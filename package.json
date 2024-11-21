@@ -1,0 +1,8 @@
+{
+  "name": "crockpot-ecs",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "private": true
+}
