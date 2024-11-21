@@ -1,8 +1,23 @@
 {
-  "name": "crockpot-ecs",
+  "name": "@tobloef/crockpot",
+  "description": "Slow but delicious ECS",
   "version": "0.0.1",
-  "description": "",
-  "main": "index.js",
-  "scripts": {},
-  "private": true
+  "main": "src/index.js",
+  "scripts": {
+    "generate-types": "rm -rf ./types && tsc --emitDeclarationOnly --project tsconfig.json",
+    "prepublish": "npm run generate-types",
+    "test": "node --test --experimental-test-coverage",
+    "check": "tsc --noEmit --project tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tobloef/crockpot.git"
+  },
+  "author": "Tobias Løfgren <tobloef@gmail.com>",
+  "license": "MIT",
+  "type": "module",
+  "types": "types/index.d.ts",
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
 }
