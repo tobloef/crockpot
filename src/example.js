@@ -1,15 +1,13 @@
 import { World } from "./world.js";
 
-/** @import { ComponentSchema, ComponentType, ComponentTypeCallable, ComponentTypeObject, ComponentTypesToComponents } from "./components.js"; */
-
 const world = new World();
 
-const Position = world.components.define("Position", {
+const Position = world.define("Position", {
   x: "number",
   y: "number",
 });
 
-const SomeTag = world.components.define("SomeTag");
+const SomeTag = world.define("SomeTag");
 
 console.log(Position.name);
 
@@ -28,7 +26,7 @@ console.log(pos);
 // @ts-expect-error
 console.log(Position());
 
-const player = world.entities.create(pos, SomeTag);
+const player = world.create(pos, SomeTag);
 player.add(pos, SomeTag);
 
 const [position, tag] = player.get(Position, SomeTag);

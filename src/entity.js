@@ -1,7 +1,13 @@
 import { NotImplementedError } from "./utils/errors/not-implemented-error.js";
 
 /** @import { World } from "./world.js"; */
-/** @import { Component, ComponentSchema, TagComponentType, ComponentType, ComponentTypesToComponents, ComponentTypeObject } from "./components.js"; */
+/** @import {
+ *   Component,
+ *   ComponentSchema,
+ *   TagComponentType,
+ *   ComponentTypesToComponents,
+ *   ComponentTypeObject
+ * } from "./components.js"; */
 
 export class Entity {
   /** @type {number} */
