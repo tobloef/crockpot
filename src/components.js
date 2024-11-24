@@ -1,5 +1,6 @@
 /** @import { DataType, DataTypeToType } from "./data-type.js"; */
 /** @import { Entity } from "./entity.js"; */
+/** @import { Brand } from "./utils/brand.js"; */
 
 /**
  * @typedef {Record<string, DataType>} ComponentSchema
@@ -13,9 +14,9 @@
 /**
  * @template {string} Name
  * @template {ComponentSchema | undefined} [Schema=undefined]
- * @typedef {Schema extends ComponentSchema ? ({
+ * @typedef {Schema extends ComponentSchema ? Brand<{
  *   [Key in keyof Schema]: DataTypeToType<Schema[Key]>
- * } & {__type: "component"}) : never} Component
+ * }, "Component"> : never} Component
  */
 
 /**
@@ -38,27 +39,27 @@
 
 /**
  * @template {Component<string, any>} T
- * @typedef {{ __source: "ref" }} RefSourceCall
+ * @typedef {Brand<{}, "RefSourceCall">} RefSourceCall
  */
 
 /**
  * @template {Component<string, any>} T
- * @typedef {{ __source: "component" }} ComponentSourceCall
+ * @typedef {Brand<{}, "ComponentSourceCall">} ComponentSourceCall
  */
 
 /**
  * @template {Component<string, any>} T
- * @typedef {{ __source: "componentType" }} ComponentTypeSourceCall
+ * @typedef {Brand<{}, "ComponentTypeSourceCall">} ComponentTypeSourceCall
  */
 
 /**
  * @template {Component<string, any>} T
- * @typedef {{ __source: "entity" }} EntitySourceCall
+ * @typedef {Brand<{}, "EntitySourceCall">} EntitySourceCall
  */
 
 /**
  * @template {Component<string, any>} T
- * @typedef {{ __source: "wildcard" }} WildcardSourceCall
+ * @typedef {Brand<{}, "AnyComponentSourceCall">} AnyComponentSourceCall
  */
 
 /**
@@ -67,6 +68,10 @@
  * @typedef {Object} ComponentTypeObject
  * @property {Name} name
  * @property {Schema} [schema]
+ * @property {(...components: Array<
+ *   | Component<string, ComponentSchema>
+ *   | TagComponentType<string>
+ * >) => void} add
  */
 
 /**
@@ -86,11 +91,17 @@
  *   & ((source: Component<string, any>) => ComponentSourceCall<Component<Name, Schema>>)
  *   & ((source: ComponentTypeObject<string, any>) => ComponentTypeSourceCall<Component<Name, Schema>>)
  *   & ((source: Entity) => EntitySourceCall<Component<Name, Schema>>)
- *   & ((source: Wildcard) => WildcardSourceCall<Component<Name, Schema>>)
+ *   & ((source: AnyComponent) => AnyComponentSourceCall<Component<Name, Schema>>)
  * )} ComponentTypeCallable
  */
 
-export const Wildcard = ({ __type: "wildcard" });
+import { NotImplementedError } from "./utils/errors/not-implemented-error.js";
+
+/**
+ * @typedef {Brand<{}, "ComponentWildcard">} ComponentWildcard
+ */
+
+export const AnyComponent = /** @type {ComponentWildcard} */ ({});
 
 export class Components {
   /**
@@ -101,18 +112,86 @@ export class Components {
    * @returns {ComponentType<Name, Schema extends ComponentSchema ? Schema : undefined>}
    */
   define(name, schema) {
+    /**
+     * @param {Array<
+     *   | Component<string, ComponentSchema>
+     *   | TagComponentType<string>
+     * >} components
+     * @returns {void}
+     */
+    function add(...components) {
+      throw new NotImplementedError()
+    }
+
     /** @type {Omit<ComponentTypeObject<Name, Schema>, "name">} */
     const componentTypeObject = {
       schema,
+      add,
     };
 
     /**
-     * @param {Component<Name, Schema>} [arg1]
-     * @returns {Component<Name, Schema> | void}
+     * @template {ComponentValues<Name, Schema>} Values
+     * @overload
+     * @param {Values extends Component<Name, Schema> ? never : Values} values
+     * @returns {Values extends Component<Name, Schema> ? never : Values}
      */
-    function componentTypeCallable(arg1) {
-      return arg1;
+
+    /**
+     * @overload
+     * @param {string} source
+     * @returns {RefSourceCall<Component<Name, Schema>>}
+     */
+
+    /**
+     * @overload
+     * @param {Component<string, any>} source
+     * @returns {ComponentSourceCall<Component<Name, Schema>>}
+     */
+
+    /**
+     * @overload
+     * @param {ComponentTypeObject<string, any>} source
+     * @returns {ComponentTypeSourceCall<Component<Name, Schema>>}
+     */
+
+    /**
+     * @overload
+     * @param {Entity} source
+     * @returns {EntitySourceCall<Component<Name, Schema>>}
+     */
+
+    /**
+     * @overload
+     * @param {AnyComponent} source
+     * @returns {AnyComponentSourceCall<Component<Name, Schema>>}
+     */
+
+    /**
+     * @param {(
+     *   | ComponentValues<Name, Schema>
+     *   | string
+     *   | Component<string, any>
+     *   | ComponentTypeObject<string, any>
+     *   | Entity
+     *   | AnyComponent
+     * )} arg1
+     * @returns {(
+     *   | Component<Name, Schema>
+     *   | RefSourceCall<Component<Name, Schema>>
+     *   | ComponentSourceCall<Component<Name, Schema>>
+     *   | ComponentTypeSourceCall<Component<Name, Schema>>
+     *   | EntitySourceCall<Component<Name, Schema>>
+     *   | AnyComponentSourceCall<Component<Name, Schema>>
+     * )}
+     */
+    function componentType(arg1) {
+      return /** @type {Component<Name, Schema>} */ (arg1);
     }
+
+    /**
+     * @type {ComponentTypeCallable<Name, Schema>}
+     */
+    const componentTypeCallable = componentType;
 
     Object.assign(componentTypeCallable, componentTypeObject);
     Object.defineProperty(componentTypeCallable, "name", { value: name });
