@@ -1,4 +1,5 @@
 import { World } from "./world.js";
+import { Wildcard } from "./components.js";
 
 const world = new World();
 
@@ -30,3 +31,9 @@ const player = world.create(pos, SomeTag);
 player.add(pos, SomeTag);
 
 const [position, tag] = player.get(Position, SomeTag);
+
+const refCall = Position("someThing");
+const componentCall = Position(pos);
+const componentTypeCall = Position(Position);
+const entityCall = Position(player);
+const wildcardCall = Position(Wildcard);

@@ -1,4 +1,5 @@
 /** @import { DataType, DataTypeToType } from "./data-type.js"; */
+/** @import { Entity } from "./entity.js"; */
 
 /**
  * @typedef {Record<string, DataType>} ComponentSchema
@@ -12,9 +13,9 @@
 /**
  * @template {string} Name
  * @template {ComponentSchema | undefined} [Schema=undefined]
- * @typedef {Schema extends ComponentSchema ? {
+ * @typedef {Schema extends ComponentSchema ? ({
  *   [Key in keyof Schema]: DataTypeToType<Schema[Key]>
- * } : never} Component
+ * } & {__type: "component"}) : never} Component
  */
 
 /**
@@ -36,6 +37,31 @@
  */
 
 /**
+ * @template {Component<string, any>} T
+ * @typedef {{ __source: "ref" }} RefSourceCall
+ */
+
+/**
+ * @template {Component<string, any>} T
+ * @typedef {{ __source: "component" }} ComponentSourceCall
+ */
+
+/**
+ * @template {Component<string, any>} T
+ * @typedef {{ __source: "componentType" }} ComponentTypeSourceCall
+ */
+
+/**
+ * @template {Component<string, any>} T
+ * @typedef {{ __source: "entity" }} EntitySourceCall
+ */
+
+/**
+ * @template {Component<string, any>} T
+ * @typedef {{ __source: "wildcard" }} WildcardSourceCall
+ */
+
+/**
  * @template {string} Name
  * @template {ComponentSchema | undefined} [Schema=undefined]
  * @typedef {Object} ComponentTypeObject
@@ -46,10 +72,25 @@
 /**
  * @template {string} Name
  * @template {ComponentSchema | undefined} [Schema=undefined]
+ * @typedef {Schema extends ComponentSchema ? ({
+ *   [Key in keyof Schema]: DataTypeToType<Schema[Key]>
+ * }) : never} ComponentValues
+ */
+
+/**
+ * @template {string} Name
+ * @template {ComponentSchema | undefined} [Schema=undefined]
  * @typedef {(
- *   & ((values: Component<Name, Schema>) => Component<Name, Schema>)
+ *   & ((values: ComponentValues<Name, Schema>) => Component<Name, Schema>)
+ *   & ((source: string) => RefSourceCall<Component<Name, Schema>>)
+ *   & ((source: Component<string, any>) => ComponentSourceCall<Component<Name, Schema>>)
+ *   & ((source: ComponentTypeObject<string, any>) => ComponentTypeSourceCall<Component<Name, Schema>>)
+ *   & ((source: Entity) => EntitySourceCall<Component<Name, Schema>>)
+ *   & ((source: Wildcard) => WildcardSourceCall<Component<Name, Schema>>)
  * )} ComponentTypeCallable
  */
+
+export const Wildcard = ({ __type: "wildcard" });
 
 export class Components {
   /**
@@ -64,7 +105,6 @@ export class Components {
     const componentTypeObject = {
       schema,
     };
-
 
     /**
      * @param {Component<Name, Schema>} [arg1]
