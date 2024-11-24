@@ -7,7 +7,8 @@ import { AnyComponent } from "./components.js";
  *   ComponentTypeSourceCall,
  *   EntitySourceCall,
  *   AnyComponentSourceCall,
- * } from "./relations.js"; */
+ * } from "./components.js"; */
+/** @import { ComponentTargetCall, ComponentTypeTargetCall, EntityTargetCall, RelationTargetCall, RelationTypeTargetCall } from "./relations.js"; */
 
 const world = new World();
 
@@ -46,4 +47,30 @@ const Likes = world.relations.define("Likes", {
   reason: "string",
 });
 
-const someRelation = Likes({ reason: "just because" });
+const Has = world.relations.define("Has");
+
+/** @type {ComponentTargetCall<any>} */
+// @ts-expect-error
+const componentRelation0 = Likes(position);
+
+/** @type {ComponentTargetCall<any>} */
+const componentRelation = Likes(position, { reason: "just because" });
+/** @type {ComponentTypeTargetCall<any>} */
+const componentTypeRelation = Likes(Position, { reason: "just because" });
+/** @type {EntityTargetCall<any>} */
+const entityRelation = Likes(player, { reason: "just because" });
+/** @type {RelationTypeTargetCall<any>} */
+const relationTypeRelation = Likes(Likes, { reason: "just because" });
+/** @type {RelationTargetCall<any>} */
+const relationRelation = Likes(componentRelation, { reason: "just because" });
+
+/** @type {ComponentTargetCall<any>} */
+const componentRelation2 = Has(position);
+/** @type {ComponentTypeTargetCall<any>} */
+const componentTypeRelation2 = Has(Position);
+/** @type {EntityTargetCall<any>} */
+const entityRelation2 = Has(player);
+/** @type {RelationTypeTargetCall<any>} */
+const relationTypeRelation2 = Has(Likes);
+/** @type {RelationTargetCall<any>} */
+const relationRelation2 = Has(componentRelation);

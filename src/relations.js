@@ -1,3 +1,5 @@
+import { NotImplementedError } from "./utils/errors/not-implemented-error.js";
+
 /** @import { DataType, DataTypeToType } from "./data-type.js"; */
 /** @import { Entity } from "./entity.js"; */
 /** @import { Brand } from "./utils/brand.js"; */
@@ -54,27 +56,37 @@
 
 /**
  * @template {Relation<string, any>} T
- * @typedef {Brand<{}, "RefSourceCall">} RefSourceCall
+ * @typedef {Brand<{}, "RefTargetCall">} RefTargetCall
  */
 
 /**
  * @template {Relation<string, any>} T
- * @typedef {Brand<{}, "ComponentSourceCall">} ComponentSourceCall
+ * @typedef {Brand<{}, "ComponentTargetCall">} ComponentTargetCall
  */
 
 /**
  * @template {Relation<string, any>} T
- * @typedef {Brand<{}, "ComponentTypeSourceCall">} ComponentTypeSourceCall
+ * @typedef {Brand<{}, "ComponentTypeTargetCall">} ComponentTypeTargetCall
  */
 
 /**
  * @template {Relation<string, any>} T
- * @typedef {Brand<{}, "EntitySourceCall">} EntitySourceCall
+ * @typedef {Brand<{}, "EntityTargetCall">} EntityTargetCall
  */
 
 /**
  * @template {Relation<string, any>} T
- * @typedef {Brand<{}, "AnyComponentSourceCall">} AnyComponentSourceCall
+ * @typedef {Brand<{}, "AnyComponentTargetCall">} AnyComponentTargetCall
+ */
+
+/**
+ * @template {Relation<string, any>} T
+ * @typedef {Brand<{}, "RelationTypeTargetCall">} RelationTypeTargetCall
+ */
+
+/**
+ * @template {Relation<string, any>} T
+ * @typedef {Brand<{}, "RelationTargetCall">} RelationTargetCall
  */
 
 // TODO: Add relations (type and instance) to the possible methods below
@@ -82,16 +94,15 @@
  * @template {string} Name
  * @template {RelationSchema | undefined} [Schema=undefined]
  * @typedef {(
- *   & ((source: string) => RefSourceCall<Relation<Name, Schema>>)
- *   & ((source: Component<string, any>) => ComponentSourceCall<Relation<Name, Schema>>)
- *   & ((source: ComponentTypeObject<string, any>) => ComponentTypeSourceCall<Relation<Name, Schema>>)
- *   & ((source: Entity) => EntitySourceCall<Relation<Name, Schema>>)
- *   & ((source: AnyComponent) => AnyComponentSourceCall<Relation<Name, Schema>>)
- *   & ((values: RelationValues<Name, Schema>) => Relation<Name, Schema>)
+ *   & ((target: Component<string, ComponentSchema>, values: Schema extends RelationSchema ? RelationValues<string, Schema> : undefined) => ComponentTargetCall<Relation<Name, Schema>>)
+ *   & ((target: ComponentTypeObject<string, ComponentSchema | undefined>, values: Schema extends RelationSchema ? RelationValues<string, Schema> : undefined) => ComponentTypeTargetCall<Relation<Name, Schema>>)
+ *   & ((target: Entity, values: Schema extends RelationSchema ? RelationValues<string, Schema> : undefined) => EntityTargetCall<Relation<Name, Schema>>)
+ *   & ((target: RelationType<string, RelationSchema | undefined>, values: Schema extends RelationSchema ? RelationValues<string, Schema> : undefined) => RelationTypeTargetCall<Relation<Name, Schema>>)
+ *   & ((target: Relation<string, RelationSchema>, values: Schema extends RelationSchema ? RelationValues<string, Schema> : undefined) => RelationTargetCall<Relation<Name, Schema>>)
+ *   & ((target: string) => RefTargetCall<Relation<Name, Schema>>)
+ *   & ((target: AnyComponent) => AnyComponentTargetCall<Relation<Name, Schema>>)
  * )} RelationTypeCallable
  */
-
-import { NotImplementedError } from "./utils/errors/not-implemented-error.js";
 
 /**
  * @typedef {Brand<{}, "RelationWildcard">} RelationWildcard
@@ -137,49 +148,51 @@ export class Relations {
     /**
      * @overload
      * @param {string} source
-     * @returns {RefSourceCall<Relation<Name, Schema>>}
+     * @returns {RefTargetCall<Relation<Name, Schema>>}
      */
 
     /**
      * @overload
      * @param {Component<string, any>} source
-     * @returns {ComponentSourceCall<Relation<Name, Schema>>}
+     * @returns {ComponentTargetCall<Relation<Name, Schema>>}
      */
 
     /**
      * @overload
      * @param {ComponentTypeObject<string, any>} source
-     * @returns {ComponentTypeSourceCall<Relation<Name, Schema>>}
+     * @returns {ComponentTypeTargetCall<Relation<Name, Schema>>}
      */
 
     /**
      * @overload
      * @param {Entity} source
-     * @returns {EntitySourceCall<Relation<Name, Schema>>}
+     * @returns {EntityTargetCall<Relation<Name, Schema>>}
      */
 
     /**
      * @overload
      * @param {AnyComponent} source
-     * @returns {AnyComponentSourceCall<Relation<Name, Schema>>}
+     * @returns {AnyComponentTargetCall<Relation<Name, Schema>>}
      */
 
     /**
      * @param {(
-     *   | string
      *   | Component<string, any>
      *   | ComponentTypeObject<string, any>
      *   | Entity
+     *   | RelationType<string, Schema>
+     *   | Relation<string, Schema>
+     *   | string
      *   | AnyComponent
-     *   | RelationValues<Name, Schema>
      * )} arg1
      * @returns {(
-     *   | RefSourceCall<Relation<Name, Schema>>
-     *   | ComponentSourceCall<Relation<Name, Schema>>
-     *   | ComponentTypeSourceCall<Relation<Name, Schema>>
-     *   | EntitySourceCall<Relation<Name, Schema>>
-     *   | AnyComponentSourceCall<Relation<Name, Schema>>
-     *   | Relation<Name, Schema>
+     *   | ComponentTargetCall<Relation<Name, Schema>>
+     *   | ComponentTypeTargetCall<Relation<Name, Schema>>
+     *   | EntityTargetCall<Relation<Name, Schema>>
+     *   | RelationTypeTargetCall<Relation<Name, Schema>>
+     *   | RelationTargetCall<Relation<Name, Schema>>
+     *   | RefTargetCall<Relation<Name, Schema>>
+     *   | AnyComponentTargetCall<Relation<Name, Schema>>
      * )}
      */
     function relationType(arg1) {
