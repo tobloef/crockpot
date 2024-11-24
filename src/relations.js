@@ -89,16 +89,35 @@ import { NotImplementedError } from "./utils/errors/not-implemented-error.js";
  * @typedef {Brand<{}, "RelationTargetCall">} RelationTargetCall
  */
 
-// TODO: Add relations (type and instance) to the possible methods below
 /**
  * @template {string} Name
  * @template {RelationSchema | undefined} [Schema=undefined]
  * @typedef {(
- *   & ((target: Component<string, ComponentSchema>, values: Schema extends RelationSchema ? RelationValues<string, Schema> : undefined) => ComponentTargetCall<Relation<Name, Schema>>)
- *   & ((target: ComponentTypeObject<string, ComponentSchema | undefined>, values: Schema extends RelationSchema ? RelationValues<string, Schema> : undefined) => ComponentTypeTargetCall<Relation<Name, Schema>>)
- *   & ((target: Entity, values: Schema extends RelationSchema ? RelationValues<string, Schema> : undefined) => EntityTargetCall<Relation<Name, Schema>>)
- *   & ((target: RelationType<string, RelationSchema | undefined>, values: Schema extends RelationSchema ? RelationValues<string, Schema> : undefined) => RelationTypeTargetCall<Relation<Name, Schema>>)
- *   & ((target: Relation<string, RelationSchema>, values: Schema extends RelationSchema ? RelationValues<string, Schema> : undefined) => RelationTargetCall<Relation<Name, Schema>>)
+ *   & (
+ *     Schema extends RelationSchema
+ *       ? ((target: Component<string, ComponentSchema>, values: RelationValues<Name, Schema>) => ComponentTargetCall<Relation<Name, Schema>>)
+ *       : ((target: Component<string, ComponentSchema>) => ComponentTargetCall<Relation<Name, Schema>>)
+ *   )
+ *   & (
+ *     Schema extends RelationSchema
+ *       ? ((target: ComponentTypeObject<string, ComponentSchema | undefined>, values: RelationValues<Name, Schema>) => ComponentTypeTargetCall<Relation<Name, Schema>>)
+ *       : ((target: ComponentTypeObject<string, ComponentSchema | undefined>) => ComponentTypeTargetCall<Relation<Name, Schema>>)
+ *   )
+ *   & (
+ *     Schema extends RelationSchema
+ *       ? ((target: Entity, values: RelationValues<Name, Schema>) => EntityTargetCall<Relation<Name, Schema>>)
+ *       : ((target: Entity) => EntityTargetCall<Relation<Name, Schema>>)
+ *   )
+ *   & (
+ *     Schema extends RelationSchema
+ *       ? ((target: RelationTypeObject<string, RelationSchema | undefined>, values: RelationValues<Name, Schema>) => RelationTypeTargetCall<Relation<Name, Schema>>)
+ *       : ((target: RelationTypeObject<string, RelationSchema | undefined>) => RelationTypeTargetCall<Relation<Name, Schema>>)
+ *   )
+ *   & (
+ *     Schema extends RelationSchema
+ *       ? ((target: Relation<string, RelationSchema>, values: RelationValues<Name, Schema>) => RelationTargetCall<Relation<Name, Schema>>)
+ *       : ((target: Relation<string, RelationSchema>) => RelationTargetCall<Relation<Name, Schema>>)
+ *   )
  *   & ((target: string) => RefTargetCall<Relation<Name, Schema>>)
  *   & ((target: AnyComponent) => AnyComponentTargetCall<Relation<Name, Schema>>)
  * )} RelationTypeCallable
@@ -177,14 +196,19 @@ export class Relations {
 
     /**
      * @param {(
-     *   | Component<string, any>
-     *   | ComponentTypeObject<string, any>
+     *   | Component<string, ComponentSchema>
+     *   | ComponentTypeObject<string, ComponentSchema>
      *   | Entity
-     *   | RelationType<string, Schema>
-     *   | Relation<string, Schema>
+     *   | RelationTypeObject<string, RelationSchema | undefined>
+     *   | Relation<string, RelationSchema>
      *   | string
      *   | AnyComponent
      * )} arg1
+     * @param {(
+     *   Schema extends RelationSchema
+     *     ? RelationValues<Name, Schema>
+     *     : undefined
+     * )} arg2
      * @returns {(
      *   | ComponentTargetCall<Relation<Name, Schema>>
      *   | ComponentTypeTargetCall<Relation<Name, Schema>>
@@ -195,7 +219,7 @@ export class Relations {
      *   | AnyComponentTargetCall<Relation<Name, Schema>>
      * )}
      */
-    function relationType(arg1) {
+    function relationType(arg1, arg2) {
       throw new NotImplementedError();
     }
 
