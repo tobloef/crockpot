@@ -4,9 +4,9 @@ import { NotImplementedError } from "./utils/errors/not-implemented-error.js";
 /** @import {
  *   Component,
  *   ComponentSchema,
- *   TagComponentType,
+ *   TagComponent,
  *   ComponentTypesToComponents,
- *   ComponentTypeObject
+ *   ComponentTypeObject,
  * } from "./components.js"; */
 
 export class Entity {
@@ -34,19 +34,19 @@ export class Entity {
   }
 
   /**
-   * @param {Array<
+   * @param {Array<(
    *   | Component<string, ComponentSchema>
-   *   | TagComponentType<string>
-   * >} components
+   *   | TagComponent<string>
+   * )>} component
    */
-  add(...components) {
+  add(...component) {
     throw new NotImplementedError();
   }
 
   /**
    * @param {Array<
    *   | Component<string, ComponentSchema>
-   *   | TagComponentType<string>
+   *   | TagComponent<string>
    * >} components
    */
   remove(...components) {
@@ -58,7 +58,9 @@ export class Entity {
   }
 
   /**
-   * @template {ComponentTypeObject<string, ComponentSchema>[]} ComponentTypes
+   * @template {Array<(
+   *   | ComponentTypeObject<string, ComponentSchema | undefined>
+   * )>} ComponentTypes
    * @param {ComponentTypes} components
    * @returns {ComponentTypesToComponents<ComponentTypes>}
    */

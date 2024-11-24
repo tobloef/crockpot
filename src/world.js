@@ -6,7 +6,7 @@ import { Relations } from "./relations.js";
  *   ComponentSchema,
  *   ComponentType,
  *   Component,
- *   TagComponentType,
+ *   TagComponent,
  * } from "./components.js"; */
 /** @import { Entity } from "./entity.js"; */
 
@@ -46,7 +46,7 @@ export class World {
    *
    * @param {Array<
    *   | Component<string, ComponentSchema>
-   *   | TagComponentType<string>
+   *   | TagComponent<string>
    * >} components
    * @returns {Entity}
    */
@@ -60,7 +60,7 @@ export class World {
    * @param {number} id
    * @param {Array<
    *   | Component<string, ComponentSchema>
-   *   | TagComponentType<string>
+   *   | TagComponent<string>
    * >} components
    * @returns {Entity}
    */

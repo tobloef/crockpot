@@ -1,14 +1,14 @@
 import { NotImplementedError } from "./utils/errors/not-implemented-error.js";
 
 
-/** @import { Component, ComponentSchema, TagComponentType } from "./components.js"; */
+/** @import { Component, ComponentSchema, TagComponent } from "./components.js"; */
 /** @import { Entity } from "./entity.js"; */
 
 export class Entities {
   /**
    * @param {Array<
    *   | Component<string, ComponentSchema>
-   *   | TagComponentType<string>
+   *   | TagComponent<string>
    * >} components
    * @returns {Entity}
    */
@@ -20,7 +20,7 @@ export class Entities {
    * @param {number} id
    * @param {Array<
    *   | Component<string, ComponentSchema>
-   *   | TagComponentType<string>
+   *   | TagComponent<string>
    * >} components
    * @returns {Entity}
    */

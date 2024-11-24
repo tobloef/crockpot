@@ -1,6 +1,14 @@
 import { World } from "./world.js";
 import { AnyComponent } from "./components.js";
 
+/** @import {
+ *   RefSourceCall,
+ *   ComponentSourceCall,
+ *   ComponentTypeSourceCall,
+ *   EntitySourceCall,
+ *   AnyComponentSourceCall,
+ * } from "./relations.js"; */
+
 const world = new World();
 
 const Position = world.define("Position", {
@@ -10,30 +18,32 @@ const Position = world.define("Position", {
 
 const SomeTag = world.define("SomeTag");
 
+const tagSchema = SomeTag.schema;
+
 console.log(Position.name);
 
-const pos = Position({ x: 12, y: 34 });
-// @ts-expect-error
-Position({ x: 12, z: 34 })
-// @ts-expect-error
-SomeTag();
+const positionSchema = Position.schema;
 
-console.log(Position.schema);
-
-console.log("x:", pos.x);
-
-console.log(pos);
-
-// @ts-expect-error
-console.log(Position());
-
-const player = world.create(pos, SomeTag);
-player.add(pos, SomeTag);
+const player = world.create(Position({ x: 12, y: 34 }), SomeTag);
+player.add(Position({ x: 12, y: 34 }), Position({ x: 12, y: 34 }));
+player.add(SomeTag);
 
 const [position, tag] = player.get(Position, SomeTag);
 
+/** @type {RefSourceCall<any>} */
 const refCall = Position("someThing");
-const componentCall = Position(pos);
+/** @type {ComponentSourceCall<any>} */
+const componentCall = Position(Position({ x: 12, y: 34 }));
+/** @type {ComponentTypeSourceCall<any>} */
 const componentTypeCall = Position(Position);
+/** @type {EntitySourceCall<any>} */
 const entityCall = Position(player);
+/** @type {AnyComponentSourceCall<any>} */
 const anyComponentCall = Position(AnyComponent);
+
+
+const Likes = world.relations.define("Likes", {
+  reason: "string",
+});
+
+const someRelation = Likes({ reason: "just because" });

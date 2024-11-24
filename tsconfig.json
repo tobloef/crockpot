@@ -7,7 +7,7 @@
     "declaration": true,
     "outDir": "types",
     "target": "ESNext",
-    "module": "NodeNext"
+    "module": "NodeNext",
   },
   "exclude": [
     "node_modules",

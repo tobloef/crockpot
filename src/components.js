@@ -8,7 +8,7 @@
 
 /**
  * @template {string} Name
- * @typedef {ComponentType<Name>} TagComponentType
+ * @typedef {ComponentType<Name>} TagComponent
  */
 
 /**
@@ -37,6 +37,27 @@
  * )} ComponentType
  */
 
+// TODO: add relations to the add method below
+/**
+ * @template {string} Name
+ * @template {ComponentSchema | undefined} [Schema=undefined]
+ * @typedef {Object} ComponentTypeObject
+ * @property {Name} name
+ * @property {Schema extends ComponentSchema ? Schema : undefined} schema
+ * @property {(...components: Array<
+ *   | Component<string, ComponentSchema>
+ *   | TagComponent<string>
+ * >) => void} add
+ */
+
+/**
+ * @template {string} Name
+ * @template {ComponentSchema | undefined} [Schema=undefined]
+ * @typedef {Schema extends ComponentSchema ? ({
+ *   [Key in keyof Schema]: DataTypeToType<Schema[Key]>
+ * }) : never} ComponentValues
+ */
+
 /**
  * @template {Component<string, any>} T
  * @typedef {Brand<{}, "RefSourceCall">} RefSourceCall
@@ -62,36 +83,17 @@
  * @typedef {Brand<{}, "AnyComponentSourceCall">} AnyComponentSourceCall
  */
 
-/**
- * @template {string} Name
- * @template {ComponentSchema | undefined} [Schema=undefined]
- * @typedef {Object} ComponentTypeObject
- * @property {Name} name
- * @property {Schema} [schema]
- * @property {(...components: Array<
- *   | Component<string, ComponentSchema>
- *   | TagComponentType<string>
- * >) => void} add
- */
-
-/**
- * @template {string} Name
- * @template {ComponentSchema | undefined} [Schema=undefined]
- * @typedef {Schema extends ComponentSchema ? ({
- *   [Key in keyof Schema]: DataTypeToType<Schema[Key]>
- * }) : never} ComponentValues
- */
-
+// TODO: Add relations (type and instance) to the possible methods below
 /**
  * @template {string} Name
  * @template {ComponentSchema | undefined} [Schema=undefined]
  * @typedef {(
- *   & ((values: ComponentValues<Name, Schema>) => Component<Name, Schema>)
  *   & ((source: string) => RefSourceCall<Component<Name, Schema>>)
  *   & ((source: Component<string, any>) => ComponentSourceCall<Component<Name, Schema>>)
  *   & ((source: ComponentTypeObject<string, any>) => ComponentTypeSourceCall<Component<Name, Schema>>)
  *   & ((source: Entity) => EntitySourceCall<Component<Name, Schema>>)
  *   & ((source: AnyComponent) => AnyComponentSourceCall<Component<Name, Schema>>)
+ *   & ((values: ComponentValues<Name, Schema>) => Component<Name, Schema>)
  * )} ComponentTypeCallable
  */
 
@@ -115,7 +117,7 @@ export class Components {
     /**
      * @param {Array<
      *   | Component<string, ComponentSchema>
-     *   | TagComponentType<string>
+     *   | TagComponent<string>
      * >} components
      * @returns {void}
      */
@@ -125,7 +127,10 @@ export class Components {
 
     /** @type {Omit<ComponentTypeObject<Name, Schema>, "name">} */
     const componentTypeObject = {
-      schema,
+      schema: (
+        /** @type {Schema extends ComponentSchema ? Schema : undefined} */
+        (schema)
+      ),
       add,
     };
 
@@ -168,24 +173,24 @@ export class Components {
 
     /**
      * @param {(
-     *   | ComponentValues<Name, Schema>
      *   | string
      *   | Component<string, any>
      *   | ComponentTypeObject<string, any>
      *   | Entity
      *   | AnyComponent
+     *   | ComponentValues<Name, Schema>
      * )} arg1
      * @returns {(
-     *   | Component<Name, Schema>
      *   | RefSourceCall<Component<Name, Schema>>
      *   | ComponentSourceCall<Component<Name, Schema>>
      *   | ComponentTypeSourceCall<Component<Name, Schema>>
      *   | EntitySourceCall<Component<Name, Schema>>
      *   | AnyComponentSourceCall<Component<Name, Schema>>
+     *   | Component<Name, Schema>
      * )}
      */
     function componentType(arg1) {
-      return /** @type {Component<Name, Schema>} */ (arg1);
+      throw new NotImplementedError();
     }
 
     /**
