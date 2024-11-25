@@ -1,1 +1,2 @@
-export { World } from "./world.js";
+export { World } from "./world/world.js";
+

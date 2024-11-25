@@ -4,7 +4,7 @@
 /** @import { QueryComponent } from "./query-component.js"; */
 /** @import { QueryRelationship } from "./query-relationship.js"; */
 /** @import { QueryPart } from "./query-part.js"; */
-/** @import { Instance, ClassesToInstances } from "../../utils/class.js"; */
+/** @import { ClassesToInstances } from "../utils/class.js"; */
 /** @import { Not, Or } from "./boolean/index.js"; */
 
 

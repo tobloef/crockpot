@@ -1,5 +1,5 @@
 import { Entity } from "../entity/entity.js";
-import { NotImplementedError } from "../../utils/errors/not-implemented-error.js";
+import { NotImplementedError } from "../utils/errors/not-implemented-error.js";
 
 /** @import { QueryPart, QueryResult } from "../query/index.js"; */
 

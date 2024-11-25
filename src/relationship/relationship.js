@@ -1,4 +1,4 @@
-/** @import { Class, Instance } from "../../utils/class.js" */
+/** @import { Class } from "../utils/class.js" */
 /** @import { Entity } from "../entity/index.js"; */
 /** @import { ComponentType, Component } from "../component/index.js" */
 /** @import { QueryAssociate } from "../query/index.js" */

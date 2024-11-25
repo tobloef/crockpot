@@ -1,6 +1,6 @@
 import { QueryComponent } from "../query/index.js";
 
-/** @import { Class, Instance } from "../../utils/class.js" */
+/** @import { Class } from "../utils/class.js" */
 /** @import { QueryAssociate } from "../query/index.js"; */
 
 /** @typedef {Class<Component>} ComponentType */

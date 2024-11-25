@@ -1,83 +1,60 @@
-import { World } from "./world.js";
-import { AnyComponent } from "./components.js";
+import { Component } from "./component/index.js";
+import { Relationship } from "./relationship/index.js";
+import { World } from "./index.js";
+import { Entity } from "./entity/index.js";
+import { not, or } from "./query/boolean/index.js";
 
-/** @import {
- *   RefSourceCall,
- *   ComponentSourceCall,
- *   ComponentTypeSourceCall,
- *   EntitySourceCall,
- *   AnyComponentSourceCall,
- * } from "./components.js"; */
-/** @import { ComponentTargetCall, ComponentTypeTargetCall, EntityTargetCall, RelationTargetCall, RelationTypeTargetCall } from "./relations.js"; */
+/** @import { Target } from "./relationship/index.js"; */
+
+class FooComponent extends Component {
+  value;
+
+  /**
+   * @param {number} value
+   */
+  constructor(value) {
+    super();
+    this.value = value;
+  }
+}
+
+class FooRelation extends Relationship {
+  value;
+
+  /**
+   * @param {Target} target
+   * @param {string} value
+   */
+  constructor(target, value) {
+    super(target);
+    this.value = value;
+  }
+}
 
 const world = new World();
 
-const Position = world.define("Position", {
-  x: "number",
-  y: "number",
-});
+const entity1 = new Entity(
+  new FooComponent(1),
+);
 
-const SomeTag = world.define("SomeTag");
+const entity2 = new Entity(
+  new FooRelation(entity1, "foo"),
+);
 
-const tagSchema = SomeTag.schema;
+world.add(entity1, entity2);
 
-console.log(Position.name);
+const results = world.query(
+  FooComponent,
+  FooRelation.to(FooComponent),
+  FooComponent.on("thing"),
+  FooRelation.to("thing"),
+  not(FooComponent),
+  not(FooComponent.on("thing")),
+  not(FooRelation.to("thing")),
+  not(FooRelation.on("x").to("y")),
+  FooRelation.on("x").to("y"),
+  or(FooComponent, FooRelation),
+  or(FooComponent.on("thing"), FooRelation.on("x").to("y")),
+);
 
-const positionSchema = Position.schema;
-
-const player = world.create(Position({ x: 12, y: 34 }), SomeTag);
-player.add(Position({ x: 12, y: 34 }), Position({ x: 12, y: 34 }));
-player.add(SomeTag);
-
-const [position, tag] = player.get(Position, SomeTag);
-
-/** @type {RefSourceCall<any>} */
-const refCall = Position("someThing");
-/** @type {ComponentSourceCall<any>} */
-const componentCall = Position(Position({ x: 12, y: 34 }));
-/** @type {ComponentTypeSourceCall<any>} */
-const componentTypeCall = Position(Position);
-/** @type {EntitySourceCall<any>} */
-const entityCall = Position(player);
-/** @type {AnyComponentSourceCall<any>} */
-const anyComponentCall = Position(AnyComponent);
-
-/**
- * @template T
- * @typedef {{ hej: T }} Test
- */
-
-/** @type {Test<Position>} */
-const test = { hej: Position };
-
-const Likes = world.relations.define("Likes", {
-  reason: "string",
-});
-
-const Has = world.relations.define("Has");
-
-/** @type {ComponentTargetCall<any>} */
-// @ts-expect-error
-const componentRelation0 = Likes(position);
-
-/** @type {ComponentTargetCall<any>} */
-const componentRelation = Likes(position, { reason: "just because" });
-/** @type {ComponentTypeTargetCall<any>} */
-const componentTypeRelation = Likes(Position, { reason: "just because" });
-/** @type {EntityTargetCall<any>} */
-const entityRelation = Likes(player, { reason: "just because" });
-/** @type {RelationTypeTargetCall<any>} */
-const relationTypeRelation = Likes(Likes, { reason: "just because" });
-/** @type {RelationTargetCall<any>} */
-const relationRelation = Likes(componentRelation, { reason: "just because" });
-
-/** @type {ComponentTargetCall<any>} */
-const componentRelation2 = Has(position);
-/** @type {ComponentTypeTargetCall<any>} */
-const componentTypeRelation2 = Has(Position);
-/** @type {EntityTargetCall<any>} */
-const entityRelation2 = Has(player);
-/** @type {RelationTypeTargetCall<any>} */
-const relationTypeRelation2 = Has(Likes);
-/** @type {RelationTargetCall<any>} */
-const relationRelation2 = Has(componentRelation);
+const result = results[0];
