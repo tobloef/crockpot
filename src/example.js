@@ -42,6 +42,13 @@ const entityCall = Position(player);
 /** @type {AnyComponentSourceCall<any>} */
 const anyComponentCall = Position(AnyComponent);
 
+/**
+ * @template T
+ * @typedef {{ hej: T }} Test
+ */
+
+/** @type {Test<Position>} */
+const test = { hej: Position };
 
 const Likes = world.relations.define("Likes", {
   reason: "string",

@@ -9,6 +9,13 @@
  */
 
 /**
+ * @template {any[]} T
+ * @typedef {{
+ *   [K in keyof T]: T[K] extends Class<any> ? Instance<T[K]> : T[K]
+ * }} ClassesToInstances
+ */
+
+/**
  * @template {Class<any>} ClassType
  * @template {Function} CallableType
  * @param {ClassType} classType
@@ -49,5 +56,5 @@ export function createNamedClass(name) {
  * @param {string} name
  */
 export function assignClassName(func, name) {
-  Object.defineProperty(func, 'name', { value: name });
+  Object.defineProperty(func, "name", { value: name });
 }

@@ -1,11 +1,5 @@
 /** @import { Instance } from "./utils/class.js"; */
 
-/**
- * @template T
- * @typedef {Object} DataTypeDefinition
- * @property {T} type
- */
-
 const DataTypes = {
   "number": {
     type: Number,
