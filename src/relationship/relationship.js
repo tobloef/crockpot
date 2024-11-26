@@ -2,6 +2,7 @@
 /** @import { Entity } from "../entity/index.js"; */
 /** @import { ComponentType, Component } from "../component/index.js" */
 /** @import { QueryAssociate } from "../query/index.js" */
+/** @import { Association } from "../association.js" */
 
 import { QueryRelationship } from "../query/index.js";
 
@@ -19,6 +20,8 @@ import { QueryRelationship } from "../query/index.js";
 
 /** @abstract */
 export class Relationship {
+  #brand = Relationship.name;
+
   /**
    * @param {Target} target
    */
@@ -26,7 +29,7 @@ export class Relationship {
   }
 
   /**
-   * @template {Class<Component>} Type
+   * @template {Class<Relationship>} Type
    * @this {Type}
    * @param {QueryAssociate} owner
    * @returns {QueryRelationship<Type>}
@@ -36,12 +39,19 @@ export class Relationship {
   }
 
   /**
-   * @template {Class<Component>} Type
+   * @template {Class<Relationship>} Type
    * @this {Type}
    * @param {QueryAssociate} target
    * @returns {QueryRelationship<Type>}
    */
   static to(target) {
     return new QueryRelationship(this).to(target);
+  }
+
+  /**
+   * @param {Association[]} associations
+   */
+  add(...associations) {
+
   }
 }

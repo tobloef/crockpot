@@ -45,6 +45,7 @@ world.add(entity1, entity2);
 
 const results = world.query(
   FooComponent,
+  FooRelation,
   FooRelation.to(FooComponent),
   FooComponent.on("thing"),
   FooRelation.to("thing"),

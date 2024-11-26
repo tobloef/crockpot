@@ -1,8 +1,8 @@
-/** @import { ComponentType } from "../component/index.js"; */
+/** @import { RelationshipType } from "../relationship/index.js"; */
 /** @import { QueryAssociate } from "./query-associate.js"; */
 
 /**
- * @template {ComponentType} Type
+ * @template {RelationshipType} Type
  */
 export class QueryRelationship {
   /** @type {Type} */

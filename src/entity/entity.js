@@ -1,19 +1,19 @@
-/** @import { Component, ComponentType } from "../component/index.js" */
-/** @import { Relationship } from "../relationship/index.js" */
-
-/**
- * @typedef {(
- *   | ComponentType
- *   | Component
- *   | Relationship
- * )} Association
- */
+/** @import { Association } from "../association.js" */
 
 export class Entity {
+  #brand = Entity.name;
+
   /**
    * @param {Association[]} associations
    */
   constructor(...associations) {
+
+  }
+
+  /**
+   * @param {Association[]} associations
+   */
+  add(...associations) {
 
   }
 }
