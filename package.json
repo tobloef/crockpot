@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "main": "src/index.js",
   "scripts": {
-    "generate-types": "rm -rf ./types && tsc --emitDeclarationOnly --project tsconfig.json",
+    "generate-types": "rimraf ./types && tsc --emitDeclarationOnly --project tsconfig.json",
     "prepublish": "npm run generate-types",
     "test": "node --test --experimental-test-coverage",
     "check": "npm run check:src && npm run check:test",
@@ -23,6 +23,7 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
-    "@types/node": "^22.9.1"
+    "@types/node": "^22.9.1",
+    "rimraf": "^6.0.1"
   }
 }
