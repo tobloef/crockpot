@@ -286,7 +286,7 @@ const john = new Entity().add(Name.with({value: "John Dogowner"}));
 world.insert(john);
 
 john.add(Human);
-john.add(Likes.with({reason: "test"})); // Wrong, but somewhat usage
+john.add(Likes.with({reason: "test"})); // Wrong, but still somewhat valid usage
 
 // @ts-expect-error
 john.add(Name);
@@ -313,8 +313,6 @@ const Any = new Component();
 const All = new Component();
 
 /////////////////////////////////////////////////////////////////////////////////////
-
-// TODO: Support nested boolean operations
 
 type Or<QueryParts extends NonBooleanQueryPart[]> = {
   __or: QueryParts;
@@ -439,7 +437,6 @@ const FooRelationship = new Relationship({
 });
 const FooTagRelationship = new Relationship();
 
-// Should perhaps be built in
 const IsA = new Relationship();
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -465,6 +462,7 @@ const results = query(
   FooTagRelationship.as("fooTagRel"),
   FooRelationship.as("fooRel"),
   // Must be related to the type (c) of the thing (a) that another thing (b) is related to
+  // This snippet relies on IsA being assigned automatically internally when a component is instantiated
   FooRelationship.on("b").to("a"),
   IsA.on("a").to("c"),
   FooRelationship.to("c"),
@@ -547,7 +545,6 @@ const item8 = query(
   or(FooTagComponent, FooTagRelationship),
   optional(FooRelationship),
 )[0];
-
 
 /////////////////////////////////////////////////////////////////////////////////////
 
