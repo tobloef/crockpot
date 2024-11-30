@@ -1,61 +1,47 @@
 type Class<T> = new (...args: any[]) => T;
 type Instance<T extends Class<any>> = T extends new (...args: any[]) => infer R ? R : any;
 
-type ComponentSchema = { [Key: string]: Class<any>};
-type Values<Schema extends ComponentSchema | undefined> = (
+type Schemaless = undefined;
+type ComponentSchema = { [Key: string]: Class<any> };
+
+type Values<Schema extends ComponentSchema | Schemaless> = (
   Schema extends ComponentSchema
     ? { [Key in keyof Schema]: Instance<Schema[Key]> }
     : never
-);
+  );
 
-type IsEmpty<T extends object> = keyof T extends never ? true : false;
-
-type ComponentWithValues<
+type ComponentValuesPair<
   Comp extends Component<Schema>,
-  Schema extends ComponentSchema | undefined
+  Schema extends ComponentSchema | Schemaless
 > = [
   component: Comp,
   values: Values<Schema>,
 ]
 
-type AddedComponents = Array<ComponentWithValues<any, any> | Component>;
+type ComponentsValues<Components extends any[]> = (
+  Components extends [infer First, ...infer Rest]
+    ? First extends Component<infer Schema>
+      ? [Values<Schema> | undefined, ...ComponentsValues<Rest>]
+      : never
+    : []
+  );
+
+type Tag = Component<Schemaless>;
+type ComponentWithValue = Component<ComponentSchema>;
+type AddableComponent = ComponentValuesPair<any, any> | Tag;
 
 type OnDestroy = () => void;
 
 /////////////////////////////////////////////////////////////////////////////////////
 
 class Entity {
-  #componentsToValues = new Map<Component, unknown | undefined>;
+  #componentsToValues = new Map<Component<any>, unknown | undefined>;
   #componentToRemoveOnDestroyCallbacks = new Map<Component, OnDestroy>;
   #onDestroyCallbacks: OnDestroy[] = [];
 
-  add<AC extends AddedComponents>(...components: AC): this {
-    for (const componentWithValuesOrTag of components) {
-      let component: Component;
-      let values = undefined;
-
-      if (Array.isArray(componentWithValuesOrTag)) {
-        [component, values] = componentWithValuesOrTag;
-      } else {
-        component = componentWithValuesOrTag;
-      }
-
-      const alreadyHasComponent = this.#componentsToValues.has(component);
-
-      this.#componentsToValues.set(component, values);
-
-      if (!alreadyHasComponent) {
-        const removeOnDestroy = component.onDestroy(() => {
-          this.#componentsToValues.delete(component);
-          const removeOnDestroyCallback = this.#componentToRemoveOnDestroyCallbacks.get(component);
-          if (removeOnDestroyCallback !== undefined) {
-            removeOnDestroyCallback();
-            this.#componentToRemoveOnDestroyCallbacks.delete(component);
-          }
-        });
-
-        this.#componentToRemoveOnDestroyCallbacks.set(component, removeOnDestroy);
-      }
+  add<Components extends AddableComponent[]>(...components: Components): this {
+    for (const component of components) {
+      this.#addComponent(component);
     }
 
     return this;
@@ -64,16 +50,18 @@ class Entity {
   remove<Comp extends Component<any>>(component: Comp): this {
     this.#componentsToValues.delete(component);
 
-    const removeOnDestroyCallback = this.#componentToRemoveOnDestroyCallbacks.get(component);
-    if (removeOnDestroyCallback !== undefined) {
-      removeOnDestroyCallback();
-      this.#componentToRemoveOnDestroyCallbacks.delete(component);
-    }
+    this.#removeDestroyCallback(component);
 
     return this;
   }
 
-  _as(name: string): EntityQuery<typeof this> {
+  get<Components extends ComponentWithValue[]>(...components: Components): ComponentsValues<Components> {
+    const values = components.map((component) => this.#componentsToValues.get(component));
+
+    return values as ComponentsValues<Components>;
+  }
+
+  as(name: string): EntityQuery<typeof this> {
     return new EntityQuery(this).as(name);
   }
 
@@ -90,12 +78,60 @@ class Entity {
     this.#onDestroyCallbacks.push(callback);
     return () => this.#onDestroyCallbacks.filter((c) => c !== callback);
   }
+
+  #addComponent<Comp extends AddableComponent>(componentValuesPairOrTag: Comp) {
+    let component: Component;
+    let values = undefined;
+
+    if (Array.isArray(componentValuesPairOrTag)) {
+      [component, values] = componentValuesPairOrTag;
+    } else {
+      component = componentValuesPairOrTag;
+    }
+
+    this.#componentsToValues.set(component, values);
+
+    this.#setupDestroyCallback(component);
+  }
+
+  #setupDestroyCallback(component: Component) {
+    if (this.#componentToRemoveOnDestroyCallbacks.has(component)) {
+      return;
+    }
+
+    const handleDestroy = () => {
+      this.#componentsToValues.delete(component);
+      const removeOnDestroyCallback = this.#componentToRemoveOnDestroyCallbacks.get(component);
+      if (removeOnDestroyCallback !== undefined) {
+        removeOnDestroyCallback();
+        this.#componentToRemoveOnDestroyCallbacks.delete(component);
+      }
+    };
+
+    const removeOnDestroy = component.onDestroy(handleDestroy);
+
+    this.#componentToRemoveOnDestroyCallbacks.set(component, removeOnDestroy);
+  }
+
+  #removeDestroyCallback(component: Component) {
+    const removeOnDestroyCallback = this.#componentToRemoveOnDestroyCallbacks.get(component);
+    if (removeOnDestroyCallback !== undefined) {
+      removeOnDestroyCallback();
+      this.#componentToRemoveOnDestroyCallbacks.delete(component);
+    }
+  }
 }
 
-class Component<Schema extends ComponentSchema | undefined = undefined> extends Entity {
+type SchemaIfNotSchemaless<Schema extends ComponentSchema | Schemaless> = (
+  Schema extends ComponentSchema
+    ? [Schema]
+    : []
+);
+
+class Component<Schema extends ComponentSchema | Schemaless = Schemaless> extends Entity {
   schema?: Schema;
 
-  constructor(...args: Schema extends ComponentSchema ? [Schema] : []) {
+  constructor(...args: SchemaIfNotSchemaless<Schema>) {
     super();
     this.schema = args[0] as Schema;
   }
@@ -104,18 +140,18 @@ class Component<Schema extends ComponentSchema | undefined = undefined> extends 
     return new ComponentQuery(this).on(source);
   }
 
-  _as(name: string): ComponentQuery<typeof this> {
+  as(name: string): ComponentQuery<typeof this> {
     return new ComponentQuery(this).as(name);
   }
 
-  _with(values: Values<Schema>): ComponentWithValues<typeof this, Schema> {
+  with(values: Values<Schema>): ComponentValuesPair<typeof this, Schema> {
     return [this, values];
   }
 }
 
 const relationshipComponents = new Map<[Relationship<any>, Entity], Component<any>>();
 
-class Relationship<Schema extends ComponentSchema | undefined = undefined> extends Component<Schema> {
+class Relationship<Schema extends ComponentSchema | Schemaless = Schemaless> extends Component<Schema> {
   to(entity: Entity): Component<Schema>;
   to(reference: string): RelationshipQuery<typeof this>;
   to(entityOrReference: Entity | string): Component<Schema> | RelationshipQuery<typeof this> {
@@ -151,7 +187,7 @@ class Relationship<Schema extends ComponentSchema | undefined = undefined> exten
     return new RelationshipQuery(this).on(source);
   }
 
-  _as(name: string): RelationshipQuery<typeof this> {
+  as(name: string): RelationshipQuery<typeof this> {
     return new RelationshipQuery(this).as(name);
   }
 }
@@ -195,7 +231,7 @@ class RelationshipQuery<Rel extends Relationship<any>> extends ComponentQuery<Re
   }
 
   override on(source: string | Entity): RelationshipQuery<Rel> {
-    this.on(source);
+    super.on(source);
     return this;
   }
 
@@ -210,7 +246,7 @@ class RelationshipQuery<Rel extends Relationship<any>> extends ComponentQuery<Re
 class World {
   entities: Entity[] = [];
 
-  create(...components: AddedComponents): Entity {
+  create(...components: AddableComponent[]): Entity {
     const entity = new Entity().add(...components);
     this.insert(entity);
     return entity;
@@ -222,13 +258,9 @@ class World {
 
   remove(entity: Entity): void {
     this.entities.filter((e) => e !== entity);
-    // TODO: Handle things that depend on this entity
+    entity.destroy();
   }
 }
-
-/////////////////////////////////////////////////////////////////////////////////////
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////
 
@@ -250,19 +282,19 @@ const Likes = new Relationship({
 
 const Loves = new Relationship();
 
-const john = new Entity().add(Name._with({ value: "John Dogowner" }));
+const john = new Entity().add(Name.with({value: "John Dogowner"}));
 world.insert(john);
 
 john.add(Human);
-john.add(Likes._with({ reason: "test" })); // Wrong, but somewhat usage
+john.add(Likes.with({reason: "test"})); // Wrong, but somewhat usage
 
 // @ts-expect-error
 john.add(Name);
 
 const snoopy = world.create(Dog);
-snoopy.add(Name._with({ value: "Snoopy" }));
+snoopy.add(Name.with({value: "Snoopy"}));
 
-john.add(Likes.to(snoopy)._with({ reason: "Good boy" }));
+john.add(Likes.to(snoopy).with({reason: "Good boy"}));
 john.add(Loves.to(Dog));
 
 // @ts-expect-error
@@ -277,13 +309,57 @@ const TestComponent = new Component<{ value: typeof String }>();
 
 /////////////////////////////////////////////////////////////////////////////////////
 
+const Any = new Component();
+const All = new Component();
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+// TODO: Support nested boolean operations
+
+type Or<QueryParts extends NonBooleanQueryPart[]> = {
+  __or: QueryParts;
+};
+
+export function or<QueryParts extends NonBooleanQueryPart[]>(
+  ...types: QueryParts
+): Or<QueryParts> {
+  return { __or: types };
+}
+
+type Not<QueryPart extends NonBooleanQueryPart> = {
+  __not: QueryPart;
+};
+
+export function not<QueryPart extends NonBooleanQueryPart>(
+  type: QueryPart
+): Not<QueryPart> {
+  return { __not: type };
+}
+
+type Optional<QueryPart extends NonBooleanQueryPart> = {
+  __optional: QueryPart;
+};
+
+export function optional<QueryPart extends NonBooleanQueryPart>(
+  type: QueryPart
+): Optional<QueryPart> {
+  return { __optional: type };
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+
 type QueryPart = (
   | Component<any>
   | Relationship<any>
   | EntityQuery<any>
   | ComponentQuery<any>
   | RelationshipQuery<any>
-  );
+  | Not<any>
+  | Or<any>
+  | Optional<any>
+);
+
+type NonBooleanQueryPart = Exclude<QueryPart, Or<any> | Not<any>>;
 
 type QueryResults<QueryParts extends QueryPart[] | Record<string, QueryPart>> = Array<{
   entity: Entity,
@@ -293,7 +369,7 @@ type QueryResults<QueryParts extends QueryPart[] | Record<string, QueryPart>> = 
       : QueryParts extends Record<string, QueryPart>
         ? ParseQueryPartsObject<QueryParts>
         : never
-  ),
+    ),
 }>;
 
 type ParseQueryPartsArray<QueryParts extends any[]> = (
@@ -310,36 +386,32 @@ type ParseQueryPartsObject<QueryParts extends Record<string, QueryPart>> = {
   [Key in keyof QueryParts]: ParseQueryPart<QueryParts[Key]>
 };
 
-type ParseQueryPart<Part extends QueryPart> = ParseQueryPartShort<Part>;
-
-type ParseQueryPartShort<Part extends QueryPart> = (
-  Part extends EntityQuery<infer Type>
-    ? Type extends Component<infer Schema>
-      ? Values<Schema>
-      : Type
-    : Part extends Component<infer Schema>
-      ? Values<Schema>
+type ParseOrTypes<Parts extends any[]> = (
+  Parts extends [infer First, ...infer Rest]
+    ? First extends QueryPart
+      ? ParseQueryPart<First> extends never
+        ? (undefined | ParseOrTypes<Rest>)
+        : (ParseQueryPart<First> | ParseOrTypes<Rest>)
       : never
-  )
+    : never
+);
 
-type ParseQueryPartFull<Part extends QueryPart> = (
-  Part extends RelationshipQuery<infer Type>
-    ? Type extends Component<infer Schema>  // Do something relationship specific for remove, since we can just match on EntityQuery
-      ? Values<Schema>
-      : Type
-    : Part extends ComponentQuery<infer Type>
-      ? Type extends Component<infer Schema>  // Do something relationship specific for remove, since we can just match on EntityQuery
-        ? Values<Schema>
-        : Type
+type ParseQueryPart<Part extends QueryPart> = (
+  Part extends Optional<infer Type>
+    ? (ParseQueryPart<Type> | undefined)
+    : Part extends Not<any>
+      ? never
+      : Part extends Or<infer Types>
+        ? ParseOrTypes<Types> extends undefined
+          ? never
+          : ParseOrTypes<Types>
       : Part extends EntityQuery<infer Type>
         ? Type extends Component<infer Schema>
           ? Values<Schema>
           : Type
-        : Part extends Relationship<infer Schema>
-          ? Values<Schema> // Do something relationship specific for remove, since we can just match on Component
-          : Part extends Component<infer Schema>
-            ? Values<Schema>
-            : never
+        : Part extends Component<infer Schema>
+          ? Values<Schema>
+          : never
   )
 
 function query<QueryParts extends QueryPart[]>(...queryPars: QueryParts): QueryResults<QueryParts>
@@ -351,7 +423,7 @@ function query<QueryParts extends QueryPart[] | Record<string, QueryPart>>(
       : QueryParts extends Record<string, QueryPart>
         ? [QueryParts]
         : never
-  )
+    )
 ): QueryResults<QueryParts> {
   throw null;
 }
@@ -388,10 +460,10 @@ const results = query(
   FooRelationship.to("thing").on("thing"),
   FooRelationship.to(john).on("thing"),
   FooRelationship.to(Dog).on("thing"),
-  FooTagComponent._as("fooTagComp"),
-  FooComponent._as("fooComp"),
-  FooTagRelationship._as("fooTagRel"),
-  FooRelationship._as("fooRel"),
+  FooTagComponent.as("fooTagComp"),
+  FooComponent.as("fooComp"),
+  FooTagRelationship.as("fooTagRel"),
+  FooRelationship.as("fooRel"),
   // Must be related to the type (c) of the thing (a) that another thing (b) is related to
   FooRelationship.on("b").to("a"),
   IsA.on("a").to("c"),
@@ -411,10 +483,10 @@ const [
 ] = item1.components;
 
 const item2 = query(
-  FooTagComponent._as(""),
-  FooComponent._as(""),
-  FooTagRelationship._as(""),
-  FooRelationship._as(""),
+  FooTagComponent.as(""),
+  FooComponent.as(""),
+  FooTagRelationship.as(""),
+  FooRelationship.as(""),
 )[0];
 
 const [
@@ -463,5 +535,20 @@ const {
   e2,
 } = item5.components;
 
+const item6 = query(Likes.to(Any))[0];
+
+const item7 = query(Likes.to(All))[0];
+
+const item8 = query(
+  FooComponent,
+  not(FooTagComponent),
+  or(FooRelationship, FooComponent),
+  or(FooRelationship, FooTagRelationship),
+  or(FooTagComponent, FooTagRelationship),
+  optional(FooRelationship),
+)[0];
+
 
 /////////////////////////////////////////////////////////////////////////////////////
+
+type Test = ParseQueryPart<[typeof FooComponent, typeof FooTagComponent][number]>;
