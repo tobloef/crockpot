@@ -1,6 +1,6 @@
 import { Component } from "./component/index.js";
 import { Relationship } from "./relationship/index.js";
-import { World } from "./index.js";
+import { World } from "../index.js";
 import { Entity } from "./entity/index.js";
 import { not, or } from "./query/boolean/index.js";
 
