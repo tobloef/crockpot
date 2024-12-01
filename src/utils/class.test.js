@@ -1,50 +1,42 @@
 import { describe, it } from "node:test";
-import * as assert from "node:assert";
-import { createNamedClass, makeClassCallable } from "./class.js";
 
-describe(makeClassCallable.name, () => {
-  it("should return a callable class", () => {
-    class TestClass {
-      static staticField = "staticField";
+/** @import { Class, Instance } from "./class.js"; */
 
-      constructor() {
-        this.field = "field";
-      }
+describe("Class", () => {
+  it("Defines a class, not an instance", () => {
+    class A { a = 0; }
+    class B { b = 0; }
 
-      method() {
-        return this.field;
-      }
-    }
+    /** @type {Class<A>} */
+    const aClass1 = A;
 
-    TestClass.someProp = "someProp";
+    /** @type {Class<B>} */
+    // @ts-expect-error
+    const bClass = A;
 
-    function testCallable() {
-      return "callable";
-    }
+    /** @type {A} */
+    const instance = new aClass1();
 
-    const callableClass = makeClassCallable(TestClass, testCallable);
+    /** @type {Class<A>} */
+    // @ts-expect-error
+    const aClass2 = instance;
+  });
+});
 
-    const instance = new callableClass();
+describe("Instance", () => {
+  it("Defines an instance of a class", () => {
+    class A { a = 0; }
+    class B { b = 0; }
 
-    assert.strictEqual(instance.method(), "field");
-    assert.strictEqual(instance.constructor.name, TestClass.name);
-    assert.strictEqual(callableClass.staticField, "staticField");
-    assert.strictEqual(callableClass.someProp, "someProp");
-    assert.strictEqual(callableClass(), "callable");
-    assert.strictEqual(callableClass.name, TestClass.name);
-    assert.deepEqual(Object.keys(callableClass), Object.keys(TestClass));
-  })
-})
+    /** @type {Instance<Class<A>>} */
+    const aInstance1 = new A();
 
-describe(createNamedClass.name, () => {
-  it("should return a named class", () => {
-    const name = "TestNamedClass";
+    /** @type {Instance<Class<B>>} */
+    // @ts-expect-error
+    const bInstance = new A();
 
-    const Class = createNamedClass(name);
-
-    const instance = new Class();
-
-    assert.strictEqual(Class.name, name);
-    assert.strictEqual(instance.constructor.name, name);
+    // @ts-expect-error
+    /** @type {Instance<A>} */
+    const instance = new A();
   });
 });
