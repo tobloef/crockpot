@@ -24,7 +24,7 @@ type ComponentsValues<Components extends any[]> = (
       ? [Values<Schema> | undefined, ...ComponentsValues<Rest>]
       : never
     : []
-  );
+);
 
 type Tag = Component<Schemaless>;
 type ComponentWithValue = Component<ComponentSchema>;
