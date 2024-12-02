@@ -153,9 +153,9 @@ const relationshipComponents = new Map<[Relationship<any>, Entity], Component<an
 
 class Relationship<Schema extends ComponentSchema | Schemaless = Schemaless> extends Component<Schema> {
   to(entity: Entity): Component<Schema>;
-  to(reference: string): RelationshipQuery<typeof this>;
-  to(entityOrReference: Entity | string): Component<Schema> | RelationshipQuery<typeof this> {
-    if (typeof entityOrReference === "string") {
+  to(reference: string | Wildcard): RelationshipQuery<typeof this>;
+  to(entityOrReference: Entity | Wildcard | string): Component<Schema> | RelationshipQuery<typeof this> {
+    if (typeof entityOrReference === "string" || entityOrReference instanceof Wildcard) {
       return this.#toQuery(entityOrReference);
     } else {
       return this.#toComponent(entityOrReference);
@@ -179,7 +179,7 @@ class Relationship<Schema extends ComponentSchema | Schemaless = Schemaless> ext
     return component as Component<Schema>;
   }
 
-  #toQuery(reference: string): RelationshipQuery<typeof this> {
+  #toQuery(reference: string | Wildcard): RelationshipQuery<typeof this> {
     return new RelationshipQuery(this).to(reference);
   }
 
@@ -224,7 +224,7 @@ class ComponentQuery<Comp extends Component<any>> {
 }
 
 class RelationshipQuery<Rel extends Relationship<any>> extends ComponentQuery<Rel> {
-  #target?: string | Entity;
+  #target?: string | Entity | Wildcard;
 
   override as(name: string): RelationshipQuery<Rel> {
     super.as(name);
@@ -236,7 +236,7 @@ class RelationshipQuery<Rel extends Relationship<any>> extends ComponentQuery<Re
     return this;
   }
 
-  to(target: string | Entity): RelationshipQuery<Rel> {
+  to(target: string | Entity | Wildcard): RelationshipQuery<Rel> {
     this.#target = target;
     return this;
   }
@@ -310,8 +310,18 @@ const TestComponent = new Component<{ value: typeof String }>();
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-const Any = new Component();
-const All = new Component();
+class Wildcard {
+  #brand = "wildcard";
+  #name?: string;
+
+  as(name: string) {
+    this.#name = name;
+    return this;
+  }
+}
+
+const Any = new Wildcard();
+const All = new Wildcard();
 
 /////////////////////////////////////////////////////////////////////////////////////
 
@@ -357,6 +367,7 @@ type QueryPart = (
   | Not<any>
   | Or<any>
   | Optional<any>
+  | Wildcard
 );
 
 type NonBooleanQueryPart = Exclude<QueryPart, Or<any> | Not<any>>;
@@ -408,11 +419,13 @@ type ParseQueryPart<Part extends QueryPart> = (
             : never
           : Part extends Component<infer Schema>
             ? Values<Schema>
-            : Part extends EntityQuery
+            : Part extends Entity
               ? Entity
-              : Part extends Entity
-                ? Entity
-                : never
+              : Part extends Wildcard
+                ? Component<any>
+                : Part extends EntityQuery
+                  ? Entity
+                  : never
   )
 
 function query<QueryParts extends QueryPart[]>(...queryPars: QueryParts): QueryResults<QueryParts>
@@ -558,6 +571,12 @@ const item9 = query(
   Entity.as("ent"),
   FooComponent.on("ent"),
   FooComponent.on(john),
+)[0];
+
+const item10 = query(
+  Any.as("any_lol"),
+  All.as("all_lol"),
+  Likes.to(Any.as("thing_name")).as("rel_name"),
 )[0];
 
 /////////////////////////////////////////////////////////////////////////////////////
