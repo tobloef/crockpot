@@ -39,6 +39,10 @@ class Entity {
   #componentToRemoveOnDestroyCallbacks = new Map<Component, OnDestroy>;
   #onDestroyCallbacks: OnDestroy[] = [];
 
+  static as(name: string): EntityQuery {
+    return new EntityQuery().as(name);
+  }
+
   add<Components extends AddableComponent[]>(...components: Components): this {
     for (const component of components) {
       this.#addComponent(component);
@@ -59,10 +63,6 @@ class Entity {
     const values = components.map((component) => this.#componentsToValues.get(component));
 
     return values as ComponentsValues<Components>;
-  }
-
-  as(name: string): EntityQuery<typeof this> {
-    return new EntityQuery(this).as(name);
   }
 
   destroy() {
@@ -194,25 +194,26 @@ class Relationship<Schema extends ComponentSchema | Schemaless = Schemaless> ext
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-class EntityQuery<Ent extends Entity> {
-  #entity: Ent;
+class EntityQuery {
   #name?: string;
 
-  constructor(entity: Ent) {
-    this.#entity = entity;
-  }
-
-  as(name: string): EntityQuery<Ent> {
+  as(name: string): EntityQuery {
     this.#name = name;
     return this;
   }
 }
 
-class ComponentQuery<Comp extends Component<any>> extends EntityQuery<Comp> {
+class ComponentQuery<Comp extends Component<any>> {
+  #component: Comp;
   #source?: string | Entity;
+  #name?: string;
 
-  override as(name: string): ComponentQuery<Comp> {
-    super.as(name);
+  constructor(component: Comp) {
+    this.#component = component;
+  }
+
+  as(name: string): ComponentQuery<Comp> {
+    this.#name = name;
     return this;
   }
 
@@ -347,10 +348,11 @@ export function optional<QueryPart extends NonBooleanQueryPart>(
 /////////////////////////////////////////////////////////////////////////////////////
 
 type QueryPart = (
+  | Class<Entity>
+  | EntityQuery
   | Component<any>
-  | Relationship<any>
-  | EntityQuery<any>
   | ComponentQuery<any>
+  | Relationship<any>
   | RelationshipQuery<any>
   | Not<any>
   | Or<any>
@@ -359,16 +361,13 @@ type QueryPart = (
 
 type NonBooleanQueryPart = Exclude<QueryPart, Or<any> | Not<any>>;
 
-type QueryResults<QueryParts extends QueryPart[] | Record<string, QueryPart>> = Array<{
-  entity: Entity,
-  components: (
-    QueryParts extends QueryPart[]
-      ? ParseQueryPartsArray<QueryParts>
-      : QueryParts extends Record<string, QueryPart>
-        ? ParseQueryPartsObject<QueryParts>
-        : never
-    ),
-}>;
+type QueryResults<QueryParts extends QueryPart[] | Record<string, QueryPart>> = Array<(
+  QueryParts extends QueryPart[]
+    ? ParseQueryPartsArray<QueryParts>
+    : QueryParts extends Record<string, QueryPart>
+      ? ParseQueryPartsObject<QueryParts>
+      : never
+)>;
 
 type ParseQueryPartsArray<QueryParts extends any[]> = (
   QueryParts extends [infer First, ...infer Rest]
@@ -403,13 +402,17 @@ type ParseQueryPart<Part extends QueryPart> = (
         ? ParseOrTypes<Types> extends undefined
           ? never
           : ParseOrTypes<Types>
-      : Part extends EntityQuery<infer Type>
-        ? Type extends Component<infer Schema>
-          ? Values<Schema>
-          : Type
-        : Part extends Component<infer Schema>
-          ? Values<Schema>
-          : never
+        : Part extends ComponentQuery<infer Type>
+          ? Type extends Component<infer Schema>
+            ? Values<Schema>
+            : never
+          : Part extends Component<infer Schema>
+            ? Values<Schema>
+            : Part extends EntityQuery
+              ? Entity
+              : Part extends Entity
+                ? Entity
+                : never
   )
 
 function query<QueryParts extends QueryPart[]>(...queryPars: QueryParts): QueryResults<QueryParts>
@@ -441,7 +444,6 @@ const IsA = new Relationship();
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-
 const results = query(
   FooComponent,
   FooRelationship,
@@ -466,6 +468,11 @@ const results = query(
   FooRelationship.on("b").to("a"),
   IsA.on("a").to("c"),
   FooRelationship.to("c"),
+  // Possible entity querying?
+  Entity,
+  Entity.as("ent"),
+  FooComponent.on("ent"),
+  FooComponent.on(john),
 );
 
 const item1 = query(
@@ -478,7 +485,7 @@ const item1 = query(
 const [
   a1,
   a2,
-] = item1.components;
+] = item1;
 
 const item2 = query(
   FooTagComponent.as(""),
@@ -490,7 +497,7 @@ const item2 = query(
 const [
   b1,
   b2,
-] = item2.components;
+] = item2;
 
 const item3 = query(
   FooTagRelationship.to("thing"),
@@ -505,7 +512,7 @@ const [
   c1,
   c2,
   c3,
-] = item3.components;
+] = item3;
 
 const item4 = query({
   d1: FooTagComponent,
@@ -519,7 +526,7 @@ const {
   d2,
   d3,
   d4,
-} = item4.components;
+} = item4;
 
 const item5 = query({
   e1: FooComponent,
@@ -531,7 +538,7 @@ const item5 = query({
 const {
   e1,
   e2,
-} = item5.components;
+} = item5;
 
 const item6 = query(Likes.to(Any))[0];
 
@@ -544,6 +551,13 @@ const item8 = query(
   or(FooRelationship, FooTagRelationship),
   or(FooTagComponent, FooTagRelationship),
   optional(FooRelationship),
+)[0];
+
+const item9 = query(
+  Entity,
+  Entity.as("ent"),
+  FooComponent.on("ent"),
+  FooComponent.on(john),
 )[0];
 
 /////////////////////////////////////////////////////////////////////////////////////
