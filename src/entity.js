@@ -2,7 +2,7 @@ import { NotImplementedError } from "./utils/errors/not-implemented-error.js";
 
 export class Entity {
   /**
-   * @template {ComponentAndValuesOrTag[]} Components
+   * @template {Array<ComponentWithValues | Tag>} Components
    * @param {Components} components
    * @returns {this}
    */
@@ -11,7 +11,7 @@ export class Entity {
   }
 
   /**
-   * @template {Component<any>[]} Components
+   * @template {Array<Component<any>>} Components
    * @param {Components} components
    * @returns {this}
    */
@@ -20,16 +20,24 @@ export class Entity {
   }
 
   /**
-   * @param {GetInput} input
-   * @returns {GetOutput<GetInput>}
+   * @template {QueryInput} Input
+   * @param {Input} input
+   * @returns {Partial<QueryOutput<Input>>}
    */
-  get(...input) {}
+  get(...input) {
+    throw new NotImplementedError();
+  }
 
   /**
-   * @param {string} name
-   * @returns EntityQuery<typeof this>
+   * @template {QueryInput} Input
+   * @param {Input} input
+   * @returns {boolean}
    */
-  as(name) {}
+  has(...input) {
 
-  destroy() {}
+  }
+
+  destroy() {
+    throw new NotImplementedError();
+  }
 }
