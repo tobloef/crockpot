@@ -11,16 +11,28 @@ import { ComponentQuery } from "./query.js";
 
 /** @template {ComponentSchema | Schemaless} [Schema=Schemaless] */
 export class Component extends Entity {
-  /** @type {Schema | undefined} */
+  /** @type {Schema | Schemaless} */
   schema;
 
-  /** @param {SchemaIfNotSchemaless<Schema>} args */
-  constructor(...args) {
-    super();
-    this.schema = (
-      /** @type {Schema} */
-      (args[0])
-    );
+  /**
+   * @overload
+   * @param {Schema} [schema]
+   */
+  /**
+   * @overload
+   * @param {string} [name]
+   * @param {Schema} [schema]
+   */
+  /**
+   * @param {string | Schema} [nameOrSchema]
+   * @param {Schema} [schemaOrUndefined]
+   */
+  constructor(nameOrSchema, schemaOrUndefined) {
+    const name = typeof nameOrSchema === "string" ? nameOrSchema : undefined;
+    const schema = typeof nameOrSchema === "string" ? schemaOrUndefined : nameOrSchema;
+
+    super(name);
+    this.schema = schema;
   }
 
   /**

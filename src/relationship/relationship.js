@@ -71,10 +71,12 @@ export class Relationship extends Component {
     /** @type {Component<Schema> | undefined} */
     let relationshipComponent = entityToComponentMap.get(entity);
     if (relationshipComponent === undefined) {
-      relationshipComponent = new Component(
-        /** @type {any} */
-        (this.schema)
-      );
+      /** @type {Component<Schema>} */
+      // @ts-ignore: It doesn't realize that the schema of the relationship is the same as the schema of the component
+      const component = new Component(this.schema);
+
+      relationshipComponent = component;
+      entityToComponentMap.set(entity, relationshipComponent);
     }
 
     return relationshipComponent;

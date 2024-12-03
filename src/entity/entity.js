@@ -5,6 +5,14 @@ import { EntityQuery } from "./query.js";
 /** @import { QueryInput, QueryOutput, QueryArrayInput, QueryObjectInput, SpreadOrObjectQueryInput } from "../query/index.js"; */
 
 export class Entity {
+  /** @type {string | undefined} */
+  name;
+
+  /** @param {string} [name] */
+  constructor(name) {
+    this.name = name;
+  }
+
   /**
    * @param {string} name
    * @returns {EntityQuery}
