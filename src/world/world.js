@@ -35,14 +35,12 @@ export class World {
    * @param {Input} input
    * @returns {QueryOutput<Input>}
    */
-
   /**
    * @template {QueryObjectInput} Input
    * @overload
    * @param {Input} input
    * @returns {QueryOutput<Input>}
    */
-
   /**
    * @template {QueryInput} Input
    * @param {SpreadOrObjectQueryInput<Input>} input

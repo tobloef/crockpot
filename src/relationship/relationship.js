@@ -20,13 +20,11 @@ export class Relationship extends Component {
    * @param {Entity} entity
    * @returns {Component<Schema>}
    */
-
   /**
    * @overload
    * @param {string | Wildcard} reference
    * @returns {RelationshipQuery<typeof this>}
    */
-
   /**
    * @param {Entity | string | Wildcard} entityOrReference
    * @returns {Component<Schema> | RelationshipQuery<typeof this>}

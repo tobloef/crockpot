@@ -37,14 +37,12 @@ export class Entity {
    * @param {Input} input
    * @returns {Partial<QueryOutput<Input>>}
    */
-
   /**
    * @template {QueryObjectInput} Input
    * @overload
    * @param {Input} input
    * @returns {Partial<QueryOutput<Input>>}
    */
-  
   /**
    * @template {QueryInput} Input
    * @param {SpreadOrObjectQueryInput<Input>} input
@@ -60,14 +58,12 @@ export class Entity {
    * @param {Input} input
    * @returns {boolean}
    */
-
   /**
    * @template {QueryObjectInput} Input
    * @overload
    * @param {Input} input
    * @returns {boolean}
    */
-
   /**
    * @template {QueryInput} Input
    * @param {SpreadOrObjectQueryInput<Input>} input
