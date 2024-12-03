@@ -1,4 +1,3 @@
-* Optional entity (and therefore component/relationship) names, for easier debugging
 * Tests
 * Implementation
 * Required components and/or bundles
