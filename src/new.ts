@@ -428,16 +428,20 @@ type ParseQueryPart<Part extends QueryPart> = (
                   : never
   )
 
-function query<QueryParts extends QueryPart[]>(...queryPars: QueryParts): QueryResults<QueryParts>
-function query<QueryParts extends Record<string, QueryPart>>(queryPars: QueryParts): QueryResults<QueryParts>
+type SpreadPartsArrayOrPartsObject<
+  QueryParts extends QueryPart[] | Record<string, QueryPart>
+> = (
+  QueryParts extends QueryPart[]
+    ? QueryParts
+    : QueryParts extends Record<string, QueryPart>
+      ? [QueryParts]
+      : never
+  )
+
+function query<QueryParts extends QueryPart[]>(...queryPartsArr: QueryParts): QueryResults<QueryParts>
+function query<QueryParts extends Record<string, QueryPart>>(queryPartsObj: QueryParts): QueryResults<QueryParts>
 function query<QueryParts extends QueryPart[] | Record<string, QueryPart>>(
-  ...queryPars: (
-    QueryParts extends QueryPart[]
-      ? QueryParts
-      : QueryParts extends Record<string, QueryPart>
-        ? [QueryParts]
-        : never
-    )
+  ...queryParts: SpreadPartsArrayOrPartsObject<QueryParts>
 ): QueryResults<QueryParts> {
   throw null;
 }
