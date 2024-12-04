@@ -18,6 +18,7 @@ import type {
   SpreadOrObjectQueryInput,
 } from "../query/index.js";
 import type { AtLeastOne } from "../utils/at-least-one.js";
+import { query } from "../query/query.js";
 
 export class Entity {
 
@@ -78,7 +79,7 @@ export class Entity {
   get<Input extends QueryInput<ComponentWithValue>>(
     ...input: SpreadOrObjectQueryInput<Input, ComponentWithValue>
   ): Partial<QueryOutput<Input>> {
-    const isObject = input.length === 1 && !(input[0].constructor.name === "Component");
+    const isObject = input.length === 1 && !(input[0].constructor.name === "Component"); // TODO: Better check
 
     if (isObject) {
       return this.#getObject(input[0] as QueryObjectInput<ComponentWithValue>) as Partial<QueryOutput<Input>>;
@@ -99,7 +100,15 @@ export class Entity {
   has<Input extends QueryInput<QueryPart>>(
     ...input: SpreadOrObjectQueryInput<Input, QueryPart>
   ): boolean {
-    throw new NotImplementedError();
+    let results: QueryOutput<Input>[];
+
+    if (input.length === 1) { // TODO: Better check, won't work at all
+      results = query([this], input[0] as QueryObjectInput<QueryPart>) as QueryOutput<Input>[];
+    } else {
+      results = query([this], input as QueryArrayInput<QueryPart>) as QueryOutput<Input>[];
+    }
+
+    return results.length > 0;
   }
 
 
