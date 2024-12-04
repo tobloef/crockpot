@@ -1,9 +1,13 @@
-import { NotImplementedError } from "../utils/errors/not-implemented-error.js";
+import { ComponentValueStore } from "./component-value-store.js";
 import { EntityQuery } from "./query.js";
+import { NotImplementedError } from "../utils/errors/not-implemented-error.js";
 import type {
   AnyComponent,
   AnyComponentValuesPair,
+  ComponentSchema,
+  ComponentWithValue,
   Tag,
+  Values,
 } from "../component/index.js";
 import type {
   QueryArrayInput,
@@ -12,9 +16,7 @@ import type {
   QueryOutput,
   QueryPart,
   SpreadOrObjectQueryInput,
-  ValuedQueryPart,
 } from "../query/index.js";
-import { ComponentValueStore } from "../component/component-value-store.js";
 import type { AtLeastOne } from "../utils/at-least-one.js";
 
 export class Entity {
@@ -65,28 +67,26 @@ export class Entity {
   }
 
 
-  get<Input extends ValuedQueryPart>(
-    input: Input
-  ): QueryOutput<Input> | undefined;
-
-  get<Input extends QueryArrayInput<ValuedQueryPart>>(
+  get<Input extends QueryArrayInput<ComponentWithValue>>(
     ...input: Input
   ): Partial<QueryOutput<Input>>;
 
-  get<Input extends QueryObjectInput<ValuedQueryPart>>(
+  get<Input extends QueryObjectInput<ComponentWithValue>>(
     input: Input
   ): Partial<QueryOutput<Input>>;
 
-  get<Input extends QueryInput<ValuedQueryPart>>(
-    ...input: SpreadOrObjectQueryInput<Input, ValuedQueryPart>
+  get<Input extends QueryInput<ComponentWithValue>>(
+    ...input: SpreadOrObjectQueryInput<Input, ComponentWithValue>
   ): Partial<QueryOutput<Input>> {
-    throw new NotImplementedError();
+    const isObject = input.length === 1 && !(input[0].constructor.name === "Component");
+
+    if (isObject) {
+      return this.#getObject(input[0] as QueryObjectInput<ComponentWithValue>) as Partial<QueryOutput<Input>>;
+    } else {
+      return this.#getArray(input as QueryArrayInput<ComponentWithValue>) as Partial<QueryOutput<Input>>;
+    }
   }
 
-
-  has<Input extends QueryPart>(
-    input: Input
-  ): boolean;
 
   has<Input extends AtLeastOne<QueryPart>>(
     ...input: Input
@@ -105,5 +105,31 @@ export class Entity {
 
   destroy() {
     this.__components.clear();
+  }
+
+
+  #getObject(
+    input: QueryObjectInput<ComponentWithValue>
+  ): Partial<Record<string, Values<ComponentSchema>>> {
+    let result: Partial<Record<string, Values<ComponentSchema>>> = {};
+
+    for (const [key, component] of Object.entries(input)) {
+      result[key] = this.__components.get(component);
+    }
+
+    return result;
+  }
+
+
+  #getArray(
+    array: QueryArrayInput<ComponentWithValue>
+  ): Partial<Values<ComponentSchema>> {
+    let result: Partial<Values<ComponentSchema>[]> = [];
+
+    for (const component of array) {
+      result.push(this.__components.get(component));
+    }
+
+    return result;
   }
 }

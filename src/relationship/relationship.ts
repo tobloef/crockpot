@@ -1,11 +1,9 @@
-import {
-  Component,
-} from "../component/index.js";
+import { Entity } from "../entity/index.js";
+import { RelationshipComponentStore } from "./relationship-component-store.js";
+import { Component } from "../component/index.js";
 import { Wildcard } from "../query/wildcard.js";
 import { RelationshipQuery } from "./query.js";
 import type { ComponentSchema, Schemaless } from "../component/index.js";
-import { Entity } from "../entity/index.js";
-import { RelationshipComponentStore } from "./relationship-component-store.js";
 import type { Immutable } from "../utils/immutable.js";
 
 export type AnyRelationship = Relationship<ComponentSchema | Schemaless>;

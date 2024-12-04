@@ -12,7 +12,8 @@
     "coevrage:open": "open-cli coverage/index.html",
     "check": "npm run check:src && npm run check:test",
     "check:src": "tsc --noEmit --project tsconfig.json",
-    "check:test": "tsc --noEmit --project tsconfig.test.json"
+    "check:test": "tsc --noEmit --project tsconfig.test.json",
+    "check-circular-dependencies": "madge --circular --extensions ts src"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
   "dependencies": {
     "@types/node": "^22.9.1",
     "c8": "^10.1.2",
+    "madge": "^8.0.0",
     "open": "^10.1.0",
     "open-cli": "^8.0.0",
     "remove": "^0.1.5",

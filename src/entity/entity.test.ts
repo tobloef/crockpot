@@ -123,10 +123,10 @@ describe(Entity.prototype.get.name, () => {
     const TestComponent = new Component({ value: Number });
     entity.add(TestComponent.with({ value: 42 }));
 
-    const components = entity.get(TestComponent);
+    const [component] = entity.get(TestComponent);
 
     assert.deepStrictEqual(
-      components,
+      component,
       { value: 42 }
     );
   });
@@ -185,9 +185,9 @@ describe(Entity.prototype.get.name, () => {
     const entity = new Entity();
     const TestComponent = new Component({ value: Number });
 
-    const components = entity.get(TestComponent);
+    const [component] = entity.get(TestComponent);
 
-    assert.deepStrictEqual(components, undefined);
+    assert.deepStrictEqual(component, undefined);
   });
 
   it("Get non-existent components by rest parameters", () => {
@@ -204,10 +204,10 @@ describe(Entity.prototype.get.name, () => {
     const TestRelationship = new Relationship({ value: Number });
     entity.add(TestRelationship.to(entity).with({ value: 42 }));
 
-    const components = entity.get(TestRelationship.to(entity));
+    const [component] = entity.get(TestRelationship.to(entity));
 
     assert.deepStrictEqual(
-      components,
+      component,
       { value: 42 }
     );
   });

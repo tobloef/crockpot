@@ -1,4 +1,5 @@
 import { Entity } from "../entity/index.js";
+import { NotImplementedError } from "../utils/errors/not-implemented-error.js";
 import { ComponentQuery } from "./query.js";
 import type { ComponentSchema, Schemaless, Values } from "./schema.js";
 import type { Immutable } from "../utils/immutable.js";
@@ -33,8 +34,12 @@ export class Component<
   constructor(name: string, schema: Schema)
   constructor(name: string | undefined, schema: Schema | undefined)
   constructor(nameOrSchema?: string | Schema, schemaOrUndefined?: Schema) {
-    const name = typeof nameOrSchema === "string" ? nameOrSchema : undefined;
-    const schema = typeof nameOrSchema === "string" ? schemaOrUndefined : nameOrSchema;
+    const name = typeof nameOrSchema === "string"
+        ? nameOrSchema
+        : undefined;
+    const schema = typeof nameOrSchema === "string" || nameOrSchema === undefined
+      ? schemaOrUndefined
+      : nameOrSchema;
 
     super(name);
     this.#schema = schema as Schema;

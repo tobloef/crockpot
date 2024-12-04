@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert";
-import { Component } from "./component.js";
+import { Component } from "../component/component.js";
 import { ComponentValueStore } from "./component-value-store.js";
 
 describe(ComponentValueStore.name, () => {

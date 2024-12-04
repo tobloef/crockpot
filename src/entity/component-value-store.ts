@@ -2,8 +2,8 @@ import type {
   ComponentSchema,
   Schemaless,
   Values,
-} from "./schema.js";
-import type { Component } from "./component.js";
+  Component,
+} from "../component/index.js";
 
 export class ComponentValueStore {
   #map = new Map<

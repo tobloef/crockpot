@@ -1,17 +1,8 @@
 import type { Class } from '../utils/class.js';
-import type { Entity, EntityQuery } from '../entity/index.js';
-import type {
-  Component,
-  ComponentQuery,
-  ComponentSchema,
-  ComponentWithValue,
-} from "../component/index.js";
-import type {
-  Relationship,
-  RelationshipQuery,
-  RelationshipWithValue,
-} from "../relationship/index.js";
-import type { Wildcard } from './wildcard.js';
+import { Entity, EntityQuery } from '../entity/index.js';
+import { Component, ComponentQuery } from '../component/index.js';
+import { Relationship, RelationshipQuery } from '../relationship/index.js';
+import { Wildcard } from './wildcard.js';
 import type { Not, Or, Optional } from './boolean/index.js';
 
 export type QueryPart = (
@@ -34,9 +25,3 @@ export type BooleanQueryPart = (
   | Or<any>
   | Optional<any>
 );
-
-export type ValuedQueryPart = (
-  | Component<ComponentSchema>
-  | ComponentQuery<ComponentWithValue>
-  | RelationshipQuery<RelationshipWithValue>
-)
