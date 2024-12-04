@@ -1,3 +1,4 @@
+* Better schema values, like enums and unions
 * Tests
 * Implementation
 * Required components and/or bundles

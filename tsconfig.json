@@ -1,20 +1,22 @@
 {
   "compilerOptions": {
-    "checkJs": true,
-    "allowJs": true,
     "strict": true,
-    "useUnknownInCatchVariables": false,
-    "declaration": true,
-    "outDir": "types",
     "target": "ESNext",
-    "module": "NodeNext",
+    "module": "ESNext",
+    "lib": ["ESNext"],
+    "verbatimModuleSyntax": true,
+    "declaration": true,
+    "sourceMap": true,
+    "outDir": "types",
+    "useUnknownInCatchVariables": false,
+    "skipLibCheck": true
   },
   "exclude": [
     "node_modules",
     "**/*.d.ts",
-    "**/*.test.js"
+    "src/**/*.test.ts"
   ],
   "include": [
-    "src/**/*.js"
+    "src/**/*.ts"
   ]
 }

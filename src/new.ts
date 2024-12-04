@@ -34,10 +34,16 @@ type OnDestroy = () => void;
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-class Entity {
+export class Entity {
+  name?: string;
+
   #componentsToValues = new Map<Component<any>, unknown | undefined>;
   #componentToRemoveOnDestroyCallbacks = new Map<Component, OnDestroy>;
   #onDestroyCallbacks: OnDestroy[] = [];
+
+  constructor(name?: string) {
+    this.name = name;
+  }
 
   static as(name: string): EntityQuery {
     return new EntityQuery().as(name);
@@ -128,12 +134,19 @@ type SchemaIfNotSchemaless<Schema extends ComponentSchema | Schemaless> = (
     : []
 );
 
-class Component<Schema extends ComponentSchema | Schemaless = Schemaless> extends Entity {
-  schema?: Schema;
+export class Component<Schema extends ComponentSchema | Schemaless = Schemaless> extends Entity {
+  schema: Schema;
 
-  constructor(...args: SchemaIfNotSchemaless<Schema>) {
-    super();
-    this.schema = args[0] as Schema;
+  constructor()
+  constructor(name: string)
+  constructor(schema: Schema)
+  constructor(name: string, schema: Schema)
+  constructor(nameOrSchema?: string | Schema, schemaOrUndefined?: Schema) {
+    const name = typeof nameOrSchema === "string" ? nameOrSchema : undefined;
+    const schema = typeof nameOrSchema === "string" ? schemaOrUndefined : nameOrSchema;
+
+    super(name);
+    this.schema = schema as Schema;
   }
 
   on(source: string | Entity): ComponentQuery<typeof this> {
@@ -166,7 +179,7 @@ class Relationship<Schema extends ComponentSchema | Schemaless = Schemaless> ext
     const pair: [Relationship<any>, Entity] = [this, entity];
 
     if (!relationshipComponents.has(pair)) {
-      const component = new Component<Schema>(...[this.schema] as any);
+      const component = new Component<Schema>(this.schema);
       relationshipComponents.set(pair, component)
     }
 
@@ -303,9 +316,6 @@ john.add(Likes.to(snoopy));
 
 // @ts-expect-error
 john.add(Likes.to("liked"));
-
-// @ts-expect-error
-const TestComponent = new Component<{ value: typeof String }>();
 
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -460,6 +470,56 @@ const FooTagRelationship = new Relationship();
 const IsA = new Relationship();
 
 /////////////////////////////////////////////////////////////////////////////////////
+
+const Spaceship = new Component();
+const Faction = new Component({ slogan: String });
+const Planet = new Component();
+const Docked = new Relationship();
+const RuledBy = new Relationship();
+const Allied = new Relationship();
+
+const empire = new Entity();
+empire.add(Faction.with({ slogan: "For the Empire!" }));
+
+const rebels = new Entity();
+rebels.add(Faction.with({ slogan: "For the Rebellion!" }));
+
+const yavin4 = new Entity();
+yavin4.add(Planet);
+yavin4.add(RuledBy.to(rebels));
+
+const spaceship = new Entity();
+spaceship.add(Spaceship);
+spaceship.add(Allied.to(rebels));
+spaceship.add(Docked.to(yavin4));
+
+// Spaceships docked to planets that are ruled by factions allied with the spaceship
+query(
+  Spaceship,
+  Docked.to("location"),
+  Planet.on("location"),
+  Allied.to("ship_faction"),
+  RuledBy.on("location").to("ship_faction"),
+);
+
+// Explicitly specifying the source entity
+query(
+  Spaceship.on("ship"),
+  Docked.on("ship").to("location"),
+  Planet.on("location"),
+  Allied.on("ship").to("ship_faction"),
+  RuledBy.on("location").to("ship_faction"),
+);
+
+
+// Spaceships docked to planets that are ruled by factions NOT allied with the spaceship
+query(
+  Spaceship,
+  Docked.to("location"),
+  Planet.on("location"),
+  RuledBy.on("location").to("planet_faction"),
+  not(Allied.to("planet_faction")),
+);
 
 const results = query(
   FooComponent,

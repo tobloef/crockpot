@@ -3,17 +3,17 @@
     "checkJs": true,
     "allowJs": true,
     "strict": true,
-    "useUnknownInCatchVariables": false,
-    "declaration": true,
-    "outDir": "types",
+    "declaration": false,
     "target": "ESNext",
-    "module": "NodeNext"
+    "module": "NodeNext",
+    "verbatimModuleSyntax": true,
+    "noEmit": true
   },
   "exclude": [
     "node_modules",
-    "**/*.d.ts",
+    "**/*.d.ts"
   ],
   "include": [
-    "src/**/*.test.js"
+    "src/**/*.test.ts"
   ]
 }
