@@ -7,8 +7,7 @@ describe("Brand", () => {
   it("Makes branded type assignable", () => {
     type A = Brand<number, "A">;
 
-    /** @type {A} */
-    const a = brand(1);
+    const a: A = brand(1);
   });
 
   it("Makes unbranded type unassignable", () => {

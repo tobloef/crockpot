@@ -1,24 +1,50 @@
 import type { AnyRelationship } from "./relationship.js";
 import type { Entity } from "../entity/index.js";
 import type { Wildcard } from "../query/index.js";
-import { ComponentQuery } from "../component/query.js";
+import type { Immutable } from "../utils/immutable.js";
 
-/**
- * @template {AnyRelationship} Rel
- * @extends {ComponentQuery<Rel>}
- */
-export class RelationshipQuery<Rel extends AnyRelationship> extends ComponentQuery<Rel> {
+export class RelationshipQuery<Rel extends AnyRelationship> {
+  #relationship: Rel;
+  #source?: Entity | string;
   #target?: string | Entity | Wildcard;
+  #name?: string;
 
-  override on(source: Entity | string): RelationshipQuery<Rel> {
-    super.on(source);
+  constructor(relationship: Rel) {
+    this.#relationship = relationship;
+  }
+
+
+  get relationship(): Immutable<Rel> {
+    return this.#relationship;
+  }
+
+
+  get source(): Immutable<Entity> | string | undefined {
+    return this.#source;
+  }
+
+
+  get target(): string | Immutable<Entity> | Immutable<Wildcard> | undefined {
+    return this.#target;
+  }
+
+
+  get name(): string | undefined {
+    return this.#name;
+  }
+
+
+  on(source: Entity | string): RelationshipQuery<Rel> {
+    this.#source = source;
     return this;
   }
 
-  override as(name: string): RelationshipQuery<Rel> {
-    super.as(name);
+
+  as(name: string): RelationshipQuery<Rel> {
+    this.#name = name;
     return this;
   }
+
 
   to(target: string | Entity | Wildcard): RelationshipQuery<Rel> {
     this.#target = target;

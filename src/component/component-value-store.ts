@@ -52,4 +52,12 @@ export class ComponentValueStore {
   ) {
     this.#map.delete(component);
   }
+
+  clear() {
+    this.#map.clear();
+  }
+
+  [Symbol.iterator]() {
+    return this.#map[Symbol.iterator]();
+  }
 }

@@ -10,23 +10,31 @@ import type {
   QueryInput,
   QueryObjectInput,
   QueryOutput,
+  QueryPart,
   SpreadOrObjectQueryInput,
+  ValuedQueryPart,
 } from "../query/index.js";
 import { ComponentValueStore } from "../component/component-value-store.js";
+import type { AtLeastOne } from "../utils/at-least-one.js";
 
 export class Entity {
 
-  name?: string;
-  components = new ComponentValueStore();
+  #name?: string;
+  __components = new ComponentValueStore();
 
 
   constructor(name?: string) {
-    this.name = name;
+    this.#name = name;
   }
 
 
   static as(name: string) {
     return new EntityQuery().as(name);
+  }
+
+
+  get name(): string | undefined {
+    return this.#name;
   }
 
 
@@ -36,9 +44,9 @@ export class Entity {
     for (const pairOrTag of components) {
       if (Array.isArray(pairOrTag)) {
         const [component, values] = pairOrTag;
-        this.components.set(component, values);
+        this.__components.set(component, values);
       } else {
-        this.components.set(pairOrTag, null);
+        this.__components.set(pairOrTag, null);
       }
     }
 
@@ -50,44 +58,52 @@ export class Entity {
     ...components: Components
   ): this {
     for (const component of components) {
-      this.components.delete(component);
+      this.__components.delete(component);
     }
 
     return this;
   }
 
 
-  get<Input extends QueryArrayInput>(
-    ...input: SpreadOrObjectQueryInput<Input>
+  get<Input extends ValuedQueryPart>(
+    input: Input
+  ): QueryOutput<Input> | undefined;
+
+  get<Input extends QueryArrayInput<ValuedQueryPart>>(
+    ...input: Input
   ): Partial<QueryOutput<Input>>;
 
-  get<Input extends QueryObjectInput>(
-    ...input: SpreadOrObjectQueryInput<Input>
+  get<Input extends QueryObjectInput<ValuedQueryPart>>(
+    input: Input
   ): Partial<QueryOutput<Input>>;
 
-  get<Input extends QueryInput>(
-    ...input: SpreadOrObjectQueryInput<Input>
+  get<Input extends QueryInput<ValuedQueryPart>>(
+    ...input: SpreadOrObjectQueryInput<Input, ValuedQueryPart>
   ): Partial<QueryOutput<Input>> {
     throw new NotImplementedError();
   }
 
 
-  has<Input extends QueryArrayInput>(
-    ...input: SpreadOrObjectQueryInput<Input>
+  has<Input extends QueryPart>(
+    input: Input
   ): boolean;
 
-  has<Input extends QueryObjectInput>(
-    ...input: SpreadOrObjectQueryInput<Input>
+  has<Input extends AtLeastOne<QueryPart>>(
+    ...input: Input
   ): boolean;
 
-  has<Input extends QueryInput>(
-    ...input: SpreadOrObjectQueryInput<Input>
+  has<Input extends QueryObjectInput<QueryPart>>(
+    input: Input
+  ): boolean;
+
+  has<Input extends QueryInput<QueryPart>>(
+    ...input: SpreadOrObjectQueryInput<Input, QueryPart>
   ): boolean {
     throw new NotImplementedError();
   }
 
 
   destroy() {
-    throw new NotImplementedError();
+    this.__components.clear();
   }
 }

@@ -5,12 +5,14 @@ import type { Wildcard } from "./wildcard.js";
 import type { Component, ComponentQuery, Values } from "../component/index.js";
 import type { Entity, EntityQuery } from "../entity/index.js";
 
-export type QueryOutput<Input extends QueryInput> = (
-  Input extends QueryArrayInput
-    ? ParseQueryArrayInput<Input>
-    : Input extends QueryObjectInput
-      ? ParseQueryObjectInput<Input>
-      : never
+export type QueryOutput<Input extends QueryInput<QueryPart>> = (
+  Input extends QueryPart
+    ? ParseQueryPart<Input>
+    : Input extends QueryArrayInput<QueryPart>
+      ? ParseQueryArrayInput<Input>
+      : Input extends QueryObjectInput<QueryPart>
+        ? ParseQueryObjectInput<Input>
+        : never
 );
 
 export type ParseQueryArrayInput<Input extends any[]> = (
@@ -23,7 +25,7 @@ export type ParseQueryArrayInput<Input extends any[]> = (
     : []
 );
 
-export type ParseQueryObjectInput<Input extends QueryObjectInput> = {
+export type ParseQueryObjectInput<Input extends QueryObjectInput<QueryPart>> = {
   [Key in keyof Input]: ParseQueryPart<Input[Key]>;
 };
 

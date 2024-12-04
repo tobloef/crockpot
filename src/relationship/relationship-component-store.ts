@@ -41,15 +41,7 @@ export class RelationshipComponentStore {
     return entityMap.get(entity) as Component<Schema> | undefined;
   }
 
-
-  delete<Rel extends Relationship<ComponentSchema | Schemaless>>(
-    relationship: Rel,
-    entity: Entity
-  ) {
-    const entityMap = this.#map.get(relationship);
-
-    if (entityMap) {
-      entityMap.delete(entity);
-    }
+  delete(relationship: Relationship<ComponentSchema | Schemaless>) {
+    this.#map.delete(relationship);
   }
 }

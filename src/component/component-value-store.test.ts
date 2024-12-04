@@ -40,4 +40,26 @@ describe(ComponentValueStore.name, () => {
 
     assert.deepStrictEqual(store.get(Tag), undefined);
   });
+
+  it("Clear store", () => {
+    const store = new ComponentValueStore();
+    const Tag = new Component();
+
+    store.set(Tag, null);
+    store.clear();
+
+    assert.deepStrictEqual(store.get(Tag), undefined);
+  });
+
+  it("Iterate over store", () => {
+    const store = new ComponentValueStore();
+    const Tag1 = new Component();
+    const Tag2 = new Component();
+
+    store.set(Tag1, null);
+    store.set(Tag2, null);
+
+    const tags = [...store];
+    assert.deepStrictEqual(tags, [[Tag1, null], [Tag2, null]]);
+  });
 });

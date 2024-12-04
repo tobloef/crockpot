@@ -3,6 +3,10 @@ export class Wildcard {
 
   #name?: string;
 
+  get name(): string | undefined {
+    return this.#name;
+  }
+
   as(name: string): this {
     this.#name = name;
     return this;

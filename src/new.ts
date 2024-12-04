@@ -521,6 +521,15 @@ query(
   not(Allied.to("planet_faction")),
 );
 
+query(
+  FooComponent,
+  FooRelationship.to(john),
+  FooRelationship.to("thing"),
+  FooComponent.on("thing"),
+  FooRelationship.on("thing").to("other"),
+  FooComponent.on("other"),
+)
+
 const results = query(
   FooComponent,
   FooRelationship,

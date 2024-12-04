@@ -5,10 +5,18 @@ import type {
   AnyComponentValuesPair,
   Tag,
 } from "../component/index.js";
-import type { QueryInput, QueryOutput, QueryArrayInput, QueryObjectInput, SpreadOrObjectQueryInput } from "../query/index.js";
+import type {
+  QueryInput,
+  QueryOutput,
+  QueryArrayInput,
+  QueryObjectInput,
+  SpreadOrObjectQueryInput,
+  QueryPart,
+} from "../query/index.js";
 
 export class World {
-  entities: Entity[] = [];
+  #entities: Entity[] = [];
+
 
   create(...components: Array<AnyComponentValuesPair | Tag>): Entity {
     const entity = new Entity().add(...components);
@@ -18,25 +26,26 @@ export class World {
 
 
   insert(entity: Entity) {
-    this.entities.push(entity);
+    this.#entities.push(entity);
   }
 
 
   remove(entity: Entity) {
-    this.entities.filter((e) => e !== entity);
+    this.#entities.filter((e) => e !== entity);
     entity.destroy();
   }
 
-  query<Input extends QueryArrayInput>(
+
+  query<Input extends QueryArrayInput<QueryPart>>(
     ...input: Input
   ): QueryOutput<Input>;
 
-  query<Input extends QueryObjectInput>(
+  query<Input extends QueryObjectInput<QueryPart>>(
     input: Input
   ): QueryOutput<Input>;
 
-  query<Input extends QueryInput>(
-    ...input: SpreadOrObjectQueryInput<Input>
+  query<Input extends QueryInput<QueryPart>>(
+    ...input: SpreadOrObjectQueryInput<Input, QueryPart>
   ): QueryOutput<Input> {
     throw new NotImplementedError();
   }
