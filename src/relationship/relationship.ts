@@ -1,10 +1,10 @@
-import { Entity } from "../entity/index.js";
-import { RelationshipComponentStore } from "./relationship-component-store.js";
-import { Component } from "../component/index.js";
-import { Wildcard } from "../query/wildcard.js";
-import { RelationshipQuery } from "./query.js";
-import type { ComponentSchema, Schemaless } from "../component/index.js";
-import type { Immutable } from "../utils/immutable.js";
+import { Entity } from "../entity/index.ts";
+import { RelationshipComponentStore } from "./relationship-component-store.ts";
+import { Component } from "../component/index.ts";
+import { Wildcard } from "../query/wildcard.ts";
+import { RelationshipQuery } from "./query.ts";
+import type { ComponentSchema, Schemaless } from "../component/index.ts";
+import type { Immutable } from "../utils/immutable.ts";
 
 export type AnyRelationship = Relationship<ComponentSchema | Schemaless>;
 export type TagRelationship = Relationship<Schemaless>;

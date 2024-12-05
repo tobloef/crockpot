@@ -1,8 +1,8 @@
-import { Entity } from "../entity/index.js";
-import { NotImplementedError } from "../utils/errors/not-implemented-error.js";
-import { ComponentQuery } from "./query.js";
-import type { ComponentSchema, Schemaless, Values } from "./schema.js";
-import type { Immutable } from "../utils/immutable.js";
+import { Entity } from "../entity/index.ts";
+import { NotImplementedError } from "../utils/errors/not-implemented-error.ts";
+import { ComponentQuery } from "./query.ts";
+import type { ComponentSchema, Schemaless, Values } from "./schema.ts";
+import type { Immutable } from "../utils/immutable.ts";
 
 export type AnyComponent = Component<ComponentSchema | Schemaless>;
 export type Tag = Component<Schemaless>;

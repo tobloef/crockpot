@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert";
-import { Component } from "./component.js";
-import { Entity } from "../entity/index.js";
+import { Component } from "./component.ts";
+import { Entity } from "../entity/index.ts";
 
 describe(Component.name, () => {
   it("Create component without name and without schema", () => {

@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
-import { brand } from "./brand.js";
+import { brand } from "./brand.ts";
 
-import type { Brand } from "./brand.js";
+import type { Brand } from "./brand.ts";
 
 describe("Brand", () => {
   it("Makes branded type assignable", () => {

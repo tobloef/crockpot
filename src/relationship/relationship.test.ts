@@ -1,8 +1,8 @@
 import { describe, it } from "node:test";
-import { Relationship } from "./relationship.js";
+import { Relationship } from "./relationship.ts";
 import * as assert from "node:assert";
-import { Entity } from "../entity/index.js";
-import { Any } from "../query/index.js";
+import { Entity } from "../entity/index.ts";
+import { Any } from "../query/index.ts";
 
 describe(Relationship.name, () => {
   it("Create relationship without name and without schema", () => {

@@ -1,10 +1,10 @@
-import type { Relationship } from "./relationship.js";
+import type { Relationship } from "./relationship.ts";
 import type {
   Component,
   ComponentSchema,
   Schemaless,
-} from "../component/index.js";
-import type { Entity } from "../entity/index.js";
+} from "../component/index.ts";
+import type { Entity } from "../entity/index.ts";
 
 export class RelationshipComponentStore {
   #map = new Map<

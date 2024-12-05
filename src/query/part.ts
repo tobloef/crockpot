@@ -1,9 +1,9 @@
-import type { Class } from '../utils/class.js';
-import { Entity, EntityQuery } from '../entity/index.js';
-import { Component, ComponentQuery } from '../component/index.js';
-import { Relationship, RelationshipQuery } from '../relationship/index.js';
-import { Wildcard } from './wildcard.js';
-import type { Not, Or, Optional } from './boolean/index.js';
+import type { Class } from '../utils/class.ts';
+import { Entity, EntityQuery } from '../entity/index.ts';
+import { Component, ComponentQuery } from '../component/index.ts';
+import { Relationship, RelationshipQuery } from '../relationship/index.ts';
+import { Wildcard } from './wildcard.ts';
+import type { Not, Or, Optional } from './boolean/index.ts';
 
 export type QueryPart = (
   | NonBooleanQueryPart

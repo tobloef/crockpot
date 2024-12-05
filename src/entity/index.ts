@@ -1,2 +1,2 @@
-export * from "./entity.js";
-export * from "./query.js";
+export * from "./entity.ts";
+export * from "./query.ts";

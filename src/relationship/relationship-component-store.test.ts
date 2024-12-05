@@ -1,9 +1,9 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert";
-import { RelationshipComponentStore } from "./relationship-component-store.js";
-import { Relationship } from "./relationship.js";
-import { Entity } from "../entity/index.js";
-import { Component } from "../component/index.js";
+import { RelationshipComponentStore } from "./relationship-component-store.ts";
+import { Relationship } from "./relationship.ts";
+import { Entity } from "../entity/index.ts";
+import { Component } from "../component/index.ts";
 
 describe(RelationshipComponentStore.name, () => {
   it("Stores and retrieves components by schemaless relationship and entity", () => {

@@ -1,9 +1,9 @@
-import type { QueryInput, QueryArrayInput, QueryObjectInput } from "./input.js";
-import type { QueryPart } from "./part.js";
-import type { Not, Optional, Or } from "./boolean/index.js";
-import type { Wildcard } from "./wildcard.js";
-import type { Component, ComponentQuery, Values } from "../component/index.js";
-import type { Entity, EntityQuery } from "../entity/index.js";
+import type { QueryInput, QueryArrayInput, QueryObjectInput } from "./input.ts";
+import type { QueryPart } from "./part.ts";
+import type { Not, Optional, Or } from "./boolean/index.ts";
+import type { Wildcard } from "./wildcard.ts";
+import type { Component, ComponentQuery, Values } from "../component/index.ts";
+import type { Entity, EntityQuery } from "../entity/index.ts";
 
 export type QueryOutput<Input extends QueryInput<QueryPart>> = (
   Input extends QueryPart

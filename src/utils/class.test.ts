@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 
-import type { Class, Instance } from "./class.js";
+import type { Class, Instance } from "./class.ts";
 
 describe("Class", () => {
   it("Defines a class, not an instance", () => {

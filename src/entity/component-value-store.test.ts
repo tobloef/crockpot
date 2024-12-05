@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert";
-import { Component } from "../component/component.js";
-import { ComponentValueStore } from "./component-value-store.js";
+import { Component } from "../component/component.ts";
+import { ComponentValueStore } from "./component-value-store.ts";
 
 describe(ComponentValueStore.name, () => {
   it("Set and get schemaless component", () => {

@@ -1,2 +1,2 @@
-export * from "./relationship.js";
-export * from "./query.js";
+export * from "./relationship.ts";
+export * from "./query.ts";

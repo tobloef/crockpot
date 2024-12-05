@@ -1,10 +1,10 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert";
-import { Entity } from "./entity.js";
+import { Entity } from "./entity.ts";
 import {
   Component,
-} from "../component/index.js";
-import { Relationship } from "../relationship/index.js";
+} from "../component/index.ts";
+import { Relationship } from "../relationship/index.ts";
 
 describe(Entity.name, () => {
   it("Create entity without name", () => {

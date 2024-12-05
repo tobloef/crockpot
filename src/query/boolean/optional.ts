@@ -1,4 +1,4 @@
-import type { NonBooleanQueryPart } from "../part.js";
+import type { NonBooleanQueryPart } from "../part.ts";
 
 export type Optional<QueryPart extends NonBooleanQueryPart> = {
    __optional: QueryPart;

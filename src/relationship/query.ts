@@ -1,7 +1,7 @@
-import type { AnyRelationship } from "./relationship.js";
-import type { Entity } from "../entity/index.js";
-import type { Wildcard } from "../query/index.js";
-import type { Immutable } from "../utils/immutable.js";
+import type { AnyRelationship } from "./relationship.ts";
+import type { Entity } from "../entity/index.ts";
+import type { Wildcard } from "../query/index.ts";
+import type { Immutable } from "../utils/immutable.ts";
 
 export class RelationshipQuery<Rel extends AnyRelationship> {
   #relationship: Rel;

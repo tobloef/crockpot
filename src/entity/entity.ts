@@ -1,6 +1,6 @@
-import { ComponentValueStore } from "./component-value-store.js";
-import { EntityQuery } from "./query.js";
-import { NotImplementedError } from "../utils/errors/not-implemented-error.js";
+import { ComponentValueStore } from "./component-value-store.ts";
+import { EntityQuery } from "./query.ts";
+import { NotImplementedError } from "../utils/errors/not-implemented-error.ts";
 import type {
   AnyComponent,
   AnyComponentValuesPair,
@@ -8,7 +8,7 @@ import type {
   ComponentWithValue,
   Tag,
   Values,
-} from "../component/index.js";
+} from "../component/index.ts";
 import type {
   QueryArrayInput,
   QueryInput,
@@ -16,9 +16,9 @@ import type {
   QueryOutput,
   QueryPart,
   SpreadOrObjectQueryInput,
-} from "../query/index.js";
-import type { AtLeastOne } from "../utils/at-least-one.js";
-import { query } from "../query/query.js";
+} from "../query/index.ts";
+import type { AtLeastOne } from "../utils/at-least-one.ts";
+import { query } from "../query/query.ts";
 
 export class Entity {
 

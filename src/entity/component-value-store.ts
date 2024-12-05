@@ -3,7 +3,7 @@ import type {
   Schemaless,
   Values,
   Component,
-} from "../component/index.js";
+} from "../component/index.ts";
 
 export class ComponentValueStore {
   #map = new Map<

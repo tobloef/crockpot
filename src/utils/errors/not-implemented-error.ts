@@ -1,4 +1,4 @@
-import { CustomError } from "./custom-error.js";
+import { CustomError } from "./custom-error.ts";
 
 export class NotImplementedError extends CustomError {
   constructor() {

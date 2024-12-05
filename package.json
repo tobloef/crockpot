@@ -5,9 +5,9 @@
   "main": "src/index.js",
   "scripts": {
     "build": "rimraf ./build && tsc --project tsconfig.json",
-    "test": "node --import=tsx --test src/**/*.test.ts",
+    "test": "node --experimental-strip-types --test src/**/*.test.ts",
     "coverage": "npm run coverage:run && npm run coverage:open",
-    "coverage:run": "c8 --reporter=html node --import=tsx --test src/**/*.test.ts --experimental-test-coverage",
+    "coverage:run": "c8 --reporter=html node --test src/**/*.test.ts --experimental-test-coverage",
     "coevrage:open": "open-cli coverage/index.html",
     "check": "npm run check:src && npm run check:test",
     "check:src": "tsc --noEmit --project tsconfig.json",

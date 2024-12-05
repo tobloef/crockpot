@@ -1,4 +1,4 @@
-import type { Class, Instance } from "../utils/class.js";
+import type { Class, Instance } from "../utils/class.ts";
 
 export type ComponentSchema = Record<string, Class<any>>;
 export type Schemaless = undefined;
