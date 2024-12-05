@@ -7,7 +7,9 @@
     "target": "ESNext",
     "module": "NodeNext",
     "verbatimModuleSyntax": true,
-    "noEmit": true
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true
   },
   "exclude": [
     "node_modules",
