@@ -4,8 +4,7 @@
   "version": "0.0.1",
   "main": "src/index.js",
   "scripts": {
-    "generate-types": "rimraf ./types && tsc --emitDeclarationOnly --project tsconfig.json",
-    "prepublish": "npm run generate-types",
+    "build": "rimraf ./build && tsc --project tsconfig.json",
     "test": "node --import=tsx --test src/**/*.test.ts",
     "coverage": "npm run coverage:run && npm run coverage:open",
     "coverage:run": "c8 --reporter=html node --import=tsx --test src/**/*.test.ts --experimental-test-coverage",
@@ -24,16 +23,11 @@
   "type": "module",
   "types": "types/index.d.ts",
   "devDependencies": {
-    "typescript": "^5.6.3"
-  },
-  "dependencies": {
+    "typescript": "^5.7.2",
     "@types/node": "^22.9.1",
     "c8": "^10.1.2",
     "madge": "^8.0.0",
-    "open": "^10.1.0",
     "open-cli": "^8.0.0",
-    "remove": "^0.1.5",
-    "rimraf": "^6.0.1",
-    "tsx": "^4.19.2"
+    "rimraf": "^6.0.1"
   }
 }
