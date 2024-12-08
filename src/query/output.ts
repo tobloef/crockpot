@@ -20,33 +20,35 @@ import type {
   EntityQuery,
 } from "../entity/index.ts";
 
-export type QueryOutput<Input extends QueryInput<QueryPart>> = (
+export type QueryOutput<Input extends QueryInput> = (
   Input extends QueryPart
-    ? ParseQueryPart<Input>
+    ? QueryPartOutput<Input>
     : Input extends QueryArrayInput<QueryPart>
-      ? ParseQueryArrayInput<Input>
+      ? QueryArrayOutput<Input>
       : Input extends QueryObjectInput<QueryPart>
-        ? ParseQueryObjectInput<Input>
+        ? QueryObjectOutput<Input>
         : never
   );
 
-export type ParseQueryArrayInput<Input extends any[]> = (
+export type QueryArrayOutput<Input extends QueryArrayInput<QueryPart>> = (
   Input extends [infer First, ...infer Rest]
     ? First extends QueryPart
-      ? [ParseQueryPart<First>] extends [never]
-        ? ParseQueryArrayInput<Rest>
-        : [ParseQueryPart<First>, ...ParseQueryArrayInput<Rest>]
+      ? Rest extends QueryArrayInput<QueryPart>
+        ? [QueryPartOutput<First>] extends [never]
+          ? QueryArrayOutput<Rest>
+          : [QueryPartOutput<First>, ...QueryArrayOutput<Rest>]
+        : never
       : never
     : []
   );
 
-export type ParseQueryObjectInput<Input extends QueryObjectInput<QueryPart>> = {
-  [Key in keyof Input]: ParseQueryPart<Input[Key]>;
+export type QueryObjectOutput<Input extends QueryObjectInput<QueryPart>> = {
+  [Key in keyof Input]: QueryPartOutput<Input[Key]>;
 };
 
-export type ParseQueryPart<Part extends QueryPart> = (
+export type QueryPartOutput<Part extends QueryPart> = (
   Part extends Optional<infer Type>
-    ? (ParseQueryPart<Type> | undefined)
+    ? (QueryPartOutput<Type> | undefined)
     : Part extends Not<any>
       ? never
       : Part extends Or<infer Types>
@@ -71,9 +73,9 @@ export type ParseQueryPart<Part extends QueryPart> = (
 export type ParseOr<Parts extends any[]> = (
   Parts extends [infer First, ...infer Rest]
     ? First extends QueryPart
-      ? ParseQueryPart<First> extends never
+      ? QueryPartOutput<First> extends never
         ? (undefined | ParseOr<Rest>)
-        : (ParseQueryPart<First> | ParseOr<Rest>)
+        : (QueryPartOutput<First> | ParseOr<Rest>)
       : never
     : never
   );

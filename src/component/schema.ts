@@ -4,13 +4,13 @@ import type { Immutable } from "../utils/immutable.ts";
 export type Schemaless = undefined;
 
 export class Schema<Value = any> {
-  readonly #defaultValue: Value;
+  readonly #defaultValue?: Value;
 
-  constructor(defaultValue: Value) {
+  constructor(defaultValue?: Value) {
     this.#defaultValue = defaultValue;
   }
 
-  get defaultValue(): Immutable<Value> {
+  get defaultValue(): Immutable<Value> | undefined {
     return this.#defaultValue;
   }
 }

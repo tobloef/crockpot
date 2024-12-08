@@ -1,11 +1,15 @@
-export type QueryInput<QueryPart> = QueryArrayInput<QueryPart> | QueryObjectInput<QueryPart> | QueryPart;
-export type QueryArrayInput<QueryPart> = Array<QueryPart>;
-export type QueryObjectInput<QueryPart> = Record<string, QueryPart>
+import type { QueryPart } from "./part.js";
 
-export type SpreadOrObjectQueryInput<Input extends QueryInput<QueryPart>, QueryPart> = (
-  Input extends QueryArrayInput<QueryPart>
+export type QueryInput<Part = QueryPart> = QueryArrayInput<Part> | QueryObjectInput<Part> | Part;
+
+export type QueryArrayInput<Part> = Array<Part>;
+
+export type QueryObjectInput<Part> = Record<string, Part>
+
+export type SpreadOrObjectQueryInput<Input extends QueryInput<Part>, Part> = (
+  Input extends QueryArrayInput<Part>
     ? Input
-    : Input extends QueryObjectInput<QueryPart>
+    : Input extends QueryObjectInput<Part>
       ? [Input]
       : never
   );

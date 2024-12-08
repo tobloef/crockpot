@@ -5,30 +5,33 @@ import {
 import * as assert from "node:assert";
 import { Component } from "./component.ts";
 import { Entity } from "../entity/index.ts";
-import { Schema } from "./schema.ts";
+import {
+  type ComponentValue,
+  Schema,
+} from "./schema.ts";
 
 describe(Component.name, () => {
   it("Create component without name and without schema", () => {
-    const component = new Component();
+    const TestComponent = new Component();
 
-    assert.strictEqual(component.name, undefined);
-    assert.deepStrictEqual(component.schema, undefined);
+    assert.strictEqual(TestComponent.name, undefined);
+    assert.deepStrictEqual(TestComponent.schema, undefined);
   });
 
   it("Create component with name and without schema", () => {
-    const component = new Component("component");
+    const TestComponent = new Component("TestComponent");
 
-    assert.strictEqual(component.name, "component");
-
-    assert.deepStrictEqual(component.schema, undefined);
+    assert.strictEqual(TestComponent.name, "TestComponent");
+    assert.deepStrictEqual(TestComponent.schema, undefined);
   });
 
   it("Create component without name and with schema", () => {
     const schema = new Schema({ value: 0 });
-    const component = new Component(schema);
 
-    assert.strictEqual(component.name, undefined);
-    assert.deepStrictEqual(component.schema, schema);
+    const TestComponent = new Component(schema);
+
+    assert.strictEqual(TestComponent.name, undefined);
+    assert.deepStrictEqual(TestComponent.schema, schema);
   });
 
   it("Create component with name and with schema", () => {
@@ -37,6 +40,40 @@ describe(Component.name, () => {
 
     assert.strictEqual(component.name, "component");
     assert.deepStrictEqual(component.schema, schema);
+  });
+
+  it("Component with no schema has null value", () => {
+    const TestComponent = new Component();
+
+    const rightValue: ComponentValue<typeof TestComponent> = null;
+    // @ts-expect-error
+    const wrongValue: ComponentValue<typeof TestComponent> = 123;
+  });
+
+  it("Component with empty schema has any value", () => {
+    const schema = new Schema();
+    const TestComponent = new Component(schema);
+
+    const rightValue1: ComponentValue<typeof TestComponent> = 123;
+    const rightValue2: ComponentValue<typeof TestComponent> = "hello";
+  });
+
+  it("Component with typed schema has matching value", () => {
+    const schema = new Schema<number>();
+    const TestComponent = new Component(schema);
+
+    const rightValue: ComponentValue<typeof TestComponent> = 123;
+    // @ts-expect-error
+    const wrongValue: ComponentValue<typeof TestComponent> = "hello";
+  });
+
+  it("Component with schema with default value has matching value", () => {
+    const schema = new Schema(0);
+    const TestComponent = new Component(schema);
+
+    const rightValue: ComponentValue<typeof TestComponent> = 123;
+    // @ts-expect-error
+    const wrongValue: ComponentValue<typeof TestComponent> = "hello";
   });
 });
 

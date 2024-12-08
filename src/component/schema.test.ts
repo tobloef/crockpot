@@ -11,4 +11,10 @@ describe(Schema.name, () => {
 
     assert.deepStrictEqual(schema.defaultValue, { value: 0 });
   });
+
+  it("Create schema without default value", () => {
+    const schema = new Schema();
+
+    assert.deepStrictEqual(schema.defaultValue, undefined);
+  });
 });
