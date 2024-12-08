@@ -1,17 +1,29 @@
 import type { Component } from "./component.ts";
+import type { Immutable } from "../utils/immutable.js";
 
 export type Schemaless = undefined;
-export type ComponentSchema<Type = any> = { defaultValue: Type }
 
-export type Value<Schema extends ComponentSchema | Schemaless> = (
-  Schema extends ComponentSchema<infer Type>
+export class Schema<Value = any> {
+  readonly #defaultValue: Value;
+
+  constructor(defaultValue: Value) {
+    this.#defaultValue = defaultValue;
+  }
+
+  get defaultValue(): Immutable<Value> {
+    return this.#defaultValue;
+  }
+}
+
+export type Value<ValueSchema extends Schema | Schemaless> = (
+  ValueSchema extends Schema<infer Type>
     ? Type
     : null
   );
 
 export type ComponentValue<Comp extends Component<any>> = (
-  Comp extends Component<infer Schema>
-    ? Value<Schema>
+  Comp extends Component<infer ComponentSchema>
+    ? Value<ComponentSchema>
     : never
   );
 
@@ -37,6 +49,3 @@ export type ComponentObjectValues<Components extends Record<string, Component<an
   [Key in keyof Components]: ComponentValue<Components[Key]>;
 };
 
-export function schema<Type>(defaultValue: Type): ComponentSchema<Type> {
-  return {defaultValue};
-}

@@ -6,7 +6,10 @@ import * as assert from "node:assert";
 import { RelationshipComponentStore } from "./relationship-component-store.ts";
 import { Relationship } from "./relationship.ts";
 import { Entity } from "../entity/index.ts";
-import { Component } from "../component/index.ts";
+import {
+  Component,
+  Schema,
+} from "../component/index.ts";
 
 describe(RelationshipComponentStore.name, () => {
   it("Stores and retrieves components by schemaless relationship and entity", () => {
@@ -24,9 +27,9 @@ describe(RelationshipComponentStore.name, () => {
   it("Stores and retrieves components by schema relationship and entity", () => {
     const store = new RelationshipComponentStore();
 
-    const TestRelationship = new Relationship({value: Number});
+    const TestRelationship = new Relationship(new Schema({value: 0}));
     const entity = new Entity();
-    const component = new Component({value: Number});
+    const component = new Component(new Schema({value: 0}));
 
     store.set(TestRelationship, entity, component);
 
@@ -36,9 +39,9 @@ describe(RelationshipComponentStore.name, () => {
   it("Does not store component with schema different from relationship", () => {
     const store = new RelationshipComponentStore();
 
-    const TestRelationship = new Relationship({value: Number});
+    const TestRelationship = new Relationship(new Schema({value: 0}));
     const entity = new Entity();
-    const component = new Component({value: String});
+    const component = new Component(new Schema({value: ""}));
 
     // @ts-expect-error
     store.set(TestRelationship, entity, component);

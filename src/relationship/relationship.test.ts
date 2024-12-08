@@ -6,6 +6,7 @@ import { Relationship } from "./relationship.ts";
 import * as assert from "node:assert";
 import { Entity } from "../entity/index.ts";
 import { Any } from "../query/index.ts";
+import { Schema } from "../component/index.js";
 
 describe(Relationship.name, () => {
   it("Create relationship without name and without schema", () => {
@@ -25,7 +26,7 @@ describe(Relationship.name, () => {
   });
 
   it("Create relationship without name and with schema", () => {
-    const schema = {value: Number};
+    const schema = new Schema({value: 0});
 
     const TestRelationship = new Relationship(schema);
 
@@ -35,7 +36,7 @@ describe(Relationship.name, () => {
 
   it("Create relationship with name and with schema", () => {
     const name = "relationship";
-    const schema = {value: Number};
+    const schema = new Schema({value: 0});
 
     const TestRelationship = new Relationship(name, schema);
 
@@ -55,7 +56,7 @@ describe(Relationship.prototype.to.name, () => {
   });
 
   it("Create relationship component to entity for relationship with values", () => {
-    const schema = {value: Number};
+    const schema = new Schema({value: 0});
     const TestRelationship = new Relationship(schema);
     const entity = new Entity();
 

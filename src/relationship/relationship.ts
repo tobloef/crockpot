@@ -1,7 +1,7 @@
 import { Entity } from "../entity/index.ts";
 import { RelationshipComponentStore } from "./relationship-component-store.ts";
 import type {
-  ComponentSchema,
+  Schema,
   Schemaless,
 } from "../component/index.ts";
 import { Component } from "../component/index.ts";
@@ -10,46 +10,46 @@ import { RelationshipQuery } from "./query.ts";
 import type { Immutable } from "../utils/immutable.ts";
 
 export type TagRelationship = Relationship<Schemaless>;
-export type RelationshipWithValue = Relationship<ComponentSchema>;
+export type RelationshipWithValue = Relationship<Schema>;
 
 export class Relationship<
-  Schema extends ComponentSchema | Schemaless = Schemaless
+  RelationSchema extends Schema | Schemaless = Schemaless
 > extends Entity {
 
   static __relationshipComponents = new RelationshipComponentStore();
 
-  #schema: Schema;
+  #schema: RelationSchema;
 
 
   constructor();
 
   constructor(name: string);
 
-  constructor(schema: Schema);
+  constructor(schema: RelationSchema);
 
-  constructor(name: string, schema: Schema);
+  constructor(name: string, schema: RelationSchema);
 
-  constructor(name: string | undefined, schema: Schema | undefined);
+  constructor(name: string | undefined, schema: RelationSchema | undefined);
 
-  constructor(nameOrSchema?: string | Schema, schemaOrUndefined?: Schema) {
+  constructor(nameOrSchema?: string | RelationSchema, schemaOrUndefined?: RelationSchema) {
     const name = typeof nameOrSchema === "string" ? nameOrSchema : undefined;
     const schema = typeof nameOrSchema === "string" ? schemaOrUndefined : nameOrSchema;
 
     super(name);
-    this.#schema = schema as Schema;
+    this.#schema = schema as RelationSchema;
   }
 
 
-  get schema(): Immutable<Schema> {
+  get schema(): Immutable<RelationSchema> {
     return this.#schema;
   }
 
 
-  to(entity: Entity): Component<Schema>;
+  to(entity: Entity): Component<RelationSchema>;
 
   to(reference: string | Wildcard): RelationshipQuery<typeof this>;
 
-  to(entityOrReference: Entity | string | Wildcard): Component<Schema> | RelationshipQuery<typeof this> {
+  to(entityOrReference: Entity | string | Wildcard): Component<RelationSchema> | RelationshipQuery<typeof this> {
     if (typeof entityOrReference === "string" || entityOrReference instanceof Wildcard) {
       return this.#queryTo(entityOrReference);
     } else {
@@ -68,14 +68,14 @@ export class Relationship<
   }
 
 
-  #componentTo(entity: Entity): Component<Schema> {
-    let relationshipComponent: Component<Schema> | undefined = (
+  #componentTo(entity: Entity): Component<RelationSchema> {
+    let relationshipComponent: Component<RelationSchema> | undefined = (
       Relationship.__relationshipComponents.get(this, entity)
     );
 
     if (relationshipComponent === undefined) {
       let name = this.#getComponentName(this, entity);
-      relationshipComponent = new Component<Schema>(name, this.#schema as Schema);
+      relationshipComponent = new Component<RelationSchema>(name, this.#schema as RelationSchema);
       Relationship.__relationshipComponents.set(this, entity, relationshipComponent);
     }
 

@@ -5,6 +5,7 @@ import {
 import * as assert from "node:assert";
 import { Component } from "../component/component.ts";
 import { ComponentValueStore } from "./component-value-store.ts";
+import { Schema } from "../component/index.js";
 
 describe(ComponentValueStore.name, () => {
   it("Set and get schemaless component", () => {
@@ -18,7 +19,7 @@ describe(ComponentValueStore.name, () => {
 
   it("Set and get schemaless component", () => {
     const store = new ComponentValueStore();
-    const Comp = new Component({value: Number});
+    const Comp = new Component(new Schema({value: 0}));
 
     store.set(Comp, {value: 42});
 

@@ -1,6 +1,6 @@
 import type {
   Component,
-  ComponentSchema,
+  Schema,
   ComponentValue,
   Schemaless,
   Tag,
@@ -9,8 +9,8 @@ import type {
 
 export class ComponentValueStore {
   #map = new Map<
-    Component<ComponentSchema | Schemaless>,
-    Value<ComponentSchema | Schemaless> | null
+    Component<Schema | Schemaless>,
+    Value<Schema | Schemaless> | null
   >();
 
 

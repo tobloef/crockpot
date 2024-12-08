@@ -1,41 +1,41 @@
 import { Entity } from "../entity/index.ts";
 import { ComponentQuery } from "./query.ts";
 import type {
-  ComponentSchema,
+  Schema,
   Schemaless,
   Value,
 } from "./schema.ts";
 import type { Immutable } from "../utils/immutable.ts";
 
 export type Tag = Component<Schemaless>;
-export type ComponentWithValue = Component<ComponentSchema>;
+export type ComponentWithValue = Component<Schema>;
 
 export type ComponentValuePair<
-  Comp extends Component<Schema> = any,
-  Schema extends ComponentSchema | Schemaless = any
+  Comp extends Component<ComponentSchema> = any,
+  ComponentSchema extends Schema | Schemaless = any
 > = [
   component: Comp,
   value: Value<Schema>
 ]; // TODO: Try with ComponentValue?
 
 export class Component<
-  Schema extends ComponentSchema | Schemaless = Schemaless
+  ComponentSchema extends Schema | Schemaless = Schemaless
 > extends Entity {
 
-  #schema: Schema;
+  #schema: ComponentSchema;
 
 
   constructor();
 
   constructor(name: string);
 
-  constructor(schema: Schema);
+  constructor(schema: ComponentSchema);
 
-  constructor(name: string, schema: Schema);
+  constructor(name: string, schema: ComponentSchema);
 
-  constructor(name: string | undefined, schema: Schema | undefined);
+  constructor(name: string | undefined, schema: ComponentSchema | undefined);
 
-  constructor(nameOrSchema?: string | Schema, schemaOrUndefined?: Schema) {
+  constructor(nameOrSchema?: string | ComponentSchema, schemaOrUndefined?: ComponentSchema) {
     const name = typeof nameOrSchema === "string"
       ? nameOrSchema
       : undefined;
@@ -44,11 +44,11 @@ export class Component<
       : nameOrSchema;
 
     super(name);
-    this.#schema = schema as Schema;
+    this.#schema = schema as ComponentSchema;
   }
 
 
-  get schema(): Immutable<Schema> {
+  get schema(): Immutable<ComponentSchema> {
     return this.#schema;
   }
 
@@ -63,7 +63,7 @@ export class Component<
   }
 
 
-  with(value: Value<Schema>): ComponentValuePair<typeof this, Schema> {
+  with(value: Value<ComponentSchema>): ComponentValuePair<typeof this, ComponentSchema> {
     return [this, value];
   }
 

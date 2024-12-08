@@ -1,7 +1,7 @@
 import type { Relationship } from "./relationship.ts";
 import type {
   Component,
-  ComponentSchema,
+  Schema,
   Schemaless,
 } from "../component/index.ts";
 import type { Entity } from "../entity/index.ts";
@@ -14,9 +14,9 @@ export class RelationshipComponentStore {
 
 
   set<
-    Rel extends Relationship<Schema>,
-    Schema extends ComponentSchema | Schemaless
-  >(relationship: Rel, entity: Entity, component: Component<Schema>) {
+    Rel extends Relationship<RelationSchema>,
+    RelationSchema extends Schema | Schemaless
+  >(relationship: Rel, entity: Entity, component: Component<RelationSchema>) {
     let entityMap = this.#map.get(relationship);
 
     if (!entityMap) {
@@ -29,20 +29,20 @@ export class RelationshipComponentStore {
 
 
   get<
-    Rel extends Relationship<Schema>,
-    Schema extends ComponentSchema | Schemaless
-  >(relationship: Rel, entity: Entity): Component<Schema> | undefined {
+    Rel extends Relationship<RelationSchema>,
+    RelationSchema extends Schema | Schemaless
+  >(relationship: Rel, entity: Entity): Component<RelationSchema> | undefined {
     const entityMap = this.#map.get(relationship);
 
     if (!entityMap) {
       return undefined;
     }
 
-    return entityMap.get(entity) as Component<Schema> | undefined;
+    return entityMap.get(entity) as Component<RelationSchema> | undefined;
   }
 
 
-  delete(relationship: Relationship<ComponentSchema | Schemaless>) {
+  delete(relationship: Relationship<Schema | Schemaless>) {
     this.#map.delete(relationship);
   }
 }
