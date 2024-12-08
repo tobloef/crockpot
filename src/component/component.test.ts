@@ -79,3 +79,10 @@ describe(Component.prototype.with.name, () => {
     assert.deepStrictEqual(pair, [component, values]);
   });
 });
+
+describe(Component.prototype.destroy.name, () => {
+  it("Destroy component", () => {
+    const component = new Component();
+    component.destroy();
+  });
+});
