@@ -4,7 +4,7 @@ import type { AnyComponent, Component as ComponentType } from "./component.ts";
 export type ComponentSchema = Record<string, Class<any>>;
 export type Schemaless = undefined;
 
-export type Values<Schema extends ComponentSchema | Schemaless> = (
+export type Value<Schema extends ComponentSchema | Schemaless> = (
   Schema extends ComponentSchema
     ? { [K in keyof Schema]: Instance<Schema[K]>; }
     : null
@@ -12,7 +12,7 @@ export type Values<Schema extends ComponentSchema | Schemaless> = (
 
 export type ComponentValue<Component extends AnyComponent> = (
   Component extends ComponentType<infer Schema>
-    ? Values<Schema>
+    ? Value<Schema>
     : never
 );
 

@@ -2,7 +2,7 @@ import { Entity } from "../entity/index.ts";
 import { NotImplementedError } from "../utils/errors/not-implemented-error.ts";
 
 import type {
-  AnyComponentValuesPair,
+  AnyComponentValuePair,
   Tag,
 } from "../component/index.ts";
 import type {
@@ -18,7 +18,7 @@ export class World {
   #entities: Entity[] = [];
 
 
-  create(...components: Array<AnyComponentValuesPair | Tag>): Entity {
+  create(...components: Array<AnyComponentValuePair | Tag>): Entity {
     const entity = new Entity().add(...components);
     this.insert(entity);
     return entity;

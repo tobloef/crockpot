@@ -2,20 +2,21 @@ import { ComponentValueStore } from "./component-value-store.ts";
 import { EntityQuery } from "./query.ts";
 import {
   type AnyComponent,
-  type AnyComponentValuesPair, Component,
   type ComponentValue,
+  type ComponentValuePair,
   type ComponentValues,
   type Tag,
 } from "../component/index.ts";
 
 export class Entity {
 
-  #name?: string;
+  name?: string;
+
   __components = new ComponentValueStore();
 
 
   constructor(name?: string) {
-    this.#name = name;
+    this.name = name;
   }
 
 
@@ -24,18 +25,13 @@ export class Entity {
   }
 
 
-  get name(): string | undefined {
-    return this.#name;
-  }
-
-
-  add<Components extends Array<AnyComponentValuesPair | Tag>>(
+  add<Components extends (ComponentValuePair | Tag)[]>(
     ...components: Components
   ): this {
     for (const pairOrTag of components) {
       if (Array.isArray(pairOrTag)) {
-        const [component, values] = pairOrTag;
-        this.__components.set(component, values);
+        const [component, value] = pairOrTag;
+        this.__components.set(component, value);
       } else {
         this.__components.set(pairOrTag, null);
       }
@@ -54,6 +50,7 @@ export class Entity {
 
     return this;
   }
+
 
   get<Component extends AnyComponent>(
     component: Component
@@ -117,11 +114,13 @@ export class Entity {
     this.__components.clear();
   }
 
+
   #getSingle<Component extends AnyComponent>(
     component: Component
   ): ComponentValue<Component> | undefined {
     return this.__components.get(component);
   }
+
 
   #getArray<Components extends AnyComponent[]>(
     components: Components
@@ -130,8 +129,7 @@ export class Entity {
 
     for (let i = 0; i < components.length; i++) {
       const component = components[i];
-      const value = this.__components.get(component);
-      values[i] = value;
+      values[i] = this.__components.get(component);
     }
 
     return values;
@@ -151,12 +149,14 @@ export class Entity {
     return values;
   }
 
+
   #hasSingle<Component extends AnyComponent>(
     component: Component
   ): boolean {
     const value = this.__components.get(component);
     return value !== undefined;
   }
+
 
   #hasArray<Components extends AnyComponent[]>(
     components: Components
@@ -165,6 +165,7 @@ export class Entity {
       this.__components.get(component) !== undefined
     ));
   }
+
 
   #hasObject<Components extends Record<string, AnyComponent>>(
     components: Components

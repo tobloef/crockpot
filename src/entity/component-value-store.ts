@@ -1,14 +1,14 @@
 import type {
   ComponentSchema,
   Schemaless,
-  Values,
+  Value,
   Component, ComponentValue, AnyComponent, Tag,
 } from "../component/index.ts";
 
 export class ComponentValueStore {
   #map = new Map<
     Component<ComponentSchema | Schemaless>,
-    Values<ComponentSchema | Schemaless> | null
+    Value<ComponentSchema | Schemaless> | null
   >();
 
   // @ts-ignore: Convenience overload for schemaless components

@@ -2,7 +2,7 @@ import type { QueryInput, QueryArrayInput, QueryObjectInput } from "./input.ts";
 import type { QueryPart } from "./part.ts";
 import type { Not, Optional, Or } from "./boolean/index.ts";
 import type { Wildcard } from "./wildcard.ts";
-import type { Component, ComponentQuery, Values } from "../component/index.ts";
+import type { Component, ComponentQuery, Value } from "../component/index.ts";
 import type { Entity, EntityQuery } from "../entity/index.ts";
 
 export type QueryOutput<Input extends QueryInput<QueryPart>> = (
@@ -40,10 +40,10 @@ export type ParseQueryPart<Part extends QueryPart> = (
           : ParseOr<Types>
         : Part extends ComponentQuery<infer Type>
           ? Type extends Component<infer Schema>
-            ? Values<Schema>
+            ? Value<Schema>
             : never
           : Part extends Component<infer Schema>
-            ? Values<Schema>
+            ? Value<Schema>
             : Part extends Entity
               ? Entity
               : Part extends Wildcard
