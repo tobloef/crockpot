@@ -1,5 +1,4 @@
 import { Entity } from "../entity/index.ts";
-import { NotImplementedError } from "../utils/errors/not-implemented-error.ts";
 import { ComponentQuery } from "./query.ts";
 import type { ComponentSchema, Schemaless, Values } from "./schema.ts";
 import type { Immutable } from "../utils/immutable.ts";
@@ -14,7 +13,7 @@ export type ComponentValuesPair<
 > = [
   component: Comp,
   values: Values<Schema>
-];
+]; // TODO: Try with ComponentValue?
 
 export type AnyComponentValuesPair = ComponentValuesPair<
   Component<ComponentSchema>,

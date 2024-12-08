@@ -1,24 +1,12 @@
 import { ComponentValueStore } from "./component-value-store.ts";
 import { EntityQuery } from "./query.ts";
-import { NotImplementedError } from "../utils/errors/not-implemented-error.ts";
-import type {
-  AnyComponent,
-  AnyComponentValuesPair,
-  ComponentSchema,
-  ComponentWithValue,
-  Tag,
-  Values,
+import {
+  type AnyComponent,
+  type AnyComponentValuesPair, Component,
+  type ComponentValue,
+  type ComponentValues,
+  type Tag,
 } from "../component/index.ts";
-import type {
-  QueryArrayInput,
-  QueryInput,
-  QueryObjectInput,
-  QueryOutput,
-  QueryPart,
-  SpreadOrObjectQueryInput,
-} from "../query/index.ts";
-import type { AtLeastOne } from "../utils/at-least-one.ts";
-import { query } from "../query/query.ts";
 
 export class Entity {
 
@@ -57,7 +45,7 @@ export class Entity {
   }
 
 
-  remove<Components extends Array<AnyComponent>>(
+  remove<Components extends AnyComponent[]>(
     ...components: Components
   ): this {
     for (const component of components) {
@@ -67,48 +55,61 @@ export class Entity {
     return this;
   }
 
+  get<Component extends AnyComponent>(
+    component: Component
+  ): ComponentValue<Component> | undefined;
 
-  get<Input extends QueryArrayInput<ComponentWithValue>>(
-    ...input: Input
-  ): Partial<QueryOutput<Input>>;
+  get<Components extends AnyComponent[]>(
+    components: Components
+  ): Partial<ComponentValues<Components>>;
 
-  get<Input extends QueryObjectInput<ComponentWithValue>>(
+  get<Components extends Record<string, AnyComponent>>(
+    components: Components
+  ): Partial<ComponentValues<Components>>;
+
+  get<Input extends (AnyComponent | AnyComponent[] | Record<string, AnyComponent>)>(
     input: Input
-  ): Partial<QueryOutput<Input>>;
-
-  get<Input extends QueryInput<ComponentWithValue>>(
-    ...input: SpreadOrObjectQueryInput<Input, ComponentWithValue>
-  ): Partial<QueryOutput<Input>> {
-    const isObject = input.length === 1 && !(input[0].constructor.name === "Component"); // TODO: Better check
-
-    if (isObject) {
-      return this.#getObject(input[0] as QueryObjectInput<ComponentWithValue>) as Partial<QueryOutput<Input>>;
+  ): (
+    Input extends AnyComponent
+      ? ComponentValue<Input> | undefined
+      : Input extends AnyComponent[]
+        ? Partial<ComponentValues<Input>>
+        : Input extends Record<string, AnyComponent>
+          ? Partial<ComponentValues<Input>>
+          : never
+  ) {
+    if (Array.isArray(input)) {
+      return this.#getArray(input) as any;
+    } else if (input.constructor === Object) {
+      return this.#getObject(input as any) as any;
     } else {
-      return this.#getArray(input as QueryArrayInput<ComponentWithValue>) as Partial<QueryOutput<Input>>;
+      return this.#getSingle(input as any) as any;
     }
   }
 
 
-  has<Input extends AtLeastOne<QueryPart>>(
-    ...input: Input
+  has<Component extends AnyComponent>(
+    component: Component
   ): boolean;
 
-  has<Input extends QueryObjectInput<QueryPart>>(
+  has<Components extends AnyComponent[]>(
+    components: Components
+  ): boolean;
+
+  has<Components extends Record<string, AnyComponent>>(
+    components: Components
+  ): boolean;
+
+  has<Input extends (AnyComponent | AnyComponent[] | Record<string, AnyComponent>)>(
     input: Input
-  ): boolean;
-
-  has<Input extends QueryInput<QueryPart>>(
-    ...input: SpreadOrObjectQueryInput<Input, QueryPart>
   ): boolean {
-    let results: QueryOutput<Input>[];
-
-    if (input.length === 1) { // TODO: Better check, won't work at all
-      results = query([this], input[0] as QueryObjectInput<QueryPart>) as QueryOutput<Input>[];
+    if (Array.isArray(input)) {
+      return this.#hasArray(input);
+    } else if (input.constructor === Object) {
+      return this.#hasObject(input as any);
     } else {
-      results = query([this], input as QueryArrayInput<QueryPart>) as QueryOutput<Input>[];
+      return this.#hasSingle(input as any);
     }
-
-    return results.length > 0;
   }
 
 
@@ -116,29 +117,60 @@ export class Entity {
     this.__components.clear();
   }
 
-
-  #getObject(
-    input: QueryObjectInput<ComponentWithValue>
-  ): Partial<Record<string, Values<ComponentSchema>>> {
-    let result: Partial<Record<string, Values<ComponentSchema>>> = {};
-
-    for (const [key, component] of Object.entries(input)) {
-      result[key] = this.__components.get(component);
-    }
-
-    return result;
+  #getSingle<Component extends AnyComponent>(
+    component: Component
+  ): ComponentValue<Component> | undefined {
+    return this.__components.get(component);
   }
 
+  #getArray<Components extends AnyComponent[]>(
+    components: Components
+  ): Partial<ComponentValues<Components>> {
+    const values: Partial<ComponentValues<Components>> = [] as any;
 
-  #getArray(
-    array: QueryArrayInput<ComponentWithValue>
-  ): Partial<Values<ComponentSchema>> {
-    let result: Partial<Values<ComponentSchema>[]> = [];
-
-    for (const component of array) {
-      result.push(this.__components.get(component));
+    for (let i = 0; i < components.length; i++) {
+      const component = components[i];
+      const value = this.__components.get(component);
+      values[i] = value;
     }
 
-    return result;
+    return values;
+  }
+
+  #getObject<Components extends Record<string, AnyComponent>>(
+    components: Components
+  ): Partial<ComponentValues<Components>> {
+    const values: Partial<ComponentValues<Components>> = {} as any;
+
+    for (const key in components) {
+      const component = components[key];
+      const value = this.__components.get(component);
+      values[key] = value as any;
+    }
+
+    return values;
+  }
+
+  #hasSingle<Component extends AnyComponent>(
+    component: Component
+  ): boolean {
+    const value = this.__components.get(component);
+    return value !== undefined;
+  }
+
+  #hasArray<Components extends AnyComponent[]>(
+    components: Components
+  ): boolean {
+    return components.every((component) => (
+      this.__components.get(component) !== undefined
+    ));
+  }
+
+  #hasObject<Components extends Record<string, AnyComponent>>(
+    components: Components
+  ): boolean {
+    return Object.values(components).every((component) => (
+      this.__components.get(component) !== undefined
+    ));
   }
 }

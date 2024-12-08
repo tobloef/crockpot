@@ -2,7 +2,7 @@ import type {
   ComponentSchema,
   Schemaless,
   Values,
-  Component,
+  Component, ComponentValue, AnyComponent, Tag,
 } from "../component/index.ts";
 
 export class ComponentValueStore {
@@ -11,41 +11,26 @@ export class ComponentValueStore {
     Values<ComponentSchema | Schemaless> | null
   >();
 
+  // @ts-ignore: Convenience overload for schemaless components
+  set<Comp extends Tag>(tag: Comp): void;
 
-  set<
-    Comp extends Component<Schemaless>,
-    Schema extends Schemaless
-  >(component: Comp, value: null): void;
+  set<Comp extends AnyComponent>(
+    component: Comp,
+    value: ComponentValue<Comp>
+  ): void;
 
-  set<
-    Comp extends Component<ComponentSchema>,
-    Schema extends ComponentSchema
-  >(component: Comp, value: Values<Schema>): void;
-
-  set<
-    Comp extends Component<Schema>,
-    Schema extends ComponentSchema | Schemaless
-  >(component: Comp, value: Values<Schema> | null) {
-    this.#map.set(component, value);
+  set<Comp extends AnyComponent>(
+    component: Comp,
+    value: ComponentValue<Comp>
+  ): void {
+    this.#map.set(component, value ?? null);
   }
 
 
-  get<
-    Comp extends Component<Schemaless>,
-    Schema extends Schemaless
-  >(component: Comp): null | undefined;
-
-  get<
-    Comp extends Component<ComponentSchema>,
-    Schema extends ComponentSchema
-  >(component: Comp): Values<Schema> | undefined;
-
-  get<
-    Comp extends Component<Schema>,
-    Schema extends ComponentSchema | Schemaless
-  >(component: Comp): Values<Schema> | null | undefined {
-    return this.#map.get(component) as Values<Schema> | null | undefined;
+  get<Comp extends AnyComponent>(component: Comp): ComponentValue<Comp> {
+    return this.#map.get(component) as ComponentValue<Comp>;
   }
+
 
   delete<Comp extends Component<ComponentSchema | Schemaless>>(
     component: Comp
@@ -61,3 +46,4 @@ export class ComponentValueStore {
     return this.#map[Symbol.iterator]();
   }
 }
+

@@ -1,4 +1,4 @@
-* Better schema values, like enums and unions
+* Better schema values, like enums and unions. And make able to pass array or single item, not just object
 * Tests
 * Implementation
 * Required components and/or bundles
