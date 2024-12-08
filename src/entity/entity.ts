@@ -53,28 +53,20 @@ export class Entity {
 
 
   get<Comp extends Component<any>>(
-    component: Comp
+    component: Comp,
   ): ComponentValue<Comp> | undefined;
 
   get<Components extends Component<any>[]>(
-    components: Components
+    components: Components,
   ): Partial<ComponentValues<Components>>;
 
   get<Components extends Record<string, Component<any>>>(
-    components: Components
+    components: Components,
   ): Partial<ComponentValues<Components>>;
 
-  get<Input extends (Component<any> | Component<any>[] | Record<string, Component<any>>)>(
-    input: Input
-  ): (
-    Input extends Component<any>
-      ? ComponentValue<Input> | undefined
-      : Input extends Component<any>[]
-        ? Partial<ComponentValues<Input>>
-        : Input extends Record<string, Component<any>>
-          ? Partial<ComponentValues<Input>>
-          : never
-  ) {
+  get<Input extends GetInput>(
+    input: Input,
+  ): GetOutput<Input> {
     if (Array.isArray(input)) {
       return this.#getArray(input) as any;
     } else if (input.constructor === Object) {
@@ -108,14 +100,14 @@ export class Entity {
 
 
   #getSingle<Comp extends Component<any>>(
-    component: Comp
+    component: Comp,
   ): ComponentValue<Comp> | undefined {
     return this.__components.get(component);
   }
 
 
   #getArray<Components extends Component<any>[]>(
-    components: Components
+    components: Components,
   ): Partial<ComponentValues<Components>> {
     const values: Partial<ComponentValues<Components>> = [] as any;
 
@@ -127,8 +119,9 @@ export class Entity {
     return values;
   }
 
+
   #getObject<Components extends Record<string, Component<any>>>(
-    components: Components
+    components: Components,
   ): Partial<ComponentValues<Components>> {
     const values: Partial<ComponentValues<Components>> = {} as any;
 
@@ -161,3 +154,15 @@ export class Entity {
     ));
   }
 }
+
+type GetInput = Component<any> | Component<any>[] | Record<string, Component<any>>;
+
+type GetOutput<Input extends GetInput> = (
+  Input extends Component<any>
+    ? ComponentValue<Input> | undefined
+    : Input extends Component<any>[]
+      ? Partial<ComponentValues<Input>>
+      : Input extends Record<string, Component<any>>
+        ? Partial<ComponentValues<Input>>
+        : never
+  )

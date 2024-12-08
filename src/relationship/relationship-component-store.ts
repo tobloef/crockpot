@@ -41,6 +41,7 @@ export class RelationshipComponentStore {
     return entityMap.get(entity) as Component<Schema> | undefined;
   }
 
+
   delete(relationship: Relationship<ComponentSchema | Schemaless>) {
     this.#map.delete(relationship);
   }

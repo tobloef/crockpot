@@ -25,15 +25,20 @@ export class Component<
   #schema: Schema;
 
 
-  constructor()
-  constructor(name: string)
-  constructor(schema: Schema)
-  constructor(name: string, schema: Schema)
-  constructor(name: string | undefined, schema: Schema | undefined)
+  constructor();
+
+  constructor(name: string);
+
+  constructor(schema: Schema);
+
+  constructor(name: string, schema: Schema);
+
+  constructor(name: string | undefined, schema: Schema | undefined);
+
   constructor(nameOrSchema?: string | Schema, schemaOrUndefined?: Schema) {
     const name = typeof nameOrSchema === "string"
-        ? nameOrSchema
-        : undefined;
+      ? nameOrSchema
+      : undefined;
     const schema = typeof nameOrSchema === "string" || nameOrSchema === undefined
       ? schemaOrUndefined
       : nameOrSchema;
@@ -61,6 +66,7 @@ export class Component<
   with(value: Value<Schema>): ComponentValuePair<typeof this, Schema> {
     return [this, value];
   }
+
 
   destroy() {
     super.destroy();

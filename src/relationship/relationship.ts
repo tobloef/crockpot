@@ -20,11 +20,17 @@ export class Relationship<
 
   #schema: Schema;
 
-  constructor()
-  constructor(name: string)
-  constructor(schema: Schema)
-  constructor(name: string, schema: Schema)
-  constructor(name: string | undefined, schema: Schema | undefined)
+
+  constructor();
+
+  constructor(name: string);
+
+  constructor(schema: Schema);
+
+  constructor(name: string, schema: Schema);
+
+  constructor(name: string | undefined, schema: Schema | undefined);
+
   constructor(nameOrSchema?: string | Schema, schemaOrUndefined?: Schema) {
     const name = typeof nameOrSchema === "string" ? nameOrSchema : undefined;
     const schema = typeof nameOrSchema === "string" ? schemaOrUndefined : nameOrSchema;
@@ -51,6 +57,7 @@ export class Relationship<
     }
   }
 
+
   on(source: string | Entity): RelationshipQuery<typeof this> {
     return new RelationshipQuery(this).on(source);
   }
@@ -59,6 +66,7 @@ export class Relationship<
   as(name: string): RelationshipQuery<typeof this> {
     return new RelationshipQuery(this).as(name);
   }
+
 
   #componentTo(entity: Entity): Component<Schema> {
     let relationshipComponent: Component<Schema> | undefined = (
@@ -74,18 +82,25 @@ export class Relationship<
     return relationshipComponent;
   }
 
+
   #queryTo(reference: string | Wildcard): RelationshipQuery<typeof this> {
     return new RelationshipQuery(this).to(reference);
   }
 
+
   #getComponentName(relationship: Relationship<any>, entity: Entity): string | undefined {
     switch (true) {
-      case !!relationship.name && !!entity.name: return `${relationship.name}->${entity.name}`;
-      case !!relationship.name && !entity.name: return `${relationship.name}->?`;
-      case !relationship.name && !!entity.name: return `?->${entity.name}`;
-      default: return undefined;
+      case !!relationship.name && !!entity.name:
+        return `${relationship.name}->${entity.name}`;
+      case !!relationship.name && !entity.name:
+        return `${relationship.name}->?`;
+      case !relationship.name && !!entity.name:
+        return `?->${entity.name}`;
+      default:
+        return undefined;
     }
   }
+
 
   destroy() {
     Relationship.__relationshipComponents.delete(this);

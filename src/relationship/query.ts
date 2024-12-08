@@ -9,6 +9,7 @@ export class RelationshipQuery<Rel extends Relationship<any>> {
   #target?: string | Entity | Wildcard;
   #name?: string;
 
+
   constructor(relationship: Rel) {
     this.#relationship = relationship;
   }

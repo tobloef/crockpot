@@ -10,8 +10,13 @@ import type {
 
 describe("Class", () => {
   it("Defines a class, not an instance", () => {
-    class A { a = 0; }
-    class B { b = 0; }
+    class A {
+      a = 0;
+    }
+
+    class B {
+      b = 0;
+    }
 
     const aClass1: Class<A> = A;
 
@@ -27,8 +32,13 @@ describe("Class", () => {
 
 describe("Instance", () => {
   it("Defines an instance of a class", () => {
-    class A { a = 0; }
-    class B { b = 0; }
+    class A {
+      a = 0;
+    }
+
+    class B {
+      b = 0;
+    }
 
     const aInstance1: Instance<Class<A>> = new A();
 

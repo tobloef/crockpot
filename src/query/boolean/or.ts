@@ -7,5 +7,5 @@ export type Or<QueryParts extends NonBooleanQueryPart[]> = {
 export function or<QueryParts extends NonBooleanQueryPart[]>(
   ...queryParts: QueryParts
 ): Or<QueryParts> {
-  return { __or: queryParts };
+  return {__or: queryParts};
 }

@@ -21,7 +21,7 @@ import type {
 export type QueryPart = (
   | NonBooleanQueryPart
   | BooleanQueryPart
-);
+  );
 
 export type NonBooleanQueryPart = (
   | Class<Entity>
@@ -31,10 +31,10 @@ export type NonBooleanQueryPart = (
   | Relationship<any>
   | RelationshipQuery<any>
   | Wildcard
-);
+  );
 
 export type BooleanQueryPart = (
   | Not<any>
   | Or<any>
   | Optional<any>
-);
+  );

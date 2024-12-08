@@ -7,6 +7,7 @@ export class Wildcard {
     return this.#name;
   }
 
+
   as(name: string): this {
     this.#name = name;
     return this;

@@ -28,7 +28,7 @@ export type QueryOutput<Input extends QueryInput<QueryPart>> = (
       : Input extends QueryObjectInput<QueryPart>
         ? ParseQueryObjectInput<Input>
         : never
-);
+  );
 
 export type ParseQueryArrayInput<Input extends any[]> = (
   Input extends [infer First, ...infer Rest]
@@ -38,7 +38,7 @@ export type ParseQueryArrayInput<Input extends any[]> = (
         : [ParseQueryPart<First>, ...ParseQueryArrayInput<Rest>]
       : never
     : []
-);
+  );
 
 export type ParseQueryObjectInput<Input extends QueryObjectInput<QueryPart>> = {
   [Key in keyof Input]: ParseQueryPart<Input[Key]>;
@@ -66,7 +66,7 @@ export type ParseQueryPart<Part extends QueryPart> = (
                 : Part extends EntityQuery
                   ? Entity
                   : never
-);
+  );
 
 export type ParseOr<Parts extends any[]> = (
   Parts extends [infer First, ...infer Rest]
@@ -76,4 +76,4 @@ export type ParseOr<Parts extends any[]> = (
         : (ParseQueryPart<First> | ParseOr<Rest>)
       : never
     : never
-);
+  );

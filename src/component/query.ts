@@ -7,6 +7,7 @@ export class ComponentQuery<Comp extends Component<any>> {
   #source?: Entity | string;
   #name?: string;
 
+
   constructor(component: Comp) {
     this.#component = component;
   }

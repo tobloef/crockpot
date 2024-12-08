@@ -16,16 +16,14 @@ describe(ComponentValueStore.name, () => {
     assert.deepStrictEqual(store.get(Tag), null);
   });
 
-
   it("Set and get schemaless component", () => {
     const store = new ComponentValueStore();
-    const Comp = new Component({ value: Number });
+    const Comp = new Component({value: Number});
 
-    store.set(Comp, { value: 42 });
+    store.set(Comp, {value: 42});
 
-    assert.deepStrictEqual(store.get(Comp), { value: 42 });
+    assert.deepStrictEqual(store.get(Comp), {value: 42});
   });
-
 
   it("Get non-existent component", () => {
     const store = new ComponentValueStore();

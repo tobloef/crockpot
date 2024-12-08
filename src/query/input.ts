@@ -8,4 +8,4 @@ export type SpreadOrObjectQueryInput<Input extends QueryInput<QueryPart>, QueryP
     : Input extends QueryObjectInput<QueryPart>
       ? [Input]
       : never
-);
+  );

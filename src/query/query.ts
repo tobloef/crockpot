@@ -4,6 +4,7 @@ import type { QueryInput } from "./input.ts";
 import type { QueryPart } from "./part.ts";
 import type { QueryOutput } from "./output.ts";
 
+
 export function query<Input extends QueryInput<QueryPart>>(
   entities: Entity[],
   input: Input,

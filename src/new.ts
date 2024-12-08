@@ -24,7 +24,7 @@ type ComponentsValues<Components extends any[]> = (
       ? [Values<Schema> | undefined, ...ComponentsValues<Rest>]
       : never
     : []
-);
+  );
 
 type Tag = Component<Schemaless>;
 type ComponentWithValue = Component<ComponentSchema>;
@@ -41,13 +41,16 @@ export class Entity {
   #componentToRemoveOnDestroyCallbacks = new Map<Component, OnDestroy>;
   #onDestroyCallbacks: OnDestroy[] = [];
 
+
   constructor(name?: string) {
     this.name = name;
   }
 
+
   static as(name: string): EntityQuery {
     return new EntityQuery().as(name);
   }
+
 
   add<Components extends AddableComponent[]>(...components: Components): this {
     for (const component of components) {
@@ -57,6 +60,7 @@ export class Entity {
     return this;
   }
 
+
   remove<Comp extends Component<any>>(component: Comp): this {
     this.#componentsToValues.delete(component);
 
@@ -65,11 +69,13 @@ export class Entity {
     return this;
   }
 
+
   get<Components extends ComponentWithValue[]>(...components: Components): ComponentsValues<Components> {
     const values = components.map((component) => this.#componentsToValues.get(component));
 
     return values as ComponentsValues<Components>;
   }
+
 
   destroy() {
     this.#onDestroyCallbacks.forEach((callback) => {
@@ -80,10 +86,12 @@ export class Entity {
     this.#onDestroyCallbacks = [];
   }
 
+
   onDestroy(callback: OnDestroy) {
     this.#onDestroyCallbacks.push(callback);
     return () => this.#onDestroyCallbacks.filter((c) => c !== callback);
   }
+
 
   #addComponent<Comp extends AddableComponent>(componentValuesPairOrTag: Comp) {
     let component: Component;
@@ -99,6 +107,7 @@ export class Entity {
 
     this.#setupDestroyCallback(component);
   }
+
 
   #setupDestroyCallback(component: Component) {
     if (this.#componentToRemoveOnDestroyCallbacks.has(component)) {
@@ -119,6 +128,7 @@ export class Entity {
     this.#componentToRemoveOnDestroyCallbacks.set(component, removeOnDestroy);
   }
 
+
   #removeDestroyCallback(component: Component) {
     const removeOnDestroyCallback = this.#componentToRemoveOnDestroyCallbacks.get(component);
     if (removeOnDestroyCallback !== undefined) {
@@ -132,10 +142,11 @@ type SchemaIfNotSchemaless<Schema extends ComponentSchema | Schemaless> = (
   Schema extends ComponentSchema
     ? [Schema]
     : []
-);
+  );
 
 export class Component<Schema extends ComponentSchema | Schemaless = Schemaless> extends Entity {
   schema: Schema;
+
 
   constructor()
   constructor(name: string)
@@ -149,13 +160,16 @@ export class Component<Schema extends ComponentSchema | Schemaless = Schemaless>
     this.schema = schema as Schema;
   }
 
+
   on(source: string | Entity): ComponentQuery<typeof this> {
     return new ComponentQuery(this).on(source);
   }
 
+
   as(name: string): ComponentQuery<typeof this> {
     return new ComponentQuery(this).as(name);
   }
+
 
   with(values: Values<Schema>): ComponentValuesPair<typeof this, Schema> {
     return [this, values];
@@ -175,6 +189,7 @@ class Relationship<Schema extends ComponentSchema | Schemaless = Schemaless> ext
     }
   }
 
+
   #toComponent(entity: Entity): Component<Schema> {
     const pair: [Relationship<any>, Entity] = [this, entity];
 
@@ -192,13 +207,16 @@ class Relationship<Schema extends ComponentSchema | Schemaless = Schemaless> ext
     return component as Component<Schema>;
   }
 
+
   #toQuery(reference: string | Wildcard): RelationshipQuery<typeof this> {
     return new RelationshipQuery(this).to(reference);
   }
 
+
   on(source: string | Entity): RelationshipQuery<typeof this> {
     return new RelationshipQuery(this).on(source);
   }
+
 
   as(name: string): RelationshipQuery<typeof this> {
     return new RelationshipQuery(this).as(name);
@@ -209,6 +227,7 @@ class Relationship<Schema extends ComponentSchema | Schemaless = Schemaless> ext
 
 class EntityQuery {
   #name?: string;
+
 
   as(name: string): EntityQuery {
     this.#name = name;
@@ -221,14 +240,17 @@ class ComponentQuery<Comp extends Component<any>> {
   #source?: string | Entity;
   #name?: string;
 
+
   constructor(component: Comp) {
     this.#component = component;
   }
+
 
   as(name: string): ComponentQuery<Comp> {
     this.#name = name;
     return this;
   }
+
 
   on(source: string | Entity): ComponentQuery<Comp> {
     this.#source = source;
@@ -239,15 +261,18 @@ class ComponentQuery<Comp extends Component<any>> {
 class RelationshipQuery<Rel extends Relationship<any>> extends ComponentQuery<Rel> {
   #target?: string | Entity | Wildcard;
 
+
   override as(name: string): RelationshipQuery<Rel> {
     super.as(name);
     return this;
   }
 
+
   override on(source: string | Entity): RelationshipQuery<Rel> {
     super.on(source);
     return this;
   }
+
 
   to(target: string | Entity | Wildcard): RelationshipQuery<Rel> {
     this.#target = target;
@@ -260,15 +285,18 @@ class RelationshipQuery<Rel extends Relationship<any>> extends ComponentQuery<Re
 class World {
   entities: Entity[] = [];
 
+
   create(...components: AddableComponent[]): Entity {
     const entity = new Entity().add(...components);
     this.insert(entity);
     return entity;
   }
 
+
   insert(entity: Entity): void {
     this.entities.push(entity);
   }
+
 
   remove(entity: Entity): void {
     this.entities.filter((e) => e !== entity);
@@ -317,12 +345,12 @@ john.add(Likes.to(snoopy));
 // @ts-expect-error
 john.add(Likes.to("liked"));
 
-
 /////////////////////////////////////////////////////////////////////////////////////
 
 class Wildcard {
   #brand = "wildcard";
   #name?: string;
+
 
   as(name: string) {
     this.#name = name;
@@ -342,7 +370,7 @@ type Or<QueryParts extends NonBooleanQueryPart[]> = {
 export function or<QueryParts extends NonBooleanQueryPart[]>(
   ...types: QueryParts
 ): Or<QueryParts> {
-  return { __or: types };
+  return {__or: types};
 }
 
 type Not<QueryPart extends NonBooleanQueryPart> = {
@@ -350,9 +378,9 @@ type Not<QueryPart extends NonBooleanQueryPart> = {
 };
 
 export function not<QueryPart extends NonBooleanQueryPart>(
-  type: QueryPart
+  type: QueryPart,
 ): Not<QueryPart> {
-  return { __not: type };
+  return {__not: type};
 }
 
 type Optional<QueryPart extends NonBooleanQueryPart> = {
@@ -360,9 +388,9 @@ type Optional<QueryPart extends NonBooleanQueryPart> = {
 };
 
 export function optional<QueryPart extends NonBooleanQueryPart>(
-  type: QueryPart
+  type: QueryPart,
 ): Optional<QueryPart> {
-  return { __optional: type };
+  return {__optional: type};
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -378,7 +406,7 @@ type QueryPart = (
   | Or<any>
   | Optional<any>
   | Wildcard
-);
+  );
 
 type NonBooleanQueryPart = Exclude<QueryPart, Or<any> | Not<any>>;
 
@@ -388,7 +416,7 @@ type QueryResults<QueryParts extends QueryPart[] | Record<string, QueryPart>> = 
     : QueryParts extends Record<string, QueryPart>
       ? ParseQueryPartsObject<QueryParts>
       : never
-)>;
+  )>;
 
 type ParseQueryPartsArray<QueryParts extends any[]> = (
   QueryParts extends [infer First, ...infer Rest]
@@ -412,7 +440,7 @@ type ParseOrTypes<Parts extends any[]> = (
         : (ParseQueryPart<First> | ParseOrTypes<Rest>)
       : never
     : never
-);
+  );
 
 type ParseQueryPart<Part extends QueryPart> = (
   Part extends Optional<infer Type>
@@ -472,17 +500,17 @@ const IsA = new Relationship();
 /////////////////////////////////////////////////////////////////////////////////////
 
 const Spaceship = new Component();
-const Faction = new Component({ slogan: String });
+const Faction = new Component({slogan: String});
 const Planet = new Component();
 const Docked = new Relationship();
 const RuledBy = new Relationship();
 const Allied = new Relationship();
 
 const empire = new Entity();
-empire.add(Faction.with({ slogan: "For the Empire!" }));
+empire.add(Faction.with({slogan: "For the Empire!"}));
 
 const rebels = new Entity();
-rebels.add(Faction.with({ slogan: "For the Rebellion!" }));
+rebels.add(Faction.with({slogan: "For the Rebellion!"}));
 
 const yavin4 = new Entity();
 yavin4.add(Planet);
@@ -510,7 +538,6 @@ query(
   Allied.on("ship").to("ship_faction"),
   RuledBy.on("location").to("ship_faction"),
 );
-
 
 // Spaceships docked to planets that are ruled by factions NOT allied with the spaceship
 query(

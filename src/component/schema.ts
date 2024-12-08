@@ -13,7 +13,7 @@ export type ComponentValue<Comp extends Component<any>> = (
   Comp extends Component<infer Schema>
     ? Value<Schema>
     : never
-);
+  );
 
 export type ComponentValues<Components extends Component<any>[] | Record<string, Component<any>>> = (
   Components extends Component<any>[]
@@ -31,12 +31,12 @@ export type ComponentArrayValues<Components extends Component<any>[]> = (
         : never
       : never
     : []
-);
+  );
 
 export type ComponentObjectValues<Components extends Record<string, Component<any>>> = {
   [Key in keyof Components]: ComponentValue<Components[Key]>;
 };
 
 export function schema<Type>(defaultValue: Type): ComponentSchema<Type> {
-  return { defaultValue };
+  return {defaultValue};
 }

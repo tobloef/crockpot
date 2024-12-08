@@ -32,12 +32,12 @@ describe(Entity.prototype.add.name, () => {
 
   it("Add value component to entity", () => {
     const entity = new Entity();
-    const TestComponent = new Component({ value: Number });
+    const TestComponent = new Component({value: Number});
 
-    entity.add(TestComponent.with({ value: 42 }));
+    entity.add(TestComponent.with({value: 42}));
 
     const componentValue = entity.__components.get(TestComponent);
-    assert.deepStrictEqual(componentValue, { value: 42 });
+    assert.deepStrictEqual(componentValue, {value: 42});
   });
 
   it("Add multiple components to entity", () => {
@@ -53,13 +53,13 @@ describe(Entity.prototype.add.name, () => {
 
   it("Add existing component to entity", () => {
     const entity = new Entity();
-    const TestComponent = new Component({ value: Number });
-    entity.add(TestComponent.with({ value: 1 }));
+    const TestComponent = new Component({value: Number});
+    entity.add(TestComponent.with({value: 1}));
 
-    entity.add(TestComponent.with({ value: 2 }));
+    entity.add(TestComponent.with({value: 2}));
 
     const componentValue = entity.__components.get(TestComponent);
-    assert.deepStrictEqual(componentValue, { value: 2 });
+    assert.deepStrictEqual(componentValue, {value: 2});
     assert.strictEqual([...entity.__components].length, 1);
   });
 });
@@ -107,7 +107,6 @@ describe(Entity.as.name, () => {
   });
 });
 
-
 describe(Entity.prototype.get.name, () => {
   it("Get no components", () => {
     const entity = new Entity();
@@ -121,41 +120,41 @@ describe(Entity.prototype.get.name, () => {
 
   it("Get one component", () => {
     const entity = new Entity();
-    const TestComponent = new Component({ value: Number });
-    entity.add(TestComponent.with({ value: 42 }));
+    const TestComponent = new Component({value: Number});
+    entity.add(TestComponent.with({value: 42}));
 
     const [component] = entity.get(TestComponent);
 
     assert.deepStrictEqual(
       component,
-      { value: 42 }
+      {value: 42},
     );
   });
 
   it("Get multiple components by rest parameters", () => {
     const entity = new Entity();
-    const TestComponent1 = new Component({ value: Number });
-    const TestComponent2 = new Component({ value: String });
+    const TestComponent1 = new Component({value: Number});
+    const TestComponent2 = new Component({value: String});
     entity.add(
-      TestComponent1.with({ value: 42 }),
-      TestComponent2.with({ value: "42" })
+      TestComponent1.with({value: 42}),
+      TestComponent2.with({value: "42"}),
     );
 
     const components = entity.get(TestComponent1, TestComponent2);
 
     assert.deepStrictEqual(
       components,
-      [{ value: 42 }, { value: "42" }]
+      [{value: 42}, {value: "42"}],
     );
   });
 
   it("Get multiple components by object", () => {
     const entity = new Entity();
-    const TestComponent1 = new Component({ value: Number });
-    const TestComponent2 = new Component({ value: String });
+    const TestComponent1 = new Component({value: Number});
+    const TestComponent2 = new Component({value: String});
     entity.add(
-      TestComponent1.with({ value: 42 }),
-      TestComponent2.with({ value: "42" })
+      TestComponent1.with({value: 42}),
+      TestComponent2.with({value: "42"}),
     );
 
     const components = entity.get({
@@ -165,7 +164,7 @@ describe(Entity.prototype.get.name, () => {
 
     assert.deepStrictEqual(
       components,
-      { one: { value: 42 }, two: { value: "42" } }
+      {one: {value: 42}, two: {value: "42"}},
     );
   });
 
@@ -177,14 +176,14 @@ describe(Entity.prototype.get.name, () => {
     // @ts-expect-error
     entity.get(TestTag);
     // @ts-expect-error
-    entity.get({ tag: TestTag });
+    entity.get({tag: TestTag});
     // @ts-expect-error
     entity.get(TestTag, TestTag);
   });
 
   it("Get non-existent component", () => {
     const entity = new Entity();
-    const TestComponent = new Component({ value: Number });
+    const TestComponent = new Component({value: Number});
 
     const [component] = entity.get(TestComponent);
 
@@ -193,7 +192,7 @@ describe(Entity.prototype.get.name, () => {
 
   it("Get non-existent components by rest parameters", () => {
     const entity = new Entity();
-    const TestComponent = new Component({ value: Number });
+    const TestComponent = new Component({value: Number});
 
     const components = entity.get(TestComponent, TestComponent);
 
@@ -202,14 +201,14 @@ describe(Entity.prototype.get.name, () => {
 
   it("Get relationship", () => {
     const entity = new Entity();
-    const TestRelationship = new Relationship({ value: Number });
-    entity.add(TestRelationship.to(entity).with({ value: 42 }));
+    const TestRelationship = new Relationship({value: Number});
+    entity.add(TestRelationship.to(entity).with({value: 42}));
 
     const [component] = entity.get(TestRelationship.to(entity));
 
     assert.deepStrictEqual(
       component,
-      { value: 42 }
+      {value: 42},
     );
   });
 
@@ -219,8 +218,8 @@ describe(Entity.prototype.get.name, () => {
 describe(Entity.prototype.has.name, () => {
   it("Has one component", () => {
     const entity = new Entity();
-    const TestComponent = new Component({ value: Number });
-    entity.add(TestComponent.with({ value: 42 }));
+    const TestComponent = new Component({value: Number});
+    entity.add(TestComponent.with({value: 42}));
 
     const hasComponents = entity.has(TestComponent);
 
@@ -229,11 +228,11 @@ describe(Entity.prototype.has.name, () => {
 
   it("Has multiple components by rest parameters", () => {
     const entity = new Entity();
-    const TestComponent1 = new Component({ value: Number });
-    const TestComponent2 = new Component({ value: String });
+    const TestComponent1 = new Component({value: Number});
+    const TestComponent2 = new Component({value: String});
     entity.add(
-      TestComponent1.with({ value: 42 }),
-      TestComponent2.with({ value: "42" })
+      TestComponent1.with({value: 42}),
+      TestComponent2.with({value: "42"}),
     );
 
     const hasComponents = entity.has(TestComponent1, TestComponent2);
@@ -243,11 +242,11 @@ describe(Entity.prototype.has.name, () => {
 
   it("Has multiple components by object", () => {
     const entity = new Entity();
-    const TestComponent1 = new Component({ value: Number });
-    const TestComponent2 = new Component({ value: String });
+    const TestComponent1 = new Component({value: Number});
+    const TestComponent2 = new Component({value: String});
     entity.add(
-      TestComponent1.with({ value: 42 }),
-      TestComponent2.with({ value: "42" })
+      TestComponent1.with({value: 42}),
+      TestComponent2.with({value: "42"}),
     );
 
     const hasComponents = entity.has({
@@ -270,7 +269,7 @@ describe(Entity.prototype.has.name, () => {
 
   it("Has non-existent component", () => {
     const entity = new Entity();
-    const TestComponent = new Component({ value: Number });
+    const TestComponent = new Component({value: Number});
 
     const hasComponents = entity.has(TestComponent);
 
@@ -279,7 +278,7 @@ describe(Entity.prototype.has.name, () => {
 
   it("Has non-existent components by rest parameters", () => {
     const entity = new Entity();
-    const TestComponent = new Component({ value: Number });
+    const TestComponent = new Component({value: Number});
 
     const hasComponents = entity.has(TestComponent, TestComponent);
 
@@ -288,8 +287,8 @@ describe(Entity.prototype.has.name, () => {
 
   it("Has relationship", () => {
     const entity = new Entity();
-    const TestRelationship = new Relationship({ value: Number });
-    entity.add(TestRelationship.to(entity).with({ value: 42 }));
+    const TestRelationship = new Relationship({value: Number});
+    entity.add(TestRelationship.to(entity).with({value: 42}));
 
     const hasComponents = entity.has(TestRelationship.to(entity));
 

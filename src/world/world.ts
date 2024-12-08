@@ -41,7 +41,7 @@ export class World {
   ): QueryOutput<Input>;
 
   query<Input extends QueryObjectInput<QueryPart>>(
-    input: Input
+    input: Input,
   ): QueryOutput<Input>;
 
   query<Input extends QueryInput<QueryPart>>(

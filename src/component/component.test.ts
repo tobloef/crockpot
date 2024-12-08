@@ -23,7 +23,7 @@ describe(Component.name, () => {
   });
 
   it("Create component without name and with schema", () => {
-    const schema = { value: Number };
+    const schema = {value: Number};
     const component = new Component(schema);
 
     assert.strictEqual(component.name, undefined);
@@ -31,7 +31,7 @@ describe(Component.name, () => {
   });
 
   it("Create component with name and with schema", () => {
-    const schema = { value: Number };
+    const schema = {value: Number};
     const component = new Component("component", schema);
 
     assert.strictEqual(component.name, "component");
@@ -70,8 +70,8 @@ describe(Component.prototype.as.name, () => {
 
 describe(Component.prototype.with.name, () => {
   it("Create component values pair", () => {
-    const component = new Component({ value: Number });
-    const values = { value: 42 };
+    const component = new Component({value: Number});
+    const values = {value: 42};
     const pair = component.with(values);
 
     assert.deepStrictEqual(pair, [component, values]);
