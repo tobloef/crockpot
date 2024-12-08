@@ -1,8 +1,8 @@
-import type { AnyComponent } from "./component.ts";
 import type { Entity } from "../entity/entity.ts";
 import type { Immutable } from "../utils/immutable.ts";
+import type { Component } from "./component.js";
 
-export class ComponentQuery<Comp extends AnyComponent> {
+export class ComponentQuery<Comp extends Component<any>> {
   #component: Comp;
   #source?: Entity | string;
   #name?: string;

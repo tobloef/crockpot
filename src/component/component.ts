@@ -1,9 +1,12 @@
 import { Entity } from "../entity/index.ts";
 import { ComponentQuery } from "./query.ts";
-import type { ComponentSchema, Schemaless, Value } from "./schema.ts";
+import type {
+  ComponentSchema,
+  Schemaless,
+  Value,
+} from "./schema.ts";
 import type { Immutable } from "../utils/immutable.ts";
 
-export type AnyComponent = Component<ComponentSchema | Schemaless>;
 export type Tag = Component<Schemaless>;
 export type ComponentWithValue = Component<ComponentSchema>;
 

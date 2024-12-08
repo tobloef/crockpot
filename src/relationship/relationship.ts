@@ -6,7 +6,6 @@ import { RelationshipQuery } from "./query.ts";
 import type { ComponentSchema, Schemaless } from "../component/index.ts";
 import type { Immutable } from "../utils/immutable.ts";
 
-export type AnyRelationship = Relationship<ComponentSchema | Schemaless>;
 export type TagRelationship = Relationship<Schemaless>;
 export type RelationshipWithValue = Relationship<ComponentSchema>;
 

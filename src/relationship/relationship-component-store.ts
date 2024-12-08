@@ -8,8 +8,8 @@ import type { Entity } from "../entity/index.ts";
 
 export class RelationshipComponentStore {
   #map = new Map<
-    Relationship<ComponentSchema | Schemaless>,
-    Map<Entity, Component<ComponentSchema | Schemaless>>
+    Relationship<any>,
+    Map<Entity, Component<any>>
   >();
 
 

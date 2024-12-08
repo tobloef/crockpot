@@ -2,7 +2,7 @@ import type {
   ComponentSchema,
   Schemaless,
   Value,
-  Component, ComponentValue, AnyComponent, Tag,
+  Component, ComponentValue, Tag,
 } from "../component/index.ts";
 
 export class ComponentValueStore {
@@ -14,12 +14,12 @@ export class ComponentValueStore {
   // @ts-ignore: Convenience overload for schemaless components
   set<Comp extends Tag>(tag: Comp): void;
 
-  set<Comp extends AnyComponent>(
+  set<Comp extends Component<any>>(
     component: Comp,
     value: ComponentValue<Comp>
   ): void;
 
-  set<Comp extends AnyComponent>(
+  set<Comp extends Component<any>>(
     component: Comp,
     value: ComponentValue<Comp>
   ): void {
@@ -27,12 +27,12 @@ export class ComponentValueStore {
   }
 
 
-  get<Comp extends AnyComponent>(component: Comp): ComponentValue<Comp> {
+  get<Comp extends Component<any>>(component: Comp): ComponentValue<Comp> {
     return this.#map.get(component) as ComponentValue<Comp>;
   }
 
 
-  delete<Comp extends Component<ComponentSchema | Schemaless>>(
+  delete<Comp extends Component<any>>(
     component: Comp
   ) {
     this.#map.delete(component);

@@ -1,7 +1,7 @@
 import { ComponentValueStore } from "./component-value-store.ts";
 import { EntityQuery } from "./query.ts";
 import {
-  type AnyComponent,
+  type Component,
   type ComponentValue,
   type ComponentValuePair,
   type ComponentValues,
@@ -41,7 +41,7 @@ export class Entity {
   }
 
 
-  remove<Components extends AnyComponent[]>(
+  remove<Components extends Component<any>[]>(
     ...components: Components
   ): this {
     for (const component of components) {
@@ -52,26 +52,26 @@ export class Entity {
   }
 
 
-  get<Component extends AnyComponent>(
-    component: Component
-  ): ComponentValue<Component> | undefined;
+  get<Comp extends Component<any>>(
+    component: Comp
+  ): ComponentValue<Comp> | undefined;
 
-  get<Components extends AnyComponent[]>(
+  get<Components extends Component<any>[]>(
     components: Components
   ): Partial<ComponentValues<Components>>;
 
-  get<Components extends Record<string, AnyComponent>>(
+  get<Components extends Record<string, Component<any>>>(
     components: Components
   ): Partial<ComponentValues<Components>>;
 
-  get<Input extends (AnyComponent | AnyComponent[] | Record<string, AnyComponent>)>(
+  get<Input extends (Component<any> | Component<any>[] | Record<string, Component<any>>)>(
     input: Input
   ): (
-    Input extends AnyComponent
+    Input extends Component<any>
       ? ComponentValue<Input> | undefined
-      : Input extends AnyComponent[]
+      : Input extends Component<any>[]
         ? Partial<ComponentValues<Input>>
-        : Input extends Record<string, AnyComponent>
+        : Input extends Record<string, Component<any>>
           ? Partial<ComponentValues<Input>>
           : never
   ) {
@@ -85,21 +85,13 @@ export class Entity {
   }
 
 
-  has<Component extends AnyComponent>(
-    component: Component
-  ): boolean;
+  has(component: Component<any>): boolean;
 
-  has<Components extends AnyComponent[]>(
-    components: Components
-  ): boolean;
+  has(components: Component<any>[]): boolean;
 
-  has<Components extends Record<string, AnyComponent>>(
-    components: Components
-  ): boolean;
+  has(components: Record<string, Component<any>>): boolean;
 
-  has<Input extends (AnyComponent | AnyComponent[] | Record<string, AnyComponent>)>(
-    input: Input
-  ): boolean {
+  has(input: (Component<any> | Component<any>[] | Record<string, Component<any>>)): boolean {
     if (Array.isArray(input)) {
       return this.#hasArray(input);
     } else if (input.constructor === Object) {
@@ -115,14 +107,14 @@ export class Entity {
   }
 
 
-  #getSingle<Component extends AnyComponent>(
-    component: Component
-  ): ComponentValue<Component> | undefined {
+  #getSingle<Comp extends Component<any>>(
+    component: Comp
+  ): ComponentValue<Comp> | undefined {
     return this.__components.get(component);
   }
 
 
-  #getArray<Components extends AnyComponent[]>(
+  #getArray<Components extends Component<any>[]>(
     components: Components
   ): Partial<ComponentValues<Components>> {
     const values: Partial<ComponentValues<Components>> = [] as any;
@@ -135,7 +127,7 @@ export class Entity {
     return values;
   }
 
-  #getObject<Components extends Record<string, AnyComponent>>(
+  #getObject<Components extends Record<string, Component<any>>>(
     components: Components
   ): Partial<ComponentValues<Components>> {
     const values: Partial<ComponentValues<Components>> = {} as any;
@@ -150,26 +142,20 @@ export class Entity {
   }
 
 
-  #hasSingle<Component extends AnyComponent>(
-    component: Component
-  ): boolean {
+  #hasSingle(component: Component<any>): boolean {
     const value = this.__components.get(component);
     return value !== undefined;
   }
 
 
-  #hasArray<Components extends AnyComponent[]>(
-    components: Components
-  ): boolean {
+  #hasArray(components: Component<any>[]): boolean {
     return components.every((component) => (
       this.__components.get(component) !== undefined
     ));
   }
 
 
-  #hasObject<Components extends Record<string, AnyComponent>>(
-    components: Components
-  ): boolean {
+  #hasObject(components: Record<string, Component<any>>): boolean {
     return Object.values(components).every((component) => (
       this.__components.get(component) !== undefined
     ));
