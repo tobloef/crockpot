@@ -1,18 +1,15 @@
 import type { Component } from "./component.ts";
-import type { Immutable } from "../utils/immutable.ts";
 
 export type Schemaless = undefined;
 
 export class Schema<Value = any> {
-  readonly #defaultValue?: Value;
-
-  constructor(defaultValue?: Value) {
-    this.#defaultValue = defaultValue;
+  static withDefault<Value>(value: Value) {
+    const schema = new Schema();
+    schema.defaultValue = value;
+    return schema;
   }
 
-  get defaultValue(): Immutable<Value> | undefined {
-    return this.#defaultValue;
-  }
+  defaultValue?: Value;
 }
 
 export type Value<ValueSchema extends Schema | Schemaless> = (

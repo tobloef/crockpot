@@ -1,6 +1,7 @@
 import { Entity } from "../entity/index.ts";
 import { ComponentQuery } from "./query.ts";
 import type {
+  ComponentValue,
   Schema,
   Schemaless,
   Value,
@@ -11,18 +12,23 @@ export type Tag = Component<Schemaless>;
 export type ComponentWithValue = Component<Schema>;
 
 export type ComponentValuePair<
-  Comp extends Component<ComponentSchema> = any,
-  ComponentSchema extends Schema | Schemaless = any
+  Comp extends Component<any> = any,
 > = [
   component: Comp,
-  value: Value<Schema>
-]; // TODO: Try with ComponentValue?
+  value: ComponentValue<Comp>
+];
 
 export class Component<
   ComponentSchema extends Schema | Schemaless = Schemaless
 > extends Entity {
 
   #schema: ComponentSchema;
+
+  static withDefault<ComponentSchema extends Schema>(value: Value<ComponentSchema>) {
+    const component = new Component<ComponentSchema>();
+    // TODO
+    return component;
+  };
 
 
   constructor();
@@ -63,7 +69,7 @@ export class Component<
   }
 
 
-  with(value: Value<ComponentSchema>): ComponentValuePair<typeof this, ComponentSchema> {
+  with(value: ComponentValue<this>): ComponentValuePair<typeof this> {
     return [this, value];
   }
 
