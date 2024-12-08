@@ -4,63 +4,63 @@ import {
 } from "node:test";
 import * as assert from "node:assert";
 import { ComponentValueStore } from "./component-value-store.ts";
-import { Schema, Component } from "../component/index.ts";
+import { Component } from "../component/index.ts";
 
 describe(ComponentValueStore.name, () => {
   it("Set and get schemaless component", () => {
     const store = new ComponentValueStore();
     const Tag = new Component();
 
-    store.set(Tag, null);
+    store.set(Tag);
 
-    assert.deepStrictEqual(store.get(Tag), null);
+    assert.deepStrictEqual(store.get(Tag), undefined);
   });
 
   it("Set and get schemaless component", () => {
     const store = new ComponentValueStore();
-    const Comp = new Component(new Schema({value: 0}));
+    const TestComponent = new Component<number>();
 
-    store.set(Comp, {value: 42});
+    store.set(TestComponent, 42);
 
-    assert.deepStrictEqual(store.get(Comp), {value: 42});
+    assert.deepStrictEqual(store.get(TestComponent), 42);
   });
 
   it("Get non-existent component", () => {
     const store = new ComponentValueStore();
     const Tag = new Component();
 
-    assert.deepStrictEqual(store.get(Tag), undefined);
+    assert.deepStrictEqual(store.get(Tag), null);
   });
 
   it("Delete component", () => {
     const store = new ComponentValueStore();
     const Tag = new Component();
 
-    store.set(Tag, null);
+    store.set(Tag);
     store.delete(Tag);
 
-    assert.deepStrictEqual(store.get(Tag), undefined);
+    assert.deepStrictEqual(store.get(Tag), null);
   });
 
   it("Clear store", () => {
     const store = new ComponentValueStore();
     const Tag = new Component();
 
-    store.set(Tag, null);
+    store.set(Tag);
     store.clear();
 
-    assert.deepStrictEqual(store.get(Tag), undefined);
+    assert.deepStrictEqual(store.get(Tag), null);
   });
 
   it("Iterate over store", () => {
     const store = new ComponentValueStore();
     const Tag1 = new Component();
     const Tag2 = new Component();
-
-    store.set(Tag1, null);
-    store.set(Tag2, null);
+    store.set(Tag1);
+    store.set(Tag2);
 
     const tags = [...store];
-    assert.deepStrictEqual(tags, [[Tag1, null], [Tag2, null]]);
+
+    assert.deepStrictEqual(tags, [[Tag1, undefined], [Tag2, undefined]]);
   });
 });

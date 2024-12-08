@@ -7,6 +7,7 @@ import type {
   ComponentValues,
   Tag,
 } from "../component/index.ts";
+import type { Nullable } from "../utils/nullable.ts";
 
 export class Entity {
 
@@ -33,7 +34,8 @@ export class Entity {
         const [component, value] = pairOrTag;
         this.__components.set(component, value);
       } else {
-        this.__components.set(pairOrTag, null);
+        const tag = pairOrTag;
+        this.__components.set(tag);
       }
     }
 
@@ -41,8 +43,8 @@ export class Entity {
   }
 
 
-  remove<Components extends Component<any>[]>(
-    ...components: Components
+  remove<ComponentTypes extends Component<any>[]>(
+    ...components: ComponentTypes
   ): this {
     for (const component of components) {
       this.__components.delete(component);
@@ -52,17 +54,17 @@ export class Entity {
   }
 
 
-  get<Comp extends Component<any>>(
-    component: Comp,
-  ): ComponentValue<Comp> | undefined;
+  get<ComponentType extends Component<any>>(
+    component: ComponentType,
+  ): ComponentValue<ComponentType> | undefined;
 
-  get<Components extends Component<any>[]>(
-    components: Components,
-  ): Partial<ComponentValues<Components>>;
+  get<ComponentTypes extends Component<any>[]>(
+    components: ComponentTypes,
+  ): Nullable<ComponentValues<ComponentTypes>>;
 
-  get<Components extends Record<string, Component<any>>>(
-    components: Components,
-  ): Partial<ComponentValues<Components>>;
+  get<ComponentTypes extends Record<string, Component<any>>>(
+    components: ComponentTypes,
+  ): Nullable<ComponentValues<ComponentTypes>>;
 
   get<Input extends GetInput>(
     input: Input,
@@ -99,17 +101,17 @@ export class Entity {
   }
 
 
-  #getSingle<Comp extends Component<any>>(
-    component: Comp,
-  ): ComponentValue<Comp> | undefined {
+  #getSingle<ComponentType extends Component<any>>(
+    component: ComponentType,
+  ): ComponentValue<ComponentType> | null {
     return this.__components.get(component);
   }
 
 
-  #getArray<Components extends Component<any>[]>(
-    components: Components,
-  ): Partial<ComponentValues<Components>> {
-    const values: Partial<ComponentValues<Components>> = [] as any;
+  #getArray<ComponentTypes extends Component<any>[]>(
+    components: ComponentTypes,
+  ): Nullable<ComponentValues<ComponentTypes>> {
+    const values: Nullable<ComponentValues<ComponentTypes>> = [] as any;
 
     for (let i = 0; i < components.length; i++) {
       const component = components[i];
@@ -120,10 +122,10 @@ export class Entity {
   }
 
 
-  #getObject<Components extends Record<string, Component<any>>>(
-    components: Components,
-  ): Partial<ComponentValues<Components>> {
-    const values: Partial<ComponentValues<Components>> = {} as any;
+  #getObject<ComponentTypes extends Record<string, Component<any>>>(
+    components: ComponentTypes,
+  ): Nullable<ComponentValues<ComponentTypes>> {
+    const values: Nullable<ComponentValues<ComponentTypes>> = {} as any;
 
     for (const key in components) {
       const component = components[key];
@@ -137,20 +139,20 @@ export class Entity {
 
   #hasSingle(component: Component<any>): boolean {
     const value = this.__components.get(component);
-    return value !== undefined;
+    return value !== null;
   }
 
 
   #hasArray(components: Component<any>[]): boolean {
     return components.every((component) => (
-      this.__components.get(component) !== undefined
+      this.__components.get(component) !== null
     ));
   }
 
 
   #hasObject(components: Record<string, Component<any>>): boolean {
     return Object.values(components).every((component) => (
-      this.__components.get(component) !== undefined
+      this.__components.get(component) !== null
     ));
   }
 }
@@ -159,10 +161,12 @@ type GetInput = Component<any> | Component<any>[] | Record<string, Component<any
 
 type GetOutput<Input extends GetInput> = (
   Input extends Component<any>
-    ? ComponentValue<Input> | undefined
+    ? Nullable<ComponentValue<Input>>
     : Input extends Component<any>[]
-      ? Partial<ComponentValues<Input>>
+      ? Nullable<ComponentValues<Input>>
       : Input extends Record<string, Component<any>>
-        ? Partial<ComponentValues<Input>>
+        ? Nullable<ComponentValues<Input>>
         : never
-  )
+  );
+
+

@@ -3,19 +3,19 @@ import type { Wildcard } from "../query/index.ts";
 import type { Immutable } from "../utils/immutable.ts";
 import type { Relationship } from "./relationship.ts";
 
-export class RelationshipQuery<Rel extends Relationship<any>> {
-  #relationship: Rel;
+export class RelationshipQuery<RelationshipType extends Relationship<any>> {
+  #relationship: RelationshipType;
   #source?: Entity | string;
   #target?: string | Entity | Wildcard;
   #name?: string;
 
 
-  constructor(relationship: Rel) {
+  constructor(relationship: RelationshipType) {
     this.#relationship = relationship;
   }
 
 
-  get relationship(): Immutable<Rel> {
+  get relationship(): Immutable<RelationshipType> {
     return this.#relationship;
   }
 
@@ -35,19 +35,19 @@ export class RelationshipQuery<Rel extends Relationship<any>> {
   }
 
 
-  on(source: Entity | string): RelationshipQuery<Rel> {
+  on(source: Entity | string): RelationshipQuery<RelationshipType> {
     this.#source = source;
     return this;
   }
 
 
-  as(name: string): RelationshipQuery<Rel> {
+  as(name: string): RelationshipQuery<RelationshipType> {
     this.#name = name;
     return this;
   }
 
 
-  to(target: string | Entity | Wildcard): RelationshipQuery<Rel> {
+  to(target: string | Entity | Wildcard): RelationshipQuery<RelationshipType> {
     this.#target = target;
     return this;
   }

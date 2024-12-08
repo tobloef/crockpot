@@ -1,4 +1,4 @@
-import type { QueryPart } from "./part.js";
+import type { QueryPart } from "./part.ts";
 
 export type QueryInput<Part = QueryPart> = QueryArrayInput<Part> | QueryObjectInput<Part> | Part;
 

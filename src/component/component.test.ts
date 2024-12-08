@@ -3,77 +3,41 @@ import {
   it,
 } from "node:test";
 import * as assert from "node:assert";
-import { Component } from "./component.ts";
-import { Entity } from "../entity/index.ts";
 import {
+  Component,
   type ComponentValue,
-  Schema,
-} from "./schema.ts";
+} from "./component.ts";
+import { Entity } from "../entity/index.ts";
 
 describe(Component.name, () => {
-  it("Create component without name and without schema", () => {
+  it("Create component without a name", () => {
     const TestComponent = new Component();
 
     assert.strictEqual(TestComponent.name, undefined);
-    assert.deepStrictEqual(TestComponent.schema, undefined);
   });
 
-  it("Create component with name and without schema", () => {
+  it("Create component with a name", () => {
     const TestComponent = new Component("TestComponent");
 
     assert.strictEqual(TestComponent.name, "TestComponent");
-    assert.deepStrictEqual(TestComponent.schema, undefined);
   });
 
-  it("Create component without name and with schema", () => {
-    const schema = new Schema({ value: 0 });
-
-    const TestComponent = new Component(schema);
-
-    assert.strictEqual(TestComponent.name, undefined);
-    assert.deepStrictEqual(TestComponent.schema, schema);
-  });
-
-  it("Create component with name and with schema", () => {
-    const schema = new Schema({ value: 0 });
-    const component = new Component("component", schema);
-
-    assert.strictEqual(component.name, "component");
-    assert.deepStrictEqual(component.schema, schema);
-  });
-
-  it("Component with no schema has null value", () => {
+  it("Component with no value type has undefined value", () => {
     const TestComponent = new Component();
 
-    const rightValue: ComponentValue<typeof TestComponent> = null;
+    const rightValue: ComponentValue<typeof TestComponent> = undefined;
     // @ts-expect-error
     const wrongValue: ComponentValue<typeof TestComponent> = 123;
   });
 
-  it("Component with empty schema has any value", () => {
-    const schema = new Schema();
-    const TestComponent = new Component(schema);
-
-    const rightValue1: ComponentValue<typeof TestComponent> = 123;
-    const rightValue2: ComponentValue<typeof TestComponent> = "hello";
-  });
-
-  it("Component with typed schema has matching value", () => {
-    const schema = new Schema<number>();
-    const TestComponent = new Component(schema);
+  it("Component with value type has matching value", () => {
+    const TestComponent = new Component<number>();
 
     const rightValue: ComponentValue<typeof TestComponent> = 123;
     // @ts-expect-error
-    const wrongValue: ComponentValue<typeof TestComponent> = "hello";
-  });
-
-  it("Component with schema with default value has matching value", () => {
-    const schema = new Schema(0);
-    const TestComponent = new Component(schema);
-
-    const rightValue: ComponentValue<typeof TestComponent> = 123;
+    const wrongValue1: ComponentValue<typeof TestComponent> = "hello";
     // @ts-expect-error
-    const wrongValue: ComponentValue<typeof TestComponent> = "hello";
+    const wrongValue2: ComponentValue<typeof TestComponent> = undefined;
   });
 });
 
@@ -81,6 +45,7 @@ describe(Component.prototype.on.name, () => {
   it("Create component query with entity as source", () => {
     const component = new Component();
     const entity = new Entity();
+
     const query = component.on(entity);
 
     assert.strictEqual(query.source, entity);
@@ -89,6 +54,7 @@ describe(Component.prototype.on.name, () => {
 
   it("Create component query with reference name as source", () => {
     const component = new Component();
+
     const query = component.on("source");
 
     assert.strictEqual(query.source, "source");
@@ -99,6 +65,7 @@ describe(Component.prototype.on.name, () => {
 describe(Component.prototype.as.name, () => {
   it("Create component query reference name", () => {
     const component = new Component();
+
     const query = component.as("name");
 
     assert.strictEqual(query.name, "name");
@@ -106,20 +73,21 @@ describe(Component.prototype.as.name, () => {
   });
 });
 
-describe(Component.prototype.with.name, () => {
+describe(Component.prototype.withValue.name, () => {
   it("Create component values pair", () => {
-    const schema = new Schema({ value: 0 });
-    const component = new Component(schema);
-    const values = {value: 42};
-    const pair = component.with(values);
+    const component = new Component<number>();
+    const value = 42;
 
-    assert.deepStrictEqual(pair, [component, values]);
+    const pair = component.withValue(value);
+
+    assert.deepStrictEqual(pair, [component, value]);
   });
 });
 
 describe(Component.prototype.destroy.name, () => {
   it("Destroy component", () => {
     const component = new Component();
+
     component.destroy();
   });
 });

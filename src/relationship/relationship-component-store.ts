@@ -1,10 +1,14 @@
 import type { Relationship } from "./relationship.ts";
 import type {
   Component,
-  Schema,
-  Schemaless,
 } from "../component/index.ts";
 import type { Entity } from "../entity/index.ts";
+
+export type RelationshipComponent<RelationshipType extends Relationship<any>> = (
+  RelationshipType extends Relationship<infer Value>
+    ? Component<Value>
+    : never
+)
 
 export class RelationshipComponentStore {
   #map = new Map<
@@ -14,9 +18,12 @@ export class RelationshipComponentStore {
 
 
   set<
-    Rel extends Relationship<RelationSchema>,
-    RelationSchema extends Schema | Schemaless
-  >(relationship: Rel, entity: Entity, component: Component<RelationSchema>) {
+    RelationshipType extends Relationship<any>
+  >(
+    relationship: RelationshipType,
+    entity: Entity,
+    component: RelationshipComponent<RelationshipType>
+  ) {
     let entityMap = this.#map.get(relationship);
 
     if (!entityMap) {
@@ -29,20 +36,24 @@ export class RelationshipComponentStore {
 
 
   get<
-    Rel extends Relationship<RelationSchema>,
-    RelationSchema extends Schema | Schemaless
-  >(relationship: Rel, entity: Entity): Component<RelationSchema> | undefined {
+    RelationshipType extends Relationship<any>
+  >(
+    relationship: RelationshipType,
+    entity: Entity
+  ): RelationshipComponent<RelationshipType> | null {
     const entityMap = this.#map.get(relationship);
 
     if (!entityMap) {
-      return undefined;
+      return null;
     }
 
-    return entityMap.get(entity) as Component<RelationSchema> | undefined;
+    return (
+      entityMap.get(entity) ?? null
+    ) as RelationshipComponent<RelationshipType> | null;
   }
 
 
-  delete(relationship: Relationship<Schema | Schemaless>) {
+  delete(relationship: Relationship<any>) {
     this.#map.delete(relationship);
   }
 }

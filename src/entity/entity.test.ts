@@ -6,7 +6,6 @@ import * as assert from "node:assert";
 import { Entity } from "./entity.ts";
 import {
   Component,
-  Schema,
 } from "../component/index.ts";
 import { Relationship } from "../relationship/index.ts";
 
@@ -30,17 +29,17 @@ describe(Entity.prototype.add.name, () => {
     entity.add(TestTag);
 
     const tagValue = entity.__components.get(TestTag);
-    assert.strictEqual(tagValue, null);
+    assert.strictEqual(tagValue, undefined);
   });
 
   it("Add value component to entity", () => {
     const entity = new Entity();
-    const TestComponent = new Component(new Schema({value: 0}));
+    const TestComponent = new Component<number>();
 
-    entity.add(TestComponent.with({value: 42}));
+    entity.add(TestComponent.withValue(42));
 
     const componentValue = entity.__components.get(TestComponent);
-    assert.deepStrictEqual(componentValue, {value: 42});
+    assert.deepStrictEqual(componentValue, 42);
   });
 
   it("Add multiple components to entity", () => {
@@ -50,56 +49,78 @@ describe(Entity.prototype.add.name, () => {
 
     entity.add(Tag1, Tag2);
 
-    assert.strictEqual(entity.__components.get(Tag1), null);
-    assert.strictEqual(entity.__components.get(Tag2), null);
+    assert.strictEqual(entity.__components.get(Tag1), undefined);
+    assert.strictEqual(entity.__components.get(Tag2), undefined);
   });
 
   it("Add existing component to entity", () => {
     const entity = new Entity();
-    const TestComponent = new Component(new Schema({value: 0}));
-    entity.add(TestComponent.with({value: 1}));
+    const TestComponent = new Component<number>();
+    entity.add(TestComponent.withValue(1));
 
-    entity.add(TestComponent.with({value: 2}));
+    entity.add(TestComponent.withValue(2));
 
     const componentValue = entity.__components.get(TestComponent);
-    assert.deepStrictEqual(componentValue, {value: 2});
+    assert.deepStrictEqual(componentValue, 2);
     assert.strictEqual([...entity.__components].length, 1);
   });
 });
 
 describe(Entity.prototype.remove.name, () => {
-  it("Remove component from entity", () => {
+  it("Remove tag component from entity", () => {
     const entity = new Entity();
     const TestTag = new Component();
-    entity.__components.set(TestTag, null);
+    entity.__components.set(TestTag);
 
+    const tagBefore = entity.__components.get(TestTag);
     entity.remove(TestTag);
+    const tagAfter = entity.__components.get(TestTag);
 
-    const tagValue = entity.__components.get(TestTag);
-    assert.strictEqual(tagValue, undefined);
+    assert.strictEqual(tagBefore, undefined);
+    assert.strictEqual(tagAfter, null);
+  });
+  it("Remove value component from entity", () => {
+    const entity = new Entity();
+    const TestTag = new Component<number>();
+    entity.__components.set(TestTag, 42);
+
+    const tagBefore = entity.__components.get(TestTag);
+    entity.remove(TestTag);
+    const tagAfter = entity.__components.get(TestTag);
+
+    assert.strictEqual(tagBefore, 42);
+    assert.strictEqual(tagAfter, null);
   });
 
   it("Remove multiple components from entity", () => {
     const entity = new Entity();
     const Tag1 = new Component();
     const Tag2 = new Component();
-    entity.__components.set(Tag1, null);
-    entity.__components.set(Tag2, null);
+    entity.__components.set(Tag1);
+    entity.__components.set(Tag2);
 
+    const tag1Before = entity.__components.get(Tag1);
+    const tag2Before = entity.__components.get(Tag2);
     entity.remove(Tag1, Tag2);
+    const tag1After = entity.__components.get(Tag1);
+    const tag2After = entity.__components.get(Tag2);
 
-    assert.strictEqual(entity.__components.get(Tag1), undefined);
-    assert.strictEqual(entity.__components.get(Tag2), undefined);
+    assert.strictEqual(tag1Before, undefined);
+    assert.strictEqual(tag2Before, undefined);
+    assert.strictEqual(tag1After, null);
+    assert.strictEqual(tag2After, null);
   });
 
   it("Remove non-existent component from entity", () => {
     const entity = new Entity();
     const TestTag = new Component();
 
+    const tagBefore = entity.__components.get(TestTag);
     entity.remove(TestTag);
+    const tagAfter = entity.__components.get(TestTag);
 
-    const tagValue = entity.__components.get(TestTag);
-    assert.strictEqual(tagValue, undefined);
+    assert.strictEqual(tagBefore, null);
+    assert.strictEqual(tagAfter, null);
   });
 });
 
@@ -120,41 +141,41 @@ describe(Entity.prototype.get.name, () => {
 
   it("Get one component", () => {
     const entity = new Entity();
-    const TestComponent = new Component(new Schema({value: 0}));
-    entity.add(TestComponent.with({value: 42}));
+    const TestComponent = new Component<number>();
+    entity.add(TestComponent.withValue(42));
 
     const component = entity.get(TestComponent);
 
     assert.deepStrictEqual(
       component,
-      {value: 42},
+      42,
     );
   });
 
   it("Get multiple components by rest parameters", () => {
     const entity = new Entity();
-    const TestComponent1 = new Component(new Schema({value: 0}));
-    const TestComponent2 = new Component(new Schema({value: ""}));
+    const TestComponent1 = new Component<number>();
+    const TestComponent2 = new Component<string>();
     entity.add(
-      TestComponent1.with({value: 42}),
-      TestComponent2.with({value: "42"}),
+      TestComponent1.withValue(42),
+      TestComponent2.withValue("42"),
     );
 
     const components = entity.get([TestComponent1, TestComponent2]);
 
     assert.deepStrictEqual(
       components,
-      [{value: 42}, {value: "42"}],
+      [42, "42"],
     );
   });
 
   it("Get multiple components by object", () => {
     const entity = new Entity();
-    const TestComponent1 = new Component(new Schema({value: 0}));
-    const TestComponent2 = new Component(new Schema({value: ""}));
+    const TestComponent1 = new Component<number>();
+    const TestComponent2 = new Component<string>();
     entity.add(
-      TestComponent1.with({value: 42}),
-      TestComponent2.with({value: "42"}),
+      TestComponent1.withValue(42),
+      TestComponent2.withValue("42"),
     );
 
     const components = entity.get({
@@ -164,7 +185,7 @@ describe(Entity.prototype.get.name, () => {
 
     assert.deepStrictEqual(
       components,
-      {one: {value: 42}, two: {value: "42"}},
+      {one: 42, two: "42"},
     );
   });
 
@@ -173,50 +194,57 @@ describe(Entity.prototype.get.name, () => {
     const TestTag = new Component();
     entity.add(TestTag);
 
-    assert.deepStrictEqual(entity.get(TestTag), null);
-    assert.deepStrictEqual(entity.get({tag: TestTag}), { tag: null });
-    assert.deepStrictEqual(entity.get([TestTag, TestTag]), [null, null]);
+    assert.deepStrictEqual(entity.get(TestTag), undefined);
+    assert.deepStrictEqual(entity.get({tag: TestTag}), { tag: undefined });
+    assert.deepStrictEqual(entity.get([TestTag, TestTag]), [undefined, undefined]);
   });
 
   it("Get non-existent component", () => {
     const entity = new Entity();
-    const TestComponent = new Component(new Schema({value: 0}));
+    const TestComponent = new Component<number>();
 
     const component = entity.get(TestComponent);
 
-    assert.deepStrictEqual(component, undefined);
+    assert.deepStrictEqual(component, null);
   });
 
-  it("Get non-existent components by rest parameters", () => {
+  it("Get non-existent components by array", () => {
     const entity = new Entity();
-    const TestComponent = new Component(new Schema({value: 0}));
+    const TestComponent = new Component<number>();
 
     const components = entity.get([TestComponent, TestComponent]);
 
-    assert.deepStrictEqual(components, [undefined, undefined]);
+    assert.deepStrictEqual(components, [null, null]);
   });
 
-  it("Get relationship", () => {
+  it("Get non-existent components by object", () => {
     const entity = new Entity();
-    const TestRelationship = new Relationship(new Schema({value: 0}));
-    entity.add(TestRelationship.to(entity).with({value: 42}));
+    const TestComponent = new Component<number>();
+
+    const components = entity.get({one: TestComponent, two: TestComponent});
+
+    assert.deepStrictEqual(components, {one: null, two: null});
+  });
+
+  it("Get relationship component", () => {
+    const entity = new Entity();
+    const TestRelationship = new Relationship<number>();
+    entity.add(TestRelationship.to(entity).withValue(42));
 
     const component = entity.get(TestRelationship.to(entity));
 
     assert.deepStrictEqual(
       component,
-      {value: 42},
+      42,
     );
   });
-
-  // TODO: More complex queries
 });
 
 describe(Entity.prototype.has.name, () => {
   it("Has one component", () => {
     const entity = new Entity();
-    const TestComponent = new Component(new Schema({value: 0}));
-    entity.add(TestComponent.with({value: 42}));
+    const TestComponent = new Component<number>();
+    entity.add(TestComponent.withValue(42));
 
     const hasComponents = entity.has(TestComponent);
 
@@ -225,11 +253,11 @@ describe(Entity.prototype.has.name, () => {
 
   it("Has multiple components by rest parameters", () => {
     const entity = new Entity();
-    const TestComponent1 = new Component(new Schema({value: 0}));
-    const TestComponent2 = new Component(new Schema({value: ""}));
+    const TestComponent1 = new Component<number>();
+    const TestComponent2 = new Component<string>();
     entity.add(
-      TestComponent1.with({value: 42}),
-      TestComponent2.with({value: "42"}),
+      TestComponent1.withValue(42),
+      TestComponent2.withValue("42"),
     );
 
     const hasComponents = entity.has([TestComponent1, TestComponent2]);
@@ -239,11 +267,11 @@ describe(Entity.prototype.has.name, () => {
 
   it("Has multiple components by object", () => {
     const entity = new Entity();
-    const TestComponent1 = new Component(new Schema({value: 0}));
-    const TestComponent2 = new Component(new Schema({value: ""}));
+    const TestComponent1 = new Component<number>();
+    const TestComponent2 = new Component<string>();
     entity.add(
-      TestComponent1.with({value: 42}),
-      TestComponent2.with({value: "42"}),
+      TestComponent1.withValue(42),
+      TestComponent2.withValue("42"),
     );
 
     const hasComponents = entity.has({
@@ -264,49 +292,49 @@ describe(Entity.prototype.has.name, () => {
     assert.strictEqual(hasComponents, true);
   });
 
-  it("Has non-existent component", () => {
+  it("Does not have non-existent component", () => {
     const entity = new Entity();
-    const TestComponent = new Component(new Schema({value: 0}));
+    const TestComponent = new Component<number>();
 
     const hasComponents = entity.has(TestComponent);
 
     assert.strictEqual(hasComponents, false);
   });
 
-  it("Has non-existent components by rest parameters", () => {
+  it("Does not have non-existent components by array", () => {
     const entity = new Entity();
-    const TestComponent = new Component(new Schema({value: 0}));
+    const TestComponent = new Component<number>();
 
     const hasComponents = entity.has([TestComponent, TestComponent]);
 
     assert.strictEqual(hasComponents, false);
   });
 
+  it("Does not have non-existent components by object", () => {
+    const entity = new Entity();
+    const TestComponent = new Component<number>();
+
+    const hasComponents = entity.has({one: TestComponent, two: TestComponent});
+
+    assert.strictEqual(hasComponents, false);
+  });
+
   it("Has relationship", () => {
     const entity = new Entity();
-    const TestRelationship = new Relationship(new Schema({value: 0}));
-    entity.add(TestRelationship.to(entity).with({value: 42}));
+    const TestRelationship = new Relationship<number>();
+    entity.add(TestRelationship.to(entity).withValue(42));
 
     const hasComponents = entity.has(TestRelationship.to(entity));
 
     assert.strictEqual(hasComponents, true);
   });
-
-  it("Cannot check if has no amount of components", () => {
-    const entity = new Entity();
-
-    // @ts-expect-error
-    try { entity.has() } catch {};
-  });
-
-  // TODO: More complex queries
 });
 
 describe(Entity.prototype.destroy.name, () => {
   it("Destroy entity", () => {
     const entity = new Entity();
     const TestTag = new Component();
-    entity.__components.set(TestTag, null);
+    entity.__components.set(TestTag);
 
     entity.destroy();
 

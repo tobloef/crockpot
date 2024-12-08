@@ -7,14 +7,7 @@ import { Entity } from "../entity/index.ts";
 import * as assert from "node:assert";
 import {
   Component,
-  Schema,
-} from "../component/index.js";
-import type { QueryInput } from "./input.js";
-import type { QueryPart } from "./part.js";
-import type {
-  QueryArrayOutput,
-  QueryPartOutput,
-} from "./output.js";
+} from "../component/index.ts";
 
 describe(query.name, () => {
   it("Finds nothing when input is empty array", () => {
@@ -80,12 +73,12 @@ describe(query.name, () => {
   });
 
   it("Find entities with specified value component", () => {
-    const Component1 = new Component(new Schema(0));
-    const Component2 = new Component(new Schema(""));
+    const Component1 = new Component<number>();
+    const Component2 = new Component<string>();
     const entities = [
-      new Entity().add(Component1.with(1)),
-      new Entity().add(Component2.with("hello")),
-      new Entity().add(Component1.with(2)),
+      new Entity().add(Component1.withValue(1)),
+      new Entity().add(Component2.withValue("hello")),
+      new Entity().add(Component1.withValue(2)),
       new Entity().add(),
     ];
 

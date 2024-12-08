@@ -1,55 +1,26 @@
 import { Entity } from "../entity/index.ts";
-import { RelationshipComponentStore } from "./relationship-component-store.ts";
-import type {
-  Schema,
-  Schemaless,
-} from "../component/index.ts";
+import {
+  type RelationshipComponent,
+  RelationshipComponentStore,
+} from "./relationship-component-store.ts";
 import { Component } from "../component/index.ts";
 import { Wildcard } from "../query/wildcard.ts";
 import { RelationshipQuery } from "./query.ts";
-import type { Immutable } from "../utils/immutable.ts";
-
-export type TagRelationship = Relationship<Schemaless>;
-export type RelationshipWithValue = Relationship<Schema>;
 
 export class Relationship<
-  RelationSchema extends Schema | Schemaless = Schemaless
+  Value = undefined,
 > extends Entity {
 
   static __relationshipComponents = new RelationshipComponentStore();
 
-  #schema: RelationSchema;
 
-
-  constructor();
-
-  constructor(name: string);
-
-  constructor(schema: RelationSchema);
-
-  constructor(name: string, schema: RelationSchema);
-
-  constructor(name: string | undefined, schema: RelationSchema | undefined);
-
-  constructor(nameOrSchema?: string | RelationSchema, schemaOrUndefined?: RelationSchema) {
-    const name = typeof nameOrSchema === "string" ? nameOrSchema : undefined;
-    const schema = typeof nameOrSchema === "string" ? schemaOrUndefined : nameOrSchema;
-
-    super(name);
-    this.#schema = schema as RelationSchema;
-  }
-
-
-  get schema(): Immutable<RelationSchema> {
-    return this.#schema;
-  }
-
-
-  to(entity: Entity): Component<RelationSchema>;
+  to(entity: Entity): RelationshipComponent<this>;
 
   to(reference: string | Wildcard): RelationshipQuery<typeof this>;
 
-  to(entityOrReference: Entity | string | Wildcard): Component<RelationSchema> | RelationshipQuery<typeof this> {
+  to(
+    entityOrReference: Entity | string | Wildcard,
+  ): RelationshipComponent<this> | RelationshipQuery<typeof this> {
     if (typeof entityOrReference === "string" || entityOrReference instanceof Wildcard) {
       return this.#queryTo(entityOrReference);
     } else {
@@ -68,14 +39,14 @@ export class Relationship<
   }
 
 
-  #componentTo(entity: Entity): Component<RelationSchema> {
-    let relationshipComponent: Component<RelationSchema> | undefined = (
+  #componentTo(entity: Entity): RelationshipComponent<this> {
+    let relationshipComponent: RelationshipComponent<this> | null = (
       Relationship.__relationshipComponents.get(this, entity)
     );
 
-    if (relationshipComponent === undefined) {
+    if (relationshipComponent === null) {
       let name = this.#getComponentName(this, entity);
-      relationshipComponent = new Component<RelationSchema>(name, this.#schema as RelationSchema);
+      relationshipComponent = new Component<Value>(name) as RelationshipComponent<this>;
       Relationship.__relationshipComponents.set(this, entity, relationshipComponent);
     }
 
@@ -107,3 +78,12 @@ export class Relationship<
     super.destroy();
   }
 }
+
+
+export type TagRelationship = Relationship<undefined>;
+
+export type RelationshipValue<RelationshipType extends Relationship<any>> = (
+  RelationshipType extends Relationship<infer Value>
+    ? Value
+    : never
+);

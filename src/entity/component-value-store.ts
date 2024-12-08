@@ -1,42 +1,52 @@
 import type {
   Component,
-  Schema,
   ComponentValue,
-  Schemaless,
   Tag,
-  Value,
 } from "../component/index.ts";
 
 export class ComponentValueStore {
+  // Stores null for components that have no value, so we can differentiate between
+  // tags (components with no value) and components that don't exist.
   #map = new Map<
-    Component<Schema | Schemaless>,
-    Value<Schema | Schemaless> | null
+    Component<any>,
+    any | null
   >();
 
 
-  // @ts-ignore: Convenience overload for schemaless components
-  set<Comp extends Tag>(tag: Comp): void;
+  set<ComponentType extends Tag>(tag: ComponentType): void;
 
-  set<Comp extends Component<any>>(
-    component: Comp,
-    value: ComponentValue<Comp>,
+  set<ComponentType extends Component<any>>(
+    component: ComponentType,
+    value: ComponentValue<ComponentType>,
   ): void;
 
-  set<Comp extends Component<any>>(
-    component: Comp,
-    value: ComponentValue<Comp>,
+  set<ComponentType extends Component<any>>(
+    component: ComponentType,
+    value?: ComponentValue<ComponentType>,
   ): void {
     this.#map.set(component, value ?? null);
   }
 
 
-  get<Comp extends Component<any>>(component: Comp): ComponentValue<Comp> {
-    return this.#map.get(component) as ComponentValue<Comp>;
+  get<ComponentType extends Component<any>>(
+    component: ComponentType,
+  ): ComponentValue<ComponentType> | null {
+    const value = this.#map.get(component);
+
+    if (value === undefined) {
+      return null;
+    }
+
+    if (value === null) {
+      return undefined as ComponentValue<ComponentType>;
+    }
+
+    return value;
   }
 
 
-  delete<Comp extends Component<any>>(
-    component: Comp,
+  delete<ComponentType extends Component<any>>(
+    component: ComponentType,
   ) {
     this.#map.delete(component);
   }
@@ -48,7 +58,35 @@ export class ComponentValueStore {
 
 
   [Symbol.iterator]() {
-    return this.#map[Symbol.iterator]();
+    const entries = this.#map.entries();
+
+    return {
+      next: () => {
+        const {done, value} = entries.next();
+        if (done) {
+          return {done, value};
+        }
+        const [component, componentValue] = value;
+
+        let mappedValue;
+
+        if (componentValue === null) {
+          mappedValue = undefined;
+        } else if (componentValue === undefined) {
+          mappedValue = null;
+        } else {
+          mappedValue = componentValue;
+        }
+
+        return {
+          done: false,
+          value: [
+            component,
+            mappedValue,
+          ],
+        };
+      },
+    };
   }
 }
 

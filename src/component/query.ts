@@ -2,18 +2,18 @@ import type { Entity } from "../entity/entity.ts";
 import type { Immutable } from "../utils/immutable.ts";
 import type { Component } from "./component.ts";
 
-export class ComponentQuery<Comp extends Component<any>> {
-  #component: Comp;
+export class ComponentQuery<ComponentType extends Component<any>> {
+  #component: ComponentType;
   #source?: Entity | string;
   #name?: string;
 
 
-  constructor(component: Comp) {
+  constructor(component: ComponentType) {
     this.#component = component;
   }
 
 
-  get component(): Immutable<Comp> {
+  get component(): Immutable<ComponentType> {
     return this.#component;
   }
 
@@ -28,13 +28,13 @@ export class ComponentQuery<Comp extends Component<any>> {
   }
 
 
-  on(source: Entity | string): ComponentQuery<Comp> {
+  on(source: Entity | string): ComponentQuery<ComponentType> {
     this.#source = source;
     return this;
   }
 
 
-  as(name: string): ComponentQuery<Comp> {
+  as(name: string): ComponentQuery<ComponentType> {
     this.#name = name;
     return this;
   }

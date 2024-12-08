@@ -1,61 +1,12 @@
 import { Entity } from "../entity/index.ts";
 import { ComponentQuery } from "./query.ts";
-import type {
-  ComponentValue,
-  Schema,
-  Schemaless,
-  Value,
-} from "./schema.ts";
-import type { Immutable } from "../utils/immutable.ts";
-
-export type Tag = Component<Schemaless>;
-export type ComponentWithValue = Component<Schema>;
-
-export type ComponentValuePair<
-  Comp extends Component<any> = any,
-> = [
-  component: Comp,
-  value: ComponentValue<Comp>
-];
 
 export class Component<
-  ComponentSchema extends Schema | Schemaless = Schemaless
+  Value = undefined,
 > extends Entity {
 
-  #schema: ComponentSchema;
-
-  static withDefault<ComponentSchema extends Schema>(value: Value<ComponentSchema>) {
-    const component = new Component<ComponentSchema>();
-    // TODO
-    return component;
-  };
-
-
-  constructor();
-
-  constructor(name: string);
-
-  constructor(schema: ComponentSchema);
-
-  constructor(name: string, schema: ComponentSchema);
-
-  constructor(name: string | undefined, schema: ComponentSchema | undefined);
-
-  constructor(nameOrSchema?: string | ComponentSchema, schemaOrUndefined?: ComponentSchema) {
-    const name = typeof nameOrSchema === "string"
-      ? nameOrSchema
-      : undefined;
-    const schema = typeof nameOrSchema === "string" || nameOrSchema === undefined
-      ? schemaOrUndefined
-      : nameOrSchema;
-
+  constructor(name?: string) {
     super(name);
-    this.#schema = schema as ComponentSchema;
-  }
-
-
-  get schema(): Immutable<ComponentSchema> {
-    return this.#schema;
   }
 
 
@@ -69,7 +20,7 @@ export class Component<
   }
 
 
-  with(value: ComponentValue<this>): ComponentValuePair<typeof this> {
+  withValue(value: ComponentValue<this>): ComponentValuePair<typeof this> {
     return [this, value];
   }
 
@@ -78,3 +29,40 @@ export class Component<
     super.destroy();
   }
 }
+
+export type Tag = Component<undefined>;
+
+export type ComponentValue<ComponentType extends Component<any>> = (
+  ComponentType extends Component<infer ValueType>
+    ? ValueType
+    : never
+  );
+
+export type ComponentValues<ComponentTypes extends Component<any>[] | Record<string, Component<any>>> = (
+  ComponentTypes extends Component<any>[]
+    ? ComponentArrayValues<ComponentTypes>
+    : ComponentTypes extends Record<string, Component<any>>
+      ? ComponentObjectValues<ComponentTypes>
+      : never
+  );
+
+export type ComponentArrayValues<ComponentTypes extends Component<any>[]> = (
+  ComponentTypes extends [infer First, ...infer Rest]
+    ? First extends Component<any>
+      ? Rest extends Component<any>[]
+        ? [ComponentValue<First>, ...ComponentArrayValues<Rest>]
+        : never
+      : never
+    : []
+  );
+
+export type ComponentObjectValues<ComponentTypes extends Record<string, Component<any>>> = {
+  [Key in keyof ComponentTypes]: ComponentValue<ComponentTypes[Key]>;
+};
+
+export type ComponentValuePair<
+  ComponentType extends Component<any> = any,
+> = [
+  component: ComponentType,
+  value: ComponentValue<ComponentType>
+];

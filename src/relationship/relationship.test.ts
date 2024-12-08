@@ -2,46 +2,52 @@ import {
   describe,
   it,
 } from "node:test";
-import { Relationship } from "./relationship.ts";
+import {
+  Relationship,
+  type RelationshipValue,
+} from "./relationship.ts";
 import * as assert from "node:assert";
 import { Entity } from "../entity/index.ts";
 import { Any } from "../query/index.ts";
-import { Schema } from "../component/index.ts";
+import {
+  Component,
+  type ComponentValue,
+} from "../component/index.ts";
+import {
+  assertTypesEqual,
+} from "../utils/type-assertions.ts";
 
 describe(Relationship.name, () => {
-  it("Create relationship without name and without schema", () => {
+  it("Create relationship without name", () => {
     const TestRelationship = new Relationship();
 
     assert.strictEqual(TestRelationship.name, undefined);
-    assert.deepStrictEqual(TestRelationship.schema, undefined);
   });
 
-  it("Create relationship with name and without schema", () => {
-    const name = "relationship";
+  it("Create relationship with name", () => {
+    const name = "TestRelationship";
 
     const TestRelationship = new Relationship(name);
 
     assert.strictEqual(TestRelationship.name, name);
-    assert.deepStrictEqual(TestRelationship.schema, undefined);
   });
 
-  it("Create relationship without name and with schema", () => {
-    const schema = new Schema({value: 0});
+  it("Relationship with no value type has undefined value", () => {
+    const TestRelationship = new Relationship();
 
-    const TestRelationship = new Relationship(schema);
-
-    assert.strictEqual(TestRelationship.name, undefined);
-    assert.deepStrictEqual(TestRelationship.schema, schema);
+    const rightValue: RelationshipValue<typeof TestRelationship> = undefined;
+    // @ts-expect-error
+    const wrongValue: RelationshipValue<typeof TestRelationship> = 123;
   });
 
-  it("Create relationship with name and with schema", () => {
-    const name = "relationship";
-    const schema = new Schema({value: 0});
+  it("Relationship with value type has matching value", () => {
+    const TestRelationship= new Relationship<number>();
 
-    const TestRelationship = new Relationship(name, schema);
-
-    assert.strictEqual(TestRelationship.name, name);
-    assert.deepStrictEqual(TestRelationship.schema, schema);
+    const rightValue: RelationshipValue<typeof TestRelationship> = 123;
+    // @ts-expect-error
+    const wrongValue1: RelationshipValue<typeof TestRelationship> = "hello";
+    // @ts-expect-error
+    const wrongValue2: RelationshipValue<typeof TestRelationship> = undefined;
   });
 });
 
@@ -50,19 +56,22 @@ describe(Relationship.prototype.to.name, () => {
     const TestRelationship = new Relationship();
     const entity = new Entity();
 
-    const component = TestRelationship.to(entity);
+    const RelationshipComponent = TestRelationship.to(entity);
 
-    assert.strictEqual(component.schema, TestRelationship.schema);
+    type RelationshipValueType = ComponentValue<typeof RelationshipComponent>;
+    type RelationshipComponentValueType = RelationshipValue<typeof TestRelationship>;
+    assertTypesEqual<RelationshipValueType, RelationshipComponentValueType>(true);
   });
 
   it("Create relationship component to entity for relationship with values", () => {
-    const schema = new Schema({value: 0});
-    const TestRelationship = new Relationship(schema);
+    const TestRelationship = new Relationship<number>();
     const entity = new Entity();
 
-    const component = TestRelationship.to(entity);
+    const RelationshipComponent = TestRelationship.to(entity);
 
-    assert.strictEqual(component.schema, TestRelationship.schema);
+    type RelationshipValueType = ComponentValue<typeof RelationshipComponent>;
+    type RelationshipComponentValueType = RelationshipValue<typeof TestRelationship>;
+    assertTypesEqual<RelationshipValueType, RelationshipComponentValueType>(true);
   });
 
   it("Created relationship component has name based on relationship and target", () => {
@@ -140,7 +149,7 @@ describe(Relationship.prototype.destroy.name, () => {
 
     assert.strictEqual(
       Relationship.__relationshipComponents.get(TestRelationship, entity),
-      undefined,
+      null,
     );
   });
 });
