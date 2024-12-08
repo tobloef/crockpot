@@ -1,6 +1,6 @@
 import type { Entity } from "../entity/entity.ts";
 import type { Immutable } from "../utils/immutable.ts";
-import type { Component } from "./component.js";
+import type { Component } from "./component.ts";
 
 export class ComponentQuery<Comp extends Component<any>> {
   #component: Comp;

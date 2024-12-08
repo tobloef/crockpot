@@ -1,5 +1,5 @@
 import type { Component } from "./component.ts";
-import type { Immutable } from "../utils/immutable.js";
+import type { Immutable } from "../utils/immutable.ts";
 
 export type Schemaless = undefined;
 

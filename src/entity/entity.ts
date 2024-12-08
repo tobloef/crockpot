@@ -1,11 +1,11 @@
 import { ComponentValueStore } from "./component-value-store.ts";
 import { EntityQuery } from "./query.ts";
-import {
-  type Component,
-  type ComponentValue,
-  type ComponentValuePair,
-  type ComponentValues,
-  type Tag,
+import type {
+  Component,
+  ComponentValue,
+  ComponentValuePair,
+  ComponentValues,
+  Tag,
 } from "../component/index.ts";
 
 export class Entity {

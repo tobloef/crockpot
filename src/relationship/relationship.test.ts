@@ -6,7 +6,7 @@ import { Relationship } from "./relationship.ts";
 import * as assert from "node:assert";
 import { Entity } from "../entity/index.ts";
 import { Any } from "../query/index.ts";
-import { Schema } from "../component/index.js";
+import { Schema } from "../component/index.ts";
 
 describe(Relationship.name, () => {
   it("Create relationship without name and without schema", () => {

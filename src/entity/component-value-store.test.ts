@@ -3,9 +3,8 @@ import {
   it,
 } from "node:test";
 import * as assert from "node:assert";
-import { Component } from "../component/component.ts";
 import { ComponentValueStore } from "./component-value-store.ts";
-import { Schema } from "../component/index.js";
+import { Schema, Component } from "../component/index.ts";
 
 describe(ComponentValueStore.name, () => {
   it("Set and get schemaless component", () => {

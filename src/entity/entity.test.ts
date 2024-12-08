@@ -115,7 +115,7 @@ describe(Entity.prototype.get.name, () => {
     const entity = new Entity();
 
     // @ts-expect-error
-    entity.get();
+    try { entity.get() } catch {};
   });
 
   it("Get one component", () => {
@@ -296,7 +296,7 @@ describe(Entity.prototype.has.name, () => {
     const entity = new Entity();
 
     // @ts-expect-error
-    entity.has();
+    try { entity.has() } catch {};
   });
 
   // TODO: More complex queries

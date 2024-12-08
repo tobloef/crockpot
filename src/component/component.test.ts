@@ -5,7 +5,7 @@ import {
 import * as assert from "node:assert";
 import { Component } from "./component.ts";
 import { Entity } from "../entity/index.ts";
-import { Schema } from "./schema.js";
+import { Schema } from "./schema.ts";
 
 describe(Component.name, () => {
   it("Create component without name and without schema", () => {
