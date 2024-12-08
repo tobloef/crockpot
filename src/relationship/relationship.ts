@@ -1,9 +1,12 @@
 import { Entity } from "../entity/index.ts";
 import { RelationshipComponentStore } from "./relationship-component-store.ts";
+import type {
+  ComponentSchema,
+  Schemaless,
+} from "../component/index.ts";
 import { Component } from "../component/index.ts";
 import { Wildcard } from "../query/wildcard.ts";
 import { RelationshipQuery } from "./query.ts";
-import type { ComponentSchema, Schemaless } from "../component/index.ts";
 import type { Immutable } from "../utils/immutable.ts";
 
 export type TagRelationship = Relationship<Schemaless>;

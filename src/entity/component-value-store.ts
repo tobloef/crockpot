@@ -1,8 +1,10 @@
 import type {
+  Component,
   ComponentSchema,
+  ComponentValue,
   Schemaless,
+  Tag,
   Value,
-  Component, ComponentValue, Tag,
 } from "../component/index.ts";
 
 export class ComponentValueStore {

@@ -1,4 +1,7 @@
-import { describe, it } from "node:test";
+import {
+  describe,
+  it,
+} from "node:test";
 import * as assert from "node:assert";
 import { Component } from "../component/component.ts";
 import { ComponentValueStore } from "./component-value-store.ts";

@@ -6,12 +6,12 @@ import type {
   Tag,
 } from "../component/index.ts";
 import type {
-  QueryInput,
-  QueryOutput,
   QueryArrayInput,
+  QueryInput,
   QueryObjectInput,
-  SpreadOrObjectQueryInput,
+  QueryOutput,
   QueryPart,
+  SpreadOrObjectQueryInput,
 } from "../query/index.ts";
 
 export class World {

@@ -1,4 +1,7 @@
-import { describe, it } from "node:test";
+import {
+  describe,
+  it,
+} from "node:test";
 import { Relationship } from "./relationship.ts";
 import * as assert from "node:assert";
 import { Entity } from "../entity/index.ts";
