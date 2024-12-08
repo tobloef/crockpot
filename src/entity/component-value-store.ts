@@ -68,21 +68,11 @@ export class ComponentValueStore {
         }
         const [component, componentValue] = value;
 
-        let mappedValue;
-
-        if (componentValue === null) {
-          mappedValue = undefined;
-        } else if (componentValue === undefined) {
-          mappedValue = null;
-        } else {
-          mappedValue = componentValue;
-        }
-
         return {
           done: false,
           value: [
             component,
-            mappedValue,
+            componentValue === null ? undefined : componentValue,
           ],
         };
       },
