@@ -13,6 +13,7 @@ import type { Wildcard } from "./wildcard.ts";
 import type {
   Component,
   ComponentQuery,
+  ComponentValuePair,
 } from "../component/index.ts";
 import type {
   Entity,
@@ -51,9 +52,7 @@ export type QueryPartOutput<Part extends QueryPart> = (
     : Part extends Not<any>
       ? never
       : Part extends Or<infer Types>
-        ? ParseOr<Types> extends undefined
-          ? never
-          : ParseOr<Types>
+        ? ParseOr<Types>
         : Part extends ComponentQuery<infer ComponentType>
           ? ComponentType extends Component<infer Value>
             ? Value
@@ -66,7 +65,11 @@ export type QueryPartOutput<Part extends QueryPart> = (
                 ? Component<any>
                 : Part extends EntityQuery
                   ? Entity
-                  : never
+                  : Part extends ComponentValuePair<infer ComponentType>
+                    ? ComponentType extends Component<infer Value>
+                      ? Value
+                      : never
+                    : never
   );
 
 export type ParseOr<Parts extends any[]> = (

@@ -6,6 +6,7 @@ import {
 import {
   Component,
   ComponentQuery,
+  type ComponentValuePair,
 } from "../component/index.ts";
 import {
   Relationship,
@@ -27,6 +28,7 @@ export type NonBooleanQueryPart = (
   | Class<Entity>
   | EntityQuery
   | Component<any>
+  | ComponentValuePair
   | ComponentQuery<any>
   | Relationship<any>
   | RelationshipQuery<any>
