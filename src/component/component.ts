@@ -4,6 +4,7 @@ import { ComponentQuery } from "./query.ts";
 export class Component<
   Value = undefined,
 > extends Entity {
+  static #brand = "Component" as const;
 
   constructor(name?: string) {
     super(name);

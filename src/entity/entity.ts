@@ -10,6 +10,7 @@ import type {
 import type { Nullable } from "../utils/nullable.ts";
 
 export class Entity {
+  static #brand = "Entity" as const;
 
   name?: string;
 

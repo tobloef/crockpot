@@ -9,16 +9,16 @@ import type {
   Optional,
   Or,
 } from "./boolean/index.ts";
-import type { Wildcard } from "./wildcard.ts";
+import { type Wildcard, WildcardQuery } from "./wildcard.ts";
 import type {
   Component,
   ComponentQuery,
-  ComponentValuePair,
 } from "../component/index.ts";
 import type {
   Entity,
   EntityQuery,
 } from "../entity/index.ts";
+import { Relationship, RelationshipQuery } from "../relationship/index.ts";
 
 export type QueryOutput<Input extends QueryInput> = (
   Input extends QueryPart
@@ -47,6 +47,12 @@ export type QueryObjectOutput<Input extends QueryObjectInput<QueryPart>> = {
 };
 
 export type QueryPartOutput<Part extends QueryPart> = (
+  Part extends Entity
+    ? Entity
+    : never
+);
+
+export type QueryPartOutputReal<Part extends QueryPart> = (
   Part extends Optional<infer Type>
     ? (QueryPartOutput<Type> | undefined)
     : Part extends Not<any>
@@ -57,20 +63,24 @@ export type QueryPartOutput<Part extends QueryPart> = (
           ? ComponentType extends Component<infer Value>
             ? Value
             : never
-          : Part extends Component<infer Value>
-            ? Value
-            : Part extends Entity
-              ? Entity
-              : Part extends Wildcard
-                ? Component<any>
-                : Part extends EntityQuery
+          : Part extends RelationshipQuery<infer RelationshipType>
+            ? RelationshipType extends Relationship<infer Value>
+              ? Value
+              : never
+            : Part extends Component<infer Value>
+              ? Value
+              : Part extends Relationship<infer Value>
+                ? Value
+                : Part extends WildcardQuery
                   ? Entity
-                  : Part extends ComponentValuePair<infer ComponentType>
-                    ? ComponentType extends Component<infer Value>
-                      ? Value
-                      : never
-                    : never
-  );
+                  : Part extends Wildcard
+                    ? Entity
+                    : Part extends EntityQuery
+                      ? Entity
+                      : Part extends Entity
+                        ? Entity
+                        : never
+);
 
 export type ParseOr<Parts extends any[]> = (
   Parts extends [infer First, ...infer Rest]

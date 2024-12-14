@@ -1,6 +1,7 @@
 import {
   describe,
   it,
+  beforeEach,
 } from "node:test";
 import { query } from "./query.ts";
 import { Entity } from "../entity/index.ts";
@@ -8,55 +9,107 @@ import * as assert from "node:assert";
 import {
   Component,
 } from "../component/index.ts";
-import { Relationship } from "../relationship/index.js";
-import { Any } from "./wildcard.js";
-import { not } from "./boolean/index.js";
+import { Relationship } from "../relationship/index.ts";
+import { Any } from "./wildcard.ts";
+import { assertTypesEqual } from "../utils/type-assertions";
+import type { QueryPartOutput } from "./output";
 
-const TagComponent1 = new Component();
-const TagComponent2 = new Component();
-const StringComponent1 = new Component<string>();
-const NumberComponent1 = new Component<number>();
-const NumberComponent2 = new Component<number>();
-const TagRelationship1 = new Relationship();
-const TagRelationship2 = new Relationship();
-const NumberRelationship1 = new Relationship<number>();
-const NumberRelationship2 = new Relationship<number>();
+let components: Component<any>[] = [];
+let relationships: Relationship<any>[] = [];
+
+let TagComponent1: Component;
+let TagComponent2: Component;
+let StringComponent1: Component<string>;
+let NumberComponent1: Component<number>;
+let NumberComponent2: Component<number>;
+
+let TagRelationship1: Relationship;
+let TagRelationship2: Relationship;
+let NumberRelationship1: Relationship<number>;
+let NumberRelationship2: Relationship<number>;
+
+beforeEach(() => {
+  setupComponents();
+  setupRelationships();
+});
 
 describe(query.name, () => {
   it("Finds nothing when input is empty array", () => {
-    const entities = [
-      new Entity(),
-      new Entity(),
-      new Entity(),
-    ];
+    // Arrange
+    const entities = setupEntities({ count: 3, includeComponents: true });
 
+    // Act
     const result = query(entities, []);
 
+    // Assert
+    assertTypesEqual<typeof result, []>(true);
     assert.deepStrictEqual(result, []);
   });
 
   it("Finds nothing when input is empty object", () => {
-    const entities = [
-      new Entity(),
-      new Entity(),
-      new Entity(),
-    ];
+    // Arrange
+    const entities = setupEntities({ count: 3, includeComponents: true });
 
+    // Act
     const result = query(entities, {});
 
-    assert.deepStrictEqual(result, []);
+    // Assert
+    assertTypesEqual<typeof result, {}>(true);
+    assert.deepStrictEqual(result, {});
   });
 
-  it("Finds entities when input is entity", () => {
-    const entities = [
-      new Entity("First"),
-      new Entity("Second"),
-      new Entity("Third"),
-    ];
+  it("Finds entities, components, and relationships when querying for Entity", () => {
+    // Arrange
+    const entities = setupEntities({ count: 3, includeComponents: true });
+
+    // Act
+    const test: QueryPartOutput<Entity> = [];
 
     const result = query(entities, [Entity]);
 
+    // Assert
+    assertTypesEqual<typeof result, [Entity]>(true);
     assert.deepStrictEqual(result, entities);
+  });
+
+  it("Finds components and relationships when input is Component class", () => {
+    const entities = [
+      TagComponent1,
+      NumberComponent1,
+      TagRelationship1,
+      NumberRelationship1,
+    ];
+
+    const result = query(entities, [
+      Component,
+    ]);
+
+    assert.deepStrictEqual(result, [
+      [TagComponent1],
+      [NumberComponent1],
+      [TagRelationship1],
+      [NumberRelationship1],
+    ]);
+  });
+
+  it("Finds relationships when input is Relationship class", () => {
+    const entities = [
+      TagComponent1,
+      NumberComponent1,
+      TagRelationship1,
+      NumberRelationship1,
+    ];
+
+    const result = query(entities, [
+      Relationship,
+    ]);
+
+    assert.deepStrictEqual(result, [
+      [TagComponent1],
+      [NumberComponent1],
+      [TagRelationship1],
+      [NumberRelationship1],
+    ]);
   });
 
   it("Finds no entities when entity list is empty", () => {
@@ -417,42 +470,6 @@ describe(query.name, () => {
     assert.deepStrictEqual(result, []);
   });
 
-  it("Finds component with specific value", () => {
-    const entities = [
-      new Entity().add(NumberComponent1.withValue(1)),
-      new Entity().add(NumberComponent1.withValue(2)),
-      new Entity().add(NumberComponent1.withValue(3)),
-    ];
-
-    // TODO: This type is not working
-    const result = query(entities, [
-      Entity,
-      NumberComponent1.withValue(2),
-    ]);
-
-    assert.deepStrictEqual(result, [
-      [entities[1], 2],
-    ]);
-  });
-
-  it("Finds tag component with no value", () => {
-    const entities = [
-      new Entity().add(TagComponent1.withValue(undefined)),
-      new Entity().add(TagComponent2.withValue(undefined)),
-      new Entity().add(TagComponent1.withValue(undefined)),
-    ];
-
-    const result = query(entities, [
-      Entity,
-      TagComponent1.withValue(undefined),
-    ]);
-
-    assert.deepStrictEqual(result, [
-      [entities[0], undefined],
-      [entities[2], undefined],
-    ]);
-  });
-
   it("Find same entity even under different reference names", () => {
     const entities = [
       new Entity().add(NumberComponent1.withValue(1)),
@@ -477,7 +494,7 @@ describe(query.name, () => {
     ];
 
     const result = query(entities, [
-      // TODO: currently not supported
+      // TODO: currently not supported. Add a "equals"?
     ]);
 
     assert.deepStrictEqual(result, [
@@ -573,6 +590,27 @@ describe(query.name, () => {
       [entities[2], 2],
     ]);
   });
+
+  it("Finds relationship on entity to component", () => {
+    const entity1 = new Entity();
+    const entity2 = new Entity();
+    entity1.add(NumberRelationship1.to(TagComponent1).withValue(1));
+    const entities = [
+      NumberRelationship1,
+      TagComponent1,
+      entity1,
+      entity2,
+    ];
+
+    const result = query(entities, [
+      Entity,
+      NumberRelationship1.to(TagComponent1),
+    ]);
+
+    assert.deepStrictEqual(result, [
+      [entity1, 1],
+    ]);
+  })
 
   it("Find component on referenced component", () => {
     const Comp1 = new Component<number>();
@@ -696,8 +734,353 @@ describe(query.name, () => {
       [1, 2, entity1, entity2, entity1, relComp],
     ]);
   });
+
+  it("Should fetch relationships with Any wildcard", () => {
+    const entity1 = new Entity();
+    const entity2 = new Entity();
+    const entity3 = new Entity();
+    const entity4 = new Entity();
+    const entity5 = new Entity();
+    const entity6 = new Entity();
+    const TestComponent = new Component();
+    const TestRelationship = new Relationship();
+    entity1.add(NumberRelationship1.to(entity6).withValue(1));
+    entity2.add(NumberRelationship2.to(entity6).withValue(2));
+    entity3.add(NumberRelationship1.to(entity6).withValue(3));
+    entity4.add(NumberRelationship1.to(TestComponent).withValue(4));
+    entity5.add(NumberRelationship1.to(TestRelationship).withValue(5));
+    const entities = [
+      entity1,
+      entity2,
+      entity3,
+      entity4,
+      entity5,
+      entity6,
+      TestComponent,
+      TestRelationship,
+    ];
+
+    const result = query(entities, [
+      Entity,
+      TagRelationship1.to(Any),
+    ]);
+
+    assert.deepStrictEqual(result, [
+      [entity1, 1],
+      [entity3, 3],
+      [entity4, 4],
+      [entity5, 5],
+    ]);
+  });
+
+  it("Reference should work the same as Any wildcard", () => {
+    const entity1 = new Entity();
+    const entity2 = new Entity();
+    const entity3 = new Entity();
+    const entity4 = new Entity();
+    const entity5 = new Entity();
+    const entity6 = new Entity();
+    const TestComponent = new Component();
+    const TestRelationship = new Relationship();
+    entity1.add(NumberRelationship1.to(entity6).withValue(1));
+    entity2.add(NumberRelationship2.to(entity6).withValue(2));
+    entity3.add(NumberRelationship1.to(entity6).withValue(3));
+    entity4.add(NumberRelationship1.to(TestComponent).withValue(4));
+    entity5.add(NumberRelationship1.to(TestRelationship).withValue(5));
+    const entities = [
+      entity1,
+      entity2,
+      entity3,
+      entity4,
+      entity5,
+      entity6,
+      TestComponent,
+      TestRelationship,
+    ];
+
+    const wildcardResult = query(entities, [Entity, TagRelationship1.to(Any)]);
+    const referenceResult = query(entities, [Entity, TagRelationship1.to("ref")]);
+
+    assert.deepStrictEqual(wildcardResult, referenceResult);
+  });
+
+  it("Finds just one related entity with Any wildcard", () => {
+    const entity1 = new Entity();
+    const entity2 = new Entity()
+      .add(NumberRelationship1.to(entity1).withValue(1))
+      .add(NumberRelationship1.to(entity1).withValue(2));
+    const entity3 = new Entity()
+      .add(NumberRelationship1.to(entity1).withValue(2))
+      .add(NumberRelationship1.to(entity1).withValue(3));
+    const entities = [
+      entity1,
+      entity2,
+      entity3,
+    ];
+
+    const result = query(entities, [
+      Entity,
+      TagRelationship1.to(Any)
+    ]);
+
+    assert.deepStrictEqual(result, [
+      [entity2, 1],
+      [entity3, 2],
+    ]);
+  });
+
+  it("Finds all related entities with All wildcard", () => {
+    const entity1 = new Entity();
+    const entity2 = new Entity()
+      .add(NumberRelationship1.to(entity1).withValue(1))
+      .add(NumberRelationship1.to(entity1).withValue(3));
+    const entity3 = new Entity()
+      .add(NumberRelationship1.to(entity1).withValue(2))
+      .add(NumberRelationship1.to(entity1).withValue(4));
+    const entities = [
+      entity1,
+      entity2,
+      entity3,
+    ];
+
+    const result = query(entities, [
+      Entity,
+      TagRelationship1.to(All)
+    ]);
+
+    assert.deepStrictEqual(result, [
+      [entity2, 1],
+      [entity2, 3],
+      [entity3, 2],
+      [entity3, 4],
+    ]);
+  });
+
+  it("Should fetch all relationships with All wildcard", () => {
+    const entity1 = new Entity();
+    const entity2 = new Entity();
+    const TestComponent = new Component();
+    const TestRelationship = new Relationship();
+    entity1.add(NumberRelationship1.to(entity2).withValue(1));
+    entity1.add(NumberRelationship2.to(entity2).withValue(2));
+    entity1.add(NumberRelationship1.to(entity2).withValue(3));
+    entity1.add(NumberRelationship1.to(TestComponent).withValue(4));
+    entity1.add(NumberRelationship1.to(TestRelationship).withValue(5));
+    const entities = [
+      entity1,
+      entity2,
+      TestComponent,
+      TestRelationship,
+    ];
+
+    const result = query(entities, [
+      Entity,
+      TagRelationship1.to(Any),
+    ]);
+
+    assert.deepStrictEqual(result, [
+      [entity1, 1],
+      [entity1, 3],
+      [entity1, 4],
+      [entity1, 5],
+    ]);
+  });
+
+  it("Wildcards should be referencable", () => {
+    const entity1 = new Entity();
+    const entity2 = new Entity();
+    const TestComponent = new Component();
+    const TestRelationship = new Relationship();
+    entity1.add(NumberRelationship1.to(entity2).withValue(1));
+    entity1.add(NumberRelationship2.to(entity2).withValue(2));
+    entity1.add(NumberRelationship1.to(entity2).withValue(3));
+    entity1.add(NumberRelationship1.to(TestComponent).withValue(4));
+    entity1.add(NumberRelationship1.to(TestRelationship).withValue(5));
+    const entities = [
+      entity1,
+      entity2,
+      TestComponent,
+      TestRelationship,
+    ];
+
+    const result = query(entities, [
+      Entity,
+      TagRelationship1.to(All.as("wild")),
+      Entity.as("wild"),
+    ]);
+
+    assert.deepStrictEqual(result, [
+      [entity1, 1, entity2],
+      [entity1, 3, entity2],
+      [entity1, 4, TestComponent],
+      [entity1, 5, TestRelationship],
+    ]);
+  });
+
+  it("Finds all entity when querying just for Any wildcard", () => {
+    const entity1 = new Entity();
+    const entity2 = new Entity();
+    const component = new Component();
+    const relationship = new Relationship();
+    const entities = [
+      entity1,
+      entity2,
+      component,
+      relationship,
+    ];
+
+    const result = query(entities, [
+      Any,
+    ]);
+
+    assert.deepStrictEqual(result, [
+      [entity1],
+      [entity2],
+      [component],
+      [relationship],
+    ]);
+  });
+
+  it("Finds all entities when querying just for All wildcard", () => {
+    const entity1 = new Entity();
+    const entity2 = new Entity();
+    const component = new Component();
+    const relationship = new Relationship();
+    const entities = [
+      entity1,
+      entity2,
+      component,
+      relationship,
+    ];
+
+    const result = query(entities, [
+      All,
+    ]);
+
+    assert.deepStrictEqual(result, [
+      [entity1],
+      [entity2],
+      [component],
+      [relationship],
+    ]);
+  });
+
+  it("Finds all entity pairs when querying for two All wildcards", () => {
+    const entity1 = new Entity();
+    const entity2 = new Entity();
+    const entity3 = new Entity();
+    const entities = [
+      entity1,
+      entity2,
+      entity3,
+    ];
+
+    const result = query(entities, [
+      All,
+      All,
+    ]);
+
+    assert.deepStrictEqual(result, [
+      [entity1, entity1],
+      [entity1, entity2],
+      [entity1, entity3],
+      [entity2, entity1],
+      [entity2, entity2],
+      [entity2, entity3],
+      [entity3, entity1],
+      [entity3, entity2],
+      [entity3, entity3],
+    ]);
+  });
+
+  it("", () => {
+    const entities = [
+
+    ];
+
+    const result = query(entities, [
+      All.as("source"),
+      TagComponent1.on("source"),
+    ]);
+
+    assert.deepStrictEqual(result, [
+
+    ]);
+  });
+
+  // ^^^^^^ vvvvvv What's the difference between these two?
+
+  it("", () => {
+    const entities = [
+
+    ];
+
+    const result = query(entities, [
+      Any.as("source"),
+      TagComponent1.on("source"),
+    ]);
+
+    assert.deepStrictEqual(result, [
+
+    ]);
+  });
 });
 
-// TODO: Wildcards (including referencing them)
+// TODO: Maybe lone wildcards, since they have the implicit `.on($this)`, means any component actually?
+//  Ah nvm perhaps, they don't have a `.on`. Should they? Probably not.
+//  Then perhaps it's time to simplify the wildcard usage, where they can used and so on...
+
+
 // TODO: Boolean queries (perhaps check out the existing tests to figure out some funky edge cases)
 // TODO: Assert types in the tests (many are wrong)
+
+function setupComponents() {
+  TagComponent1 = new Component();
+  TagComponent2 = new Component();
+  StringComponent1 = new Component();
+  NumberComponent1 = new Component();
+  NumberComponent2 = new Component();
+
+  components = [
+    TagComponent1,
+    TagComponent2,
+    StringComponent1,
+    NumberComponent1,
+    NumberComponent2,
+  ];
+}
+
+function setupRelationships() {
+  TagRelationship1 = new Relationship();
+  TagRelationship2 = new Relationship();
+  NumberRelationship1 = new Relationship();
+  NumberRelationship2 = new Relationship();
+
+  relationships = [
+    TagRelationship1,
+    TagRelationship2,
+    NumberRelationship1,
+    NumberRelationship2,
+  ];
+}
+
+function setupEntities({
+  count,
+  includeComponents
+}: {
+  count: number,
+  includeComponents: boolean
+}): Entity[] {
+  const entities = [];
+
+  for (let i = 0; i < count; i++) {
+    entities.push(new Entity());
+  }
+
+  if (includeComponents) {
+    entities.concat(components);
+    entities.concat(relationships);
+  }
+
+  return entities;
+}

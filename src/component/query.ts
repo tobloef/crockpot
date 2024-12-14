@@ -1,11 +1,14 @@
 import type { Entity } from "../entity/entity.ts";
-import type { Immutable } from "../utils/immutable.ts";
 import type { Component } from "./component.ts";
+import type { Wildcard } from "../query/index.ts";
+
+export type Source = string | Entity | Wildcard;
 
 export class ComponentQuery<ComponentType extends Component<any>> {
   #component: ComponentType;
-  #source?: Entity | string;
+  #source?: Source;
   #name?: string;
+  #isOnce: boolean = false;
 
 
   constructor(component: ComponentType) {
@@ -13,13 +16,8 @@ export class ComponentQuery<ComponentType extends Component<any>> {
   }
 
 
-  get component(): Immutable<ComponentType> {
+  get component(): ComponentType {
     return this.#component;
-  }
-
-
-  get source(): Immutable<Entity> | string | undefined {
-    return this.#source;
   }
 
 
@@ -28,14 +26,29 @@ export class ComponentQuery<ComponentType extends Component<any>> {
   }
 
 
-  on(source: Entity | string): ComponentQuery<ComponentType> {
-    this.#source = source;
-    return this;
+  get source(): Source | undefined {
+    return this.#source;
+  }
+
+
+  get isOnce(): boolean {
+    return this.#isOnce;
   }
 
 
   as(name: string): ComponentQuery<ComponentType> {
     this.#name = name;
+    return this;
+  }
+
+
+  on(source: Source): ComponentQuery<ComponentType> {
+    this.#source = source;
+    return this;
+  }
+
+  once(): ComponentQuery<ComponentType> {
+    this.#isOnce = true;
     return this;
   }
 }
