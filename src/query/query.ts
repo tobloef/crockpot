@@ -8,6 +8,11 @@ import type {
 import type { QueryPart } from "./part.ts";
 import type { QueryOutput } from "./output.ts";
 
+export function query<Input extends QueryPart>(
+  entities: Entity[],
+  input: Input
+): QueryOutput<Input>;
+
 export function query<Input extends QueryArrayInput<QueryPart>>(
   entities: Entity[],
   input: [...Input]
@@ -21,6 +26,6 @@ export function query<Input extends QueryObjectInput<QueryPart>>(
 export function query<Input extends QueryInput>(
   entities: Entity[],
   input: Input,
-): QueryOutput<Input>[] {
+): QueryOutput<Input> {
   throw new NotImplementedError();
 }

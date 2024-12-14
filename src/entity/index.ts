@@ -1,2 +1,2 @@
 export * from "./entity.ts";
-export * from "./query.ts";
+export * from "./entity-query.ts";

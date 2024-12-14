@@ -1,3 +1,3 @@
 export * from "./component.ts";
-export * from "./query.ts";
+export * from "./component-query.ts";
 export * from "../entity/component-value-store.ts";

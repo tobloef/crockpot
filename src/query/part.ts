@@ -6,13 +6,11 @@ import {
 import {
   Component,
   ComponentQuery,
-  type ComponentValuePair,
 } from "../component/index.ts";
 import {
   Relationship,
   RelationshipQuery,
 } from "../relationship/index.ts";
-import { Wildcard, WildcardQuery } from "./wildcard.ts";
 import type {
   Not,
   Optional,
@@ -27,12 +25,12 @@ export type QueryPart = (
 export type NonBooleanQueryPart = (
   | Class<Entity>
   | EntityQuery
+  | Class<Component<any>>
   | Component<any>
   | ComponentQuery<any>
+  | Class<Relationship<any>>
   | Relationship<any>
   | RelationshipQuery<any>
-  | Wildcard
-  | WildcardQuery
   );
 
 export type BooleanQueryPart = (

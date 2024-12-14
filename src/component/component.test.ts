@@ -8,6 +8,7 @@ import {
   type ComponentValue,
 } from "./component.ts";
 import { Entity } from "../entity/index.ts";
+import { Relationship } from "../relationship/index.ts";
 
 describe(Component.name, () => {
   it("Create component without a name", () => {
@@ -41,6 +42,35 @@ describe(Component.name, () => {
   });
 });
 
+describe(Component.prototype.as.name, () => {
+  it("Create component query reference name", () => {
+    const component = new Component();
+
+    const query = component.as("name");
+
+    assert.strictEqual(query.name, "name");
+    assert.strictEqual(query.component, component);
+  });
+});
+
+describe(Component.prototype.once.name, () => {
+  it("Create component query with isOnce", () => {
+    const component = new Component();
+
+    const query = component.once();
+
+    assert.strictEqual(query.isOnce, true);
+  });
+
+  it("isOnce is false by default", () => {
+    const component = new Component();
+
+    const query = component.as("");
+
+    assert.strictEqual(query.isOnce, false);
+  });
+});
+
 describe(Component.prototype.on.name, () => {
   it("Create component query with entity as source", () => {
     const component = new Component();
@@ -60,16 +90,26 @@ describe(Component.prototype.on.name, () => {
     assert.strictEqual(query.source, "source");
     assert.strictEqual(query.component, component);
   });
-});
 
-describe(Component.prototype.as.name, () => {
-  it("Create component query reference name", () => {
+  it("Create component query with Entity wildcard as source", () => {
     const component = new Component();
+    const query = component.on(Entity);
 
-    const query = component.as("name");
+    assert.strictEqual(query.source, Entity);
+  });
 
-    assert.strictEqual(query.name, "name");
-    assert.strictEqual(query.component, component);
+  it("Create component query with Component wildcard as source", () => {
+    const component = new Component();
+    const query = component.on(Component);
+
+    assert.strictEqual(query.source, Component);
+  });
+
+  it("Create component query with Relationship wildcard as source", () => {
+    const component = new Component();
+    const query = component.on(Relationship);
+
+    assert.strictEqual(query.source, Relationship);
   });
 });
 
@@ -89,5 +129,60 @@ describe(Component.prototype.destroy.name, () => {
     const component = new Component();
 
     component.destroy();
+  });
+});
+
+describe(Component.as.name, () => {
+  it("Create component wildcard query with name", () => {
+    const query = Component.as("name");
+
+    assert.strictEqual(query.name, "name");
+  });
+});
+
+describe(Component.once.name, () => {
+  it("Create component wildcard query with isOnce", () => {
+    const query = Component.once();
+
+    assert.strictEqual(query.isOnce, true);
+  });
+
+  it("isOnce is false by default", () => {
+    const query = Component.as("");
+
+    assert.strictEqual(query.isOnce, false);
+  });
+});
+
+describe(Component.on.name, () => {
+  it("Create component wildcard query with entity as source", () => {
+    const entity = new Entity();
+    const query = Component.on(entity);
+
+    assert.strictEqual(query.source, entity);
+  });
+
+  it("Create component wildcard query with reference name as source", () => {
+    const query = Component.on("source");
+
+    assert.strictEqual(query.source, "source");
+  });
+
+  it("Create component wildcard query with Entity wildcard as source", () => {
+    const query = Component.on(Entity);
+
+    assert.strictEqual(query.source, Entity);
+  });
+
+  it("Create component wildcard query with Component wildcard as source", () => {
+    const query = Component.on(Component);
+
+    assert.strictEqual(query.source, Component);
+  });
+
+  it("Create component wildcard query with Relationship wildcard as source", () => {
+    const query = Component.on(Relationship);
+
+    assert.strictEqual(query.source, Relationship);
   });
 });

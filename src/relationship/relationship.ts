@@ -3,9 +3,9 @@ import {
   type RelationshipComponent,
   RelationshipComponentStore,
 } from "./relationship-component-store.ts";
-import { Component } from "../component/index.ts";
-import { Wildcard } from "../query/wildcard.ts";
-import { RelationshipQuery } from "./query.ts";
+import { Component, ComponentQuery } from "../component/index.ts";
+import { RelationshipQuery } from "./relationship-query.ts";
+import type { Wildcard } from "../query/index.ts";
 
 export class Relationship<
   Value = undefined,
@@ -14,28 +14,54 @@ export class Relationship<
   static __relationshipComponents = new RelationshipComponentStore();
 
 
-  to(entity: Entity): RelationshipComponent<this>;
-
-  to(reference: string | Wildcard): RelationshipQuery<typeof this>;
-
-  to(
-    entityOrReference: Entity | string | Wildcard,
-  ): RelationshipComponent<this> | RelationshipQuery<typeof this> {
-    if (typeof entityOrReference === "string" || entityOrReference instanceof Wildcard) {
-      return this.#queryTo(entityOrReference);
-    } else {
-      return this.#componentTo(entityOrReference);
-    }
+  static override as(name: string) {
+    return new RelationshipQuery(this).as(name);
   }
 
 
-  on(source: string | Entity): RelationshipQuery<typeof this> {
+  static override once() {
+    return new RelationshipQuery(this).once();
+  }
+
+
+  static on(source: RelationshipSource) {
     return new RelationshipQuery(this).on(source);
+  }
+
+
+  static to(target: RelationshipTarget) {
+    return new RelationshipQuery(this).to(target);
+  }
+
+
+  once(): RelationshipQuery<typeof this> {
+    return new RelationshipQuery(this).once();
   }
 
 
   as(name: string): RelationshipQuery<typeof this> {
     return new RelationshipQuery(this).as(name);
+  }
+
+
+
+  on(source: RelationshipSource): RelationshipQuery<typeof this> {
+    return new RelationshipQuery(this).on(source);
+  }
+
+
+  to(entity: Entity): RelationshipComponent<this>;
+
+  to(reference: RelationshipTarget): RelationshipQuery<typeof this>;
+
+  to(
+    entityOrReference: Entity | string | Wildcard,
+  ): RelationshipComponent<this> | RelationshipQuery<typeof this> {
+    if (entityOrReference instanceof Entity) {
+      return this.#componentTo(entityOrReference);
+    } else {
+      return this.#queryTo(entityOrReference);
+    }
   }
 
 
@@ -81,6 +107,9 @@ export class Relationship<
 
 
 export type TagRelationship = Relationship<undefined>;
+
+export type RelationshipTarget = string | Entity | Wildcard;
+export type RelationshipSource = string | Entity | Wildcard;
 
 export type RelationshipValue<RelationshipType extends Relationship<any>> = (
   RelationshipType extends Relationship<infer Value>

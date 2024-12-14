@@ -10,7 +10,6 @@ import {
   Component,
 } from "../component/index.ts";
 import { Relationship } from "../relationship/index.ts";
-import { Any } from "./wildcard.ts";
 import { assertTypesEqual } from "../utils/type-assertions";
 import type { QueryPartOutput } from "./output";
 

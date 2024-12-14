@@ -1,5 +1,5 @@
 import { ComponentValueStore } from "./component-value-store.ts";
-import { EntityQuery } from "./query.ts";
+import { EntityQuery } from "./entity-query.ts";
 import type {
   Component,
   ComponentValue,
@@ -22,8 +22,13 @@ export class Entity {
   }
 
 
-  static as(name: string) {
+  static as(name: string): EntityQuery {
     return new EntityQuery().as(name);
+  }
+
+
+  static once(): EntityQuery {
+    return new EntityQuery().once();
   }
 
 

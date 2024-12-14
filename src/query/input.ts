@@ -1,6 +1,6 @@
 import type { QueryPart } from "./part.ts";
 
-export type QueryInput<Part = QueryPart> = QueryArrayInput<Part> | QueryObjectInput<Part> | Part;
+export type QueryInput<Part = QueryPart> = QueryArrayInput<Part> | QueryObjectInput<Part> | Part; // TODO: Remove generic param?
 
 export type QueryArrayInput<Part> = Array<Part>;
 

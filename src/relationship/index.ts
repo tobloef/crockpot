@@ -1,2 +1,2 @@
 export * from "./relationship.ts";
-export * from "./query.ts";
+export * from "./relationship-query.ts";

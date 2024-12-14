@@ -9,7 +9,6 @@ import type {
   Optional,
   Or,
 } from "./boolean/index.ts";
-import { type Wildcard, WildcardQuery } from "./wildcard.ts";
 import type {
   Component,
   ComponentQuery,
@@ -71,15 +70,11 @@ export type QueryPartOutputReal<Part extends QueryPart> = (
               ? Value
               : Part extends Relationship<infer Value>
                 ? Value
-                : Part extends WildcardQuery
+                : Part extends EntityQuery
                   ? Entity
-                  : Part extends Wildcard
+                  : Part extends Entity
                     ? Entity
-                    : Part extends EntityQuery
-                      ? Entity
-                      : Part extends Entity
-                        ? Entity
-                        : never
+                    : never
 );
 
 export type ParseOr<Parts extends any[]> = (

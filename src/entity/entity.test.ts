@@ -124,19 +124,12 @@ describe(Entity.prototype.remove.name, () => {
   });
 });
 
-describe(Entity.as.name, () => {
-  it("Create entity query", () => {
-    const query = Entity.as("entity");
-    assert.strictEqual(query.name, "entity");
-  });
-});
-
 describe(Entity.prototype.get.name, () => {
   it("Cannot get no components", () => {
     const entity = new Entity();
 
     // @ts-expect-error
-    try { entity.get() } catch {};
+    try { entity.get() } catch {}
   });
 
   it("Get one component", () => {
@@ -340,5 +333,24 @@ describe(Entity.prototype.destroy.name, () => {
 
     const components = [...entity.__components];
     assert.deepStrictEqual(components, []);
+  });
+});
+
+describe(Entity.as.name, () => {
+  it("Create entity query with name", () => {
+    const query = Entity.as("entity");
+    assert.strictEqual(query.name, "entity");
+  });
+});
+
+describe(Entity.once.name, () => {
+  it("Create entity query with isOnce", () => {
+    const query = Entity.once();
+    assert.strictEqual(query.isOnce, true);
+  });
+
+  it("isOnce is false by default if once() is not called", () => {
+    const query = Entity.as("");
+    assert.strictEqual(query.isOnce, false);
   });
 });

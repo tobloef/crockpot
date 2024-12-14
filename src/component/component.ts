@@ -1,5 +1,6 @@
 import { Entity } from "../entity/index.ts";
-import { ComponentQuery } from "./query.ts";
+import { ComponentQuery } from "./component-query.ts";
+import type { Wildcard } from "../query/index.ts";
 
 export class Component<
   Value = undefined,
@@ -11,13 +12,33 @@ export class Component<
   }
 
 
-  on(source: Entity | string): ComponentQuery<typeof this> {
+  static override as(name: string) {
+    return new ComponentQuery(this).as(name);
+  }
+
+
+  static override once() {
+    return new ComponentQuery(this).once();
+  }
+
+
+  static on(source: ComponentSource) {
+    return new ComponentQuery(this).on(source);
+  }
+
+
+  on(source: ComponentSource): ComponentQuery<typeof this> {
     return new ComponentQuery(this).on(source);
   }
 
 
   as(name: string): ComponentQuery<typeof this> {
     return new ComponentQuery(this).as(name);
+  }
+
+
+  once(): ComponentQuery<typeof this> {
+    return new ComponentQuery(this).once();
   }
 
 
@@ -32,6 +53,8 @@ export class Component<
 }
 
 export type Tag = Component<undefined>;
+
+export type ComponentSource = string | Entity | Wildcard;
 
 export type ComponentValue<ComponentType extends Component<any>> = (
   ComponentType extends Component<infer ValueType>
