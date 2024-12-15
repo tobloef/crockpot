@@ -11,6 +11,7 @@ export type QueryPart = (
 
 export type NonBooleanQueryPart = (
   | Class<Entity>
+  | Entity
   | EntityWildcardQuery
   | Class<Component<any>>
   | Component<any>

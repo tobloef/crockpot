@@ -33,7 +33,17 @@ describe("Empty query", () => {
 });
 
 describe("Entity instance query", () => {
-  it("Finds specific entity instance", () => {});
+  it("Finds specific entity instance", () => {
+    // Arrange
+    const { all, entities } = createEntities({ count: 3 });
+
+    // Act
+    const result = query(all, [entities[1]]);
+
+    // Assert
+    assertTypesEqual<typeof result, [Entity]>(true);
+    assert.deepStrictEqual(result, [entities[1]]);
+  });
 
   it("Finds specific component type", () => {});
 
