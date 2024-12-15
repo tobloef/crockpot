@@ -1,34 +1,29 @@
-import { describe, it, } from "node:test";
+import {
+  describe,
+  it,
+} from "node:test";
 import * as assert from "node:assert";
 import { query } from "./query.ts";
 import { Entity } from "../entity/index.ts";
-import { Component, } from "../component/index.ts";
+import { Component } from "../component/index.ts";
 import { Relationship } from "../relationship/index.ts";
 import { assertTypesEqual } from "../utils/type-assertions.ts";
 
 describe("Empty query", () => {
-  it("Finds nothing (empty tuples) when input is empty tuple", () => {
+  it("Finds nothing when input is empty tuple", () => {
     // Arrange
     const { all } = createEntities({ count: 3 });
 
     // Act
-    const result = query(all, []);
+    const arrayResult = query(all, []);
+    const objectResult = query(all, {});
 
     // Assert
-    assertTypesEqual<typeof result, []>(true);
-    assert.deepStrictEqual(result, []);
-  });
+    assertTypesEqual<typeof arrayResult, []>(true);
+    assertTypesEqual<typeof objectResult, {}>(true);
 
-  it("Finds nothing (empty objects) when input is empty object", () => {
-    // Arrange
-    const { all } = createEntities({ count: 3 });
-
-    // Act
-    const result = query(all, {});
-
-    // Assert
-    assertTypesEqual<typeof result, {}>(true);
-    assert.deepStrictEqual(result, {});
+    assert.deepStrictEqual(arrayResult, []);
+    assert.deepStrictEqual(objectResult, {});
   });
 });
 
@@ -38,273 +33,615 @@ describe("Entity instance query", () => {
     const { all, entities } = createEntities({ count: 3 });
 
     // Act
-    const result = query(all, [entities[1]]);
+    const arrayResult = query(all, [ entities[1] ]);
+    const objectResult = query(all, { ent: entities[1] });
 
     // Assert
-    assertTypesEqual<typeof result, [Entity]>(true);
-    assert.deepStrictEqual(result, [entities[1]]);
+    assertTypesEqual <typeof arrayResult, [ Entity ]>(true);
+    assertTypesEqual <typeof objectResult, { ent: Entity }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ entities[1] ]);
+    assert.deepStrictEqual(objectResult, { ent: entities[1] });
   });
 
-  it("Finds specific component type", () => {});
+  it("Can find multiple different entities in single query", () => {
+    // Arrange
+    const { all, entities } = createEntities({ count: 3 });
 
-  it("Find specific relationship type", () => {});
+    // Act
+    const arrayResult = query(all, [ entities[1], entities[2] ]);
+    const objectResult = query(all, { ent1: entities[1], ent2: entities[2] });
 
-  it("Can find multiple different entities in single query", () => {});
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Entity, Entity ]>(true);
+    assertTypesEqual<typeof objectResult, { ent1: Entity, ent2: Entity }>(true);
 
-  it("Can find same entity multiple times in single query", () => {});
+    assert.deepStrictEqual(arrayResult, [ entities[1], entities[2] ]);
+    assert.deepStrictEqual(objectResult, { ent1: entities[1], ent2: entities[2] });
+  });
 
-  it("Does not find entity if not on the list", () => {});
+  it("Can find same entity multiple times in single query", () => {
+    // Arrange
+    const { all, entities } = createEntities({ count: 3 });
+
+    // Act
+    const arrayResult = query(all, [ entities[1], entities[1] ]);
+    const objectResult = query(all, { ent1: entities[1], ent2: entities[1] });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Entity, Entity ]>(true);
+    assertTypesEqual<typeof objectResult, { ent1: Entity, ent2: Entity }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ entities[1], entities[1] ]);
+    assert.deepStrictEqual(objectResult, { ent1: entities[1], ent2: entities[1] });
+  });
+
+  it("Does not find entity if not on the list", () => {
+    // Arrange
+    const { all } = createEntities({ count: 3 });
+    const otherEntity = new Entity();
+
+    // Act
+    const arrayResult = query(all, [ otherEntity ]);
+    const objectResult = query(all, { ent: otherEntity });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Entity ]>(true);
+    assertTypesEqual<typeof objectResult, { ent: Entity }>(true);
+
+    assert.deepStrictEqual(arrayResult, []);
+    assert.deepStrictEqual(objectResult, {});
+  });
 });
 
 describe("Entity wildcard query", () => {
-  it("Finds all entities", () => {});
+  it("Finds all entities", () => {
+    // Arrange
+    const { entities } = createEntities({ count: 3 });
 
-  it("Finds all component types", () => {});
+    // Act
+    const arrayResult = query(entities, [ Entity ]);
+    const objectResult = query(entities, { ent: Entity });
 
-  it("Finds all relationship types", () => {});
+    // Assert
+    assertTypesEqual<typeof arrayResult, [Entity]>(true);
+    assertTypesEqual<typeof objectResult, { ent: Entity }>(true);
 
-  it("Finds nothing when entity list is empty", () => {});
+    assert.deepStrictEqual(arrayResult, entities.map((entity) => [entity]));
+    assert.deepStrictEqual(objectResult, entities.map((entity) => ({ ent: entity })));
+  });
 
-  it("Can give entity wildcard reference name", () => {});
+  it("Finds all component types", () => {
+    // Arrange
+    const { components } = createEntities({ count: 3 });
 
-  it("Find the same entity multiple times", () => {});
+    const expectedArray = Object.values(components).map((component) => [component]);
+    const expectedObject = Object.values(components).map((component) => ({ ent: component }));
 
-  it("Can specify that an entity may only be found once for a wildcard", () => {});
+    // Act
+    const arrayResult = query(Object.values(components), [ Entity ]);
+    const objectResult = query(Object.values(components), { ent: Entity });
 
-  it("Can specify multiple wildcards", () => {});
+    // Assert
+    assertTypesEqual<typeof arrayResult, [Entity]>(true);
+    assertTypesEqual<typeof objectResult, { ent: Entity }>(true);
 
-  it("Can specify multiple wildcards with different reference names", () => {});
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
 
-  it("Can specify multiple wildcards with same reference name", () => {});
+  it("Finds all relationship types", () => {
+    // Arrange
+    const { relationships } = createEntities({ count: 3 });
 
-  it("Can specify that one wildcard may only be found once, while other may be found multiple times", () => {});
+    const expectedArray = Object.values(relationships).map((relationship) => [relationship]);
+    const expectedObject = Object.values(relationships).map((relationship) => ({ ent: relationship }));
 
-  it("Can find entity combinations", () => {});
+    // Act
+    const arrayResult = query(Object.values(relationships), [ Entity ]);
+    const objectResult = query(Object.values(relationships), { ent: Entity });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [Entity]>(true);
+    assertTypesEqual<typeof objectResult, { ent: Entity }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
+
+  it("Finds nothing when entity list is empty", () => {
+    // Arrange
+    createEntities({ count: 3 });
+
+    // Act
+    const arrayResult = query([], [ Entity ]);
+    const objectResult = query([], { ent: Entity });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [Entity]>(true);
+    assertTypesEqual<typeof objectResult, {ent: Entity}>(true);
+
+    assert.deepStrictEqual(arrayResult, []);
+    assert.deepStrictEqual(objectResult, {});
+  });
+
+  it("Can give entity wildcard reference name", () => {
+    // Arrange
+    const { all } = createEntities({ count: 3 });
+
+    // Act
+    const arrayResult = query(all, [ Entity.as("ent") ]);
+    const objectResult = query(all, { ent: Entity.as("ent") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [Entity]>(true);
+    assertTypesEqual<typeof objectResult, { ent: Entity }>(true);
+
+    assert.deepStrictEqual(arrayResult, all.map((entity) => [entity]));
+    assert.deepStrictEqual(objectResult, all.map((entity) => ({ ent: entity })));
+  });
+
+  it("Find the same entity multiple times", () => {
+    // Arrange
+    const { entities } = createEntities({ count: 3 });
+
+    const expectedArray = permutations(entities);
+    const expectedObject = expectedArray.map(([ent1, ent2]) => ({ ent1, ent2 }));
+
+    // Act
+    const arrayResult = query(entities, [ Entity, Entity ]);
+    const objectResult = query(entities, { ent1: Entity, ent2: Entity });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [Entity, Entity]>(true);
+    assertTypesEqual<typeof objectResult, { ent1: Entity, ent2: Entity }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
+
+  it("Can specify that an entity may only be found once for a wildcard", () => {
+    // Arrange
+    const { entities } = createEntities({ count: 3 });
+    const expectedArray = [
+      [entities[0], entities[0], entities[0]],
+      [entities[1], entities[0], entities[0]],
+      [entities[2], entities[0], entities[0]],
+    ]
+    const expectedObject = expectedArray.map(([ent1, ent2, ent3]) => ({ ent1, ent2, ent3 }));
+
+    // Act
+    const arrayResult = query(entities, [ Entity.once(), Entity, Entity ]);
+    const objectResult = query(entities, { ent1: Entity.once(), ent2: Entity, ent3: Entity });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [Entity, Entity, Entity]>(true);
+    assertTypesEqual<typeof objectResult, { ent1: Entity, ent2: Entity, ent3: Entity }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
+
+  it("Can specify that multiple entities may only be found once for their wildcards", () => {
+    // Arrange
+    const { entities } = createEntities({ count: 3 });
+    const expectedArray = [
+      [entities[0], entities[0], entities[0]],
+      [entities[1], entities[1], entities[0]],
+      [entities[2], entities[2], entities[0]],
+    ]
+    const expectedObject = expectedArray.map(([ent1, ent2, ent3]) => ({ ent1, ent2, ent3 }));
+
+    // Act
+    const arrayResult = query(entities, [ Entity.once(), Entity.once(), Entity ]);
+    const objectResult = query(entities, { ent1: Entity.once(), ent2: Entity.once(), ent3: Entity });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [Entity, Entity, Entity]>(true);
+    assertTypesEqual<typeof objectResult, { ent1: Entity, ent2: Entity, ent3: Entity }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
+
+  it("Can specify multiple wildcards with different reference names", () => {
+    // Arrange
+    const { entities } = createEntities({ count: 3 });
+    const expectedArray = permutations(entities);
+    const expectedObject = expectedArray.map(([ent1, ent2]) => ({ ent1, ent2 }));
+
+    // Act
+    const arrayResult = query(entities, [ Entity.as("one"), Entity.as("two") ]);
+    const objectResult = query(entities, { ent1: Entity.as("one"), ent2: Entity.as("two") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [Entity, Entity]>(true);
+    assertTypesEqual<typeof objectResult, { ent1: Entity, ent2: Entity }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
+
+  it("Can specify multiple wildcards with same reference name", () => {
+    // Arrange
+    const { entities } = createEntities({ count: 3 });
+    const expectedArray = entities.map((ent) => [ent, ent]);
+    const expectedObject = entities.map((ent) => ({ ent1: ent, ent2: ent }));
+
+    // Act
+    const arrayResult = query(entities, [ Entity.as("ref"), Entity.as("ref") ]);
+    const objectResult = query(entities, { ent1: Entity.as("ref"), ent2: Entity.as("ref") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [Entity, Entity]>(true);
+    assertTypesEqual<typeof objectResult, { ent1: Entity, ent2: Entity }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
+
+  it("Can specify same reference name on a wildcard as another wildcard that may only be found once", () => {
+    // Arrange
+    const { entities } = createEntities({ count: 3 });
+    const expectedArray = [
+      [entities[0], entities[0], entities[0]],
+      [entities[1], entities[1], entities[0]],
+      [entities[2], entities[2], entities[0]],
+    ];
+    const expectedObject = expectedArray.map(([ent1, ent2, ent3]) => ({ ent1, ent2, ent3 }));
+
+    // Act
+    const arrayResult = query(entities, [ Entity.as("a").once(), Entity.as("a"), Entity.as("c") ]);
+    const objectResult = query(entities, { ent1: Entity.as("a").once(), ent2: Entity.as("a"), ent3: Entity.as("c") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [Entity, Entity, Entity]>(true);
+    assertTypesEqual<typeof objectResult, { ent1: Entity, ent2: Entity, ent3: Entity }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
 });
 
 describe("Entity type query", () => {
-  it("Finds that type of base entities are Entity", () => {});
+  it("Finds that type of base entities are Entity", () => {
+  });
 
-  it("Finds that type of component types are the component types", () => {});
+  it("Finds that type of component types are the component types", () => {
+  });
 
-  it("Finds that type of relationship types are the relationship types", () => {});
+  it("Finds that type of relationship types are the relationship types", () => {
+  });
 
-  it("Can specify reference name for entity type", () => {});
+  it("Can specify reference name for entity type", () => {
+  });
 
-  it("Can find the same entity type multiple times", () => {});
+  it("Can find the same entity type multiple times", () => {
+  });
 
-  it("Can find the same entity type multiple times in the same query", () => {});
+  it("Can find the same entity type multiple times in the same query", () => {
+  });
 
-  it("Can specify that an entity type may only be found once for a given query", () => {});
+  it("Can specify that an entity type may only be found once for a given query", () => {
+  });
 
-  it("Can specify that an entity type may only be found once, while another may be found multiple times", () => {});
+  it("Can specify that an entity type may only be found once, while another may be found multiple times", () => {
+  });
 });
 
 describe("Component instance query", () => {
-  it("Finds tag components on entities", () => {});
+  it("Finds tag components on entities", () => {
+  });
 
-  it("Finds value component on entities", () => {});
+  it("Finds value component on entities", () => {
+  });
 
-  it("Can find multiple different component values in single query", () => {});
+  it("Can find multiple different component values in single query", () => {
+  });
 
-  it("Can find same component value multiple times in single query", () => {});
+  it("Can find same component value multiple times in single query", () => {
+  });
 
-  it("Does not find component value if not on an entity", () => {});
+  it("Does not find component value if not on an entity", () => {
+  });
 
-  it("Finds component value on specific entity", () => {});
+  it("Finds component value on specific entity", () => {
+  });
 
-  it("Finds component value on entity reference", () => {});
+  it("Finds component value on entity reference", () => {
+  });
 
-  it("Finds component value on any entity using wildcard", () => {});
+  it("Finds component value on any entity using wildcard", () => {
+  });
 
-  it("Finds component value on any component type using wildcard", () => {});
+  it("Finds component value on any component type using wildcard", () => {
+  });
 
-  it("Finds component value on any relationship type using wildcard", () => {});
+  it("Finds component value on any relationship type using wildcard", () => {
+  });
 
-  it("Does not find component value on specific entity if it does not have it", () => {});
+  it("Does not find component value on specific entity if it does not have it", () => {
+  });
 
-  it("Does not find component value on specific entity if entity not in list", () => {});
+  it("Does not find component value on specific entity if entity not in list", () => {
+  });
 
-  it("Finds entity with the specific component", () => {});
+  it("Finds entity with the specific component", () => {
+  });
 
-  it("Does not find anything if query only has partial match", () => {});
+  it("Does not find anything if query only has partial match", () => {
+  });
 });
 
 describe("Component wildcard query", () => {
-  it("Finds all components", () => {});
+  it("Finds all components", () => {
+  });
 
-  it("Finds all components on specific entity", () => {});
+  it("Finds all components on specific entity", () => {
+  });
 
-  it("Finds all components on references entity", () => {});
+  it("Finds all components on references entity", () => {
+  });
 
-  it("Finds all components on any entity", () => {});
+  it("Finds all components on any entity", () => {
+  });
 
-  it("Finds all components on any component", () => {});
+  it("Finds all components on any component", () => {
+  });
 
-  it("Finds all components on any relationship", () => {});
+  it("Finds all components on any relationship", () => {
+  });
 
-  it("Finds all components and their attached entity by reference", () => {});
+  it("Finds all components and their attached entity by reference", () => {
+  });
 
-  it("Can specify reference name for found component (not for found values)", () => {});
+  it("Can specify reference name for found component (not for found values)", () => {
+  });
 
-  it("Can find the same component multiple times", () => {});
+  it("Can find the same component multiple times", () => {
+  });
 
-  it("Can specify that a given component type may only be found once", () => {});
+  it("Can specify that a given component type may only be found once", () => {
+  });
 
-  it("Can find the same component value with two different wildcards", () => {});
+  it("Can find the same component value with two different wildcards", () => {
+  });
 
-  it("Can specify that a given component type may only be found once, while another may be found multiple times", () => {});
+  it(
+    "Can specify that a given component type may only be found once, while another may be found multiple times",
+    () => {
+    },
+  );
 });
 
 describe("Component type query", () => {
-  it("Find all component types", () => {});
+  it("Find all component types", () => {
+  });
 
-  it("Can specify reference name of component type", () => {});
+  it("Can specify reference name of component type", () => {
+  });
 
   it("Can use component type reference to find components of type", () => {
     // Component.type().as("type"), Component.as("type")
   });
 
-  it("Can find the same component type multiple times", () => {});
+  it("Can find the same component type multiple times", () => {
+  });
 
-  it("Can specify that a given component type may only be found once", () => {});
+  it("Can specify that a given component type may only be found once", () => {
+  });
 
-  it("Can specify that a given component type may only be found once, while another may be found multiple times", () => {});
+  it(
+    "Can specify that a given component type may only be found once, while another may be found multiple times",
+    () => {
+    },
+  );
 
-  it("Can specify source entity of component type", () => {});
+  it("Can specify source entity of component type", () => {
+  });
 
-  it("Can specify source reference of component type", () => {});
+  it("Can specify source reference of component type", () => {
+  });
 
-  it("Can specify entity wildcard as source of component type", () => {});
+  it("Can specify entity wildcard as source of component type", () => {
+  });
 
-  it("Can specify component wildcard as source of component type", () => {});
+  it("Can specify component wildcard as source of component type", () => {
+  });
 
-  it("Can specify relationship wildcard as source of component type", () => {});
+  it("Can specify relationship wildcard as source of component type", () => {
+  });
 });
 
 describe("Relationship instance query", () => {
-  it("Finds tag relationship on entities", () => {});
+  it("Finds tag relationship on entities", () => {
+  });
 
-  it("Finds value relationship on entities", () => {});
+  it("Finds value relationship on entities", () => {
+  });
 
-  it("Can find multiple different relationship values in single query", () => {});
+  it("Can find multiple different relationship values in single query", () => {
+  });
 
-  it("Can find same relationship value multiple times in single query", () => {});
+  it("Can find same relationship value multiple times in single query", () => {
+  });
 
-  it("Does not find relationship value if not on an entity", () => {});
+  it("Does not find relationship value if not on an entity", () => {
+  });
 
-  it("Finds relationship value on specific entity", () => {});
+  it("Finds relationship value on specific entity", () => {
+  });
 
-  it("Finds relationship value on entity reference", () => {});
+  it("Finds relationship value on entity reference", () => {
+  });
 
-  it("Finds relationship value on any entity using wildcard", () => {});
+  it("Finds relationship value on any entity using wildcard", () => {
+  });
 
-  it("Finds relationship value on any component type using wildcard", () => {});
+  it("Finds relationship value on any component type using wildcard", () => {
+  });
 
-  it("Finds relationship value on any relationship type using wildcard", () => {});
+  it("Finds relationship value on any relationship type using wildcard", () => {
+  });
 
-  it("Finds relationship value to specific entity", () => {});
+  it("Finds relationship value to specific entity", () => {
+  });
 
-  it("Finds relationship value to entity reference", () => {});
+  it("Finds relationship value to entity reference", () => {
+  });
 
-  it("Finds relationship value to any entity using wildcard", () => {});
+  it("Finds relationship value to any entity using wildcard", () => {
+  });
 
-  it("Finds relationship value to any component type using wildcard", () => {});
+  it("Finds relationship value to any component type using wildcard", () => {
+  });
 
-  it("Finds relationship value to any relationship type using wildcard", () => {});
+  it("Finds relationship value to any relationship type using wildcard", () => {
+  });
 
-  it("Does not find relationship value on specific entity if it does not have it", () => {});
+  it("Does not find relationship value on specific entity if it does not have it", () => {
+  });
 
-  it("Does not find relationship value on specific entity if entity not in list", () => {});
+  it("Does not find relationship value on specific entity if entity not in list", () => {
+  });
 
-  it("Finds entity with the specific relationship", () => {});
+  it("Finds entity with the specific relationship", () => {
+  });
 
-  it("Finds explicit relationship to self", () => {});
+  it("Finds explicit relationship to self", () => {
+  });
 
-  it("Finds transitive relationship to self by reference", () => {});
+  it("Finds transitive relationship to self by reference", () => {
+  });
 });
 
 describe("Relationship wildcard query", () => {
-  it("Finds all relationships", () => {});
+  it("Finds all relationships", () => {
+  });
 
-  it("Finds all relationships on specific entity", () => {});
+  it("Finds all relationships on specific entity", () => {
+  });
 
-  it("Finds all relationships on references entity", () => {});
+  it("Finds all relationships on references entity", () => {
+  });
 
-  it("Finds all relationships on any entity", () => {});
+  it("Finds all relationships on any entity", () => {
+  });
 
-  it("Finds all relationships on any component", () => {});
+  it("Finds all relationships on any component", () => {
+  });
 
-  it("Finds all relationships on any relationship", () => {});
+  it("Finds all relationships on any relationship", () => {
+  });
 
-  it("Finds all relationships and their source entity by reference", () => {});
+  it("Finds all relationships and their source entity by reference", () => {
+  });
 
-  it("Finds all relationships to specific entity", () => {});
+  it("Finds all relationships to specific entity", () => {
+  });
 
-  it("Finds all relationships to references entity", () => {});
+  it("Finds all relationships to references entity", () => {
+  });
 
-  it("Finds all relationships to any entity", () => {});
+  it("Finds all relationships to any entity", () => {
+  });
 
-  it("Finds all relationships to any component", () => {});
+  it("Finds all relationships to any component", () => {
+  });
 
-  it("Finds all relationships to any relationship", () => {});
+  it("Finds all relationships to any relationship", () => {
+  });
 
-  it("Finds all relationships and their target entity by reference", () => {});
+  it("Finds all relationships and their target entity by reference", () => {
+  });
 
-  it("Can specify reference name for found relationship (not for found values)", () => {});
+  it("Can specify reference name for found relationship (not for found values)", () => {
+  });
 
-  it("Can find the same relationship multiple times", () => {});
+  it("Can find the same relationship multiple times", () => {
+  });
 
-  it("Can specify that a given relationship type may only be found once", () => {});
+  it("Can specify that a given relationship type may only be found once", () => {
+  });
 
-  it("Can find the same relationship value with two different wildcards", () => {});
+  it("Can find the same relationship value with two different wildcards", () => {
+  });
 
-  it("Can specify that a given relationship type may only be found once, while another may be found multiple times", () => {});
+  it(
+    "Can specify that a given relationship type may only be found once, while another may be found multiple times",
+    () => {
+    },
+  );
 
-  it("Finds direct circular relationship", () => {});
+  it("Finds direct circular relationship", () => {
+  });
 
-  it("Finds transitive circular relationship", () => {});
+  it("Finds transitive circular relationship", () => {
+  });
 });
 
 describe("Relationship type query", () => {
-  it("Find all relationship types", () => {});
+  it("Find all relationship types", () => {
+  });
 
-  it("Can specify reference name of relationship type", () => {});
+  it("Can specify reference name of relationship type", () => {
+  });
 
   it("Can use relationship type reference to find relationship of type", () => {
     // Relationship.type().as("type"), Relationship.as("type")
   });
 
-  it("Can find the same relationship type multiple times", () => {});
+  it("Can find the same relationship type multiple times", () => {
+  });
 
-  it("Can specify that a given relationship type may only be found once", () => {});
+  it("Can specify that a given relationship type may only be found once", () => {
+  });
 
-  it("Can specify that a given relationship type may only be found once, while another may be found multiple times", () => {});
+  it(
+    "Can specify that a given relationship type may only be found once, while another may be found multiple times",
+    () => {
+    },
+  );
 
-  it("Can specify source entity of relationship type", () => {});
+  it("Can specify source entity of relationship type", () => {
+  });
 
-  it("Can specify source reference of relationship type", () => {});
+  it("Can specify source reference of relationship type", () => {
+  });
 
-  it("Can specify entity wildcard as source of relationship type", () => {});
+  it("Can specify entity wildcard as source of relationship type", () => {
+  });
 
-  it("Can specify component wildcard as source of relationship type", () => {});
+  it("Can specify component wildcard as source of relationship type", () => {
+  });
 
-  it("Can specify relationship wildcard as source of relationship type", () => {});
+  it("Can specify relationship wildcard as source of relationship type", () => {
+  });
 
-  it("Can specify target entity of relationship type", () => {});
+  it("Can specify target entity of relationship type", () => {
+  });
 
-  it("Can specify target reference of relationship type", () => {});
+  it("Can specify target reference of relationship type", () => {
+  });
 
-  it("Can specify entity wildcard as target of relationship type", () => {});
+  it("Can specify entity wildcard as target of relationship type", () => {
+  });
 
-  it("Can specify component wildcard as target of relationship type", () => {});
+  it("Can specify component wildcard as target of relationship type", () => {
+  });
 
-  it("Can specify relationship wildcard as target of relationship type", () => {});
+  it("Can specify relationship wildcard as target of relationship type", () => {
+  });
 });
 
 describe("Ordering of query parts", () => {
-  it("Ordering of query parts does not matter", () => {});
+  it("Ordering of query parts does not matter", () => {
+  });
 });
+
+// TODO: Boolean queries
+// TODO: Dynamic queries (e.g. from user input)
+// TODO: Some negative tests, stuff you can't pass in, etc.
 
 function createEntities(options: {
   count: number
@@ -362,4 +699,8 @@ function createEntities(options: {
     components,
     relationships,
   };
+}
+
+function permutations<T>(array: T[]): T[][] {
+  return array.flatMap((item1) => array.map((item2) => [item1, item2]));
 }

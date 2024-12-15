@@ -24,13 +24,10 @@ import {
 import type { Class } from "../utils/class.ts";
 
 export type QueryOutput<Input extends QueryInput> =
-  Input extends QueryPart
-  ? QueryPartOutput<Input>
-  : Input extends QueryArrayInput<QueryPart>
-    ? QueryArrayOutput<Input>
-    : Input extends QueryObjectInput<QueryPart>
-      ? QueryObjectOutput<Input>
-      : never;
+  Input extends QueryPart ? QueryPartOutput<Input> :
+  Input extends QueryArrayInput<QueryPart> ? QueryArrayOutput<Input> :
+  Input extends QueryObjectInput<QueryPart> ? QueryObjectOutput<Input> :
+  never;
 
 export type QueryArrayOutput<Input extends QueryArrayInput<QueryPart>> =
   Input extends [infer First, ...infer Rest]
