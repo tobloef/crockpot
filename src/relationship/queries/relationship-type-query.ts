@@ -1,5 +1,5 @@
-import { EntityTypeQuery } from "../entity/entity-type-query.ts";
-import type { RelationshipSource, RelationshipTarget } from "./relationship.ts";
+import { EntityTypeQuery } from "../../entity/queries/entity-type-query.ts";
+import type { RelationshipSource, RelationshipTarget } from "../relationship.ts";
 
 export class RelationshipTypeQuery extends EntityTypeQuery {
   #source?: RelationshipSource;

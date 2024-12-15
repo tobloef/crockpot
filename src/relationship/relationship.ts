@@ -1,9 +1,9 @@
 import { Entity } from "../entity/index.ts";
 import { type RelationshipComponent, RelationshipComponentStore, } from "./relationship-component-store.ts";
 import { Component } from "../component/index.ts";
-import { RelationshipQuery } from "./relationship-query.ts";
+import { RelationshipInstanceQuery } from "./queries/relationship-instance-query.ts";
 import type { Wildcard } from "../query/index.ts";
-import { RelationshipWildcardQuery } from "./relationship-wildcard-query.ts";
+import { RelationshipWildcardQuery } from "./queries/relationship-wildcard-query.ts";
 
 export class Relationship<
   Value = undefined,
@@ -32,28 +32,18 @@ export class Relationship<
   }
 
 
-  once(): RelationshipQuery<typeof this> {
-    return new RelationshipQuery(this).once();
-  }
-
-
-  as(name: string): RelationshipQuery<typeof this> {
-    return new RelationshipQuery(this).as(name);
-  }
-
-
-  on(source: RelationshipSource): RelationshipQuery<typeof this> {
-    return new RelationshipQuery(this).on(source);
+  on(source: RelationshipSource): RelationshipInstanceQuery<typeof this> {
+    return new RelationshipInstanceQuery(this).on(source);
   }
 
 
   to(entity: Entity): RelationshipComponent<this>;
 
-  to(reference: RelationshipTarget): RelationshipQuery<typeof this>;
+  to(reference: RelationshipTarget): RelationshipInstanceQuery<typeof this>;
 
   to(
     entityOrReference: Entity | string | Wildcard,
-  ): RelationshipComponent<this> | RelationshipQuery<typeof this> {
+  ): RelationshipComponent<this> | RelationshipInstanceQuery<typeof this> {
     if (entityOrReference instanceof Entity) {
       return this.#componentTo(entityOrReference);
     } else {
@@ -77,8 +67,8 @@ export class Relationship<
   }
 
 
-  #queryTo(reference: string | Wildcard): RelationshipQuery<typeof this> {
-    return new RelationshipQuery(this).to(reference);
+  #queryTo(reference: string | Wildcard): RelationshipInstanceQuery<typeof this> {
+    return new RelationshipInstanceQuery(this).to(reference);
   }
 
 

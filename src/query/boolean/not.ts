@@ -1,11 +1,11 @@
-import type { NonBooleanQueryPart } from "../part.ts";
+import type { QueryPart } from "../part.ts";
 
-export type Not<QueryPart extends NonBooleanQueryPart> = {
-  __not: QueryPart;
+export type Not<Part extends QueryPart> = {
+  __not: Part;
 };
 
-export function not<QueryPart extends NonBooleanQueryPart>(
-  queryPart: QueryPart,
-): Not<QueryPart> {
+export function not<Part extends QueryPart>(
+  queryPart: Part,
+): Not<Part> {
   return { __not: queryPart };
 }

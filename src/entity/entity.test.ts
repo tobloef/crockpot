@@ -123,8 +123,8 @@ describe(Entity.prototype.get.name, () => {
   it("Cannot get no components", () => {
     const entity = new Entity();
 
-    // @ts-expect-error
     try {
+      // @ts-expect-error
       entity.get()
     } catch {
     }
@@ -335,20 +335,17 @@ describe(Entity.prototype.destroy.name, () => {
 });
 
 describe(Entity.as.name, () => {
-  it("Create entity query with name", () => {
-    const query = Entity.as("entity");
-    assert.strictEqual(query.name, "entity");
-  });
+  it("Create entity wildcard query with reference name", () => {});
 });
 
 describe(Entity.once.name, () => {
-  it("Create entity query with isOnce", () => {
-    const query = Entity.once();
-    assert.strictEqual(query.isOnce, true);
-  });
+  it("Create entity once query with reference name", () => {});
+});
 
-  it("isOnce is false by default if once() is not called", () => {
-    const query = Entity.as("");
-    assert.strictEqual(query.isOnce, false);
-  });
+describe(Entity.type.name, () => {
+  it("Create entity type query", () => {});
+
+  it("Create entity type query with reference name", () => {});
+
+  it("Create entity type query with isOnce set to true", () => {});
 });

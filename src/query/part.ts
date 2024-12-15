@@ -1,7 +1,7 @@
 import type { Class } from "../utils/class.ts";
 import { Entity, EntityWildcardQuery, } from "../entity/index.ts";
-import { Component, ComponentQuery, } from "../component/index.ts";
-import { Relationship, RelationshipQuery, } from "../relationship/index.ts";
+import { Component, ComponentInstanceQuery, } from "../component/index.ts";
+import { Relationship, RelationshipInstanceQuery, } from "../relationship/index.ts";
 import type { Not, Optional, Or, } from "./boolean/index.ts";
 
 export type QueryPart = (
@@ -14,10 +14,10 @@ export type NonBooleanQueryPart = (
   | EntityWildcardQuery
   | Class<Component<any>>
   | Component<any>
-  | ComponentQuery<any>
+  | ComponentInstanceQuery<any>
   | Class<Relationship<any>>
   | Relationship<any>
-  | RelationshipQuery<any>
+  | RelationshipInstanceQuery<any>
   );
 
 export type BooleanQueryPart = (

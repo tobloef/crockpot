@@ -1,8 +1,8 @@
 import { Entity } from "../entity/index.ts";
-import { ComponentQuery } from "./component-query.ts";
+import { ComponentInstanceQuery } from "./queries/component-instance-query.ts";
 import type { Wildcard } from "../query/index.ts";
-import { ComponentWildcardQuery } from "./component-wildcard-query.ts";
-import { ComponentTypeQuery } from "./component-type-query.ts";
+import { ComponentWildcardQuery } from "./queries/component-wildcard-query.ts";
+import { ComponentTypeQuery } from "./queries/component-type-query.ts";
 
 export class Component<
   Value = undefined,
@@ -34,18 +34,8 @@ export class Component<
   }
 
 
-  on(source: ComponentSource): ComponentQuery<typeof this> {
-    return new ComponentQuery(this).on(source);
-  }
-
-
-  as(name: string): ComponentQuery<typeof this> {
-    return new ComponentQuery(this).as(name);
-  }
-
-
-  once(): ComponentQuery<typeof this> {
-    return new ComponentQuery(this).once();
+  on(source: ComponentSource): ComponentInstanceQuery<typeof this> {
+    return new ComponentInstanceQuery(this).on(source);
   }
 
 

@@ -1,9 +1,9 @@
 import type { QueryArrayInput, QueryInput, QueryObjectInput, } from "./input.ts";
 import type { QueryPart } from "./part.ts";
 import type { Not, Optional, Or, } from "./boolean/index.ts";
-import type { Component, ComponentQuery, } from "../component/index.ts";
+import type { Component, ComponentInstanceQuery, } from "../component/index.ts";
 import type { Entity, EntityWildcardQuery, } from "../entity/index.ts";
-import { Relationship, RelationshipQuery } from "../relationship/index.ts";
+import { Relationship, RelationshipInstanceQuery } from "../relationship/index.ts";
 import type { Class } from "../utils/class.ts";
 
 export type QueryOutput<Input extends QueryInput> = (
@@ -39,11 +39,11 @@ export type QueryPartOutput<Part extends QueryPart> = (
       ? never
       : Part extends Or<infer Types>
         ? ParseOr<Types>
-        : Part extends RelationshipQuery<infer RelationshipType>
+        : Part extends RelationshipInstanceQuery<infer RelationshipType>
           ? RelationshipType extends Relationship<infer Value>
             ? Value
             : never
-          : Part extends ComponentQuery<infer ComponentType>
+          : Part extends ComponentInstanceQuery<infer ComponentType>
             ? ComponentType extends Component<infer Value>
               ? Value
               : never
