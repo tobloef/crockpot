@@ -8,6 +8,7 @@ import { Entity } from "../entity/index.ts";
 import { Component } from "../component/index.ts";
 import { Relationship } from "../relationship/index.ts";
 import { assertTypesEqual } from "../utils/type-assertions.ts";
+import type { Class } from "../utils/class.js";
 
 describe("Empty query", () => {
   it("Finds nothing when input is empty tuple", () => {
@@ -37,8 +38,8 @@ describe("Entity instance query", () => {
     const objectResult = query(all, { ent: entities[1] });
 
     // Assert
-    assertTypesEqual <typeof arrayResult, [ Entity ]>(true);
-    assertTypesEqual <typeof objectResult, { ent: Entity }>(true);
+    assertTypesEqual<typeof arrayResult, [ Entity ]>(true);
+    assertTypesEqual<typeof objectResult, { ent: Entity }>(true);
 
     assert.deepStrictEqual(arrayResult, [ entities[1] ]);
     assert.deepStrictEqual(objectResult, { ent: entities[1] });
@@ -104,10 +105,10 @@ describe("Entity wildcard query", () => {
     const objectResult = query(entities, { ent: Entity });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [Entity]>(true);
+    assertTypesEqual<typeof arrayResult, [ Entity ]>(true);
     assertTypesEqual<typeof objectResult, { ent: Entity }>(true);
 
-    assert.deepStrictEqual(arrayResult, entities.map((entity) => [entity]));
+    assert.deepStrictEqual(arrayResult, entities.map((entity) => [ entity ]));
     assert.deepStrictEqual(objectResult, entities.map((entity) => ({ ent: entity })));
   });
 
@@ -115,7 +116,7 @@ describe("Entity wildcard query", () => {
     // Arrange
     const { components } = createEntities({ count: 3 });
 
-    const expectedArray = Object.values(components).map((component) => [component]);
+    const expectedArray = Object.values(components).map((component) => [ component ]);
     const expectedObject = Object.values(components).map((component) => ({ ent: component }));
 
     // Act
@@ -123,7 +124,7 @@ describe("Entity wildcard query", () => {
     const objectResult = query(Object.values(components), { ent: Entity });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [Entity]>(true);
+    assertTypesEqual<typeof arrayResult, [ Entity ]>(true);
     assertTypesEqual<typeof objectResult, { ent: Entity }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
@@ -134,7 +135,7 @@ describe("Entity wildcard query", () => {
     // Arrange
     const { relationships } = createEntities({ count: 3 });
 
-    const expectedArray = Object.values(relationships).map((relationship) => [relationship]);
+    const expectedArray = Object.values(relationships).map((relationship) => [ relationship ]);
     const expectedObject = Object.values(relationships).map((relationship) => ({ ent: relationship }));
 
     // Act
@@ -142,7 +143,7 @@ describe("Entity wildcard query", () => {
     const objectResult = query(Object.values(relationships), { ent: Entity });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [Entity]>(true);
+    assertTypesEqual<typeof arrayResult, [ Entity ]>(true);
     assertTypesEqual<typeof objectResult, { ent: Entity }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
@@ -158,8 +159,8 @@ describe("Entity wildcard query", () => {
     const objectResult = query([], { ent: Entity });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [Entity]>(true);
-    assertTypesEqual<typeof objectResult, {ent: Entity}>(true);
+    assertTypesEqual<typeof arrayResult, [ Entity ]>(true);
+    assertTypesEqual<typeof objectResult, { ent: Entity }>(true);
 
     assert.deepStrictEqual(arrayResult, []);
     assert.deepStrictEqual(objectResult, {});
@@ -174,10 +175,10 @@ describe("Entity wildcard query", () => {
     const objectResult = query(all, { ent: Entity.as("ent") });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [Entity]>(true);
+    assertTypesEqual<typeof arrayResult, [ Entity ]>(true);
     assertTypesEqual<typeof objectResult, { ent: Entity }>(true);
 
-    assert.deepStrictEqual(arrayResult, all.map((entity) => [entity]));
+    assert.deepStrictEqual(arrayResult, all.map((entity) => [ entity ]));
     assert.deepStrictEqual(objectResult, all.map((entity) => ({ ent: entity })));
   });
 
@@ -186,14 +187,14 @@ describe("Entity wildcard query", () => {
     const { entities } = createEntities({ count: 3 });
 
     const expectedArray = permutations(entities);
-    const expectedObject = expectedArray.map(([ent1, ent2]) => ({ ent1, ent2 }));
+    const expectedObject = expectedArray.map(([ ent1, ent2 ]) => ({ ent1, ent2 }));
 
     // Act
     const arrayResult = query(entities, [ Entity, Entity ]);
     const objectResult = query(entities, { ent1: Entity, ent2: Entity });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [Entity, Entity]>(true);
+    assertTypesEqual<typeof arrayResult, [ Entity, Entity ]>(true);
     assertTypesEqual<typeof objectResult, { ent1: Entity, ent2: Entity }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
@@ -204,18 +205,18 @@ describe("Entity wildcard query", () => {
     // Arrange
     const { entities } = createEntities({ count: 3 });
     const expectedArray = [
-      [entities[0], entities[0], entities[0]],
-      [entities[1], entities[0], entities[0]],
-      [entities[2], entities[0], entities[0]],
+      [ entities[0], entities[0], entities[0] ],
+      [ entities[1], entities[0], entities[0] ],
+      [ entities[2], entities[0], entities[0] ],
     ]
-    const expectedObject = expectedArray.map(([ent1, ent2, ent3]) => ({ ent1, ent2, ent3 }));
+    const expectedObject = expectedArray.map(([ ent1, ent2, ent3 ]) => ({ ent1, ent2, ent3 }));
 
     // Act
     const arrayResult = query(entities, [ Entity.once(), Entity, Entity ]);
     const objectResult = query(entities, { ent1: Entity.once(), ent2: Entity, ent3: Entity });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [Entity, Entity, Entity]>(true);
+    assertTypesEqual<typeof arrayResult, [ Entity, Entity, Entity ]>(true);
     assertTypesEqual<typeof objectResult, { ent1: Entity, ent2: Entity, ent3: Entity }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
@@ -226,18 +227,18 @@ describe("Entity wildcard query", () => {
     // Arrange
     const { entities } = createEntities({ count: 3 });
     const expectedArray = [
-      [entities[0], entities[0], entities[0]],
-      [entities[1], entities[1], entities[0]],
-      [entities[2], entities[2], entities[0]],
+      [ entities[0], entities[0], entities[0] ],
+      [ entities[1], entities[1], entities[0] ],
+      [ entities[2], entities[2], entities[0] ],
     ]
-    const expectedObject = expectedArray.map(([ent1, ent2, ent3]) => ({ ent1, ent2, ent3 }));
+    const expectedObject = expectedArray.map(([ ent1, ent2, ent3 ]) => ({ ent1, ent2, ent3 }));
 
     // Act
     const arrayResult = query(entities, [ Entity.once(), Entity.once(), Entity ]);
     const objectResult = query(entities, { ent1: Entity.once(), ent2: Entity.once(), ent3: Entity });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [Entity, Entity, Entity]>(true);
+    assertTypesEqual<typeof arrayResult, [ Entity, Entity, Entity ]>(true);
     assertTypesEqual<typeof objectResult, { ent1: Entity, ent2: Entity, ent3: Entity }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
@@ -248,14 +249,14 @@ describe("Entity wildcard query", () => {
     // Arrange
     const { entities } = createEntities({ count: 3 });
     const expectedArray = permutations(entities);
-    const expectedObject = expectedArray.map(([ent1, ent2]) => ({ ent1, ent2 }));
+    const expectedObject = expectedArray.map(([ ent1, ent2 ]) => ({ ent1, ent2 }));
 
     // Act
     const arrayResult = query(entities, [ Entity.as("one"), Entity.as("two") ]);
     const objectResult = query(entities, { ent1: Entity.as("one"), ent2: Entity.as("two") });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [Entity, Entity]>(true);
+    assertTypesEqual<typeof arrayResult, [ Entity, Entity ]>(true);
     assertTypesEqual<typeof objectResult, { ent1: Entity, ent2: Entity }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
@@ -265,7 +266,7 @@ describe("Entity wildcard query", () => {
   it("Can specify multiple wildcards with same reference name", () => {
     // Arrange
     const { entities } = createEntities({ count: 3 });
-    const expectedArray = entities.map((ent) => [ent, ent]);
+    const expectedArray = entities.map((ent) => [ ent, ent ]);
     const expectedObject = entities.map((ent) => ({ ent1: ent, ent2: ent }));
 
     // Act
@@ -273,7 +274,7 @@ describe("Entity wildcard query", () => {
     const objectResult = query(entities, { ent1: Entity.as("ref"), ent2: Entity.as("ref") });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [Entity, Entity]>(true);
+    assertTypesEqual<typeof arrayResult, [ Entity, Entity ]>(true);
     assertTypesEqual<typeof objectResult, { ent1: Entity, ent2: Entity }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
@@ -284,18 +285,18 @@ describe("Entity wildcard query", () => {
     // Arrange
     const { entities } = createEntities({ count: 3 });
     const expectedArray = [
-      [entities[0], entities[0], entities[0]],
-      [entities[1], entities[1], entities[0]],
-      [entities[2], entities[2], entities[0]],
+      [ entities[0], entities[0], entities[0] ],
+      [ entities[1], entities[1], entities[0] ],
+      [ entities[2], entities[2], entities[0] ],
     ];
-    const expectedObject = expectedArray.map(([ent1, ent2, ent3]) => ({ ent1, ent2, ent3 }));
+    const expectedObject = expectedArray.map(([ ent1, ent2, ent3 ]) => ({ ent1, ent2, ent3 }));
 
     // Act
     const arrayResult = query(entities, [ Entity.as("a").once(), Entity.as("a"), Entity.as("c") ]);
     const objectResult = query(entities, { ent1: Entity.as("a").once(), ent2: Entity.as("a"), ent3: Entity.as("c") });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [Entity, Entity, Entity]>(true);
+    assertTypesEqual<typeof arrayResult, [ Entity, Entity, Entity ]>(true);
     assertTypesEqual<typeof objectResult, { ent1: Entity, ent2: Entity, ent3: Entity }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
@@ -305,27 +306,250 @@ describe("Entity wildcard query", () => {
 
 describe("Entity type query", () => {
   it("Finds that type of base entities are Entity", () => {
+    // Arrange
+    const { entities } = createEntities({ count: 3 });
+
+    // Act
+    const arrayResult = query(entities, [ Entity.type() ]);
+    const objectResult = query(entities, { typ: Entity.type() });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Entity> ]>(true);
+    assertTypesEqual<typeof objectResult, { typ: Class<Entity> }>(true);
+
+    assert.deepStrictEqual(arrayResult, entities.map(() => [ Entity ]));
+    assert.deepStrictEqual(objectResult, entities.map(() => ({ typ: Entity })));
   });
 
   it("Finds that type of component types are the component types", () => {
+    // Arrange
+    const { components } = createEntities({ count: 3 });
+
+    // Act
+    const arrayResult = query(Object.values(components), [ Entity.type() ]);
+    const objectResult = query(Object.values(components), { typ: Entity.type() });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Entity> ]>(true);
+    assertTypesEqual<typeof objectResult, { typ: Class<Entity> }>(true);
+
+    assert.deepStrictEqual(arrayResult, Object.values(components).map(() => [ Component ]));
+    assert.deepStrictEqual(objectResult, Object.values(components).map(() => ({ typ: Component })));
   });
 
   it("Finds that type of relationship types are the relationship types", () => {
+    // Arrange
+    const { relationships } = createEntities({ count: 3 });
+
+    // Act
+    const arrayResult = query(Object.values(relationships), [ Entity.type() ]);
+    const objectResult = query(Object.values(relationships), { typ: Entity.type() });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Entity> ]>(true);
+    assertTypesEqual<typeof objectResult, { typ: Class<Entity> }>(true);
+
+    assert.deepStrictEqual(arrayResult, Object.values(relationships).map(() => [ Relationship ]));
+    assert.deepStrictEqual(objectResult, Object.values(relationships).map(() => ({ typ: Relationship })));
   });
 
   it("Can specify reference name for entity type", () => {
+    // Arrange
+    const { entities } = createEntities({ count: 3 });
+
+    // Act
+    const arrayResult = query(entities, [ Entity.type().as("typ") ]);
+    const objectResult = query(entities, { typ: Entity.type().as("typ") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Entity> ]>(true);
+    assertTypesEqual<typeof objectResult, { typ: Class<Entity> }>(true);
+
+    assert.deepStrictEqual(arrayResult, entities.map(() => [ Entity ]));
+    assert.deepStrictEqual(objectResult, entities.map(() => ({ typ: Entity })));
   });
 
   it("Can find the same entity type multiple times", () => {
+    // Arrange
+    const { entities: [ entity ], components: { Tag1 } } = createEntities({ count: 1 });
+    const entityList = [ entity, Tag1 ];
+
+    const expectedArray = [
+      [ Entity, Entity ],
+      [ Entity, Tag1 ],
+      [ Tag1, Entity ],
+      [ Tag1, Tag1 ],
+    ];
+    const expectedObject = expectedArray.map(([ typ1, typ2 ]) => ({ typ1, typ2 }));
+
+    // Act
+    const arrayResult = query(entityList, [ Entity.type(), Entity.type() ]);
+    const objectResult = query(entityList, { typ1: Entity.type(), typ2: Entity.type() });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Entity>, Class<Entity> ]>(true);
+    assertTypesEqual<typeof objectResult, { typ1: Class<Entity>, typ2: Class<Entity> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
-  it("Can find the same entity type multiple times in the same query", () => {
+  it("Can specify that an entity type may only be found once for a wildcard", () => {
+    // Arrange
+    const {
+      entities: [ entity ],
+      components: { Tag1 },
+      relationships: { Number1 },
+    } = createEntities({ count: 1 });
+    const entityList = [ entity, Tag1, Number1 ];
+
+    const expectedArray = [
+      [ Entity, Entity, Entity ],
+      [ Tag1, Entity, Entity ],
+      [ Number1, Entity, Entity ],
+    ];
+    const expectedObject = expectedArray.map(([ typ1, typ2, typ3 ]) => ({ typ1, typ2, typ3 }));
+
+    // Act
+    const arrayResult = query(entityList, [ Entity.type().once(), Entity.type(), Entity.type() ]);
+    const objectResult = query(entityList, { typ1: Entity.type().once(), typ2: Entity.type(), typ3: Entity.type() });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Entity>, Class<Entity>, Class<Entity> ]>(true);
+    assertTypesEqual<typeof objectResult, { typ1: Class<Entity>, typ2: Class<Entity>, typ3: Class<Entity> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
-  it("Can specify that an entity type may only be found once for a given query", () => {
+  it("Can specify that multiple entities types may only be found once for their wildcards", () => {
+    // Arrange
+    const {
+      entities: [ entity ],
+      components: { Tag1 },
+      relationships: { Number1 },
+    } = createEntities({ count: 1 });
+    const entityList = [ entity, Tag1, Number1 ];
+
+    const expectedArray = [
+      [ Entity, Entity, Entity ],
+      [ Tag1, Tag1, Entity ],
+      [ Number1, Number1, Entity ],
+    ];
+    const expectedObject = expectedArray.map(([ typ1, typ2, typ3 ]) => ({ typ1, typ2, typ3 }));
+
+    // Act
+    const arrayResult = query(
+      entityList,
+      [ Entity.type().once(), Entity.type().once(), Entity.type() ],
+    );
+    const objectResult = query(
+      entityList,
+      { typ1: Entity.type().once(), typ2: Entity.type().once(), typ3: Entity.type() },
+    );
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Entity>, Class<Entity>, Class<Entity> ]>(true);
+    assertTypesEqual<typeof objectResult, { typ1: Class<Entity>, typ2: Class<Entity>, typ3: Class<Entity> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
-  it("Can specify that an entity type may only be found once, while another may be found multiple times", () => {
+  it("Can specify multiple types with different reference names", () => {
+    // Arrange
+    const {
+      entities: [ entity ],
+      components: { Tag1 },
+      relationships: { Number1 },
+    } = createEntities({ count: 1 });
+    const entityList = [ entity, Tag1, Number1 ];
+
+    const expectedArray = [
+      [ Entity, Entity ],
+      [ Entity, Tag1 ],
+      [ Entity, Number1 ],
+      [ Tag1, Entity ],
+      [ Tag1, Tag1 ],
+      [ Tag1, Number1 ],
+      [ Number1, Entity ],
+      [ Number1, Tag1 ],
+      [ Number1, Number1 ],
+    ];
+    const expectedObject = expectedArray.map(([ typ1, typ2 ]) => ({ typ1, typ2 }));
+
+    // Act
+    const arrayResult = query(entityList, [ Entity.type().as("one"), Entity.type().as("two") ]);
+    const objectResult = query(entityList, { typ1: Entity.type().as("one"), typ2: Entity.type().as("two") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Entity>, Class<Entity> ]>(true);
+    assertTypesEqual<typeof objectResult, { typ1: Class<Entity>, typ2: Class<Entity> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
+
+  it("Can specify multiple types with same reference name", () => {
+    // Arrange
+    const {
+      entities: [ entity ],
+      components: { Tag1 },
+      relationships: { Number1 },
+    } = createEntities({ count: 1 });
+    const entityList = [ entity, Tag1, Number1 ];
+
+    const expectedArray = [
+      [ Entity, Entity ],
+      [ Tag1, Tag1 ],
+      [ Number1, Number1 ],
+    ];
+    const expectedObject = expectedArray.map(([ typ1, typ2 ]) => ({ typ1, typ2 }));
+
+    // Act
+    const arrayResult = query(entityList, [ Entity.type().as("ref"), Entity.type().as("ref") ]);
+    const objectResult = query(entityList, { typ1: Entity.type().as("ref"), typ2: Entity.type().as("ref") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Entity>, Class<Entity> ]>(true);
+    assertTypesEqual<typeof objectResult, { typ1: Class<Entity>, typ2: Class<Entity> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
+
+  it("Can specify same reference name on a type as another type that may only be found once", () => {
+    // Arrange
+    const {
+      entities: [ entity ],
+      components: { Tag1 },
+      relationships: { Number1 },
+    } = createEntities({ count: 1 });
+    const entityList = [ entity, Tag1, Number1 ];
+
+    const expectedArray = [
+      [ Entity, Entity, Entity ],
+      [ Tag1, Tag1, Entity ],
+      [ Number1, Number1, Entity ],
+    ];
+    const expectedObject = expectedArray.map(([ typ1, typ2, typ3 ]) => ({ typ1, typ2, typ3 }));
+
+    // Act
+    const arrayResult = query(
+      entityList,
+      [ Entity.type().as("a").once(), Entity.type().as("a"), Entity.type().as("c") ],
+    );
+    const objectResult = query(
+      entityList,
+      { typ1: Entity.type().as("a").once(), typ2: Entity.type().as("a"), ent3: Entity.type().as("c") },
+    );
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Entity>, Class<Entity>, Class<Entity> ]>(true);
+    assertTypesEqual<typeof objectResult, { typ1: Class<Entity>, typ2: Class<Entity>, ent3: Class<Entity> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 });
 
@@ -702,5 +926,5 @@ function createEntities(options: {
 }
 
 function permutations<T>(array: T[]): T[][] {
-  return array.flatMap((item1) => array.map((item2) => [item1, item2]));
+  return array.flatMap((item1) => array.map((item2) => [ item1, item2 ]));
 }
