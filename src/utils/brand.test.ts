@@ -1,7 +1,4 @@
-import {
-  describe,
-  it,
-} from "node:test";
+import { describe, it, } from "node:test";
 import type { Brand } from "./brand.ts";
 import { brand } from "./brand.ts";
 

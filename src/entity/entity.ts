@@ -1,13 +1,8 @@
 import { ComponentValueStore } from "./component-value-store.ts";
-import { EntityQuery } from "./entity-query.ts";
-import type {
-  Component,
-  ComponentValue,
-  ComponentValuePair,
-  ComponentValues,
-  Tag,
-} from "../component/index.ts";
+import { EntityWildcardQuery } from "./entity-wildcard-query.ts";
+import type { Component, ComponentValue, ComponentValuePair, ComponentValues, Tag, } from "../component/index.ts";
 import type { Nullable } from "../utils/nullable.ts";
+import { EntityTypeQuery } from "./entity-type-query.ts";
 
 export class Entity {
   static #brand = "Entity" as const;
@@ -22,13 +17,17 @@ export class Entity {
   }
 
 
-  static as(name: string): EntityQuery {
-    return new EntityQuery().as(name);
+  static as(name: string): EntityWildcardQuery {
+    return new EntityWildcardQuery().as(name);
   }
 
 
-  static once(): EntityQuery {
-    return new EntityQuery().once();
+  static once(): EntityWildcardQuery {
+    return new EntityWildcardQuery().once();
+  }
+
+  static type() {
+    return new EntityTypeQuery()
   }
 
 

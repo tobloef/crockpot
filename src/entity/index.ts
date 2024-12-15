@@ -1,2 +1,2 @@
 export * from "./entity.ts";
-export * from "./entity-query.ts";
+export * from "./entity-wildcard-query.ts";

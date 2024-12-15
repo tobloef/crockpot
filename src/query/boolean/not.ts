@@ -7,5 +7,5 @@ export type Not<QueryPart extends NonBooleanQueryPart> = {
 export function not<QueryPart extends NonBooleanQueryPart>(
   queryPart: QueryPart,
 ): Not<QueryPart> {
-  return {__not: queryPart};
+  return { __not: queryPart };
 }

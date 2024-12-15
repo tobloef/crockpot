@@ -1,11 +1,9 @@
 import { Entity } from "../entity/index.ts";
-import {
-  type RelationshipComponent,
-  RelationshipComponentStore,
-} from "./relationship-component-store.ts";
-import { Component, ComponentQuery } from "../component/index.ts";
+import { type RelationshipComponent, RelationshipComponentStore, } from "./relationship-component-store.ts";
+import { Component } from "../component/index.ts";
 import { RelationshipQuery } from "./relationship-query.ts";
 import type { Wildcard } from "../query/index.ts";
+import { RelationshipWildcardQuery } from "./relationship-wildcard-query.ts";
 
 export class Relationship<
   Value = undefined,
@@ -15,22 +13,22 @@ export class Relationship<
 
 
   static override as(name: string) {
-    return new RelationshipQuery(this).as(name);
+    return new RelationshipWildcardQuery().as(name);
   }
 
 
   static override once() {
-    return new RelationshipQuery(this).once();
+    return new RelationshipWildcardQuery().once();
   }
 
 
   static on(source: RelationshipSource) {
-    return new RelationshipQuery(this).on(source);
+    return new RelationshipWildcardQuery().on(source);
   }
 
 
   static to(target: RelationshipTarget) {
-    return new RelationshipQuery(this).to(target);
+    return new RelationshipWildcardQuery().to(target);
   }
 
 
@@ -42,7 +40,6 @@ export class Relationship<
   as(name: string): RelationshipQuery<typeof this> {
     return new RelationshipQuery(this).as(name);
   }
-
 
 
   on(source: RelationshipSource): RelationshipQuery<typeof this> {
@@ -115,4 +112,4 @@ export type RelationshipValue<RelationshipType extends Relationship<any>> = (
   RelationshipType extends Relationship<infer Value>
     ? Value
     : never
-);
+  );

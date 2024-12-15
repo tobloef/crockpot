@@ -1,6 +1,6 @@
 import type { Component, ComponentSource } from "./component.ts";
 import type { Class } from "../utils/class.ts";
-import { EntityQuery } from "../entity/index.ts";
+import { EntityQuery } from "../entity/entity-query.ts";
 
 export class ComponentQuery<
   ComponentType extends Component<any> | Class<Component<any>>,
@@ -34,7 +34,6 @@ export class ComponentQuery<
     super.once();
     return this;
   }
-
 
   on(source: ComponentSource): ComponentQuery<ComponentType> {
     this.#source = source;

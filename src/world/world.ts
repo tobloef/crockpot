@@ -1,18 +1,8 @@
 import { Entity } from "../entity/index.ts";
 import { NotImplementedError } from "../utils/errors/not-implemented-error.ts";
 
-import type {
-  ComponentValuePair,
-  Tag,
-} from "../component/index.ts";
-import type {
-  QueryArrayInput,
-  QueryInput,
-  QueryObjectInput,
-  QueryOutput,
-  QueryPart,
-  SpreadOrObjectQueryInput,
-} from "../query/index.ts";
+import type { ComponentValuePair, Tag, } from "../component/index.ts";
+import type { QueryArrayInput, QueryInput, QueryObjectInput, QueryOutput, QueryPart, SpreadOrObjectQueryInput, } from "../query/index.ts";
 
 export class World {
   #entities: Entity[] = [];

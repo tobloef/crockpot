@@ -1,10 +1,6 @@
 import { NotImplementedError } from "../utils/errors/not-implemented-error.ts";
 import type { Entity } from "../entity/index.ts";
-import type {
-  QueryArrayInput,
-  QueryInput,
-  QueryObjectInput,
-} from "./input.ts";
+import type { QueryArrayInput, QueryInput, QueryObjectInput, } from "./input.ts";
 import type { QueryPart } from "./part.ts";
 import type { QueryOutput } from "./output.ts";
 

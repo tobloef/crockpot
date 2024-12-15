@@ -1,12 +1,7 @@
-import {
-  describe,
-  it,
-} from "node:test";
+import { describe, it, } from "node:test";
 import * as assert from "node:assert";
 import { Entity } from "./entity.ts";
-import {
-  Component,
-} from "../component/index.ts";
+import { Component, } from "../component/index.ts";
 import { Relationship } from "../relationship/index.ts";
 
 describe(Entity.name, () => {
@@ -129,7 +124,10 @@ describe(Entity.prototype.get.name, () => {
     const entity = new Entity();
 
     // @ts-expect-error
-    try { entity.get() } catch {}
+    try {
+      entity.get()
+    } catch {
+    }
   });
 
   it("Get one component", () => {
@@ -178,7 +176,7 @@ describe(Entity.prototype.get.name, () => {
 
     assert.deepStrictEqual(
       components,
-      {one: 42, two: "42"},
+      { one: 42, two: "42" },
     );
   });
 
@@ -188,7 +186,7 @@ describe(Entity.prototype.get.name, () => {
     entity.add(TestTag);
 
     assert.deepStrictEqual(entity.get(TestTag), undefined);
-    assert.deepStrictEqual(entity.get({tag: TestTag}), { tag: undefined });
+    assert.deepStrictEqual(entity.get({ tag: TestTag }), { tag: undefined });
     assert.deepStrictEqual(entity.get([TestTag, TestTag]), [undefined, undefined]);
   });
 
@@ -214,9 +212,9 @@ describe(Entity.prototype.get.name, () => {
     const entity = new Entity();
     const TestComponent = new Component<number>();
 
-    const components = entity.get({one: TestComponent, two: TestComponent});
+    const components = entity.get({ one: TestComponent, two: TestComponent });
 
-    assert.deepStrictEqual(components, {one: null, two: null});
+    assert.deepStrictEqual(components, { one: null, two: null });
   });
 
   it("Get relationship component", () => {
@@ -307,7 +305,7 @@ describe(Entity.prototype.has.name, () => {
     const entity = new Entity();
     const TestComponent = new Component<number>();
 
-    const hasComponents = entity.has({one: TestComponent, two: TestComponent});
+    const hasComponents = entity.has({ one: TestComponent, two: TestComponent });
 
     assert.strictEqual(hasComponents, false);
   });

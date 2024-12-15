@@ -1,6 +1,6 @@
-import { EntityQuery } from "../entity/index.ts";
 import type { Relationship, RelationshipSource, RelationshipTarget } from "./relationship.ts";
 import type { Class } from "../utils/class.ts";
+import { EntityQuery } from "../entity/entity-query.ts";
 
 export class RelationshipQuery<
   RelationshipType extends Relationship<any> | Class<Relationship<any>>,

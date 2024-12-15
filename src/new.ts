@@ -324,19 +324,19 @@ const Likes = new Relationship({
 
 const Loves = new Relationship();
 
-const john = new Entity().add(Name.with({value: "John Dogowner"}));
+const john = new Entity().add(Name.with({ value: "John Dogowner" }));
 world.insert(john);
 
 john.add(Human);
-john.add(Likes.with({reason: "test"})); // Wrong, but still somewhat valid usage
+john.add(Likes.with({ reason: "test" })); // Wrong, but still somewhat valid usage
 
 // @ts-expect-error
 john.add(Name);
 
 const snoopy = world.create(Dog);
-snoopy.add(Name.with({value: "Snoopy"}));
+snoopy.add(Name.with({ value: "Snoopy" }));
 
-john.add(Likes.to(snoopy).with({reason: "Good boy"}));
+john.add(Likes.to(snoopy).with({ reason: "Good boy" }));
 john.add(Loves.to(Dog));
 
 // @ts-expect-error
@@ -370,7 +370,7 @@ type Or<QueryParts extends NonBooleanQueryPart[]> = {
 export function or<QueryParts extends NonBooleanQueryPart[]>(
   ...types: QueryParts
 ): Or<QueryParts> {
-  return {__or: types};
+  return { __or: types };
 }
 
 type Not<QueryPart extends NonBooleanQueryPart> = {
@@ -380,7 +380,7 @@ type Not<QueryPart extends NonBooleanQueryPart> = {
 export function not<QueryPart extends NonBooleanQueryPart>(
   type: QueryPart,
 ): Not<QueryPart> {
-  return {__not: type};
+  return { __not: type };
 }
 
 type Optional<QueryPart extends NonBooleanQueryPart> = {
@@ -390,7 +390,7 @@ type Optional<QueryPart extends NonBooleanQueryPart> = {
 export function optional<QueryPart extends NonBooleanQueryPart>(
   type: QueryPart,
 ): Optional<QueryPart> {
-  return {__optional: type};
+  return { __optional: type };
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -500,17 +500,17 @@ const IsA = new Relationship();
 /////////////////////////////////////////////////////////////////////////////////////
 
 const Spaceship = new Component();
-const Faction = new Component({slogan: String});
+const Faction = new Component({ slogan: String });
 const Planet = new Component();
 const Docked = new Relationship();
 const RuledBy = new Relationship();
 const Allied = new Relationship();
 
 const empire = new Entity();
-empire.add(Faction.with({slogan: "For the Empire!"}));
+empire.add(Faction.with({ slogan: "For the Empire!" }));
 
 const rebels = new Entity();
-rebels.add(Faction.with({slogan: "For the Rebellion!"}));
+rebels.add(Faction.with({ slogan: "For the Rebellion!" }));
 
 const yavin4 = new Entity();
 yavin4.add(Planet);

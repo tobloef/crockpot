@@ -7,4 +7,4 @@ export type Wildcard = (
   | Class<Entity>
   | Class<Component<any>>
   | Class<Relationship<any>>
-);
+  );

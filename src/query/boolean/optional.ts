@@ -7,5 +7,5 @@ export type Optional<QueryPart extends NonBooleanQueryPart> = {
 export function optional<QueryPart extends NonBooleanQueryPart>(
   queryPart: QueryPart,
 ): Optional<QueryPart> {
-  return {__optional: queryPart};
+  return { __optional: queryPart };
 }

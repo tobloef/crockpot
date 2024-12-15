@@ -1,8 +1,4 @@
-import type {
-  Component,
-  ComponentValue,
-  Tag,
-} from "../component/index.ts";
+import type { Component, ComponentValue, Tag, } from "../component/index.ts";
 
 export class ComponentValueStore {
   // Stores null for components that have no value, so we can differentiate between
@@ -62,9 +58,9 @@ export class ComponentValueStore {
 
     return {
       next: () => {
-        const {done, value} = entries.next();
+        const { done, value } = entries.next();
         if (done) {
-          return {done, value};
+          return { done, value };
         }
         const [component, componentValue] = value;
 

@@ -1,20 +1,9 @@
-import {
-  describe,
-  it,
-} from "node:test";
-import {
-  Relationship,
-  type RelationshipValue
-} from "./relationship.ts";
+import { describe, it, } from "node:test";
+import { Relationship, type RelationshipValue } from "./relationship.ts";
 import * as assert from "node:assert";
 import { Entity } from "../entity/index.ts";
-import {
-  Component,
-  type ComponentValue
-} from "../component/index.ts";
-import {
-  assertTypesEqual,
-} from "../utils/type-assertions.ts";
+import { Component, type ComponentValue } from "../component/index.ts";
+import { assertTypesEqual, } from "../utils/type-assertions.ts";
 
 describe(Relationship.name, () => {
   it("Create relationship without name", () => {
@@ -40,7 +29,7 @@ describe(Relationship.name, () => {
   });
 
   it("Relationship with value type has matching value", () => {
-    const TestRelationship= new Relationship<number>();
+    const TestRelationship = new Relationship<number>();
 
     const rightValue: RelationshipValue<typeof TestRelationship> = 123;
     // @ts-expect-error

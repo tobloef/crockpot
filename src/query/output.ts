@@ -1,23 +1,10 @@
-import type {
-  QueryArrayInput,
-  QueryInput,
-  QueryObjectInput,
-} from "./input.ts";
+import type { QueryArrayInput, QueryInput, QueryObjectInput, } from "./input.ts";
 import type { QueryPart } from "./part.ts";
-import type {
-  Not,
-  Optional,
-  Or,
-} from "./boolean/index.ts";
-import type {
-  Component,
-  ComponentQuery,
-} from "../component/index.ts";
-import type {
-  Entity,
-  EntityQuery,
-} from "../entity/index.ts";
+import type { Not, Optional, Or, } from "./boolean/index.ts";
+import type { Component, ComponentQuery, } from "../component/index.ts";
+import type { Entity, EntityWildcardQuery, } from "../entity/index.ts";
 import { Relationship, RelationshipQuery } from "../relationship/index.ts";
+import type { Class } from "../utils/class.ts";
 
 export type QueryOutput<Input extends QueryInput> = (
   Input extends QueryPart
@@ -46,36 +33,34 @@ export type QueryObjectOutput<Input extends QueryObjectInput<QueryPart>> = {
 };
 
 export type QueryPartOutput<Part extends QueryPart> = (
-  Part extends Entity
-    ? Entity
-    : never
-);
-
-export type QueryPartOutputReal<Part extends QueryPart> = (
   Part extends Optional<infer Type>
     ? (QueryPartOutput<Type> | undefined)
     : Part extends Not<any>
       ? never
       : Part extends Or<infer Types>
         ? ParseOr<Types>
-        : Part extends ComponentQuery<infer ComponentType>
-          ? ComponentType extends Component<infer Value>
+        : Part extends RelationshipQuery<infer RelationshipType>
+          ? RelationshipType extends Relationship<infer Value>
             ? Value
             : never
-          : Part extends RelationshipQuery<infer RelationshipType>
-            ? RelationshipType extends Relationship<infer Value>
+          : Part extends ComponentQuery<infer ComponentType>
+            ? ComponentType extends Component<infer Value>
               ? Value
               : never
-            : Part extends Component<infer Value>
-              ? Value
+            : Part extends EntityWildcardQuery
+              ? Entity
               : Part extends Relationship<infer Value>
                 ? Value
-                : Part extends EntityQuery
-                  ? Entity
-                  : Part extends Entity
-                    ? Entity
-                    : never
-);
+                : Part extends Component<infer Value>
+                  ? Value
+                  : Part extends Class<Relationship>
+                    ? Relationship<any>
+                    : Part extends Class<Component>
+                      ? Component<any>
+                      : Part extends Class<Entity>
+                        ? Entity
+                        : never
+  );
 
 export type ParseOr<Parts extends any[]> = (
   Parts extends [infer First, ...infer Rest]
