@@ -160,7 +160,7 @@ describe(Relationship.prototype.to.name, () => {
     const TestRelationship = new Relationship();
     const query = TestRelationship.to(Component);
 
-    assert.strictEqual(query.target, Entity);
+    assert.strictEqual(query.target, Component);
     assert.strictEqual(query.entity, TestRelationship);
   });
 
@@ -168,7 +168,7 @@ describe(Relationship.prototype.to.name, () => {
     const TestRelationship = new Relationship();
     const query = TestRelationship.to(Relationship);
 
-    assert.strictEqual(query.target, Entity);
+    assert.strictEqual(query.target, Relationship);
     assert.strictEqual(query.entity, TestRelationship);
   });
 });
@@ -238,12 +238,12 @@ describe(Relationship.to.name, () => {
   it("Create relationship wildcard query with component wildcard as target", () => {
     const query = Relationship.to(Component);
 
-    assert.strictEqual(query.target, Entity);
+    assert.strictEqual(query.target, Component);
   });
 
   it("Create relationship wildcard query with relationship wildcard as target", () => {
     const query = Relationship.to(Relationship);
 
-    assert.strictEqual(query.target, Entity);
+    assert.strictEqual(query.target, Relationship);
   });
 });
