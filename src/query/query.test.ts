@@ -555,45 +555,275 @@ describe("Entity type query", () => {
 
 describe("Component instance query", () => {
   it("Finds tag components on entities", () => {
+    // Arrange
+    const { all, entities, components: { Tag1, Tag2 } } = createEntities({ count: 4 });
+    entities[1].add(Tag1);
+    entities[3].add(Tag2);
+
+    // Act
+    const arrayResult = query(all, [ Tag1 ]);
+    const objectResult = query(all, { tag: Tag1 });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ undefined ]>(true);
+    assertTypesEqual<typeof objectResult, { tag: undefined }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ [ undefined ] ]);
+    assert.deepStrictEqual(objectResult, [ { tag: undefined } ]);
   });
 
   it("Finds value component on entities", () => {
+    // Arrange
+    const { all, entities, components: { Number1, Number2 } } = createEntities({ count: 4 });
+    entities[1].add(Number1.withValue(1));
+    entities[3].add(Number2.withValue(2));
+
+    // Act
+    const arrayResult = query(all, [ Number1 ]);
+    const objectResult = query(all, { val: Number1 });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ [ 1 ] ]);
+    assert.deepStrictEqual(objectResult, [ { val: 1 } ]);
   });
 
-  it("Can find multiple different component values in single query", () => {
+  it("Can require multiple different component values in single query", () => {
+    // Arrange
+    const { all, entities, components: { Number1, Number2 } } = createEntities({ count: 4 });
+    entities[1].add(Number1.withValue(1));
+    entities[1].add(Number2.withValue(2));
+    entities[2].add(Number1.withValue(3));
+    entities[3].add(Number2.withValue(4));
+
+    // Act
+    const arrayResult = query(all, [ Number1, Number2 ]);
+    const objectResult = query(all, { val1: Number1, val2: Number2 });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number, number ]>(true);
+    assertTypesEqual<typeof objectResult, { val1: number, val2: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ [ 1, 2 ] ]);
+    assert.deepStrictEqual(objectResult, [ { val1: 1, val2: 2 } ]);
+  });
+
+  it("Can find multiple value instances of the same component", () => {
+    // Arrange
+    const { all, entities, components: { Number1 } } = createEntities({ count: 4 });
+    entities[1].add(Number1.withValue(1));
+    entities[2].add(Number1.withValue(2));
+
+    // Act
+    const arrayResult = query(all, [ Number1 ]);
+    const objectResult = query(all, { val: Number1 });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ [ 1 ], [ 2 ] ]);
+    assert.deepStrictEqual(objectResult, [ { val: 1 }, { val: 2 } ]);
   });
 
   it("Can find same component value multiple times in single query", () => {
+    // Arrange
+    const { all, entities, components: { Number1 } } = createEntities({ count: 4 });
+    entities[1].add(Number1.withValue(1));
+    entities[2].add(Number1.withValue(2));
+
+    // Act
+    const arrayResult = query(all, [ Number1, Number1 ]);
+    const objectResult = query(all, { val1: Number1, val2: Number1 });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number, number ]>(true);
+    assertTypesEqual<typeof objectResult, { val1: number, val2: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ [ 1, 1 ], [ 2, 2 ] ]);
+    assert.deepStrictEqual(objectResult, [ { val1: 1, val2: 1 }, { val1: 2, val2: 2 } ]);
   });
 
   it("Does not find component value if not on an entity", () => {
+    // Arrange
+    const { all, components: { Number1 } } = createEntities({ count: 4 });
+
+    // Act
+    const arrayResult = query(all, [ Number1 ]);
+    const objectResult = query(all, { val: Number1 });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ ]);
+    assert.deepStrictEqual(objectResult, [ ]);
   });
 
   it("Finds component value on specific entity", () => {
+    // Arrange
+    const { all, entities, components: { Number1, Number2 } } = createEntities({ count: 4 });
+    entities[1].add(Number1.withValue(1));
+    entities[3].add(Number1.withValue(2));
+
+    // Act
+    const arrayResult = query(all, [ Number1.on(entities[1]) ]);
+    const objectResult = query(all, { val: Number1.on(entities[1]) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ [ 1 ] ]);
+    assert.deepStrictEqual(objectResult, [ { val: 1 } ]);
+  });
+
+  it("Finds component value on unused reference", () => {
+    // Arrange
+    const { all, entities, components: { Number1, Number2 } } = createEntities({ count: 4 });
+    entities[1].add(Number1.withValue(1));
+    entities[3].add(Number1.withValue(2));
+
+    // Act
+    const arrayResult = query(all, [ Number1.on("ref") ]);
+    const objectResult = query(all, { val: Number1.on("ref") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ [ 1 ], [ 2 ] ]);
+    assert.deepStrictEqual(objectResult, [ { val: 1 }, { val: 2 } ]);
   });
 
   it("Finds component value on entity reference", () => {
+    // Arrange
+    const { all, entities, components: { Number1 } } = createEntities({ count: 4 });
+    entities[1].add(Number1.withValue(1));
+    entities[3].add(Number1.withValue(2));
+
+    // Act
+    const arrayResult = query(all, [ Entity.as("ref"), Number1.on("ref") ]);
+    const objectResult = query(all, { ent: Entity, val: Number1.on("ref") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Entity, number ]>(true);
+    assertTypesEqual<typeof objectResult, { ent: Entity, val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ [ entities[1], 1 ], [ entities[3], 2 ] ]);
+    assert.deepStrictEqual(objectResult, [ { ent: entities[1], val: 1 }, { ent: entities[3], val: 2 } ]);
   });
 
   it("Finds component value on any entity using wildcard", () => {
+    // Arrange
+    const { all, entities, components: { Number1 } } = createEntities({ count: 4 });
+    entities[1].add(Number1.withValue(1));
+    entities[3].add(Number1.withValue(2));
+
+    // Act
+    const arrayResult = query(all, [ Number1.on(Entity) ]);
+    const objectResult = query(all, { val: Number1.on(Entity) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ [ 1 ], [ 2 ] ]);
+    assert.deepStrictEqual(objectResult, [ { val: 1 }, { val: 2 } ]);
   });
 
   it("Finds component value on any component type using wildcard", () => {
+    // Arrange
+    const { all, entities, components: { Number1, Tag1 } } = createEntities({ count: 4 });
+    entities[1].add(Number1.withValue(1));
+    entities[3].add(Number1.withValue(2));
+    Number1.add(Number1.withValue(3));
+    Tag1.add(Number1.withValue(4));
+
+    // Act
+    const arrayResult = query(all, [ Number1.on(Component) ]);
+    const objectResult = query(all, { val: Number1.on(Component) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ [ 3 ], [ 4 ] ]);
+    assert.deepStrictEqual(objectResult, [ { val: 3 }, { val: 4 } ]);
   });
 
   it("Finds component value on any relationship type using wildcard", () => {
+    // Arrange
+    const { all, entities, components, relationships } = createEntities({ count: 4 });
+    entities[1].add(components.Number1.withValue(1));
+    components.Number1.add(components.Number1.withValue(2));
+    relationships.Tag1.add(components.Number1.withValue(3));
+    relationships.String1.add(components.Number1.withValue(4));
+
+    // Act
+    const arrayResult = query(all, [ components.Number1.on(Relationship) ]);
+    const objectResult = query(all, { val: components.Number1.on(Relationship) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ [ 3 ], [ 4 ] ]);
+    assert.deepStrictEqual(objectResult, [ { val: 3 }, { val: 4 } ]);
   });
 
   it("Does not find component value on specific entity if it does not have it", () => {
+    // Arrange
+    const { all, entities, components: { Number1 } } = createEntities({ count: 4 });
+
+    // Act
+    const arrayResult = query(all, [ Number1.on(entities[0]) ]);
+    const objectResult = query(all, { val: Number1.on(entities[0]) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ ]);
+    assert.deepStrictEqual(objectResult, [ ]);
   });
 
   it("Does not find component value on specific entity if entity not in list", () => {
-  });
+    // Arrange
+    const { all, entities, components: { Number1 } } = createEntities({ count: 4 });
+    const entity = new Entity();
+    entity.add(Number1.withValue(1));
 
-  it("Finds entity with the specific component", () => {
+    // Act
+    const arrayResult = query(all, [ Number1.on(entity) ]);
+    const objectResult = query(all, { val: Number1.on(entity) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ ]);
+    assert.deepStrictEqual(objectResult, [ ]);
   });
 
   it("Does not find anything if query only has partial match", () => {
+    // Arrange
+    const { all, entities, components: { Number1, Number2 } } = createEntities({ count: 3 });
+    entities[1].add(Number1.withValue(1));
+
+
+    // Act
+    const arrayResult = query(all, [ Number1, Number2 ]);
+    const objectResult = query(all, { val1: Number1, val2: Number2 });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number, number ]>(true);
+    assertTypesEqual<typeof objectResult, { val1: number, val2: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ ]);
+    assert.deepStrictEqual(objectResult, [ ]);
   });
 });
 
@@ -873,16 +1103,16 @@ function createEntities(options: {
   all: Entity[],
   entities: Entity[],
   components: {
-    Tag1: Component<undefined>,
-    Tag2: Component<undefined>,
+    Tag1: Component,
+    Tag2: Component,
     Number1: Component<number>,
     Number2: Component<number>,
     String1: Component<string>,
     String2: Component<string>,
   },
   relationships: {
-    Tag1: Relationship<undefined>,
-    Tag2: Relationship<undefined>,
+    Tag1: Relationship,
+    Tag2: Relationship,
     Number1: Relationship<number>,
     Number2: Relationship<number>,
     String1: Relationship<string>,
