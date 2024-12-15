@@ -23,6 +23,7 @@ import {
 } from "../relationship/index.ts";
 import type { Class } from "../utils/class.ts";
 import type { EntityTypeQuery } from "../entity/queries/entity-type-query.js";
+import type { ComponentWildcardQuery } from "../component/queries/component-wildcard-query.js";
 
 export type QueryOutput<Input extends QueryInput> =
   Input extends QueryPart ? QueryPartOutput<Input> :
@@ -51,13 +52,14 @@ type QueryPartOutput<Part> =
   Part extends Or<infer Types> ? ParseOr<Types> :
   Part extends RelationshipInstanceQuery<infer RelationshipType> ? RelationshipValue<RelationshipType> :
   Part extends ComponentInstanceQuery<infer ComponentType> ? ComponentValue<ComponentType> :
+  Part extends ComponentWildcardQuery ? Component<any> :
+  Part extends Class<Relationship> ? Relationship<any> :
+  Part extends Class<Component> ? Component<any> :
   Part extends Class<Entity> ? Entity :
   Part extends EntityTypeQuery ? Class<Entity> :
   Part extends EntityWildcardQuery ? Entity :
   Part extends Relationship<infer Value> ? Value :
   Part extends Component<infer Value> ? Value :
-  Part extends Class<Relationship> ? Relationship<any> :
-  Part extends Class<Component> ? Component<any> :
   Part extends Entity ? Entity :
   never;
 
