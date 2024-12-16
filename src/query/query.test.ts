@@ -1256,7 +1256,7 @@ describe("Component type query", () => {
 
   it("Can specify relationship wildcard as source of component type", () => {
     // Arrange
-    const { all, components: { Number1, Number2 }, relationships: { Tag1} } = createEntities({ count: 3 });
+    const { all, components: { Number1, Number2 }, relationships: { Tag1 } } = createEntities({ count: 3 });
 
     Tag1.add(Number1.withValue(1));
     Number1.add(Number1.withValue(2));
@@ -1394,11 +1394,9 @@ describe("Relationship wildcard query", () => {
   it("Can find the same relationship value with two different wildcards", () => {
   });
 
-  it(
-    "Can specify that a given relationship type may only be found once, while another may be found multiple times",
-    () => {
-    },
-  );
+  it("Can specify that a relationship type may only be found once, while other may be found multiple times", () => {
+
+  });
 
   it("Finds direct circular relationship", () => {
   });
@@ -1424,11 +1422,8 @@ describe("Relationship type query", () => {
   it("Can specify that a given relationship type may only be found once", () => {
   });
 
-  it(
-    "Can specify that a given relationship type may only be found once, while another may be found multiple times",
-    () => {
-    },
-  );
+  it("Can specify that a relationship type may only be found once, while other may be found multiple times", () => {
+  });
 
   it("Can specify source entity of relationship type", () => {
   });
