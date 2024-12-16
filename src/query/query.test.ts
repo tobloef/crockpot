@@ -658,8 +658,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, [ number ]>(true);
     assertTypesEqual<typeof objectResult, { val: number }>(true);
 
-    assert.deepStrictEqual(arrayResult, [ ]);
-    assert.deepStrictEqual(objectResult, [ ]);
+    assert.deepStrictEqual(arrayResult, []);
+    assert.deepStrictEqual(objectResult, []);
   });
 
   it("Finds component value on specific entity", () => {
@@ -786,8 +786,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, [ number ]>(true);
     assertTypesEqual<typeof objectResult, { val: number }>(true);
 
-    assert.deepStrictEqual(arrayResult, [ ]);
-    assert.deepStrictEqual(objectResult, [ ]);
+    assert.deepStrictEqual(arrayResult, []);
+    assert.deepStrictEqual(objectResult, []);
   });
 
   it("Does not find component value on specific entity if entity not in list", () => {
@@ -804,15 +804,14 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, [ number ]>(true);
     assertTypesEqual<typeof objectResult, { val: number }>(true);
 
-    assert.deepStrictEqual(arrayResult, [ ]);
-    assert.deepStrictEqual(objectResult, [ ]);
+    assert.deepStrictEqual(arrayResult, []);
+    assert.deepStrictEqual(objectResult, []);
   });
 
   it("Does not find anything if query only has partial match", () => {
     // Arrange
     const { all, entities, components: { Number1, Number2 } } = createEntities({ count: 3 });
     entities[1].add(Number1.withValue(1));
-
 
     // Act
     const arrayResult = query(all, [ Number1, Number2 ]);
@@ -822,8 +821,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, [ number, number ]>(true);
     assertTypesEqual<typeof objectResult, { val1: number, val2: number }>(true);
 
-    assert.deepStrictEqual(arrayResult, [ ]);
-    assert.deepStrictEqual(objectResult, [ ]);
+    assert.deepStrictEqual(arrayResult, []);
+    assert.deepStrictEqual(objectResult, []);
   });
 });
 
@@ -835,7 +834,7 @@ describe("Component wildcard query", () => {
     entities[1].add(components.Tag1);
     entities[2].add(components.Number1.withValue(1), components.Tag2);
 
-    const expectedArray = [[undefined], [1], [undefined]];
+    const expectedArray = [ [ undefined ], [ 1 ], [ undefined ] ];
     const expectedObject = expectedArray.map((val) => ({ comp: val }));
 
     // Act
@@ -902,7 +901,7 @@ describe("Component wildcard query", () => {
     entities[1].add(components.Tag1);
     entities[2].add(components.Number1.withValue(1), components.Tag2);
 
-    const expectedArray = [[undefined], [1], [undefined]];
+    const expectedArray = [ [ undefined ], [ 1 ], [ undefined ] ];
     const expectedObject = expectedArray.map((val) => ({ comp: val }));
 
     // Act
@@ -925,7 +924,7 @@ describe("Component wildcard query", () => {
     components.Tag1.add(components.Number1.withValue(1), components.Tag2);
     components.Number2.add(components.Number1.withValue(2));
 
-    const expectedArray = [[1], [undefined], [2]];
+    const expectedArray = [ [ 1 ], [ undefined ], [ 2 ] ];
     const expectedObject = expectedArray.map((val) => ({ comp: val }));
 
     // Act
@@ -949,7 +948,7 @@ describe("Component wildcard query", () => {
     relationships.Tag1.add(components.Number1.withValue(2), components.Tag2);
     relationships.Number2.add(components.Number1.withValue(3));
 
-    const expectedArray = [[2], [undefined], [3]];
+    const expectedArray = [ [ 2 ], [ undefined ], [ 3 ] ];
     const expectedObject = expectedArray.map((val) => ({ comp: val }));
 
     // Act
@@ -973,7 +972,7 @@ describe("Component wildcard query", () => {
     components.Number1.add(components.Number2.withValue(3));
     components.String1.add(components.Number2.withValue(4));
 
-    const expectedArray = [ [1, 3] ];
+    const expectedArray = [ [ 1, 3 ] ];
     const expectedObject = expectedArray.map(([ comp1, comp2 ]) => ({ comp1, comp2 }));
 
     // Act
@@ -997,10 +996,10 @@ describe("Component wildcard query", () => {
     entities[1].add(components.Number1.withValue(3));
 
     const expectedArray = [
-      [1, 1],
-      [1, 2],
-      [2, 1],
-      [2, 2],
+      [ 1, 1 ],
+      [ 1, 2 ],
+      [ 2, 1 ],
+      [ 2, 2 ],
     ];
     const expectedObject = expectedArray.map(([ comp1, comp2 ]) => ({ comp1, comp2 }));
 
@@ -1025,8 +1024,8 @@ describe("Component wildcard query", () => {
     entities[1].add(components.Number1.withValue(3));
 
     const expectedArray = [
-      [1, 1],
-      [2, 1],
+      [ 1, 1 ],
+      [ 2, 1 ],
     ];
     const expectedObject = expectedArray.map(([ comp1, comp2 ]) => ({ comp1, comp2 }));
 
@@ -1045,40 +1044,239 @@ describe("Component wildcard query", () => {
 
 describe("Component type query", () => {
   it("Find all component types", () => {
+    // Arrange
+    const { all, components } = createEntities({ count: 3 });
+
+    const expectedArray = Object.values(components).map((component) => [ component ]);
+    const expectedObject = expectedArray.map((comp) => ({ comp }));
+
+    // Act
+    const arrayResult = query(all, [ Component.type() ]);
+    const objectResult = query(all, { comp: Component.type() });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Component> ]>(true);
+    assertTypesEqual<typeof objectResult, { comp: Class<Component> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify reference name of component type", () => {
+    // Arrange
+    const { all, components } = createEntities({ count: 3 });
+
+    const expectedArray = Object.values(components).map((component) => [ component ]);
+    const expectedObject = expectedArray.map((comp) => ({ comp }));
+
+    // Act
+    const arrayResult = query(all, [ Component.type().as("comp") ]);
+    const objectResult = query(all, { comp: Component.type().as("comp") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Component> ]>(true);
+    assertTypesEqual<typeof objectResult, { comp: Class<Component> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can use component type reference to find components of type", () => {
-    // Component.type().as("type"), Component.as("type")
+    // Arrange
+    const { all, components, entities } = createEntities({ count: 3 });
+
+    entities[0].add(components.Number1.withValue(1));
+    entities[1].add(components.Tag1);
+
+    const expectedArray = [
+      [ components.Number1, 1 ],
+      [ components.Tag1, undefined ],
+    ];
+    const expectedObject = expectedArray.map(([ comp, val ]) => ({ comp, val }));
+
+    // Act
+    const arrayResult = query(all, [ Component.type().as("type"), Component.as("type") ]);
+    const objectResult = query(all, { comp: Component.type().as("type"), val: Component.as("type") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Component<any>>, Component<any> ]>(true);
+    assertTypesEqual<typeof objectResult, { comp: Class<Component<any>>, val: Component<any> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can find the same component type multiple times", () => {
+    // Arrange
+    const { all, components } = createEntities({ count: 3 });
+
+    const expectedArray = [
+      [ components.Number1, components.Number1 ],
+      [ components.Number1, components.Number2 ],
+      [ components.Number2, components.Number1 ],
+      [ components.Number2, components.Number2 ],
+    ];
+    const expectedObject = expectedArray.map(([ comp1, comp2 ]) => ({ comp1, comp2 }));
+
+    // Act
+    const arrayResult = query(all, [ Component.type(), Component.type() ]);
+    const objectResult = query(all, { comp1: Component.type(), comp2: Component.type() });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Component>, Class<Component> ]>(true);
+    assertTypesEqual<typeof objectResult, { comp1: Class<Component>, comp2: Class<Component> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify that a given component type may only be found once", () => {
+    // Arrange
+    const { all, components } = createEntities({ count: 3 });
+
+    const expectedArray = [
+      [ components.Number1, components.Number1 ],
+      [ components.Number2, components.Number1 ],
+    ];
+    const expectedObject = expectedArray.map(([ comp1, comp2 ]) => ({ comp1, comp2 }));
+
+    // Act
+    const arrayResult = query(all, [ Component.type().once(), Component.type() ]);
+    const objectResult = query(all, { comp1: Component.type().once(), comp2: Component.type() });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Component>, Class<Component> ]>(true);
+    assertTypesEqual<typeof objectResult, { comp1: Class<Component>, comp2: Class<Component> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
-  it(
-    "Can specify that a given component type may only be found once, while another may be found multiple times",
-    () => {
-    },
-  );
-
   it("Can specify source entity of component type", () => {
+    // Arrange
+    const { all, components: { Number1, Number2 }, entities } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.withValue(1));
+    entities[1].add(Number1.withValue(2));
+    entities[1].add(Number2.withValue(3));
+
+    const expectedArray = [ [ Number1 ], [ Number2 ] ];
+    const expectedObject = expectedArray.map(([ comp, val ]) => ({ comp, val }));
+
+    // Act
+    const arrayResult = query(all, [ Component.type().on(entities[1]) ]);
+    const objectResult = query(all, { comp: Component.type().on(entities[1]) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Component<any>> ]>(true);
+    assertTypesEqual<typeof objectResult, { comp: Class<Component<any>> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify source reference of component type", () => {
+    // Arrange
+    const { all, components: { Number1, Number2 }, entities } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.withValue(1));
+    entities[1].add(Number1.withValue(2));
+    entities[1].add(Number2.withValue(3));
+
+    const expectedArray = [
+      [ 2, Number1 ],
+      [ 2, Number2 ],
+    ];
+    const expectedObject = expectedArray.map(([ comp, val ]) => ({ comp, val }));
+
+    // Act
+    const arrayResult = query(all, [ Number2.on("ent"), Component.type().on("ent") ]);
+    const objectResult = query(all, { val: Number2.on("ent"), type: Component.type().on("ent") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number, Class<Component<any>> ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number, type: Class<Component<any>> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify entity wildcard as source of component type", () => {
+    // Arrange
+    const { all, components: { Number1, Number2 }, entities } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.withValue(1));
+    entities[1].add(Number1.withValue(2));
+    entities[1].add(Number2.withValue(3));
+
+    const expectedArray = [
+      [ Number1 ],
+      [ Number1 ],
+      [ Number2 ],
+    ];
+    const expectedObject = expectedArray.map(([ comp, val ]) => ({ comp, val }));
+
+    // Act
+    const arrayResult = query(all, [ Component.type().on(Entity) ]);
+    const objectResult = query(all, { type: Component.type().on(Entity) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Component<any>> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Class<Component<any>> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify component wildcard as source of component type", () => {
+    // Arrange
+    const { all, components: { Number1, Number2 }, entities } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.withValue(1));
+    Number1.add(Number1.withValue(2));
+    Number2.add(Number1.withValue(3));
+
+    const expectedArray = [
+      [ Number1 ],
+      [ Number1 ],
+    ];
+    const expectedObject = expectedArray.map(([ comp, val ]) => ({ comp, val }));
+
+    // Act
+    const arrayResult = query(all, [ Component.type().on(Component) ]);
+    const objectResult = query(all, { type: Component.type().on(Component) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Component<any>> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Class<Component<any>> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify relationship wildcard as source of component type", () => {
+    // Arrange
+    const { all, components: { Number1, Number2 }, relationships: { Tag1} } = createEntities({ count: 3 });
+
+    Tag1.add(Number1.withValue(1));
+    Number1.add(Number1.withValue(2));
+    Number2.add(Number1.withValue(3));
+
+    const expectedArray = [
+      [ Number1 ],
+    ];
+    const expectedObject = expectedArray.map(([ comp, val ]) => ({ comp, val }));
+
+    // Act
+    const arrayResult = query(all, [ Component.type().on(Relationship) ]);
+    const objectResult = query(all, { type: Component.type().on(Relationship) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Class<Component<any>> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Class<Component<any>> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 });
 
