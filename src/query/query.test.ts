@@ -1327,7 +1327,7 @@ describe("Relationship instance query", () => {
     assert.deepStrictEqual(objectResult, expectedObject);
   });
 
-  it("Can find multiple different relationship values in single query", () => {
+  it("Can require multiple different relationship values in single query", () => {
     // Arrange
     const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
 
@@ -1337,57 +1337,465 @@ describe("Relationship instance query", () => {
 
     // Act
     const arrayResult = query(all, [ Number1, Number2 ]);
-  });
+    const objectResult = query(all, { val1: Number1, val2: Number2 });
 
-  it("Can find same relationship value multiple times in single query", () => {
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number, number ]>(true);
+    assertTypesEqual<typeof objectResult, { val1: number, val2: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, [ [ 2, 3 ] ]);
+    assert.deepStrictEqual(objectResult, [ { val1: 2, val2: 3 } ]);
   });
 
   it("Does not find relationship value if not on an entity", () => {
+    // Arrange
+    const { all, relationships: { Number1 } } = createEntities({ count: 3 });
+
+    // Act
+    const arrayResult = query(all, [ Number1 ]);
+    const objectResult = query(all, { val: Number1 });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, []);
+    assert.deepStrictEqual(objectResult, []);
   });
 
   it("Finds relationship value on specific entity", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[0].add(Number2.to(entities[0]).withValue(2));
+    entities[1].add(Number1.to(entities[2]).withValue(3));
+
+    const expectedArray = [ [ 1 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Number1.on(entities[0]) ]);
+    const objectResult = query(all, { val: Number1.on(entities[0]) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds relationship value on entity reference", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[0].add(Number2.to(entities[0]).withValue(2));
+    entities[1].add(Number1.to(entities[2]).withValue(3));
+
+    const expectedArray = [ [ entities[0], 1 ], [ entities[1], 3 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Entity.as("ref"), Number1.on("ref") ]);
+    const objectResult = query(all, { ent: Entity.as("ref"), val: Number1.on("ref") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Entity, number ]>(true);
+    assertTypesEqual<typeof objectResult, { ent: Entity, val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds relationship value on any entity using wildcard", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[0].add(Number2.to(entities[0]).withValue(2));
+    entities[1].add(Number1.to(entities[2]).withValue(3));
+
+    const expectedArray = [ [ 1 ], [ 3 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Number1.on(Entity) ]);
+    const objectResult = query(all, { val: Number1.on(Entity) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds relationship value on any component type using wildcard", () => {
+    // Arrange
+    const {
+      all,
+      entities,
+      components: { Tag1, String1 },
+      relationships: { Number1, Number2 },
+    } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(Tag1).withValue(1));
+    Tag1.add(Number1.to(Tag1).withValue(1));
+    Tag1.add(Number2.to(Tag1).withValue(2));
+    String1.add(Number1.to(Tag1).withValue(3));
+
+    const expectedArray = [ [ 1 ], [ 3 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Number1.on(Component) ]);
+    const objectResult = query(all, { val: Number1.on(Component) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds relationship value on any relationship type using wildcard", () => {
+    // Arrange
+    const {
+      all,
+      entities,
+      components,
+      relationships: { Number1, Number2, Tag1, Tag2, String1 },
+    } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(Tag1).withValue(1));
+    components.Number1.add(Number1.to(Tag1).withValue(2));
+    Tag1.add(Number1.to(Tag1).withValue(3));
+    Tag1.add(Number2.to(Tag1).withValue(4));
+    String1.add(Number1.to(Tag1).withValue(5));
+
+    const expectedArray = [ [ 3 ], [ 5 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Number1.on(Relationship) ]);
+    const objectResult = query(all, { val: Number1.on(Relationship) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds relationship value to specific entity", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[1].add(Number1.to(entities[0]).withValue(2));
+    entities[1].add(Number2.to(entities[1]).withValue(3));
+
+    const expectedArray = [ [ 1 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Number1.to(entities[1]) ]);
+    const objectResult = query(all, { val: Number1.to(entities[1]) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds relationship value to entity reference", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[1].add(Number1.to(entities[0]).withValue(2));
+    entities[1].add(Number2.to(entities[1]).withValue(3));
+
+    const expectedArray = [ [ entities[1], 1 ], [ entities[0], 2 ] ];
+    const expectedObject = expectedArray.map(([ ent, val ]) => ({ ent, val }));
+
+    // Act
+    const arrayResult = query(all, [ Entity.as("ref"), Number1.to("ref") ]);
+    const objectResult = query(all, { ent: Entity.as("ref"), val: Number1.to("ref") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Entity, number ]>(true);
+    assertTypesEqual<typeof objectResult, { ent: Entity, val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds relationship value to any entity using wildcard", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[1].add(Number1.to(entities[0]).withValue(2));
+    entities[1].add(Number2.to(entities[1]).withValue(3));
+
+    const expectedArray = [ [ 1 ], [ 2 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Number1.to(Entity) ]);
+    const objectResult = query(all, { val: Number1.to(Entity) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds relationship value to any component type using wildcard", () => {
+    // Arrange
+    const {
+      all,
+      entities,
+      components: { Tag1, String1 },
+      relationships: { Number1, Number2 },
+    } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(Tag1).withValue(1));
+    Tag1.add(Number1.to(Tag1).withValue(2));
+    Tag1.add(Number2.to(Tag1).withValue(3));
+    String1.add(Number1.to(Tag1).withValue(4));
+    Number1.add(Number1.to(Tag1).withValue(5));
+    Tag1.add(Number1.to(entities[0]).withValue(6));
+    Tag1.add(Number1.to(Number1).withValue(7));
+    Tag1.add(Number1.to(Number1.to(entities[0])).withValue(8));
+
+    const expectedArray = [ [ 1 ], [ 2 ], [ 4 ]]
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Number1.to(Component) ]);
+    const objectResult = query(all, { val: Number1.to(Component) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds relationship value to any relationship type using wildcard", () => {
+    // Arrange
+    const {
+      all,
+      entities,
+      components: { Tag1, String1 },
+      relationships: { Number1, Number2 },
+    } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(Tag1).withValue(1));
+    Tag1.add(Number1.to(Tag1).withValue(2));
+    Tag1.add(Number2.to(Tag1).withValue(3));
+    String1.add(Number1.to(Tag1).withValue(4));
+    Number1.add(Number1.to(Tag1).withValue(5));
+    Tag1.add(Number1.to(entities[0]).withValue(6));
+    Tag1.add(Number1.to(Number1).withValue(7));
+    Tag1.add(Number1.to(Number1.to(entities[0])).withValue(8));
+    Number1.add(Number1.to(Number1).withValue(9));
+
+    const expectedArray = [ [ 7 ], [ 9 ]]
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Number1.to(Relationship) ]);
+    const objectResult = query(all, { val: Number1.to(Relationship) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Does not find relationship value on specific entity if it does not have it", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[1].add(Number1.to(entities[0]).withValue(2));
+    entities[1].add(Number2.to(entities[1]).withValue(3));
+
+    // Act
+    const arrayResult = query(all, [ Number1.on(entities[2]) ]);
+    const objectResult = query(all, { val: Number1.on(entities[2]) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, []);
+    assert.deepStrictEqual(objectResult, []);
+  });
+
+  it("Does not find relationship value to specific entity if it does not have it", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[1].add(Number1.to(entities[0]).withValue(2));
+    entities[1].add(Number2.to(entities[1]).withValue(3));
+
+    // Act
+    const arrayResult = query(all, [ Number1.to(entities[2]) ]);
+    const objectResult = query(all, { val: Number1.to(entities[2]) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, []);
+    assert.deepStrictEqual(objectResult, []);
   });
 
   it("Does not find relationship value on specific entity if entity not in list", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1 } } = createEntities({ count: 1 });
+
+    const entity = new Entity();
+    entity.add(Number1.to(entities[0]).withValue(1));
+
+    // Act
+    const arrayResult = query(all, [ Number1.on(entity) ]);
+    const objectResult = query(all, { val: Number1.on(entity) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, []);
+    assert.deepStrictEqual(objectResult, []);
   });
 
-  it("Finds entity with the specific relationship", () => {
+  it("Finds entity with explicit relationship to self", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1 } } = createEntities({ count: 1 });
+
+    entities[0].add(Number1.to(entities[0]).withValue(1));
+
+    const expectedArray = [ [ 1 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Number1.to(entities[0]) ]);
+    const objectResult = query(all, { val: Number1.to(entities[0]) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
-  it("Finds explicit relationship to self", () => {
+  it("Finds relationship with explicit relationship to self using instance", () => {
+    // Arrange
+    const { all, relationships: { Number1 } } = createEntities({ count: 1 });
+
+    Number1.add(Number1.to(Number1).withValue(1));
+
+    const expectedArray = [ [ 1 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Number1.to(Number1) ]);
+    const objectResult = query(all, { val: Number1.to(Number1) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
+
+  it("Finds relationship with explicit relationship to self using wildcard", () => {
+    // Arrange
+    const { all, relationships: { Number1 } } = createEntities({ count: 1 });
+
+    Number1.add(Number1.to(Number1).withValue(1));
+
+    const expectedArray = [ [ 1 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.to(Relationship) ]);
+    const objectResult = query(all, { val: Relationship.to(Relationship) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Component<any> ]>(true);
+    assertTypesEqual<typeof objectResult, { val: Component<any> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
+
+  it("Finds relationship to self by reference", () => {
+    // Arrange
+    const { all, relationships: { Number1 } } = createEntities({ count: 1 });
+
+    Number1.add(Number1.to(Number1).withValue(1));
+
+    const expectedArray = [ [ 1, Number1 ] ];
+    const expectedObject = expectedArray.map(([ rel, target ]) => ({ rel, target }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.to("target"), Relationship.type().as("target") ]);
+    const objectResult = query(all, { val: Relationship.to("target"), target: Relationship.type().as("target") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Component<any>, Class<Relationship> ]>(true);
+    assertTypesEqual<typeof objectResult, { val: Component<any>, target: Class<Relationship> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds transitive relationship to self by reference", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1 } } = createEntities({ count: 1 });
+
+    Number1.add(Number1.to(entities[0]).withValue(1));
+    entities[0].add(Number1.to(Number1).withValue(2));
+
+    const expectedArray = [ [ 1, 2 ] ];
+    const expectedObject = expectedArray.map(([ rel1, rel2 ]) => ({ rel1, rel2 }));
+
+    // Act
+    const arrayResult = query(all, [
+      Relationship.on("source").to("target"),
+      Relationship.on("target").to("source"),
+    ]);
+    const objectResult = query(all, {
+      rel1: Relationship.on("source").to("target"),
+      rel2: Relationship.on("target").to("source"),
+    });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Component<any>, Component<any> ]>(true);
+    assertTypesEqual<typeof objectResult, { rel1: Component<any>, rel2: Component<any> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 });
 
@@ -1513,6 +1921,8 @@ describe("Ordering of query parts", () => {
 // TODO: Boolean queries
 // TODO: Dynamic queries (e.g. from user input)
 // TODO: Some negative tests, stuff you can't pass in, etc.
+// TODO: What happens if a relation points to an entity not in the list? Is such a thing even possible?
+//  Maybe rather, it's what happens if a relation points to an entity that has been destroyed?
 
 function createEntities(options: {
   count: number
