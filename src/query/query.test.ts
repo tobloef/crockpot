@@ -1282,12 +1282,61 @@ describe("Component type query", () => {
 
 describe("Relationship instance query", () => {
   it("Finds tag relationship on entities", () => {
+    // Arrange
+    const { all, entities, relationships: { Tag1, Tag2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Tag1.to(entities[1]));
+    entities[1].add(Tag1.to(entities[2]));
+    entities[1].add(Tag2.to(entities[0]));
+
+    const expectedArray = [ [ Tag1 ], [ Tag1 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Tag1 ]);
+    const objectResult = query(all, { rel: Tag1 });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ undefined ]>(true);
+    assertTypesEqual<typeof objectResult, { rel: undefined }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds value relationship on entities", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[1].add(Number1.to(entities[2]).withValue(2));
+    entities[1].add(Number2.to(entities[0]).withValue(3));
+
+    const expectedArray = [ [ 1 ], [ 2 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Number1 ]);
+    const objectResult = query(all, { rel: Number1 });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number ]>(true);
+    assertTypesEqual<typeof objectResult, { rel: number }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can find multiple different relationship values in single query", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[1].add(Number1.to(entities[2]).withValue(2));
+    entities[1].add(Number2.to(entities[0]).withValue(3));
+
+    // Act
+    const arrayResult = query(all, [ Number1, Number2 ]);
   });
 
   it("Can find same relationship value multiple times in single query", () => {
