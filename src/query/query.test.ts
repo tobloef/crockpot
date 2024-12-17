@@ -842,8 +842,8 @@ describe("Component wildcard query", () => {
     const objectResult = query(all, { comp: Component });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Component ]>(true);
-    assertTypesEqual<typeof objectResult, { comp: Component }>(true);
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { comp: unknown }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -864,8 +864,8 @@ describe("Component wildcard query", () => {
     const objectResult = query(all, { comp: Component.on(entities[1]) });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Component<any> ]>(true);
-    assertTypesEqual<typeof objectResult, { comp: Component<any> }>(true);
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { comp: unknown }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -887,8 +887,8 @@ describe("Component wildcard query", () => {
     const objectResult = query(all, { ent: Entity.as("ref").once(), comp: Component.on("ref") });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Entity, Component ]>(true);
-    assertTypesEqual<typeof objectResult, { ent: Entity, comp: Component }>(true);
+    assertTypesEqual<typeof arrayResult, [ Entity, unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { ent: Entity, comp: unknown }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -909,8 +909,8 @@ describe("Component wildcard query", () => {
     const objectResult = query(all, { comp: Component.on(Entity) });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Component ]>(true);
-    assertTypesEqual<typeof objectResult, { comp: Component }>(true);
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { comp: unknown }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -932,8 +932,8 @@ describe("Component wildcard query", () => {
     const objectResult = query(all, { comp: Component.on(Component) });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Component ]>(true);
-    assertTypesEqual<typeof objectResult, { comp: Component }>(true);
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { comp: unknown }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -956,8 +956,8 @@ describe("Component wildcard query", () => {
     const objectResult = query(all, { comp: Component.on(Relationship) });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Component ]>(true);
-    assertTypesEqual<typeof objectResult, { comp: Component }>(true);
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { comp: unknown }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -980,8 +980,8 @@ describe("Component wildcard query", () => {
     const objectResult = query(all, { comp1: Component.as("comp"), comp2: Component.on("comp") });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Component<any>, Component<any> ]>(true);
-    assertTypesEqual<typeof objectResult, { comp1: Component<any>, comp2: Component<any> }>(true);
+    assertTypesEqual<typeof arrayResult, [ unknown, unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { comp1: unknown, comp2:unknown }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1008,8 +1008,8 @@ describe("Component wildcard query", () => {
     const objectResult = query(all, { comp1: Component, comp2: Component });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Component<any>, Component<any> ]>(true);
-    assertTypesEqual<typeof objectResult, { comp1: Component<any>, comp2: Component<any> }>(true);
+    assertTypesEqual<typeof arrayResult, [ unknown, unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { comp1: unknown, comp2: unknown }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1034,8 +1034,8 @@ describe("Component wildcard query", () => {
     const objectResult = query(all, { comp1: Component.once(), comp2: Component });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Component<any>, Component<any> ]>(true);
-    assertTypesEqual<typeof objectResult, { comp1: Component<any>, comp2: Component<any> }>(true);
+    assertTypesEqual<typeof arrayResult, [ unknown, unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { comp1: unknown, comp2: unknown }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1055,8 +1055,8 @@ describe("Component type query", () => {
     const objectResult = query(all, { comp: Component.type() });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Class<Component> ]>(true);
-    assertTypesEqual<typeof objectResult, { comp: Class<Component> }>(true);
+    assertTypesEqual<typeof arrayResult, [ Component<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { comp: Component<unknown> }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1074,8 +1074,8 @@ describe("Component type query", () => {
     const objectResult = query(all, { comp: Component.type().as("comp") });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Class<Component> ]>(true);
-    assertTypesEqual<typeof objectResult, { comp: Class<Component> }>(true);
+    assertTypesEqual<typeof arrayResult, [ Component<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { comp: Component<unknown> }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1099,8 +1099,8 @@ describe("Component type query", () => {
     const objectResult = query(all, { comp: Component.type().as("type"), val: Component.as("type") });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Class<Component<any>>, Component<any> ]>(true);
-    assertTypesEqual<typeof objectResult, { comp: Class<Component<any>>, val: Component<any> }>(true);
+    assertTypesEqual<typeof arrayResult, [ Component<unknown>, unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { comp: Component<unknown>, val: unknown }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1123,8 +1123,8 @@ describe("Component type query", () => {
     const objectResult = query(all, { comp1: Component.type(), comp2: Component.type() });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Class<Component>, Class<Component> ]>(true);
-    assertTypesEqual<typeof objectResult, { comp1: Class<Component>, comp2: Class<Component> }>(true);
+    assertTypesEqual<typeof arrayResult, [ Component<unknown>, Component<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { comp1: Component<unknown>, comp2: Component<unknown> }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1145,8 +1145,8 @@ describe("Component type query", () => {
     const objectResult = query(all, { comp1: Component.type().once(), comp2: Component.type() });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Class<Component>, Class<Component> ]>(true);
-    assertTypesEqual<typeof objectResult, { comp1: Class<Component>, comp2: Class<Component> }>(true);
+    assertTypesEqual<typeof arrayResult, [ Component<unknown>, Component<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { comp1: Component<unknown>, comp2: Component<unknown> }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1168,8 +1168,8 @@ describe("Component type query", () => {
     const objectResult = query(all, { comp: Component.type().on(entities[1]) });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Class<Component<any>> ]>(true);
-    assertTypesEqual<typeof objectResult, { comp: Class<Component<any>> }>(true);
+    assertTypesEqual<typeof arrayResult, [ Component<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { comp: Component<unknown> }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1194,8 +1194,8 @@ describe("Component type query", () => {
     const objectResult = query(all, { val: Number2.on("ent"), type: Component.type().on("ent") });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ number, Class<Component<any>> ]>(true);
-    assertTypesEqual<typeof objectResult, { val: number, type: Class<Component<any>> }>(true);
+    assertTypesEqual<typeof arrayResult, [ number, Component<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number, type: Component<unknown> }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1221,8 +1221,8 @@ describe("Component type query", () => {
     const objectResult = query(all, { type: Component.type().on(Entity) });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Class<Component<any>> ]>(true);
-    assertTypesEqual<typeof objectResult, { type: Class<Component<any>> }>(true);
+    assertTypesEqual<typeof arrayResult, [ Component<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Component<unknown> }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1247,8 +1247,8 @@ describe("Component type query", () => {
     const objectResult = query(all, { type: Component.type().on(Component) });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Class<Component<any>> ]>(true);
-    assertTypesEqual<typeof objectResult, { type: Class<Component<any>> }>(true);
+    assertTypesEqual<typeof arrayResult, [ Component<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Component<unknown> }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1272,8 +1272,8 @@ describe("Component type query", () => {
     const objectResult = query(all, { type: Component.type().on(Relationship) });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Class<Component<any>> ]>(true);
-    assertTypesEqual<typeof objectResult, { type: Class<Component<any>> }>(true);
+    assertTypesEqual<typeof arrayResult, [ Component<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Component<unknown> }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1467,7 +1467,7 @@ describe("Relationship instance query", () => {
       all,
       entities,
       components,
-      relationships: { Number1, Number2, Tag1, Tag2, String1 },
+      relationships: { Number1, Number2, Tag1, String1 },
     } = createEntities({ count: 3 });
 
     entities[0].add(Number1.to(Tag1).withValue(1));
@@ -1728,27 +1728,6 @@ describe("Relationship instance query", () => {
     assert.deepStrictEqual(objectResult, expectedObject);
   });
 
-  it("Finds relationship with explicit relationship to self using wildcard", () => {
-    // Arrange
-    const { all, relationships: { Number1 } } = createEntities({ count: 1 });
-
-    Number1.add(Number1.to(Number1).withValue(1));
-
-    const expectedArray = [ [ 1 ] ];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
-
-    // Act
-    const arrayResult = query(all, [ Relationship.to(Relationship) ]);
-    const objectResult = query(all, { val: Relationship.to(Relationship) });
-
-    // Assert
-    assertTypesEqual<typeof arrayResult, [ Component<any> ]>(true);
-    assertTypesEqual<typeof objectResult, { val: Component<any> }>(true);
-
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
-  });
-
   it("Finds relationship to self by reference", () => {
     // Arrange
     const { all, relationships: { Number1 } } = createEntities({ count: 1 });
@@ -1759,12 +1738,12 @@ describe("Relationship instance query", () => {
     const expectedObject = expectedArray.map(([ rel, target ]) => ({ rel, target }));
 
     // Act
-    const arrayResult = query(all, [ Relationship.to("target"), Relationship.type().as("target") ]);
-    const objectResult = query(all, { val: Relationship.to("target"), target: Relationship.type().as("target") });
+    const arrayResult = query(all, [ Number1.to("target"), Entity.as("target") ]);
+    const objectResult = query(all, { val: Number1.to("target"), target: Entity.as("target") });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Component<any>, Class<Relationship> ]>(true);
-    assertTypesEqual<typeof objectResult, { val: Component<any>, target: Class<Relationship> }>(true);
+    assertTypesEqual<typeof arrayResult, [ number, Entity ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number, target: Entity }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1782,17 +1761,17 @@ describe("Relationship instance query", () => {
 
     // Act
     const arrayResult = query(all, [
-      Relationship.on("source").to("target"),
-      Relationship.on("target").to("source"),
+      Number1.on("source").to("target"),
+      Number1.on("target").to("source"),
     ]);
     const objectResult = query(all, {
-      rel1: Relationship.on("source").to("target"),
-      rel2: Relationship.on("target").to("source"),
+      rel1: Number1.on("source").to("target"),
+      rel2: Number1.on("target").to("source"),
     });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, [ Component<any>, Component<any> ]>(true);
-    assertTypesEqual<typeof objectResult, { rel1: Component<any>, rel2: Component<any> }>(true);
+    assertTypesEqual<typeof arrayResult, [ number, number ]>(true);
+    assertTypesEqual<typeof objectResult, { rel1: number, rel2: number }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1801,6 +1780,26 @@ describe("Relationship instance query", () => {
 
 describe("Relationship wildcard query", () => {
   it("Finds all relationships", () => {
+    // Arrange
+    const { all, entities, relationships: { Tag1, Number1 } } = createEntities({ count: 3 });
+
+    entities[0].add(Tag1.to(entities[1]));
+    entities[1].add(Tag1.to(entities[2]));
+    entities[1].add(Number1.to(entities[0]).withValue(1));
+
+    const expectedArray = [ [ Tag1 ], [ Tag1 ], [ Number1 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship ]);
+    const objectResult = query(all, { rel: Relationship });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ any ]>(true);
+    assertTypesEqual<typeof objectResult, { rel: any }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds all relationships on specific entity", () => {
@@ -1859,6 +1858,76 @@ describe("Relationship wildcard query", () => {
   });
 
   it("Finds transitive circular relationship", () => {
+  });
+
+  it("Finds relationship with explicit relationship to self using wildcard", () => {
+    // Arrange
+    const { all, relationships: { Number1 } } = createEntities({ count: 1 });
+
+    Number1.add(Number1.to(Number1).withValue(1));
+
+    const expectedArray = [ [ 1 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.to(Relationship) ]);
+    const objectResult = query(all, { val: Relationship.to(Relationship) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { val: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
+
+  it("Finds relationship to self by reference", () => {
+    // Arrange
+    const { all, relationships: { Number1 } } = createEntities({ count: 1 });
+
+    Number1.add(Number1.to(Number1).withValue(1));
+
+    const expectedArray = [ [ 1, Number1 ] ];
+    const expectedObject = expectedArray.map(([ rel, target ]) => ({ rel, target }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.to("target"), Relationship.type().as("target") ]);
+    const objectResult = query(all, { val: Relationship.to("target"), target: Relationship.type().as("target") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ any, Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { val: any, target: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
+
+  it("Finds transitive relationship to self by reference", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1 } } = createEntities({ count: 1 });
+
+    Number1.add(Number1.to(entities[0]).withValue(1));
+    entities[0].add(Number1.to(Number1).withValue(2));
+
+    const expectedArray = [ [ 1, 2 ] ];
+    const expectedObject = expectedArray.map(([ rel1, rel2 ]) => ({ rel1, rel2 }));
+
+    // Act
+    const arrayResult = query(all, [
+      Relationship.on("source").to("target"),
+      Relationship.on("target").to("source"),
+    ]);
+    const objectResult = query(all, {
+      rel1: Relationship.on("source").to("target"),
+      rel2: Relationship.on("target").to("source"),
+    });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown, unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { rel1: unknown, rel2: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 });
 
@@ -1923,6 +1992,7 @@ describe("Ordering of query parts", () => {
 // TODO: Some negative tests, stuff you can't pass in, etc.
 // TODO: What happens if a relation points to an entity not in the list? Is such a thing even possible?
 //  Maybe rather, it's what happens if a relation points to an entity that has been destroyed?
+// TODO: Some crazy bespoke queries
 
 function createEntities(options: {
   count: number

@@ -54,11 +54,11 @@ type QueryPartOutput<Part> =
   Part extends Or<infer Types> ? ParseOr<Types> :
   Part extends RelationshipInstanceQuery<infer RelationshipType> ? RelationshipValue<RelationshipType> :
   Part extends ComponentInstanceQuery<infer ComponentType> ? ComponentValue<ComponentType> :
-  Part extends RelationshipTypeQuery ? Class<Relationship<any>> :
-  Part extends ComponentTypeQuery ? Class<Component<any>> :
-  Part extends ComponentWildcardQuery ? Component<any> :
-  Part extends Class<Relationship> ? Relationship<any> :
-  Part extends Class<Component> ? Component<any> :
+  Part extends RelationshipTypeQuery ? Relationship<unknown> :
+  Part extends ComponentTypeQuery ? Component<unknown> :
+  Part extends ComponentWildcardQuery ? unknown :
+  Part extends Class<Relationship<infer Value>> ? Value :
+  Part extends Class<Component<infer Value>> ? Value :
   Part extends Class<Entity> ? Entity :
   Part extends EntityTypeQuery ? Class<Entity> :
   Part extends EntityWildcardQuery ? Entity :
