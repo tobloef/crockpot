@@ -9,6 +9,8 @@ import type {
   Or,
 } from "./boolean/index.ts";
 import type { EntityTypeQuery } from "../entity/queries/entity-type-query.ts";
+import type { ComponentTypeQuery } from "../component/queries/component-type-query.ts";
+import type { RelationshipTypeQuery } from "../relationship/queries/relationship-type-query.ts";
 
 export type QueryPart = (
   | NonBooleanQueryPart
@@ -17,15 +19,17 @@ export type QueryPart = (
 
 export type NonBooleanQueryPart = (
   | Class<Entity>
-  | Entity
-  | EntityWildcardQuery
-  | EntityTypeQuery
   | Class<Component<any>>
-  | Component<any>
-  | ComponentInstanceQuery<any>
   | Class<Relationship<any>>
+  | Entity
+  | Component<any>
   | Relationship<any>
+  | EntityWildcardQuery
+  | ComponentInstanceQuery<any>
   | RelationshipInstanceQuery<any>
+  | EntityTypeQuery
+  | ComponentTypeQuery
+  | RelationshipTypeQuery
   );
 
 export type BooleanQueryPart = (

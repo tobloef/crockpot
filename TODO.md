@@ -1,6 +1,6 @@
-* Better schema values, like enums and unions. And make able to pass array or single item, not just object
 * Tests
 * Implementation
+* Two-way relationships
 * Required components and/or bundles
 * Observers
 * Destruction/Cleanup
