@@ -22,10 +22,10 @@ import {
   RelationshipInstanceQuery,
 } from "../relationship/index.ts";
 import type { Class } from "../utils/class.ts";
-import type { EntityTypeQuery } from "../entity/queries/entity-type-query.js";
-import type { ComponentWildcardQuery } from "../component/queries/component-wildcard-query.js";
-import type { ComponentTypeQuery } from "../component/queries/component-type-query.js";
-import type { RelationshipTypeQuery } from "../relationship/queries/relationship-type-query.js";
+import type { EntityTypeQuery } from "../entity/queries/entity-type-query.ts";
+import type { ComponentWildcardQuery } from "../component/queries/component-wildcard-query.ts";
+import type { ComponentTypeQuery } from "../component/queries/component-type-query.ts";
+import type { RelationshipTypeQuery } from "../relationship/queries/relationship-type-query.ts";
 
 export type QueryOutput<Input extends QueryInput> =
   Input extends QueryPart ? QueryPartOutput<Input> :

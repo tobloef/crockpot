@@ -8,7 +8,7 @@ import { Entity } from "../entity/index.ts";
 import { Component } from "../component/index.ts";
 import { Relationship } from "../relationship/index.ts";
 import { assertTypesEqual } from "../utils/type-assertions.ts";
-import type { Class } from "../utils/class.js";
+import type { Class } from "../utils/class.ts";
 
 describe("Empty query", () => {
   it("Finds nothing when input is empty tuple", () => {

@@ -8,7 +8,7 @@ import type {
   Optional,
   Or,
 } from "./boolean/index.ts";
-import type { EntityTypeQuery } from "../entity/queries/entity-type-query.js";
+import type { EntityTypeQuery } from "../entity/queries/entity-type-query.ts";
 
 export type QueryPart = (
   | NonBooleanQueryPart
