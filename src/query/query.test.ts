@@ -981,7 +981,7 @@ describe("Component wildcard query", () => {
 
     // Assert
     assertTypesEqual<typeof arrayResult, [ unknown, unknown ]>(true);
-    assertTypesEqual<typeof objectResult, { comp1: unknown, comp2:unknown }>(true);
+    assertTypesEqual<typeof objectResult, { comp1: unknown, comp2: unknown }>(true);
 
     assert.deepStrictEqual(arrayResult, expectedArray);
     assert.deepStrictEqual(objectResult, expectedObject);
@@ -1578,7 +1578,7 @@ describe("Relationship instance query", () => {
     Tag1.add(Number1.to(Number1).withValue(7));
     Tag1.add(Number1.to(Number1.to(entities[0])).withValue(8));
 
-    const expectedArray = [ [ 1 ], [ 2 ], [ 4 ]]
+    const expectedArray = [ [ 1 ], [ 2 ], [ 4 ] ]
     const expectedObject = expectedArray.map((rel) => ({ rel }));
 
     // Act
@@ -1612,7 +1612,7 @@ describe("Relationship instance query", () => {
     Tag1.add(Number1.to(Number1.to(entities[0])).withValue(8));
     Number1.add(Number1.to(Number1).withValue(9));
 
-    const expectedArray = [ [ 7 ], [ 9 ]]
+    const expectedArray = [ [ 7 ], [ 9 ] ]
     const expectedObject = expectedArray.map((rel) => ({ rel }));
 
     // Act
@@ -1803,61 +1803,374 @@ describe("Relationship wildcard query", () => {
   });
 
   it("Finds all relationships on specific entity", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[0].add(Number2.to(entities[0]).withValue(2));
+    entities[1].add(Number1.to(entities[2]).withValue(3));
+
+    const expectedArray = [ [ 1 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.on(entities[0]) ]);
+    const objectResult = query(all, { val: Relationship.on(entities[0]) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { val: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds all relationships on referenced entity", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[0].add(Number2.to(entities[0]).withValue(2));
+    entities[1].add(Number1.to(entities[2]).withValue(3));
+
+    const expectedArray = [ [ entities[0], 1 ], [ entities[1], 3 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Entity.as("ref"), Relationship.on("ref") ]);
+    const objectResult = query(all, { ent: Entity.as("ref"), val: Relationship.on("ref") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Entity, unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { ent: Entity, val: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds all relationships on any entity", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[0].add(Number2.to(entities[0]).withValue(2));
+    entities[1].add(Number1.to(entities[2]).withValue(3));
+
+    const expectedArray = [ [ 1 ], [ 3 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.on(Entity) ]);
+    const objectResult = query(all, { val: Relationship.on(Entity) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { val: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds all relationships on any component", () => {
+    // Arrange
+    const {
+      all,
+      entities,
+      components: { Tag1, String1 },
+      relationships: { Number1, Number2 },
+    } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(Tag1).withValue(1));
+    Tag1.add(Number1.to(Tag1).withValue(1));
+    Tag1.add(Number2.to(Tag1).withValue(2));
+    String1.add(Number1.to(Tag1).withValue(3));
+
+    const expectedArray = [ [ 1 ], [ 3 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.on(Component) ]);
+    const objectResult = query(all, { val: Relationship.on(Component) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { val: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds all relationships on any relationship", () => {
-  });
+    // Arrange
+    const {
+      all,
+      entities,
+      components,
+      relationships: { Number1, Number2, Tag1, String1 },
+    } = createEntities({ count: 3 });
 
-  it("Finds all relationships and their source entity by reference", () => {
+    entities[0].add(Number1.to(Tag1).withValue(1));
+    components.Number1.add(Number1.to(Tag1).withValue(2));
+    Tag1.add(Number1.to(Tag1).withValue(3));
+    Tag1.add(Number2.to(Tag1).withValue(4));
+    String1.add(Number1.to(Tag1).withValue(5));
+
+    const expectedArray = [ [ 3 ], [ 5 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.on(Relationship) ]);
+    const objectResult = query(all, { val: Relationship.on(Relationship) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { val: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds all relationships to specific entity", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[1].add(Number1.to(entities[0]).withValue(2));
+    entities[1].add(Number2.to(entities[1]).withValue(3));
+
+    const expectedArray = [ [ 1 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.to(entities[1]) ]);
+    const objectResult = query(all, { val: Relationship.to(entities[1]) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { val: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds all relationships to referenced entity", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[1].add(Number1.to(entities[0]).withValue(2));
+    entities[1].add(Number2.to(entities[1]).withValue(3));
+
+    const expectedArray = [ [ entities[1], 1 ], [ entities[0], 2 ] ];
+    const expectedObject = expectedArray.map(([ ent, val ]) => ({ ent, val }));
+
+    // Act
+    const arrayResult = query(all, [ Entity.as("ref"), Relationship.to("ref") ]);
+    const objectResult = query(all, { ent: Entity.as("ref"), val: Relationship.to("ref") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Entity, unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { ent: Entity, val: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds all relationships to any entity", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[1].add(Number1.to(entities[0]).withValue(2));
+    entities[1].add(Number2.to(entities[1]).withValue(3));
+
+    const expectedArray = [ [ 1 ], [ 2 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.to(Entity) ]);
+    const objectResult = query(all, { val: Relationship.to(Entity) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { val: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds all relationships to any component", () => {
+    // Arrange
+    const {
+      all,
+      entities,
+      components: { Tag1, String1 },
+      relationships: { Number1, Number2 },
+    } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(Tag1).withValue(1));
+    Tag1.add(Number1.to(Tag1).withValue(2));
+    Tag1.add(Number2.to(Tag1).withValue(3));
+    String1.add(Number1.to(Tag1).withValue(4));
+    Number1.add(Number1.to(Tag1).withValue(5));
+    Tag1.add(Number1.to(entities[0]).withValue(6));
+    Tag1.add(Number1.to(Number1).withValue(7));
+    Tag1.add(Number1.to(Number1.to(entities[0])).withValue(8));
+
+    const expectedArray = [ [ 1 ], [ 2 ], [ 4 ] ]
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.to(Component) ]);
+    const objectResult = query(all, { val: Relationship.to(Component) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { val: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds all relationships to any relationship", () => {
-  });
+    // Arrange
+    const {
+      all,
+      entities,
+      components: { Tag1, String1 },
+      relationships: { Number1, Number2 },
+    } = createEntities({ count: 3 });
 
-  it("Finds all relationships and their target entity by reference", () => {
+    entities[0].add(Number1.to(Tag1).withValue(1));
+    Tag1.add(Number1.to(Tag1).withValue(2));
+    Tag1.add(Number2.to(Tag1).withValue(3));
+    String1.add(Number1.to(Tag1).withValue(4));
+    Number1.add(Number1.to(Tag1).withValue(5));
+    Tag1.add(Number1.to(entities[0]).withValue(6));
+    Tag1.add(Number1.to(Number1).withValue(7));
+    Tag1.add(Number1.to(Number1.to(entities[0])).withValue(8));
+    Number1.add(Number1.to(Number1).withValue(9));
+
+    const expectedArray = [ [ 7 ], [ 9 ] ]
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.to(Relationship) ]);
+    const objectResult = query(all, { val: Relationship.to(Relationship) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { val: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify reference name for found relationship (not for found values)", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[0].add(Number2.to(entities[0]).withValue(2));
+    entities[1].add(Number1.to(entities[2]).withValue(3));
+
+    const expectedArray = [ [ 1 ], [ 3 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.as("rel").on(Entity) ]);
+    const objectResult = query(all, { rel: Relationship.as("rel").on(Entity) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { rel: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can find the same relationship multiple times", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[0].add(Number1.to(entities[2]).withValue(2));
+
+    const expectedArray = [ [ 1, 1 ], [ 1, 2 ], [ 2, 1 ], [ 2, 2 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.on(Entity), Relationship.on(Entity) ]);
+    const objectResult = query(all, { val1: Relationship.on(Entity), val2: Relationship.on(Entity) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown, unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { val1: unknown, val2: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify that a given relationship type may only be found once", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[0].add(Number1.to(entities[2]).withValue(2));
+
+    const expectedArray = [ [ 1, 1 ], [ 2, 1 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.on(Entity).once(), Relationship.on(Entity) ]);
+    const objectResult = query(all, { val1: Relationship.on(Entity).once(), val2: Relationship.on(Entity) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown, unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { val1: unknown, val2: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
-  it("Can find the same relationship value with two different wildcards", () => {
+  it("Does not find relationship value on specific entity if entity not in list", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1 } } = createEntities({ count: 1 });
+
+    const entity = new Entity();
+    entity.add(Number1.to(entities[0]).withValue(1));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.on(entity) ]);
+    const objectResult = query(all, { val: Relationship.on(entity) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { val: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, []);
+    assert.deepStrictEqual(objectResult, []);
   });
 
-  it("Can specify that a relationship type may only be found once, while other may be found multiple times", () => {
+  it("Finds entity with explicit relationship to self", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1 } } = createEntities({ count: 1 });
 
-  });
+    entities[0].add(Number1.to(entities[0]).withValue(1));
 
-  it("Finds direct circular relationship", () => {
-  });
+    const expectedArray = [ [ 1 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
 
-  it("Finds transitive circular relationship", () => {
+    // Act
+    const arrayResult = query(all, [ Relationship.to(entities[0]) ]);
+    const objectResult = query(all, { val: Relationship.to(entities[0]) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { val: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Finds relationship with explicit relationship to self using wildcard", () => {
@@ -1933,57 +2246,437 @@ describe("Relationship wildcard query", () => {
 
 describe("Relationship type query", () => {
   it("Find all relationship types", () => {
+    // Arrange
+    const { all, entities, relationships: { Tag1, Number1, String1 } } = createEntities({ count: 3 });
+
+    entities[0].add(Tag1.to(entities[1]));
+    entities[1].add(Number1.to(entities[1]).withValue(1));
+    entities[2].add(String1.to(entities[1]).withValue("hello"));
+
+    const expectedArray = [ [ Tag1 ], [ Number1 ], [ String1 ] ];
+    const expectedObject = expectedArray.map((rel) => ({ rel }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.type() ]);
+    const objectResult = query(all, { rel: Relationship.type() });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { rel: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify reference name of relationship type", () => {
+    // Arrange
+    const { all, entities, relationships: { Tag1, Number1, String1 } } = createEntities({ count: 3 });
+
+    entities[0].add(Tag1.to(entities[1]));
+    entities[1].add(Number1.to(entities[1]).withValue(1));
+    entities[2].add(String1.to(entities[1]).withValue("hello"));
+
+    const expectedArray = [ [ Tag1 ], [ Number1 ], [ String1 ] ];
+
+    // Act
+    const arrayResult = query(all, [ Relationship.type().as("type") ]);
+    const objectResult = query(all, { type: Relationship.type().as("type") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedArray);
   });
 
   it("Can use relationship type reference to find relationship of type", () => {
-    // Relationship.type().as("type"), Relationship.as("type")
+    // Arrange
+    const { all, entities, relationships: { Tag1, Number1, String1 } } = createEntities({ count: 3 });
+
+    entities[0].add(Tag1.to(entities[1]));
+    entities[1].add(Number1.to(entities[1]).withValue(1));
+    entities[2].add(String1.to(entities[1]).withValue("hello"));
+
+    const expectedArray = [ [ Tag1, undefined ], [ Number1, 1 ], [ String1, "hello" ] ];
+
+    // Act
+    const arrayResult = query(
+      all,
+      [ Relationship.type().as("type"), Relationship.as("type") ],
+    );
+    const objectResult = query(
+      all,
+      { type: Relationship.type().as("type"), rel: Relationship.as("type") },
+    );
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Relationship<unknown>, unknown ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Relationship<unknown>, rel: unknown }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedArray);
   });
 
   it("Can find the same relationship type multiple times", () => {
+    // Arrange
+    const { all, entities, relationships: { Tag1, Number1 } } = createEntities({ count: 3 });
+
+    entities[0].add(Tag1.to(entities[1]));
+    entities[1].add(Number1.to(entities[1]).withValue(1));
+
+    const expectedArray = [
+      [ Tag1, Tag1 ],
+      [ Tag1, Number1 ],
+      [ Number1, Tag1 ],
+      [ Number1, Number1 ],
+    ];
+
+    // Act
+    const arrayResult = query(all, [ Relationship.type(), Relationship.type() ]);
+    const objectResult = query(all, { type1: Relationship.type(), type2: Relationship.type() });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Relationship<unknown>, Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type1: Relationship<unknown>, type2: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedArray);
   });
 
   it("Can specify that a given relationship type may only be found once", () => {
-  });
+    // Arrange
+    const { all, entities, relationships: { Tag1, Number1 } } = createEntities({ count: 3 });
 
-  it("Can specify that a relationship type may only be found once, while other may be found multiple times", () => {
+    entities[0].add(Tag1.to(entities[1]));
+    entities[1].add(Number1.to(entities[1]).withValue(1));
+
+    const expectedArray = [
+      [ Tag1, Tag1 ],
+      [ Number1, Tag1 ],
+    ];
+
+    // Act
+    const arrayResult = query(all, [ Relationship.type().once(), Relationship.type() ]);
+    const objectResult = query(all, { type1: Relationship.type().once(), type2: Relationship.type() });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Relationship<unknown>, Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type1: Relationship<unknown>, type2: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedArray);
   });
 
   it("Can specify source entity of relationship type", () => {
+    // Arrange
+    const { all, entities, relationships: { Tag1, Number1 } } = createEntities({ count: 3 });
+
+    entities[0].add(Tag1.to(entities[1]));
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[1].add(Number1.to(entities[1]).withValue(2));
+
+    const expectedArray = [ [ Tag1 ], [ Number1 ] ];
+
+    // Act
+    const arrayResult = query(all, [ Relationship.type().on(entities[0]) ]);
+    const objectResult = query(all, { type: Relationship.type().on(entities[0]) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedArray);
   });
 
   it("Can specify source reference of relationship type", () => {
+    // Arrange
+    const { all, relationships: { Number1, Number2 }, entities } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[0]).withValue(1));
+    entities[1].add(Number1.to(entities[0]).withValue(2));
+    entities[1].add(Number2.to(entities[0]).withValue(3));
+
+    const expectedArray = [
+      [ 2, Number1 ],
+      [ 2, Number2 ],
+    ];
+    const expectedObject = expectedArray.map(([ comp, val ]) => ({ comp, val }));
+
+    // Act
+    const arrayResult = query(all, [ Number2.on("ent"), Relationship.type().on("ent") ]);
+    const objectResult = query(all, { val: Number2.on("ent"), type: Relationship.type().on("ent") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ number, Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { val: number, type: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify entity wildcard as source of relationship type", () => {
+    // Arrange
+    const { all, relationships: { Number1, Number2 }, entities } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[0]).withValue(1));
+    entities[1].add(Number1.to(entities[0]).withValue(2));
+    entities[1].add(Number2.to(entities[0]).withValue(3));
+
+    const expectedArray = [
+      [ Number1 ],
+      [ Number1 ],
+      [ Number2 ],
+    ];
+    const expectedObject = expectedArray.map(([ comp, val ]) => ({ comp, val }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.type().on(Entity) ]);
+    const objectResult = query(all, { type: Relationship.type().on(Entity) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify component wildcard as source of relationship type", () => {
+    // Arrange
+    const { all, relationships: { Number1, Number2 }, entities } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[0]).withValue(1));
+    Number1.add(Number1.to(entities[0]).withValue(2));
+    Number2.add(Number1.to(entities[0]).withValue(3));
+
+    const expectedArray = [
+      [ Number1 ],
+      [ Number1 ],
+    ];
+    const expectedObject = expectedArray.map(([ comp, val ]) => ({ comp, val }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.type().on(Component) ]);
+    const objectResult = query(all, { type: Relationship.type().on(Component) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify relationship wildcard as source of relationship type", () => {
+    // Arrange
+    const { all, relationships: { Tag1, Number1, Number2 } } = createEntities({ count: 3 });
+
+    Tag1.add(Number1.to(all[0]).withValue(1));
+    Number1.add(Number1.to(all[0]).withValue(2));
+    Number2.add(Number1.to(all[0]).withValue(3));
+
+    const expectedArray = [
+      [ Number1 ],
+    ];
+    const expectedObject = expectedArray.map(([ comp, val ]) => ({ comp, val }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.type().on(Relationship) ]);
+    const objectResult = query(all, { type: Relationship.type().on(Relationship) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify target entity of relationship type", () => {
+    // Arrange
+    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[1].add(Number1.to(entities[2]).withValue(2));
+    entities[1].add(Number2.to(entities[1]).withValue(3));
+
+    const expectedArray = [ [ Number1 ], [ Number2 ] ];
+
+    // Act
+    const arrayResult = query(all, [ Relationship.type().to(entities[1]) ]);
+    const objectResult = query(all, { type: Relationship.type().to(entities[1]) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedArray);
   });
 
   it("Can specify target reference of relationship type", () => {
+    // Arrange
+    const { all, relationships: { Number1, Number2 }, entities } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[0]).withValue(1));
+    entities[1].add(Number1.to(entities[0]).withValue(2));
+    entities[1].add(Number2.to(entities[0]).withValue(3));
+
+    const expectedArray = [
+      [ Number1 ],
+      [ Number1 ],
+      [ Number2 ],
+    ];
+    const expectedObject = expectedArray.map(([ comp, val ]) => ({ comp, val }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.type().to("ent") ]);
+    const objectResult = query(all, { type: Relationship.type().to("ent") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify entity wildcard as target of relationship type", () => {
+    // Arrange
+    const { all, relationships: { Number1, Number2 }, entities } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[0]).withValue(1));
+    entities[1].add(Number1.to(entities[1]).withValue(2));
+    entities[1].add(Number2.to(entities[0]).withValue(3));
+
+    const expectedArray = [
+      [ Number1 ],
+      [ Number1 ],
+      [ Number2 ],
+    ];
+    const expectedObject = expectedArray.map(([ comp, val ]) => ({ comp, val }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.type().to(Entity) ]);
+    const objectResult = query(all, { type: Relationship.type().to(Entity) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify component wildcard as target of relationship type", () => {
+    // Arrange
+    const {
+      all,
+      relationships: { Number1, Number2 },
+      components: { String1, String2 },
+      entities,
+    } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[0]).withValue(1));
+    entities[0].add(Number1.to(String1).withValue(2));
+    entities[0].add(Number2.to(String2).withValue(3));
+
+    const expectedArray = [
+      [ Number1 ],
+      [ Number2 ],
+    ];
+    const expectedObject = expectedArray.map(([ comp, val ]) => ({ comp, val }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.type().to(Component) ]);
+    const objectResult = query(all, { type: Relationship.type().to(Component) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 
   it("Can specify relationship wildcard as target of relationship type", () => {
+    // Arrange
+    const { all, relationships: { Number1, Number2 }, entities } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[0]).withValue(1));
+    entities[0].add(Number1.to(Number1).withValue(2));
+    entities[0].add(Number1.to(Number2).withValue(3));
+
+    const expectedArray = [
+      [ Number1 ],
+      [ Number2 ],
+    ];
+    const expectedObject = expectedArray.map(([ comp, val ]) => ({ comp, val }));
+
+    // Act
+    const arrayResult = query(all, [ Relationship.type().to(Relationship) ]);
+    const objectResult = query(all, { type: Relationship.type().to(Relationship) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, [ Relationship<unknown> ]>(true);
+    assertTypesEqual<typeof objectResult, { type: Relationship<unknown> }>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
   });
 });
 
 describe("Ordering of query parts", () => {
   it("Ordering of query parts does not matter", () => {
+    // Arrange
+    const {
+      all,
+      entities,
+      relationships: {Number1, Number2},
+    } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(entities[1]).withValue(1));
+    entities[0].add(Number2.to(entities[0]).withValue(2));
+    entities[1].add(Number1.to(entities[2]).withValue(3));
+
+    // Act
+    const result1 = query(all, [
+      Entity.as("source"),
+      Relationship.type().as("type"),
+      Relationship.as("type").to("target"),
+      Entity.as("target"),
+    ]);
+    const result2 = query(all, [
+      Entity.as("source"),
+      Entity.as("target"),
+      Relationship.as("type").to("target"),
+      Relationship.type().as("type"),
+    ]);
+    const result3 = query(all, [
+      Entity.as("target"),
+      Relationship.as("type").to("target"),
+      Relationship.type().as("type"),
+      Entity.as("source"),
+    ]);
+
+    // Assert
+    assert.deepStrictEqual(result1, [
+      [ entities[0], Number1, 1, entities[1] ],
+      [ entities[0], Number2, 2, entities[0] ],
+      [ entities[1], Number1, 3, entities[2] ],
+    ]);
+    assert.deepStrictEqual(result2, [
+      [ entities[0], entities[1], 1, Number1 ],
+      [ entities[0], entities[0], 2, Number2 ],
+      [ entities[1], entities[2], 3, Number1 ],
+    ]);
+    assert.deepStrictEqual(result3, [
+      [ entities[1], 1, Number1, entities[0] ],
+      [ entities[0], 2, Number2, entities[0] ],
+      [ entities[2], 3, Number1, entities[1] ],
+    ]);
   });
 });
 
