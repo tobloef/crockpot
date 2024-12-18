@@ -27,7 +27,9 @@ import type { ComponentWildcardQuery } from "../component/queries/component-wild
 import type { ComponentTypeQuery } from "../component/queries/component-type-query.ts";
 import type { RelationshipTypeQuery } from "../relationship/queries/relationship-type-query.ts";
 
-export type QueryOutput<Input extends QueryInput> =
+export type QueryOutput<Input extends QueryInput> = QueryOutputItem<Input>[];
+
+export type QueryOutputItem<Input extends QueryInput> =
   Input extends QueryPart ? QueryPartOutput<Input> :
   Input extends QueryArrayInput<QueryPart> ? QueryArrayOutput<Input> :
   Input extends QueryObjectInput<QueryPart> ? QueryObjectOutput<Input> :
