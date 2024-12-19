@@ -188,7 +188,7 @@ describe("Entity wildcard query", () => {
     const expectedObject = expectedArray.map(([ent1, ent2]) => ({ ent1, ent2 }));
 
     // Act
-    const arrayResult = query(entities, [Entity, Entity]);
+    const arrayResult = query(entities, [Entity.as("one"), Entity.as("two")]);
     const objectResult = query(entities, { ent1: Entity, ent2: Entity });
 
     // Assert
@@ -210,8 +210,16 @@ describe("Entity wildcard query", () => {
     const expectedObject = expectedArray.map(([ent1, ent2, ent3]) => ({ ent1, ent2, ent3 }));
 
     // Act
-    const arrayResult = query(entities, [Entity.once(), Entity, Entity]);
-    const objectResult = query(entities, { ent1: Entity.once(), ent2: Entity, ent3: Entity });
+    const arrayResult = query(entities, [
+      Entity.as("one").once(),
+      Entity.as("two"),
+      Entity.as("three")
+    ]);
+    const objectResult = query(entities, {
+      ent1: Entity.as("one").once(),
+      ent2: Entity.as("two"),
+      ent3: Entity.as("three")
+    });
 
     // Assert
     assertTypesEqual<typeof arrayResult, Array<[Entity, Entity, Entity]>>(true);
@@ -232,8 +240,16 @@ describe("Entity wildcard query", () => {
     const expectedObject = expectedArray.map(([ent1, ent2, ent3]) => ({ ent1, ent2, ent3 }));
 
     // Act
-    const arrayResult = query(entities, [Entity.once(), Entity.once(), Entity]);
-    const objectResult = query(entities, { ent1: Entity.once(), ent2: Entity.once(), ent3: Entity });
+    const arrayResult = query(entities, [
+      Entity.as("one").once(),
+      Entity.as("two").once(),
+      Entity.as("three")
+    ]);
+    const objectResult = query(entities, {
+      ent1: Entity.as("one").once(),
+      ent2: Entity.as("two").once(),
+      ent3: Entity.as("three")
+    });
 
     // Assert
     assertTypesEqual<typeof arrayResult, Array<[Entity, Entity, Entity]>>(true);
@@ -243,15 +259,15 @@ describe("Entity wildcard query", () => {
     assert.deepStrictEqual(objectResult, expectedObject);
   });
 
-  it("Can specify multiple wildcards with different reference names", () => {
+  it("Wildcards without reference name refers to same entity", () => {
     // Arrange
     const { entities } = createEntities({ count: 3 });
-    const expectedArray = permutations(entities);
+    const expectedArray = entities.map((ent) => [ent, ent]);
     const expectedObject = expectedArray.map(([ent1, ent2]) => ({ ent1, ent2 }));
 
     // Act
-    const arrayResult = query(entities, [Entity.as("one"), Entity.as("two")]);
-    const objectResult = query(entities, { ent1: Entity.as("one"), ent2: Entity.as("two") });
+    const arrayResult = query(entities, [Entity, Entity]);
+    const objectResult = query(entities, { ent1: Entity, ent2: Entity });
 
     // Assert
     assertTypesEqual<typeof arrayResult, Array<[Entity, Entity]>>(true);
