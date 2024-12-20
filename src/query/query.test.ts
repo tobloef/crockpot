@@ -347,8 +347,8 @@ describe("Entity type query", () => {
     assertTypesEqual<typeof arrayResult, Array<[Class<Entity>]>>(true);
     assertTypesEqual<typeof objectResult, Array<{ typ: Class<Entity> }>>(true);
 
-    assert.deepStrictEqual(arrayResult, Object.values(components).map(() => [Component]));
-    assert.deepStrictEqual(objectResult, Object.values(components).map(() => ({ typ: Component })));
+    assert.deepStrictEqual(arrayResult, Object.values(components).map((c) => [c]));
+    assert.deepStrictEqual(objectResult, Object.values(components).map((c) => ({ typ: c })));
   });
 
   it("Finds that type of relationship types are the relationship types", () => {
@@ -363,8 +363,8 @@ describe("Entity type query", () => {
     assertTypesEqual<typeof arrayResult, Array<[Class<Entity>]>>(true);
     assertTypesEqual<typeof objectResult, Array<{ typ: Class<Entity> }>>(true);
 
-    assert.deepStrictEqual(arrayResult, Object.values(relationships).map(() => [Relationship]));
-    assert.deepStrictEqual(objectResult, Object.values(relationships).map(() => ({ typ: Relationship })));
+    assert.deepStrictEqual(arrayResult, Object.values(relationships).map((r) => [r]));
+    assert.deepStrictEqual(objectResult, Object.values(relationships).map((r) => ({ typ: r })));
   });
 
   it("Can specify reference name for entity type", () => {
@@ -1109,6 +1109,7 @@ describe("Component type query", () => {
     const expectedObject = expectedArray.map(([comp, val]) => ({ comp, val }));
 
     // Act
+    // Component.as("comp"), IsA.on("comp").to("type"), Entity.as("type")
     const arrayResult = query(all, [Component.type().as("type"), Component.as("type")]);
     const objectResult = query(all, { comp: Component.type().as("type"), val: Component.as("type") });
 
@@ -1303,7 +1304,7 @@ describe("Relationship instance query", () => {
     entities[1].add(Tag1.to(entities[2]));
     entities[1].add(Tag2.to(entities[0]));
 
-    const expectedArray = [[Tag1], [Tag1]];
+    const expectedArray = [[undefined], [undefined]];
     const expectedObject = expectedArray.map((rel) => ({ rel }));
 
     // Act

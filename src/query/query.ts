@@ -18,6 +18,14 @@ export function query<Input extends QueryInput>(
   entities: Entity[],
   input: Input,
 ): QueryOutput<Input> {
+  if (entities.length === 0) {
+    return [];
+  }
+
+  if (Object.keys(input).length === 0) {
+    return [];
+  }
+
   let results = [];
 
   entityLoop:

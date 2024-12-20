@@ -1,5 +1,6 @@
 import type { ComponentSource } from "../component.ts";
 import { EntityWildcardQuery } from "../../entity/index.ts";
+import { ComponentTypeQuery } from "./component-type-query.ts";
 
 export class ComponentWildcardQuery extends EntityWildcardQuery {
   source?: ComponentSource;
@@ -13,6 +14,10 @@ export class ComponentWildcardQuery extends EntityWildcardQuery {
   override once(): ComponentWildcardQuery {
     super.once();
     return this;
+  }
+
+  override type() {
+    return new ComponentTypeQuery(this);
   }
 
   on(source: ComponentSource): ComponentWildcardQuery {

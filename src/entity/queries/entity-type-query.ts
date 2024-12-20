@@ -1,22 +1,21 @@
+import type { EntityWildcardQuery } from "./entity-wildcard-query.ts";
+
 export class EntityTypeQuery {
-  #name?: string;
-  #isOnce = false;
+  name?: string;
+  isOnce = false;
+  wildcardQuery?: EntityWildcardQuery;
 
-  get name(): string | undefined {
-    return this.#name;
-  }
-
-  get isOnce(): boolean {
-    return this.#isOnce;
+  constructor(wildcardQuery?: EntityWildcardQuery) {
+    this.wildcardQuery = wildcardQuery;
   }
 
   as(name: string): EntityTypeQuery {
-    this.#name = name;
+    this.name = name;
     return this;
   }
 
   once(): EntityTypeQuery {
-    this.#isOnce = true;
+    this.isOnce = true;
     return this;
   }
 }

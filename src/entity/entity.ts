@@ -3,6 +3,7 @@ import { EntityWildcardQuery } from "./queries/entity-wildcard-query.ts";
 import type { Component, ComponentValue, ComponentValuePair, ComponentValues, Tag, } from "../component/index.ts";
 import type { Nullable } from "../utils/nullable.ts";
 import { EntityTypeQuery } from "./queries/entity-type-query.ts";
+import { Relationship, type RelationshipValue } from "../relationship/index.ts";
 
 export class Entity {
   static #brand = "Entity" as const;
@@ -58,6 +59,10 @@ export class Entity {
     return this;
   }
 
+
+  get<RelationshipType extends Relationship<any>>(
+    relationship: RelationshipType,
+  ): RelationshipValue<RelationshipType>[];
 
   get<ComponentType extends Component<any>>(
     component: ComponentType,
@@ -162,16 +167,12 @@ export class Entity {
   }
 }
 
-type GetInput = Component<any> | Component<any>[] | Record<string, Component<any>>;
+type GetInput = Component<any> | Relationship<any>;
 
 type GetOutput<Input extends GetInput> = (
-  Input extends Component<any>
-    ? Nullable<ComponentValue<Input>>
-    : Input extends Component<any>[]
-      ? Nullable<ComponentValues<Input>>
-      : Input extends Record<string, Component<any>>
-        ? Nullable<ComponentValues<Input>>
-        : never
-  );
+  Input extends Relationship<any> ? RelationshipValue<Input>[] :
+  Input extends Component<any> ? Nullable<ComponentValue<Input>> :
+  never
+);
 
 

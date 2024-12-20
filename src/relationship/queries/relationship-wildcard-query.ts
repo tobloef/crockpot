@@ -16,6 +16,10 @@ export class RelationshipWildcardQuery extends EntityWildcardQuery {
     return this;
   }
 
+  override type() {
+    return new RelationshipTypeQuery(this);
+  }
+
   on(source: RelationshipSource): RelationshipWildcardQuery {
     this.source = source;
     return this;
