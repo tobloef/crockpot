@@ -1,5 +1,6 @@
 import { Entity } from "../entity/index.ts";
-import { type RelationshipComponent, RelationshipComponentStore, } from "./relationship-component-store.ts";
+import type { RelationshipComponent } from "./relationship-component-store.ts";
+import { RelationshipComponentStore } from "./relationship-component-store.ts";
 import { Component } from "../component/index.ts";
 import { RelationshipInstanceQuery } from "./queries/relationship-instance-query.ts";
 import type { Wildcard } from "../query/index.ts";
@@ -41,14 +42,16 @@ export class Relationship<
     return new RelationshipInstanceQuery(this).on(source);
   }
 
-
-  to(entity: Entity): RelationshipComponent<this>;
+  to(entity: Entity): RelationshipComponent<Relationship<Value>>;
 
   to(reference: RelationshipTarget): RelationshipInstanceQuery<typeof this>;
 
   to(
     entityOrReference: Entity | string | Wildcard,
-  ): RelationshipComponent<this> | RelationshipInstanceQuery<typeof this> {
+  ): (
+    | RelationshipComponent<Relationship<Value>>
+    | RelationshipInstanceQuery<typeof this>
+  ) {
     if (entityOrReference instanceof Entity) {
       return this.#componentTo(entityOrReference);
     } else {
@@ -57,7 +60,7 @@ export class Relationship<
   }
 
 
-  #componentTo(entity: Entity): RelationshipComponent<this> {
+  #componentTo(entity: Entity): RelationshipComponent<Relationship<Value>> {
     let relationshipComponent: RelationshipComponent<this> | null = (
       Relationship.__relationshipComponents.get(this, entity)
     );

@@ -1,7 +1,7 @@
-* Replace .type() with relationships
-  * Component.as("comp"), IsA.on("comp").to("type"), Entity.as("type")
-  * Don't have the IsA built-in, but make sure the above can work
-  * If can then probably remove all three type test groups
+* Remove type() stuff for now
+* Support or and not for RelationshipTarget, RelationshipSource and ComponentSource
+  * Give them RelationshipTarget/RelationshipSource/ComponentSource as their generic
+* Make a "one of" alias for "or" and a "none of" alias "not".
 * Implementation
 * Two-way relationships
 * Required components and/or bundles

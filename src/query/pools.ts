@@ -1,0 +1,126 @@
+import type { Entity } from "../entity/index.ts";
+import type { QueryInput } from "./input.ts";
+import type { QueryOutputItem } from "./output.ts";
+
+export type Permutation = Record<string, Entity>;
+export type Pool = () => Generator<Entity>;
+export type Pools = Record<string, Pool>;
+export type Constraint = (permutation: Permutation) => boolean;
+export type Constraints = { poolSpecific: Record<string, Constraint[]>; crossPool: Constraint[] };
+export type Mapper<Output extends Record<string, any> | any[]> = (permutation: Permutation, output: Output) => void;
+export type OutputMapper<Input extends QueryInput> = (permutation: Permutation) => QueryOutputItem<Input>;
+
+// TODO: Give this file a better name
+
+export function parseInput<Input extends QueryInput>(
+  input: Input
+): {
+  pools: Pools;
+  constraints: Constraints;
+  outputMapper: OutputMapper<Input>;
+} {
+  const pools = parsePools(input);
+  const constraints = parseConstraints(input);
+  const mappers = parseMappers(input);
+  const outputMapper = combineMappers(input, mappers);
+
+  return {
+    pools,
+    constraints,
+    outputMapper,
+  }
+}
+
+export function parsePools<Input extends QueryInput>(
+  input: Input
+): Pools {
+  // TODO
+  return {};
+}
+
+export function parseConstraints<Input extends QueryInput>(
+  input: Input
+): Constraints {
+  // TODO
+  return {
+    poolSpecific: {},
+    crossPool: [],
+  };
+}
+
+export function parseMappers<Input extends QueryInput>(
+  input: Input
+): Mapper<any>[] {
+  // TODO
+  return [];
+}
+
+export function combineMappers<Input extends QueryInput>(
+  input: Input,
+  mappers: Mapper<any>[]
+): OutputMapper<Input> {
+  return (permutation: Permutation): QueryOutputItem<Input> => {
+    const output = Array.isArray(input) ? [] : {};
+
+    for (const mapper of mappers) {
+      mapper(permutation, output)
+    }
+
+    return output as QueryOutputItem<Input>;
+  }
+}
+
+
+export function* permutePools(pools: Pools): Generator<Permutation> {
+  if (Object.keys(pools).length === 0) {
+    return;
+  }
+
+  const poolKeys = Object.keys(pools);
+  const firstKey = poolKeys[0];
+  const firstPool = pools[firstKey];
+  const otherPools = Object.fromEntries(
+    poolKeys.slice(1).map((key) => [key, pools[key]])
+  );
+
+  for (const entity of firstPool()) {
+    if (Object.keys(otherPools).length === 0) {
+      const permutation = { [firstKey]: entity };
+      yield permutation;
+    } else {
+      const otherPermutations = permutePools(otherPools);
+
+      for (const otherPermutation of otherPermutations) {
+        const permutation = { [firstKey]: entity, ...otherPermutation };
+        yield permutation;
+      }
+    }
+  }
+}
+
+export function filterPools(
+  pools: Pools,
+  constraints: Record<string, Constraint[]>
+): Pools {
+  const filteredPools: Pools = {};
+
+  for (const key in pools) {
+    const poolConstraints = constraints[key] ?? [];
+
+    const predicate = (entity: Entity) => (
+      poolConstraints.every((constraint) => constraint({ [key]: entity }))
+    );
+
+    filteredPools[key] = () => filterGenerator(pools[key](), predicate);
+  }
+
+  return filteredPools;
+}
+
+export function* filterGenerator<T>(generator: Generator<T>, predicate: (x: T) => boolean): Generator<T> {
+  for (const item of generator) {
+    if (predicate(item)) {
+      yield item;
+    }
+  }
+}

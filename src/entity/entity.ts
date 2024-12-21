@@ -1,9 +1,9 @@
 import { ComponentValueStore } from "./component-value-store.ts";
 import { EntityWildcardQuery } from "./queries/entity-wildcard-query.ts";
+import { EntityTypeQuery } from "./queries/entity-type-query.ts";
 import type { Component, ComponentValue, ComponentValuePair, ComponentValues, Tag, } from "../component/index.ts";
 import type { Nullable } from "../utils/nullable.ts";
-import { EntityTypeQuery } from "./queries/entity-type-query.ts";
-import { Relationship, type RelationshipValue } from "../relationship/index.ts";
+import type { Relationship, RelationshipValue } from "../relationship/index.ts";
 
 export class Entity {
   static #brand = "Entity" as const;
