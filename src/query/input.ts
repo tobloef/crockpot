@@ -1,8 +1,11 @@
 import type { QueryPart } from "./part.ts";
 
-export type QueryInput<Part = QueryPart> = QueryArrayInput<Part> | QueryObjectInput<Part> | Part; // TODO: Remove generic param?
+export type QueryInput<Part = QueryPart> = (
+  | QueryArrayInput<Part>
+  | QueryObjectInput<Part>
+); // TODO: Remove generic param?
 
-export type QueryArrayInput<Part> = Array<Part>;
+export type QueryArrayInput<Part> = Part[] | readonly Part[];
 
 export type QueryObjectInput<Part> = Record<string, Part>
 

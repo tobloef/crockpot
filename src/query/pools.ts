@@ -1,14 +1,17 @@
 import type { Entity } from "../entity/index.ts";
 import type { QueryInput } from "./input.ts";
-import type { QueryOutputItem } from "./output.ts";
+import type { QueryOutput, QueryOutputItem } from "./output.ts";
 
-export type Permutation = Record<string, Entity>;
-export type Pool = () => Generator<Entity>;
 export type Pools = Record<string, Pool>;
+export type Pool = () => Generator<Entity>;
+export type Permutation = Record<string, Entity>;
 export type Constraint = (permutation: Permutation) => boolean;
 export type Constraints = { poolSpecific: Record<string, Constraint[]>; crossPool: Constraint[] };
-export type Mapper<Output extends Record<string, any> | any[]> = (permutation: Permutation, output: Output) => void;
+export type Mapper<Input extends QueryInput> = (
+  (permutation: Permutation, output: Partial<QueryOutputItem<Input>>) => void
+);
 export type OutputMapper<Input extends QueryInput> = (permutation: Permutation) => QueryOutputItem<Input>;
+export type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
 // TODO: Give this file a better name
 
@@ -50,20 +53,21 @@ export function parseConstraints<Input extends QueryInput>(
 
 export function parseMappers<Input extends QueryInput>(
   input: Input
-): Mapper<any>[] {
+): Mapper<Input>[] {
   // TODO
   return [];
 }
 
 export function combineMappers<Input extends QueryInput>(
   input: Input,
-  mappers: Mapper<any>[]
+  mappers: Mapper<Input>[]
 ): OutputMapper<Input> {
   return (permutation: Permutation): QueryOutputItem<Input> => {
     const output = Array.isArray(input) ? [] : {};
 
     for (const mapper of mappers) {
-      mapper(permutation, output)
+      // @ts-ignore
+      mapper(permutation, output);
     }
 
     return output as QueryOutputItem<Input>;

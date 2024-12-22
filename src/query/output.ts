@@ -26,13 +26,14 @@ import type { EntityTypeQuery } from "../entity/queries/entity-type-query.ts";
 import type { ComponentWildcardQuery } from "../component/queries/component-wildcard-query.ts";
 import type { ComponentTypeQuery } from "../component/queries/component-type-query.ts";
 import type { RelationshipTypeQuery } from "../relationship/queries/relationship-type-query.ts";
+import type { Writeable } from "./pools.ts";
 
 export type QueryOutput<Input extends QueryInput> = Generator<QueryOutputItem<Input>>;
 
 export type QueryOutputItem<Input extends QueryInput> =
   Input extends QueryPart ? QueryPartOutput<Input> :
-  Input extends QueryArrayInput<QueryPart> ? QueryArrayOutput<Input> :
-  Input extends QueryObjectInput<QueryPart> ? QueryObjectOutput<Input> :
+  Input extends QueryArrayInput<QueryPart> ? QueryArrayOutput<Writeable<Input>> :
+  Input extends QueryObjectInput<QueryPart> ? QueryObjectOutput<Writeable<Input>> :
   never;
 
 export type QueryArrayOutput<Input extends QueryArrayInput<QueryPart>> =
@@ -62,8 +63,8 @@ type QueryPartOutput<Part> =
   Part extends Class<Relationship<infer Value>> ? Value :
   Part extends Class<Component<infer Value>> ? Value :
   Part extends Class<Entity> ? Entity :
-  Part extends EntityTypeQuery ? Class<Entity> :
   Part extends EntityWildcardQuery ? Entity :
+  Part extends EntityTypeQuery ? Class<Entity> :
   Part extends Relationship<infer Value> ? Value :
   Part extends Component<infer Value> ? Value :
   Part extends Entity ? Entity :

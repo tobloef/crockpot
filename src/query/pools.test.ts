@@ -1,17 +1,11 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert";
-import {
-  combineMappers,
-  filterGenerator,
-  filterPools,
-  parseConstraints,
-  parseInput,
-  parseMappers,
-  parsePools,
-  permutePools,
-} from "./pools.ts";
-import type { Pools, Constraint, Mapper } from "./pools.ts";
+import type { Constraint, Mapper, Pools } from "./pools.ts";
+import { combineMappers, filterGenerator, filterPools, parseConstraints, parseInput, parseMappers, parsePools, permutePools, } from "./pools.ts";
 import { Entity } from "../entity/index.ts";
+import type { QueryOutputItem } from "./output";
+import { Component } from "../component/index";
+import { Relationship } from "../relationship/index";
 
 describe(parseInput.name, () => {
 
@@ -26,50 +20,264 @@ describe(parseConstraints.name, () => {
 });
 
 describe(parseMappers.name, () => {
+  it("Parses entity class for arrays", () => {
+    // Arrange
+    const entity = new Entity();
+    const permutation = {
+      "__default": entity,
+    };
+    const input = [Entity] as const;
+    const output: Partial<QueryOutputItem<typeof input>> = [];
 
+    // Act
+    const [mapper] = parseMappers(input);
+    mapper(permutation, output);
+
+    // Assert
+    assert.deepStrictEqual(output, [entity]);
+  });
+
+  it("Parses entity class for objects", () => {
+    // Arrange
+    const entity = new Entity();
+    const permutation = {
+      "__default": entity,
+    };
+    const input = { x: Entity } as const;
+    const output: Partial<QueryOutputItem<typeof input>> = {};
+
+    // Act
+    const [mapper] = parseMappers(input);
+    mapper(permutation, output);
+
+    // Assert
+    assert.deepStrictEqual(output, { x: entity });
+  });
+
+  it("Parses component class for arrays", () => {
+    // Arrange
+    const component = new Component();
+    const permutation = {
+      "__default": component,
+    };
+    const input = [Component] as const;
+    const output: Partial<QueryOutputItem<typeof input>> = [];
+
+    // Act
+    const [mapper] = parseMappers(input);
+    mapper(permutation, output);
+
+    // Assert
+    assert.deepStrictEqual(output, [component]);
+  });
+
+  it("Parses entity class for objects", () => {
+    // Arrange
+    const component = new Component();
+    const permutation = {
+      "__default": component,
+    };
+    const input = { x: Component } as const;
+    const output: Partial<QueryOutputItem<typeof input>> = {};
+
+    // Act
+    const [mapper] = parseMappers(input);
+    mapper(permutation, output);
+
+    // Assert
+    assert.deepStrictEqual(output, { x: component });
+  });
+
+  it("Parses relationship class for arrays", () => {
+    // Arrange
+    const relationship = new Relationship();
+    const permutation = {
+      "__default": relationship,
+    };
+    const input = [Relationship] as const;
+    const output: Partial<QueryOutputItem<typeof input>> = [];
+
+    // Act
+    const [mapper] = parseMappers(input);
+    mapper(permutation, output);
+
+    // Assert
+    assert.deepStrictEqual(output, [relationship]);
+  });
+
+  it("Parses relationship class for objects", () => {
+    // Arrange
+    const relationship = new Relationship();
+    const permutation = {
+      "__default": relationship,
+    };
+    const input = { x: Relationship } as const;
+    const output: Partial<QueryOutputItem<typeof input>> = {};
+
+    // Act
+    const [mapper] = parseMappers(input);
+    mapper(permutation, output);
+
+    // Assert
+    assert.deepStrictEqual(output, { x: relationship });
+  });
+
+  it("Parses entity instance for arrays", () => {
+    // Arrange
+    const entity = new Entity();
+    const permutation = {
+      "__default": entity,
+    };
+    const input = [entity] as const;
+    const output: Partial<QueryOutputItem<typeof input>> = [];
+
+    // Act
+    const [mapper] = parseMappers(input);
+    mapper(permutation, output);
+
+    // Assert
+    assert.deepStrictEqual(output, [entity]);
+  });
+
+  it("Parses entity instance for objects", () => {
+    // Arrange
+    const entity = new Entity();
+    const permutation = {
+      "__default": entity,
+    };
+    const input = { x: entity } as const;
+    const output: Partial<QueryOutputItem<typeof input>> = {};
+
+    // Act
+    const [mapper] = parseMappers(input);
+    mapper(permutation, output);
+
+    // Assert
+    assert.deepStrictEqual(output, { x: entity });
+  });
+
+  it("Parses component instance for arrays", () => {
+    // Arrange
+    const component = new Component();
+    const permutation = {
+      "__default": component,
+    };
+    const input = [component] as const;
+    const output: Partial<QueryOutputItem<typeof input>> = [];
+
+    // Act
+    const [mapper] = parseMappers(input);
+    mapper(permutation, output);
+
+    // Assert
+    assert.deepStrictEqual(output, [component]);
+  });
+
+  it("Parses component instance for objects", () => {
+    // Arrange
+    const component = new Component();
+    const permutation = {
+      "__default": component,
+    };
+    const input = { x: component } as const;
+    const output: Partial<QueryOutputItem<typeof input>> = {};
+
+    // Act
+    const [mapper] = parseMappers(input);
+    mapper(permutation, output);
+
+    // Assert
+    assert.deepStrictEqual(output, { x: component });
+  });
+
+  it("Parses relationship instance for arrays", () => {
+    // Arrange
+    const relationship = new Relationship();
+    const permutation = {
+      "__default": relationship,
+    };
+    const input = [relationship] as const;
+    const output: Partial<QueryOutputItem<typeof input>> = [];
+
+    // Act
+    const [mapper] = parseMappers(input);
+    mapper(permutation, output);
+
+    // Assert
+    assert.deepStrictEqual(output, [relationship]);
+  });
+
+  it("Parses relationship instance for objects", () => {
+    // Arrange
+    const relationship = new Relationship();
+    const permutation = {
+      "__default": relationship,
+    };
+    const input = { x: relationship } as const;
+    const output: Partial<QueryOutputItem<typeof input>> = {};
+
+    // Act
+    const [mapper] = parseMappers(input);
+    mapper(permutation, output);
+
+    // Assert
+    assert.deepStrictEqual(output, { x: relationship });
+  });
 });
 
 describe(combineMappers.name, () => {
   it("Combine mappers for object", () => {
     // Arrange
-    const input = {};
+    const input = {
+      a: Entity.as("c"),
+      b: Entity.as("d"),
+    } as const;
 
-    const mappers: Mapper<Record<string, any>>[] = [
+    const mappers: Mapper<typeof input>[] = [
       (permutation, output) => {
-        output["a"] = permutation.a.name;
+        output.a = permutation.a;
       },
       (permutation, output) => {
-        output["b"] = permutation.b.name;
+        output.b = permutation.b;
       },
     ];
 
     // Act
-    const result = combineMappers(input, mappers);
+    const mapper = combineMappers(input, mappers);
+    const output = mapper({
+      c: new Entity("Entity 1"),
+      d: new Entity("Entity 2"),
+    });
 
     // Assert
-    const output = result({ a: new Entity("Entity A"), b: new Entity("Entity B") });
-    assert.deepStrictEqual(output, { a: "Entity A", b: "Entity B" });
+    assert.deepStrictEqual(output, { a: "Entity 1", b: "Entity 2" });
   });
 
   it("Combine mappers for array", () => {
     // Arrange
-    const input: any[] = [];
+    const input = [
+      Entity.as("a"),
+      Entity.as("b"),
+    ] as const;
 
-    const mappers: Mapper<any[]>[] = [
+    const mappers: Mapper<typeof input>[] = [
       (permutation, output) => {
-        output.push(permutation.a.name);
+        output.push(permutation.a);
       },
       (permutation, output) => {
-        output.push(permutation.b.name);
+        output.push(permutation.b);
       },
     ];
 
     // Act
-    const result = combineMappers(input, mappers);
+    const mapper = combineMappers(input, mappers);
+    const output = mapper({
+      a: new Entity("Entity 1"),
+      b: new Entity("Entity 2"),
+    });
 
     // Assert
-    const output = result({ a: new Entity("Entity A"), b: new Entity("Entity B") });
-    assert.deepStrictEqual(output, ["Entity A", "Entity B"]);
+    assert.deepStrictEqual(output, ["Entity 1", "Entity 2"]);
   });
 });
 
