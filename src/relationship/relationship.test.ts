@@ -181,14 +181,6 @@ describe(Relationship.once.name, () => {
   it("Create relationship once query with reference name", () => {});
 });
 
-describe(Relationship.type.name, () => {
-  it("Create entity type query", () => {});
-
-  it("Create entity type query with reference name", () => {});
-
-  it("Create entity type query with isOnce set to true", () => {});
-});
-
 describe(Relationship.on.name, () => {
   it("Create relationship wildcard query with entity as source", () => {
     const entity = new Entity();

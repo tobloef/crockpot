@@ -3,9 +3,9 @@ import * as assert from "node:assert";
 import type { Constraint, Mapper, Pools } from "./pools.ts";
 import { combineMappers, filterGenerator, filterPools, parseConstraints, parseInput, parseMappers, parsePools, permutePools, } from "./pools.ts";
 import { Entity } from "../entity/index.ts";
-import type { QueryOutputItem } from "./output";
-import { Component } from "../component/index";
-import { Relationship } from "../relationship/index";
+import type { QueryOutputItem } from "./output.ts";
+import { Component } from "../component/index.ts";
+import { Relationship } from "../relationship/index.ts";
 
 describe(parseInput.name, () => {
 
@@ -222,6 +222,40 @@ describe(parseMappers.name, () => {
 
     // Assert
     assert.deepStrictEqual(output, { x: relationship });
+  });
+
+  it("Parses entity wildcard with reference name", () => {
+    // Arrange
+    const entity = new Entity();
+    const permutation = {
+      "a": entity,
+    };
+    const input = { x: Entity.as("a") } as const;
+    const output: Partial<QueryOutputItem<typeof input>> = {};
+
+    // Act
+    const [mapper] = parseMappers(input);
+    mapper(permutation, output);
+
+    // Assert
+    assert.deepStrictEqual(output, { x: entity });
+  });
+
+  it("Parses entity wildcard with once clause", () => {
+    // Arrange
+    const entity = new Entity();
+    const permutation = {
+      "__default": entity,
+    };
+    const input = { x: Entity.once() } as const;
+    const output: Partial<QueryOutputItem<typeof input>> = {};
+
+    // Act
+    const [mapper] = parseMappers(input);
+    mapper(permutation, output);
+
+    // Assert
+    assert.deepStrictEqual(output, { x: entity });
   });
 });
 

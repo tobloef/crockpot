@@ -5,7 +5,6 @@ import { Component } from "../component/index.ts";
 import { RelationshipInstanceQuery } from "./queries/relationship-instance-query.ts";
 import type { Wildcard } from "../query/index.ts";
 import { RelationshipWildcardQuery } from "./queries/relationship-wildcard-query.ts";
-import { RelationshipTypeQuery } from "./queries/relationship-type-query.ts";
 
 export class Relationship<
   Value = undefined,
@@ -21,10 +20,6 @@ export class Relationship<
 
   static override once() {
     return new RelationshipWildcardQuery().once();
-  }
-
-  static override type() {
-    return new RelationshipTypeQuery();
   }
 
 

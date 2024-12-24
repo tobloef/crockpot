@@ -105,14 +105,6 @@ describe(Component.once.name, () => {
   it("Create component once query with reference name", () => {});
 });
 
-describe(Component.type.name, () => {
-  it("Create component type query", () => {});
-
-  it("Create component type query with reference name", () => {});
-
-  it("Create component type query with isOnce set to true", () => {});
-});
-
 describe(Component.on.name, () => {
   it("Create component wildcard query with entity as source", () => {
     const entity = new Entity();

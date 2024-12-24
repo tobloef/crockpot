@@ -2,7 +2,6 @@ import { Entity } from "../entity/index.ts";
 import { ComponentInstanceQuery } from "./queries/component-instance-query.ts";
 import type { Wildcard } from "../query/index.ts";
 import { ComponentWildcardQuery } from "./queries/component-wildcard-query.ts";
-import { ComponentTypeQuery } from "./queries/component-type-query.ts";
 
 export class Component<
   Value = undefined,
@@ -21,11 +20,6 @@ export class Component<
 
   static override once() {
     return new ComponentWildcardQuery().once();
-  }
-
-
-  static override type() {
-    return new ComponentTypeQuery();
   }
 
 

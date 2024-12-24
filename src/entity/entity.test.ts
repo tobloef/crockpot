@@ -341,11 +341,3 @@ describe(Entity.as.name, () => {
 describe(Entity.once.name, () => {
   it("Create entity once query with reference name", () => {});
 });
-
-describe(Entity.type.name, () => {
-  it("Create entity type query", () => {});
-
-  it("Create entity type query with reference name", () => {});
-
-  it("Create entity type query with isOnce set to true", () => {});
-});

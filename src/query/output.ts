@@ -22,10 +22,7 @@ import {
   RelationshipInstanceQuery,
 } from "../relationship/index.ts";
 import type { Class } from "../utils/class.ts";
-import type { EntityTypeQuery } from "../entity/queries/entity-type-query.ts";
 import type { ComponentWildcardQuery } from "../component/queries/component-wildcard-query.ts";
-import type { ComponentTypeQuery } from "../component/queries/component-type-query.ts";
-import type { RelationshipTypeQuery } from "../relationship/queries/relationship-type-query.ts";
 import type { Writeable } from "./pools.ts";
 
 export type QueryOutput<Input extends QueryInput> = Generator<QueryOutputItem<Input>>;
@@ -57,14 +54,11 @@ type QueryPartOutput<Part> =
   Part extends Or<infer Types> ? ParseOr<Types> :
   Part extends RelationshipInstanceQuery<infer RelationshipType> ? RelationshipValue<RelationshipType> :
   Part extends ComponentInstanceQuery<infer ComponentType> ? ComponentValue<ComponentType> :
-  Part extends RelationshipTypeQuery ? Relationship<unknown> :
-  Part extends ComponentTypeQuery ? Component<unknown> :
   Part extends ComponentWildcardQuery ? unknown :
   Part extends Class<Relationship<infer Value>> ? Value :
   Part extends Class<Component<infer Value>> ? Value :
   Part extends Class<Entity> ? Entity :
   Part extends EntityWildcardQuery ? Entity :
-  Part extends EntityTypeQuery ? Class<Entity> :
   Part extends Relationship<infer Value> ? Value :
   Part extends Component<infer Value> ? Value :
   Part extends Entity ? Entity :
