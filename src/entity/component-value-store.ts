@@ -1,4 +1,8 @@
-import type { Component, ComponentValue, Tag, } from "../component/index.ts";
+import type {
+  Component,
+  ComponentValue,
+  Tag,
+} from "../component/index.ts";
 
 export class ComponentValueStore {
   // Stores null for components that have no value, so we can differentiate between
@@ -24,17 +28,17 @@ export class ComponentValueStore {
   }
 
 
-  get<ComponentType extends Component<any>>(
-    component: ComponentType,
-  ): ComponentValue<ComponentType> | null {
-    const value = this.#map.get(component);
+  get<Input extends Component<any>>(
+    input: Input,
+  ): ComponentValue<Input> | null {
+    const value = this.#map.get(input);
 
     if (value === undefined) {
       return null;
     }
 
     if (value === null) {
-      return undefined as ComponentValue<ComponentType>;
+      return undefined as ComponentValue<Input>;
     }
 
     return value;

@@ -2,12 +2,6 @@ import type { Relationship } from "./relationship.ts";
 import type { Component, } from "../component/index.ts";
 import type { Entity } from "../entity/index.ts";
 
-export type RelationshipComponent<RelationshipType extends Relationship<any>> = (
-  RelationshipType extends Relationship<infer Value>
-    ? Component<Value>
-    : never
-  )
-
 export class RelationshipComponentStore {
   #map = new Map<
     Relationship<any>,
@@ -16,11 +10,12 @@ export class RelationshipComponentStore {
 
 
   set<
-    RelationshipType extends Relationship<any>
+    RelationshipType extends Relationship<Value>,
+    Value
   >(
     relationship: RelationshipType,
     entity: Entity,
-    component: RelationshipComponent<RelationshipType>
+    component: Component<Value>,
   ) {
     let entityMap = this.#map.get(relationship);
 
@@ -29,6 +24,7 @@ export class RelationshipComponentStore {
       this.#map.set(relationship, entityMap);
     }
 
+    // @ts-ignore
     entityMap.set(entity, component);
   }
 
@@ -38,16 +34,14 @@ export class RelationshipComponentStore {
   >(
     relationship: RelationshipType,
     entity: Entity
-  ): RelationshipComponent<RelationshipType> | null {
+  ): RelationshipType extends Relationship<infer Value> ? Component<Value> | null : never {
     const entityMap = this.#map.get(relationship);
 
     if (!entityMap) {
-      return null;
+      return null as any;
     }
 
-    return (
-      entityMap.get(entity) ?? null
-    ) as RelationshipComponent<RelationshipType> | null;
+    return (entityMap.get(entity) ?? null) as any;
   }
 
 

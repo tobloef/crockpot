@@ -48,32 +48,9 @@ export type Tag = Component<undefined>;
 export type ComponentSource = string | Entity | Wildcard;
 
 export type ComponentValue<ComponentType extends Component<any>> = (
-  ComponentType extends Component<infer ValueType>
-    ? ValueType
-    : never
+  ComponentType extends Component<infer ValueType> ? ValueType :
+  never
   );
-
-export type ComponentValues<ComponentTypes extends Component<any>[] | Record<string, Component<any>>> = (
-  ComponentTypes extends Component<any>[]
-    ? ComponentArrayValues<ComponentTypes>
-    : ComponentTypes extends Record<string, Component<any>>
-      ? ComponentObjectValues<ComponentTypes>
-      : never
-  );
-
-export type ComponentArrayValues<ComponentTypes extends Component<any>[]> = (
-  ComponentTypes extends [infer First, ...infer Rest]
-    ? First extends Component<any>
-      ? Rest extends Component<any>[]
-        ? [ComponentValue<First>, ...ComponentArrayValues<Rest>]
-        : never
-      : never
-    : []
-  );
-
-export type ComponentObjectValues<ComponentTypes extends Record<string, Component<any>>> = {
-  [Key in keyof ComponentTypes]: ComponentValue<ComponentTypes[Key]>;
-};
 
 export type ComponentValuePair<
   ComponentType extends Component<any> = any,

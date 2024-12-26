@@ -1,7 +1,8 @@
 import type { Entity } from "../entity/index.ts";
 import type { QueryInput } from "./input.ts";
 import type { QueryOutputItem } from "./output.ts";
-
+import { Component } from "../component/index.js";
+import { Relationship } from "../relationship/index.js";
 export type Pools = Record<string, Pool>;
 export type Pool = () => Generator<Entity>;
 export type Permutation = Record<string, Entity>;
@@ -131,4 +132,41 @@ export function* filterGenerator<T>(generator: Generator<T>, predicate: (x: T) =
       yield item;
     }
   }
+}
+
+export const isComponent: Constraint = (permutation: Permutation): boolean => {
+  return Object.values(permutation).every((entity) => entity instanceof Component);
+}
+
+export const isRelationship: Constraint = (permutation: Permutation): boolean => {
+  return Object.values(permutation).every((entity) => entity instanceof Component);
+}
+
+export const is = (entity: Entity): Constraint => {
+  const constraint = (permutation: Permutation): boolean => {
+    return Object.values(permutation).every((pEntity) => pEntity === entity);
+  };
+
+  constraint.__entity = entity;
+
+  return constraint;
+}
+
+export const has = (entity: Component<any> | Relationship<any>): Constraint => {
+  const constraint = (permutation: Permutation): boolean => {
+    return Object.values(permutation).some((entity) => {
+      if (
+        entity instanceof Component ||
+        entity instanceof Relationship
+      ) {
+        return entity.has(entity);
+      } else {
+        return false;
+      }
+    });
+  };
+
+  constraint.__entity = entity;
+
+  return constraint;
 }
