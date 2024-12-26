@@ -8,7 +8,7 @@ export class ComponentValueStore {
   // Stores null for components that have no value, so we can differentiate between
   // tags (components with no value) and components that don't exist.
   #map = new Map<
-    Component<any>,
+    Component<unknown>,
     any | null
   >();
 
