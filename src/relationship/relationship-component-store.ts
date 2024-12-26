@@ -24,7 +24,6 @@ export class RelationshipComponentStore {
       this.#map.set(relationship, entityMap);
     }
 
-    // @ts-ignore
     entityMap.set(entity, component);
   }
 

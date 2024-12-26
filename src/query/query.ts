@@ -34,7 +34,6 @@ export function* query<Input extends QueryInput>(
 
     const output: QueryOutputItem<Input> = outputMapper(permutation);
 
-    // @ts-ignore
     yield output;
   }
 }

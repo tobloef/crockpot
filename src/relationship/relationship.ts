@@ -56,7 +56,6 @@ export class Relationship<
 
   #componentTo(entity: Entity): Component<Value> {
     let relationshipComponent: Component<Value> | null = (
-      // @ts-ignore
       Relationship.__relationshipComponents.get(this, entity)
     );
 
@@ -66,7 +65,6 @@ export class Relationship<
       Relationship.__relationshipComponents.set(this, entity, relationshipComponent);
     }
 
-    // @ts-ignore
     return relationshipComponent;
   }
 
