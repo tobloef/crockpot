@@ -1,6 +1,6 @@
 import type { Entity } from "../entity/index.ts";
 import type { QueryInput } from "./input.ts";
-import type { QueryOutput, QueryOutputItem } from "./output.ts";
+import type { QueryOutputItem } from "./output.ts";
 
 export type Pools = Record<string, Pool>;
 export type Pool = () => Generator<Entity>;
@@ -12,6 +12,10 @@ export type Mapper<Input extends QueryInput> = (
 );
 export type OutputMapper<Input extends QueryInput> = (permutation: Permutation) => QueryOutputItem<Input>;
 export type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+
+export const DEFAULT_ENTITY_POOL = "__default_entity";
+export const DEFAULT_COMPONENT_POOL = "__default_component";
+export const DEFAULT_RELATIONSHIP_POOL = "__default_relationship";
 
 // TODO: Give this file a better name
 

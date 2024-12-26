@@ -1,8 +1,7 @@
-* Remove type() stuff for now
+* Figure out how to do mappers when a part can return multiple
 * Support or and not for RelationshipTarget, RelationshipSource and ComponentSource
   * Give them RelationshipTarget/RelationshipSource/ComponentSource as their generic
 * Make a "one of" alias for "or" and a "none of" alias "not".
-* Implementation
 * Two-way relationships
 * Required components and/or bundles
 * Observers

@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert";
-import type { Constraint, Mapper, Pools } from "./pools.ts";
+import { Constraint, DEFAULT_COMPONENT_POOL, DEFAULT_ENTITY_POOL, DEFAULT_RELATIONSHIP_POOL, Mapper, Pools } from "./pools.ts";
 import { combineMappers, filterGenerator, filterPools, parseConstraints, parseInput, parseMappers, parsePools, permutePools, } from "./pools.ts";
 import { Entity } from "../entity/index.ts";
 import type { QueryOutputItem } from "./output.ts";
@@ -12,7 +12,38 @@ describe(parseInput.name, () => {
 });
 
 describe(parsePools.name, () => {
+  it("Parses entity class for arrays", () => {
+    // Arrange
+    const input = [Entity] as const;
 
+    // Act
+    const pools = parsePools(input);
+
+    // Assert
+    assert.deepStrictEqual(Object.keys(pools), [DEFAULT_ENTITY_POOL]);
+  });
+
+  it("Parses entity class for objects", () => {
+    // Arrange
+    const input = { x: Entity } as const;
+
+    // Act
+    const pools = parsePools(input);
+
+    // Assert
+    assert.deepStrictEqual(Object.keys(pools), [DEFAULT_ENTITY_POOL]);
+  });
+
+  it("Parses component class for arrays", () => {
+    // Arrange
+    const input = [Component] as const;
+
+    // Act
+    const pools = parsePools(input);
+
+    // Assert
+    assert.deepStrictEqual(Object.keys(pools), ["__default"]);
+  });
 });
 
 describe(parseConstraints.name, () => {
@@ -24,7 +55,7 @@ describe(parseMappers.name, () => {
     // Arrange
     const entity = new Entity();
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = [Entity] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -41,7 +72,7 @@ describe(parseMappers.name, () => {
     // Arrange
     const entity = new Entity();
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = { x: Entity } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -57,10 +88,12 @@ describe(parseMappers.name, () => {
   it("Parses component class for arrays", () => {
     // Arrange
     const component = new Component<number>();
+    const entity = new Entity();
     const value = 1;
-    const entity = new Entity().add(component.withValue(value));
+    entity.add(component.withValue(value));
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
+      [DEFAULT_COMPONENT_POOL]: component,
     };
     const input = [Component] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -79,7 +112,8 @@ describe(parseMappers.name, () => {
     const value = 1;
     const entity = new Entity().add(component.withValue(value));
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
+      [DEFAULT_COMPONENT_POOL]: component,
     };
     const input = { x: Component } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -99,7 +133,8 @@ describe(parseMappers.name, () => {
     const entity = new Entity();
     entity.add(relationship.to(relationship).withValue(value));
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
+      [DEFAULT_RELATIONSHIP_POOL]: relationship,
     };
     const input = [Relationship] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -119,7 +154,8 @@ describe(parseMappers.name, () => {
     const entity = new Entity();
     entity.add(relationship.to(relationship).withValue(value));
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
+      [DEFAULT_RELATIONSHIP_POOL]: relationship,
     };
     const input = { x: Relationship } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -136,7 +172,7 @@ describe(parseMappers.name, () => {
     // Arrange
     const entity = new Entity();
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = [entity] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -153,7 +189,7 @@ describe(parseMappers.name, () => {
     // Arrange
     const entity = new Entity();
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = { x: entity } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -172,7 +208,7 @@ describe(parseMappers.name, () => {
     const value = 1;
     const entity = new Entity().add(component.withValue(value));
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = [component] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -191,7 +227,7 @@ describe(parseMappers.name, () => {
     const value = 1;
     const entity = new Entity().add(component.withValue(value));
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = { x: component } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -211,7 +247,7 @@ describe(parseMappers.name, () => {
     const entity = new Entity();
     entity.add(relationship.to(relationship).withValue(value));
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = [relationship] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -231,7 +267,7 @@ describe(parseMappers.name, () => {
     const entity = new Entity();
     entity.add(relationship.to(relationship).withValue(value));
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = { x: relationship } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -282,7 +318,7 @@ describe(parseMappers.name, () => {
     // Arrange
     const entity = new Entity();
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = [Entity.once()] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -299,7 +335,7 @@ describe(parseMappers.name, () => {
     // Arrange
     const entity = new Entity();
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = { x: Entity.once() } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -356,7 +392,7 @@ describe(parseMappers.name, () => {
     const value = 1;
     const entity = new Entity().add(component.withValue(value));
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = [Component.once()] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -375,7 +411,7 @@ describe(parseMappers.name, () => {
     const value = 1;
     const entity = new Entity().add(component.withValue(value));
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = { x: Component.once() } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -473,7 +509,7 @@ describe(parseMappers.name, () => {
     const entity = new Entity();
     entity.add(relationship.to(relationship).withValue(value));
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = [Relationship.once()] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -493,7 +529,7 @@ describe(parseMappers.name, () => {
     const entity = new Entity();
     entity.add(relationship.to(relationship).withValue(value));
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = { x: Relationship.once() } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -553,7 +589,7 @@ describe(parseMappers.name, () => {
     const entity = new Entity();
     entity.add(relationship.to(relationship).withValue(value));
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = [Relationship.to("target")] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -573,7 +609,7 @@ describe(parseMappers.name, () => {
     const entity = new Entity();
     entity.add(relationship.to(relationship).withValue(value));
     const permutation = {
-      "__default": entity,
+      [DEFAULT_ENTITY_POOL]: entity,
     };
     const input = { x: Relationship.to("target") } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
