@@ -4,27 +4,25 @@ import {
 } from "node:test";
 import * as assert from "node:assert";
 import {
+  combineMappers,
   type Constraint,
   type Constraints,
-  has,
-  is,
-  isComponent,
-  isRelationship,
-  type Mapper,
-  type Pools,
-} from "./pools.ts";
-import {
-  combineMappers,
   DEFAULT_COMPONENT_POOL,
   DEFAULT_ENTITY_POOL,
   DEFAULT_RELATIONSHIP_POOL,
   filterGenerator,
   filterPools,
+  has,
+  is,
+  isComponent,
+  isRelationship,
+  type Mapper,
   parseConstraints,
   parseInput,
   parseMappers,
   parsePools,
   permutePools,
+  type Pools,
 } from "./pools.ts";
 import { Entity } from "../entity/index.ts";
 import type { QueryOutputItem } from "./output.ts";
@@ -409,7 +407,7 @@ describe(parseConstraints.name, () => {
     const input = [ Component ] as const;
     const expected: Constraints = {
       poolSpecific: {
-        [DEFAULT_COMPONENT_POOL]: [isComponent],
+        [DEFAULT_COMPONENT_POOL]: [ isComponent ],
       },
       crossPool: [],
     };
@@ -426,7 +424,7 @@ describe(parseConstraints.name, () => {
     const input = { x: Component } as const;
     const expected: Constraints = {
       poolSpecific: {
-        [DEFAULT_COMPONENT_POOL]: [isComponent],
+        [DEFAULT_COMPONENT_POOL]: [ isComponent ],
       },
       crossPool: [],
     };
@@ -443,7 +441,7 @@ describe(parseConstraints.name, () => {
     const input = [ Relationship ] as const;
     const expected: Constraints = {
       poolSpecific: {
-        [DEFAULT_RELATIONSHIP_POOL]: [isRelationship],
+        [DEFAULT_RELATIONSHIP_POOL]: [ isRelationship ],
       },
       crossPool: [],
     };
@@ -460,7 +458,7 @@ describe(parseConstraints.name, () => {
     const input = { x: Relationship } as const;
     const expected: Constraints = {
       poolSpecific: {
-        [DEFAULT_RELATIONSHIP_POOL]: [isRelationship],
+        [DEFAULT_RELATIONSHIP_POOL]: [ isRelationship ],
       },
       crossPool: [],
     };
@@ -478,7 +476,7 @@ describe(parseConstraints.name, () => {
     const input = [ entity ] as const;
     const expected: Constraints = {
       poolSpecific: {
-        [DEFAULT_ENTITY_POOL]: [is(entity)],
+        [DEFAULT_ENTITY_POOL]: [ is(entity) ],
       },
       crossPool: [],
     };
@@ -496,7 +494,7 @@ describe(parseConstraints.name, () => {
     const input = { x: entity } as const;
     const expected: Constraints = {
       poolSpecific: {
-        [DEFAULT_ENTITY_POOL]: [is(entity)],
+        [DEFAULT_ENTITY_POOL]: [ is(entity) ],
       },
       crossPool: [],
     };
@@ -514,8 +512,8 @@ describe(parseConstraints.name, () => {
     const input = [ component ] as const;
     const expected: Constraints = {
       poolSpecific: {
-        [DEFAULT_COMPONENT_POOL]: [is(component)],
-        [DEFAULT_ENTITY_POOL]: [has(component)],
+        [DEFAULT_COMPONENT_POOL]: [ is(component) ],
+        [DEFAULT_ENTITY_POOL]: [ has(component) ],
       },
       crossPool: [],
     };
@@ -533,8 +531,8 @@ describe(parseConstraints.name, () => {
     const input = { x: component } as const;
     const expected: Constraints = {
       poolSpecific: {
-        [DEFAULT_COMPONENT_POOL]: [is(component)],
-        [DEFAULT_ENTITY_POOL]: [has(component)],
+        [DEFAULT_COMPONENT_POOL]: [ is(component) ],
+        [DEFAULT_ENTITY_POOL]: [ has(component) ],
       },
       crossPool: [],
     };
@@ -552,8 +550,8 @@ describe(parseConstraints.name, () => {
     const input = [ relationship ] as const;
     const expected: Constraints = {
       poolSpecific: {
-        [DEFAULT_RELATIONSHIP_POOL]: [is(relationship)],
-        [DEFAULT_ENTITY_POOL]: [has(relationship)],
+        [DEFAULT_RELATIONSHIP_POOL]: [ is(relationship) ],
+        [DEFAULT_ENTITY_POOL]: [ has(relationship) ],
       },
       crossPool: [],
     };

@@ -1,7 +1,16 @@
 import type { Class } from "../utils/class.ts";
-import { Entity, EntityWildcardQuery, } from "../entity/index.ts";
-import { Component, ComponentInstanceQuery, } from "../component/index.ts";
-import { Relationship, RelationshipInstanceQuery, } from "../relationship/index.ts";
+import {
+  Entity,
+  EntityWildcardQuery,
+} from "../entity/index.ts";
+import {
+  Component,
+  ComponentInstanceQuery,
+} from "../component/index.ts";
+import {
+  Relationship,
+  RelationshipInstanceQuery,
+} from "../relationship/index.ts";
 import type {
   Equals,
   Not,

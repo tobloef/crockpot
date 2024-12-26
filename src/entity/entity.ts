@@ -7,9 +7,7 @@ import type {
   Tag,
 } from "../component/index.ts";
 import type { Nullable } from "../utils/nullable.ts";
-import type {
-  RelationshipValue,
-} from "../relationship/index.ts";
+import type { RelationshipValue } from "../relationship/index.ts";
 import { Relationship } from "../relationship/index.ts";
 
 export class Entity {
@@ -126,7 +124,7 @@ export class Entity {
 
       const values = [];
 
-      for (const [key, value] of this.__components) {
+      for (const [ key, value ] of this.__components) {
         if (key.__relationship === relationship) {
           values.push(value);
         }
@@ -170,7 +168,7 @@ export class Entity {
     if (input instanceof Relationship) {
       const relationship: Relationship<any> = input;
 
-      for (const [key] of this.__components) {
+      for (const [ key ] of this.__components) {
         if (key.__relationship === relationship) {
           return true;
         }
@@ -225,4 +223,4 @@ type CombinedInput = (
   | ComponentOrRelationship
   | ComponentOrRelationship[]
   | Record<string, ComponentOrRelationship>
-);
+  );

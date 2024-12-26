@@ -1,4 +1,7 @@
-import { describe, it, } from "node:test";
+import {
+  describe,
+  it,
+} from "node:test";
 import * as assert from "node:assert";
 import { ComponentValueStore } from "./component-value-store.ts";
 import { Component } from "../component/index.ts";
@@ -56,8 +59,8 @@ describe(ComponentValueStore.name, () => {
     store.set(Tag1);
     store.set(Tag2);
 
-    const tags = [...store];
+    const tags = [ ...store ];
 
-    assert.deepStrictEqual(tags, [[Tag1, undefined], [Tag2, undefined]]);
+    assert.deepStrictEqual(tags, [ [ Tag1, undefined ], [ Tag2, undefined ] ]);
   });
 });

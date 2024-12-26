@@ -1,4 +1,8 @@
-import type { Relationship, RelationshipSource, RelationshipTarget } from "../relationship.ts";
+import type {
+  Relationship,
+  RelationshipSource,
+  RelationshipTarget,
+} from "../relationship.ts";
 import { EntityInstanceQuery } from "../../entity/queries/entity-instance-query.ts";
 
 export class RelationshipInstanceQuery<
@@ -12,6 +16,7 @@ export class RelationshipInstanceQuery<
   constructor(relationship: RelationshipType) {
     super(relationship);
   }
+
 
   get relationship(): RelationshipType {
     return this.entity;

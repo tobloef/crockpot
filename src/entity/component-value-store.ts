@@ -66,7 +66,7 @@ export class ComponentValueStore {
         if (done) {
           return { done, value };
         }
-        const [component, componentValue] = value;
+        const [ component, componentValue ] = value;
 
         return {
           done: false,

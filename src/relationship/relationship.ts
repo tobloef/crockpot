@@ -36,6 +36,7 @@ export class Relationship<
     return new RelationshipInstanceQuery(this).on(source);
   }
 
+
   to(entity: Entity): Component<Value>;
 
   to(reference: RelationshipTarget): RelationshipInstanceQuery<typeof this>;
@@ -45,7 +46,7 @@ export class Relationship<
   ): (
     | Component<Value>
     | RelationshipInstanceQuery<typeof this>
-  ) {
+    ) {
     if (entityOrReference instanceof Entity) {
       return this.#componentTo(entityOrReference);
     } else {
@@ -77,11 +78,11 @@ export class Relationship<
   #getComponentName(relationship: Relationship<any>, entity: Entity): string | undefined {
     switch (true) {
       case !!relationship.name && !!entity.name:
-        return `${relationship.name}->${entity.name}`;
+        return `${ relationship.name }->${ entity.name }`;
       case !!relationship.name && !entity.name:
-        return `${relationship.name}->?`;
+        return `${ relationship.name }->?`;
       case !relationship.name && !!entity.name:
-        return `?->${entity.name}`;
+        return `?->${ entity.name }`;
       default:
         return undefined;
     }
@@ -94,7 +95,6 @@ export class Relationship<
   }
 }
 
-
 export type TagRelationship = Relationship<undefined>;
 
 export type RelationshipTarget = string | Entity | Wildcard;
@@ -102,6 +102,6 @@ export type RelationshipSource = string | Entity | Wildcard;
 
 export type RelationshipValue<RelationshipType extends Relationship<any>> = (
   RelationshipType extends Relationship<infer Value>
-    ? Value
-    : never
+  ? Value
+  : never
   );

@@ -1,6 +1,12 @@
-import { describe, it, } from "node:test";
+import {
+  describe,
+  it,
+} from "node:test";
 import * as assert from "node:assert";
-import { Component, type ComponentValue, } from "./component.ts";
+import {
+  Component,
+  type ComponentValue,
+} from "./component.ts";
 import { Entity } from "../entity/index.ts";
 import { Relationship } from "../relationship/index.ts";
 
@@ -43,7 +49,7 @@ describe(Component.prototype.withValue.name, () => {
 
     const pair = component.withValue(value);
 
-    assert.deepStrictEqual(pair, [component, value]);
+    assert.deepStrictEqual(pair, [ component, value ]);
   });
 });
 
@@ -98,11 +104,13 @@ describe(Component.prototype.on.name, () => {
 });
 
 describe(Component.as.name, () => {
-  it("Create component wildcard query with reference name", () => {});
+  it("Create component wildcard query with reference name", () => {
+  });
 });
 
 describe(Component.once.name, () => {
-  it("Create component once query with reference name", () => {});
+  it("Create component once query with reference name", () => {
+  });
 });
 
 describe(Component.on.name, () => {

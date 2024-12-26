@@ -9,7 +9,7 @@ export type EqualityValue = (
   | Component<any>
   | Relationship<any>
   | Class<Entity>
-);
+  );
 
 export type Equals = {
   __left: EqualityValue;
@@ -22,6 +22,6 @@ export function equals(
 ): Equals {
   return {
     __left: left,
-    __right: right
+    __right: right,
   };
 }

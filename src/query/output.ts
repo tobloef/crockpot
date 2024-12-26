@@ -34,12 +34,12 @@ export type QueryOutputItem<Input extends QueryInput> =
   never;
 
 export type QueryArrayOutput<Input extends QueryArrayInput<QueryPart>> =
-  Input extends [infer First, ...infer Rest]
+  Input extends [ infer First, ...infer Rest ]
   ? First extends QueryPart
     ? Rest extends QueryArrayInput<QueryPart>
-      ? [QueryPartOutput<First>] extends [never]
+      ? [ QueryPartOutput<First> ] extends [ never ]
         ? QueryArrayOutput<Rest>
-        : [QueryPartOutput<First>, ...QueryArrayOutput<Rest>]
+        : [ QueryPartOutput<First>, ...QueryArrayOutput<Rest> ]
       : never
     : never
   : [];
@@ -68,7 +68,7 @@ type RelationshipValue<T> = T extends Relationship<infer Value> ? Value : never;
 type ComponentValue<T> = T extends Component<infer Value> ? Value : never;
 
 export type ParseOr<Parts extends any[]> =
-  Parts extends [infer First, ...infer Rest]
+  Parts extends [ infer First, ...infer Rest ]
   ? First extends QueryPart
     ? QueryPartOutput<First> extends never
       ? (undefined | ParseOr<Rest>)

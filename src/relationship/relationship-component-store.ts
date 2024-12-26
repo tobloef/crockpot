@@ -1,5 +1,5 @@
 import type { Relationship } from "./relationship.ts";
-import type { Component, } from "../component/index.ts";
+import type { Component } from "../component/index.ts";
 import type { Entity } from "../entity/index.ts";
 
 export class RelationshipComponentStore {
@@ -32,7 +32,7 @@ export class RelationshipComponentStore {
     RelationshipType extends Relationship<any>
   >(
     relationship: RelationshipType,
-    entity: Entity
+    entity: Entity,
   ): RelationshipType extends Relationship<infer Value> ? Component<Value> | null : never {
     const entityMap = this.#map.get(relationship);
 

@@ -3,6 +3,7 @@ import type { QueryInput } from "./input.ts";
 import type { QueryOutputItem } from "./output.ts";
 import { Component } from "../component/index.js";
 import { Relationship } from "../relationship/index.js";
+
 export type Pools = Record<string, Pool>;
 export type Pool = () => Generator<Entity>;
 export type Permutation = Record<string, Entity>;
@@ -10,7 +11,7 @@ export type Constraint = (permutation: Permutation) => boolean;
 export type Constraints = { poolSpecific: Record<string, Constraint[]>; crossPool: Constraint[] };
 export type Mapper<Input extends QueryInput> = (
   (permutation: Permutation, output: Partial<QueryOutputItem<Input>>) => void
-);
+  );
 export type OutputMapper<Input extends QueryInput> = (permutation: Permutation) => QueryOutputItem<Input>;
 export type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -21,7 +22,7 @@ export const DEFAULT_RELATIONSHIP_POOL = "__default_relationship";
 // TODO: Give this file a better name
 
 export function parseInput<Input extends QueryInput>(
-  input: Input
+  input: Input,
 ): {
   pools: Pools;
   constraints: Constraints;
@@ -40,14 +41,14 @@ export function parseInput<Input extends QueryInput>(
 }
 
 export function parsePools<Input extends QueryInput>(
-  input: Input
+  input: Input,
 ): Pools {
   // TODO
   return {};
 }
 
 export function parseConstraints<Input extends QueryInput>(
-  input: Input
+  input: Input,
 ): Constraints {
   // TODO
   return {
@@ -57,7 +58,7 @@ export function parseConstraints<Input extends QueryInput>(
 }
 
 export function parseMappers<Input extends QueryInput>(
-  input: Input
+  input: Input,
 ): Mapper<Input>[] {
   // TODO
   return [];
@@ -65,7 +66,7 @@ export function parseMappers<Input extends QueryInput>(
 
 export function combineMappers<Input extends QueryInput>(
   input: Input,
-  mappers: Mapper<Input>[]
+  mappers: Mapper<Input>[],
 ): OutputMapper<Input> {
   return (permutation: Permutation): QueryOutputItem<Input> => {
     const output = Array.isArray(input) ? [] : {};
@@ -79,7 +80,6 @@ export function combineMappers<Input extends QueryInput>(
   }
 }
 
-
 export function* permutePools(pools: Pools): Generator<Permutation> {
   if (Object.keys(pools).length === 0) {
     return;
@@ -89,7 +89,7 @@ export function* permutePools(pools: Pools): Generator<Permutation> {
   const firstKey = poolKeys[0];
   const firstPool = pools[firstKey];
   const otherPools = Object.fromEntries(
-    poolKeys.slice(1).map((key) => [key, pools[key]])
+    poolKeys.slice(1).map((key) => [ key, pools[key] ]),
   );
 
   for (const entity of firstPool()) {
@@ -109,7 +109,7 @@ export function* permutePools(pools: Pools): Generator<Permutation> {
 
 export function filterPools(
   pools: Pools,
-  constraints: Record<string, Constraint[]>
+  constraints: Record<string, Constraint[]>,
 ): Pools {
   const filteredPools: Pools = {};
 

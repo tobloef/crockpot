@@ -1,4 +1,7 @@
-import type { Component, ComponentSource } from "../component.ts";
+import type {
+  Component,
+  ComponentSource,
+} from "../component.ts";
 import { EntityInstanceQuery } from "../../entity/queries/entity-instance-query.ts";
 
 export class ComponentInstanceQuery<
@@ -13,9 +16,11 @@ export class ComponentInstanceQuery<
     super(component);
   }
 
+
   get component(): ComponentType {
     return this.entity;
   }
+
 
   on(source: ComponentSource): ComponentInstanceQuery<ComponentType> {
     this.source = source;

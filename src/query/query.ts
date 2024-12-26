@@ -1,17 +1,29 @@
 import { Entity } from "../entity/index.ts";
-import type { QueryArrayInput, QueryInput, QueryObjectInput, } from "./input.ts";
+import type {
+  QueryArrayInput,
+  QueryInput,
+  QueryObjectInput,
+} from "./input.ts";
 import type { QueryPart } from "./part.ts";
-import type { QueryOutput, QueryOutputItem } from "./output.ts";
-import { filterPools, parseInput, permutePools } from "./pools.ts";
+import type {
+  QueryOutput,
+  QueryOutputItem,
+} from "./output.ts";
+import {
+  filterPools,
+  parseInput,
+  permutePools,
+} from "./pools.ts";
+
 
 export function query<Input extends QueryArrayInput<QueryPart>>(
   entities: Entity[],
-  input: [...Input]
+  input: [ ...Input ],
 ): QueryOutput<Input>;
 
 export function query<Input extends QueryObjectInput<QueryPart>>(
   entities: Entity[],
-  input: Input
+  input: Input,
 ): QueryOutput<Input>;
 
 export function* query<Input extends QueryInput>(
@@ -25,7 +37,7 @@ export function* query<Input extends QueryInput>(
 
   for (const permutation of permutations) {
     const passesConstraints = constraints.crossPool.every(
-      (constraint) => constraint(permutation)
+      (constraint) => constraint(permutation),
     );
 
     if (!passesConstraints) {

@@ -8,6 +8,7 @@ export class Component<
 > extends Entity {
   static #brand = "Component" as const;
 
+
   constructor(name?: string) {
     super(name);
   }
@@ -34,7 +35,7 @@ export class Component<
 
 
   withValue(value: ComponentValue<this>): ComponentValuePair<typeof this> {
-    return [this, value];
+    return [ this, value ];
   }
 
 

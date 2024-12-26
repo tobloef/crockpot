@@ -1,9 +1,18 @@
-import { describe, it, } from "node:test";
-import { Relationship, type RelationshipValue } from "./relationship.ts";
+import {
+  describe,
+  it,
+} from "node:test";
+import {
+  Relationship,
+  type RelationshipValue,
+} from "./relationship.ts";
 import * as assert from "node:assert";
 import { Entity } from "../entity/index.ts";
-import { Component, type ComponentValue } from "../component/index.ts";
-import { assertTypesEqual, } from "../utils/type-assertions.ts";
+import {
+  Component,
+  type ComponentValue,
+} from "../component/index.ts";
+import { assertTypesEqual } from "../utils/type-assertions.ts";
 
 describe(Relationship.name, () => {
   it("Create relationship without name", () => {
@@ -174,11 +183,13 @@ describe(Relationship.prototype.to.name, () => {
 });
 
 describe(Relationship.as.name, () => {
-  it("Create relationship wildcard query with reference name", () => {});
+  it("Create relationship wildcard query with reference name", () => {
+  });
 });
 
 describe(Relationship.once.name, () => {
-  it("Create relationship once query with reference name", () => {});
+  it("Create relationship once query with reference name", () => {
+  });
 });
 
 describe(Relationship.on.name, () => {

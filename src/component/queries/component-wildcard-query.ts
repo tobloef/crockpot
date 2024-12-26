@@ -10,10 +10,12 @@ export class ComponentWildcardQuery extends EntityWildcardQuery {
     return this;
   }
 
+
   override once(): ComponentWildcardQuery {
     super.once();
     return this;
   }
+
 
   on(source: ComponentSource): ComponentWildcardQuery {
     this.source = source;
