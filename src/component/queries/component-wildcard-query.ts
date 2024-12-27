@@ -1,6 +1,6 @@
 import type { ComponentSource } from "../component.ts";
-import { ComponentWildcardValueQuery } from "./component-wildcard-value-query.js";
-import { EntityWildcardQuery } from "../../entity/index.js";
+import { ComponentWildcardValueQuery } from "./component-wildcard-value-query.ts";
+import { EntityWildcardQuery } from "../../entity/queries/entity-wildcard-query.ts";
 
 export class ComponentWildcardQuery extends EntityWildcardQuery {
   source?: ComponentSource;

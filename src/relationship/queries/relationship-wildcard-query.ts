@@ -1,7 +1,7 @@
 import type { RelationshipSource, RelationshipTarget, } from "../relationship.ts";
-import { EntityWildcardQuery } from "../../entity/index.js";
-import type { ComponentSource } from "../../component/index.js";
-import { RelationshipWildcardValueQuery } from "./relationship-wildcard-value-query.js";
+import type { ComponentSource } from "../../component/index.ts";
+import { RelationshipWildcardValueQuery } from "./relationship-wildcard-value-query.ts";
+import { EntityWildcardQuery } from "../../entity/queries/entity-wildcard-query.ts";
 
 export class RelationshipWildcardQuery extends EntityWildcardQuery {
   source?: RelationshipSource;

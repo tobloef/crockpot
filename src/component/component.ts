@@ -1,8 +1,8 @@
 import { Entity } from "../entity/index.ts";
 import { ComponentInstanceQuery } from "./queries/component-instance-query.ts";
 import { ComponentWildcardQuery } from "./queries/component-wildcard-query.ts";
-import { ComponentWildcardValueQuery } from "./queries/component-wildcard-value-query.js";
-import { Relationship } from "../relationship/index.js";
+import { ComponentWildcardValueQuery } from "./queries/component-wildcard-value-query.ts";
+import type { Relationship } from "../relationship/index.ts";
 
 
 export class Component<

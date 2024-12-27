@@ -2,9 +2,9 @@ import { describe, it, } from "node:test";
 import * as assert from "node:assert";
 import { Component, type ComponentValue, type ComponentValuePair, } from "./component.ts";
 import { Entity } from "../entity/index.ts";
-import type { ComponentWildcardQuery } from "./queries/component-wildcard-query.js";
-import type { ComponentInstanceQuery } from "./queries/component-instance-query.js";
-import { ComponentWildcardValueQuery } from "./queries/component-wildcard-value-query.js";
+import type { ComponentWildcardQuery } from "./queries/component-wildcard-query.ts";
+import type { ComponentInstanceQuery } from "./queries/component-instance-query.ts";
+import { ComponentWildcardValueQuery } from "./queries/component-wildcard-value-query.ts";
 
 describe(Component.name, () => {
   it("Create component without a name", () => {

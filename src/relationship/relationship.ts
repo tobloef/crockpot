@@ -3,7 +3,7 @@ import { RelationshipComponentStore } from "./relationship-component-store.ts";
 import { Component } from "../component/index.ts";
 import { RelationshipInstanceQuery } from "./queries/relationship-instance-query.ts";
 import { RelationshipWildcardQuery } from "./queries/relationship-wildcard-query.ts";
-import { RelationshipWildcardValueQuery } from "./queries/relationship-wildcard-value-query.js";
+import { RelationshipWildcardValueQuery } from "./queries/relationship-wildcard-value-query.ts";
 
 export class Relationship<
   Value = undefined,

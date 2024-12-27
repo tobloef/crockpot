@@ -1,14 +1,15 @@
 import type { QueryInput } from "./input.ts";
 import type { QueryOutputItem, } from "./output.ts";
-import { type ComponentOrRelationship, Entity, EntityWildcardQuery, } from "../entity/index.ts";
-import { Component, ComponentInstanceQuery, } from "../component/index.js";
-import { Relationship, RelationshipInstanceQuery, } from "../relationship/index.js";
-import type { Class } from "../utils/class.js";
+import { type ComponentOrRelationship, Entity } from "../entity/index.ts";
+import { Component, ComponentInstanceQuery, } from "../component/index.ts";
+import { Relationship, RelationshipInstanceQuery, } from "../relationship/index.ts";
+import type { Class } from "../utils/class.ts";
 import type { QueryPart } from "./part.ts";
 import { RelationshipWildcardValueQuery } from "../relationship/queries/relationship-wildcard-value-query.ts";
 import { ComponentWildcardValueQuery } from "../component/queries/component-wildcard-value-query.ts";
 import { RelationshipWildcardQuery } from "../relationship/queries/relationship-wildcard-query.ts";
 import { ComponentWildcardQuery } from "../component/queries/component-wildcard-query.ts";
+import { EntityWildcardQuery } from "../entity/queries/entity-wildcard-query.ts";
 
 export type Pools = Record<string, Pool>;
 export type Pool = () => Generator<Entity>;

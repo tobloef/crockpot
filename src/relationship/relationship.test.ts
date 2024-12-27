@@ -4,9 +4,9 @@ import * as assert from "node:assert";
 import { Entity } from "../entity/index.ts";
 import { type ComponentValue } from "../component/index.ts";
 import { assertTypesEqual } from "../utils/type-assertions.ts";
-import type { RelationshipInstanceQuery } from "./queries/relationship-instance-query.js";
-import type { RelationshipWildcardQuery } from "./queries/relationship-wildcard-query.js";
-import type { RelationshipWildcardValueQuery } from "./queries/relationship-wildcard-value-query.js";
+import type { RelationshipInstanceQuery } from "./queries/relationship-instance-query.ts";
+import type { RelationshipWildcardQuery } from "./queries/relationship-wildcard-query.ts";
+import type { RelationshipWildcardValueQuery } from "./queries/relationship-wildcard-value-query.ts";
 
 describe(Relationship.name, () => {
   it("Create relationship without name", () => {

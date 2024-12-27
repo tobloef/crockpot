@@ -3,7 +3,7 @@ import { EntityWildcardQuery } from "./queries/entity-wildcard-query.ts";
 import type { Component, ComponentValue, ComponentValuePair, Tag, } from "../component/index.ts";
 import type { Nullable } from "../utils/nullable.ts";
 import type { RelationshipValue } from "../relationship/index.ts";
-import { Relationship } from "../relationship/index.ts";
+import type { Relationship } from "../relationship/index.ts";
 
 export class Entity {
   static #brand = "Entity" as const;
@@ -121,22 +121,19 @@ export class Entity {
   #getSingle<Input extends ComponentOrRelationship>(
     input: Input,
   ): GetOutputSingle<Input> {
-    if (input instanceof Relationship) {
-      const relationship: Relationship<any> = input;
+    const value = this.__components.get(input as any);
 
+    if (value === null) {
       const values = [];
-
       for (const [component, value] of this.__components) {
-        if (component.relationship === relationship) {
+        if (component.relationship === input) {
           values.push(value);
         }
       }
-
       return values as GetOutputSingle<Input>;
-    } else {
-      const component: Component<any> = input;
-      return this.__components.get(component);
     }
+
+    return value as GetOutputSingle<Input>;
   }
 
 
@@ -167,22 +164,20 @@ export class Entity {
 
 
   #hasSingle(input: ComponentOrRelationship): boolean {
-    if (input instanceof Relationship) {
-      const relationship: Relationship<any> = input;
+    const value = this.__components.get(input as any);
 
+    if (value === null) {
       for (const [component] of this.__components) {
-        if (component.relationship === relationship) {
+        if (component.relationship === input) {
           return true;
         }
       }
 
       return false;
     } else {
-      const component: Component<any> = input;
-      return this.__components.get(component) !== null;
+      return true;
     }
   }
-
 
   #hasArray(components: ComponentOrRelationship[]): boolean {
     return components.every(this.#hasSingle.bind(this));

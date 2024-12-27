@@ -2,14 +2,15 @@ import type { QueryArrayInput, QueryInput, QueryObjectInput, } from "./input.ts"
 import type { QueryPart } from "./part.ts";
 import type { Not, Optional, Or, } from "./boolean/index.ts";
 import type { Component, ComponentInstanceQuery, } from "../component/index.ts";
-import type { Entity, EntityWildcardQuery, } from "../entity/index.ts";
+import type { Entity } from "../entity/index.ts";
 import { Relationship, RelationshipInstanceQuery, } from "../relationship/index.ts";
 import type { Class } from "../utils/class.ts";
 import type { ComponentWildcardQuery } from "../component/queries/component-wildcard-query.ts";
 import type { Writeable } from "./pools.ts";
-import type { RelationshipWildcardValueQuery } from "../relationship/queries/relationship-wildcard-value-query.js";
-import type { ComponentWildcardValueQuery } from "../component/queries/component-wildcard-value-query.js";
-import type { RelationshipWildcardQuery } from "../relationship/queries/relationship-wildcard-query.js";
+import type { RelationshipWildcardValueQuery } from "../relationship/queries/relationship-wildcard-value-query.ts";
+import type { ComponentWildcardValueQuery } from "../component/queries/component-wildcard-value-query.ts";
+import type { RelationshipWildcardQuery } from "../relationship/queries/relationship-wildcard-query.ts";
+import type { EntityWildcardQuery } from "../entity/queries/entity-wildcard-query.ts";
 
 export type QueryOutput<Input extends QueryInput> = Generator<QueryOutputItem<Input>>;
 
