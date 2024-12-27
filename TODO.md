@@ -1,3 +1,8 @@
+* Finish creating handlers
+* Run and fix pool tests
+* Tests for once clause stuff with pools
+* Support boolean queries in pools
+* Fix query tests
 * Support or and not for RelationshipTarget, RelationshipSource and ComponentSource
   * Give them RelationshipTarget/RelationshipSource/ComponentSource as their generic?
 

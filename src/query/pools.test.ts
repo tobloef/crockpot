@@ -18,7 +18,7 @@ import {
   isA,
   parseConstraints,
   parseMappers,
-  parsePools,
+  parsePoolNames,
   type PermutationMapper,
   permutePools,
   poolHasPool,
@@ -31,13 +31,13 @@ import type { QueryOutputItem } from "./output.ts";
 import { Component } from "../component/index.ts";
 import { Relationship } from "../relationship/index.ts";
 
-describe(parsePools.name, () => {
+describe(parsePoolNames.name, () => {
   it("Parses entity class for arrays", () => {
     // Arrange
     const input = [ Entity ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ ENTITY_POOL ]);
@@ -48,7 +48,7 @@ describe(parsePools.name, () => {
     const input = { x: Entity } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ ENTITY_POOL ]);
@@ -59,7 +59,7 @@ describe(parsePools.name, () => {
     const input = [ Component ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, ENTITY_POOL ]);
@@ -70,7 +70,7 @@ describe(parsePools.name, () => {
     const input = { x: Component } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, ENTITY_POOL ]);
@@ -81,7 +81,7 @@ describe(parsePools.name, () => {
     const input = [ Relationship ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0) ]);
@@ -92,7 +92,7 @@ describe(parsePools.name, () => {
     const input = { x: Relationship } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0) ]);
@@ -104,7 +104,7 @@ describe(parsePools.name, () => {
     const input = [ component ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ getInstancePoolName(component), ENTITY_POOL ]);
@@ -116,7 +116,7 @@ describe(parsePools.name, () => {
     const input = { x: component } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ getInstancePoolName(component), ENTITY_POOL ]);
@@ -128,7 +128,7 @@ describe(parsePools.name, () => {
     const input = [ relationship ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(
@@ -143,7 +143,7 @@ describe(parsePools.name, () => {
     const input = { x: relationship } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(
@@ -158,7 +158,7 @@ describe(parsePools.name, () => {
     const input = [ component.on("a") ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ getInstancePoolName(component), "a" ]);
@@ -170,7 +170,7 @@ describe(parsePools.name, () => {
     const input = { x: component.on("a") } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ getInstancePoolName(component), "a" ]);
@@ -183,7 +183,7 @@ describe(parsePools.name, () => {
     const input = [ component.on(entity) ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ getInstancePoolName(component), getInstancePoolName(entity) ]);
@@ -196,7 +196,7 @@ describe(parsePools.name, () => {
     const input = { x: component.on(entity) } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ getInstancePoolName(component), getInstancePoolName(entity) ]);
@@ -208,7 +208,7 @@ describe(parsePools.name, () => {
     const input = [ relationship.on("a") ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ getInstancePoolName(relationship), "a", getTargetPoolName(0) ]);
@@ -220,7 +220,7 @@ describe(parsePools.name, () => {
     const input = { x: relationship.on("a") } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ getInstancePoolName(relationship), "a", getTargetPoolName(0) ]);
@@ -233,7 +233,7 @@ describe(parsePools.name, () => {
     const input = [ relationship.on(entity) ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(
@@ -249,7 +249,7 @@ describe(parsePools.name, () => {
     const input = { x: relationship.on(entity) } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(
@@ -264,7 +264,7 @@ describe(parsePools.name, () => {
     const input = [ relationship.to("a") ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ getInstancePoolName(relationship), ENTITY_POOL, "a" ]);
@@ -276,7 +276,7 @@ describe(parsePools.name, () => {
     const input = { x: relationship.to("a") } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ getInstancePoolName(relationship), ENTITY_POOL, "a" ]);
@@ -289,7 +289,7 @@ describe(parsePools.name, () => {
     const input = [ relationship.to(entity) ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(
@@ -305,7 +305,7 @@ describe(parsePools.name, () => {
     const input = { x: relationship.to(entity) } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(
@@ -319,7 +319,7 @@ describe(parsePools.name, () => {
     const input = [ Entity.as("a") ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ "a" ]);
@@ -330,7 +330,7 @@ describe(parsePools.name, () => {
     const input = { x: Entity.as("a") } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ "a" ]);
@@ -341,7 +341,7 @@ describe(parsePools.name, () => {
     const input = [ Entity.once() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ ENTITY_POOL ]);
@@ -352,7 +352,7 @@ describe(parsePools.name, () => {
     const input = { x: Entity.once() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ ENTITY_POOL ]);
@@ -363,7 +363,7 @@ describe(parsePools.name, () => {
     const input = [ Component.as("a") ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ "a", ENTITY_POOL ]);
@@ -374,7 +374,7 @@ describe(parsePools.name, () => {
     const input = { x: Component.as("a") } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ "a", ENTITY_POOL ]);
@@ -385,7 +385,7 @@ describe(parsePools.name, () => {
     const input = [ Component.once() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, ENTITY_POOL ]);
@@ -396,7 +396,7 @@ describe(parsePools.name, () => {
     const input = { x: Component.once() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, ENTITY_POOL ]);
@@ -407,7 +407,7 @@ describe(parsePools.name, () => {
     const input = [ Component.on("source") ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, "source" ]);
@@ -418,7 +418,7 @@ describe(parsePools.name, () => {
     const input = { x: Component.on("source") } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, "source" ]);
@@ -430,7 +430,7 @@ describe(parsePools.name, () => {
     const input = [ Component.on(entity) ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, getInstancePoolName(entity) ]);
@@ -442,7 +442,7 @@ describe(parsePools.name, () => {
     const input = { x: Component.on(entity) } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, getInstancePoolName(entity) ]);
@@ -453,7 +453,7 @@ describe(parsePools.name, () => {
     const input = [ Relationship.as("a") ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ "a", ENTITY_POOL, getTargetPoolName(0) ]);
@@ -464,7 +464,7 @@ describe(parsePools.name, () => {
     const input = { x: Relationship.as("a") } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ "a", ENTITY_POOL, getTargetPoolName(0) ]);
@@ -475,7 +475,7 @@ describe(parsePools.name, () => {
     const input = [ Relationship.once() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0) ]);
@@ -486,7 +486,7 @@ describe(parsePools.name, () => {
     const input = { x: Relationship.once() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0) ]);
@@ -497,7 +497,7 @@ describe(parsePools.name, () => {
     const input = [ Relationship.on("source") ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, "source", getTargetPoolName(0) ]);
@@ -508,7 +508,7 @@ describe(parsePools.name, () => {
     const input = { x: Relationship.on("source") } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, "source", getTargetPoolName(0) ]);
@@ -520,7 +520,7 @@ describe(parsePools.name, () => {
     const input = [ Relationship.on(entity) ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(
@@ -535,7 +535,7 @@ describe(parsePools.name, () => {
     const input = { x: Relationship.on(entity) } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(
@@ -549,7 +549,7 @@ describe(parsePools.name, () => {
     const input = [ Relationship.to("target") ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, "target" ]);
@@ -560,7 +560,7 @@ describe(parsePools.name, () => {
     const input = { x: Relationship.to("target") } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, "target" ]);
@@ -572,7 +572,7 @@ describe(parsePools.name, () => {
     const input = [ Relationship.to(entity) ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, getInstancePoolName(entity) ]);
@@ -584,7 +584,7 @@ describe(parsePools.name, () => {
     const input = { x: Relationship.to(entity) } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, getInstancePoolName(entity) ]);
@@ -595,7 +595,7 @@ describe(parsePools.name, () => {
     const input = [ Component.value() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, ENTITY_POOL ]);
@@ -606,7 +606,7 @@ describe(parsePools.name, () => {
     const input = { x: Component.value() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, ENTITY_POOL ]);
@@ -617,7 +617,7 @@ describe(parsePools.name, () => {
     const input = [ Component.as("a").value() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ "a", ENTITY_POOL ]);
@@ -628,7 +628,7 @@ describe(parsePools.name, () => {
     const input = { x: Component.as("a").value() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ "a", ENTITY_POOL ]);
@@ -639,7 +639,7 @@ describe(parsePools.name, () => {
     const input = [ Component.once().value() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, ENTITY_POOL ]);
@@ -650,7 +650,7 @@ describe(parsePools.name, () => {
     const input = { x: Component.once().value() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, ENTITY_POOL ]);
@@ -661,7 +661,7 @@ describe(parsePools.name, () => {
     const input = [ Component.on("source").value() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, "source" ]);
@@ -672,7 +672,7 @@ describe(parsePools.name, () => {
     const input = { x: Component.on("source").value() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, "source" ]);
@@ -684,7 +684,7 @@ describe(parsePools.name, () => {
     const input = [ Component.on(entity).value() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, getInstancePoolName(entity) ]);
@@ -696,7 +696,7 @@ describe(parsePools.name, () => {
     const input = { x: Component.on(entity).value() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ COMPONENT_POOL, getInstancePoolName(entity) ]);
@@ -707,7 +707,7 @@ describe(parsePools.name, () => {
     const input = [ Relationship.value() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0) ]);
@@ -718,7 +718,7 @@ describe(parsePools.name, () => {
     const input = { x: Relationship.value() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0) ]);
@@ -729,7 +729,7 @@ describe(parsePools.name, () => {
     const input = [ Relationship.as("a").value() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ "a", ENTITY_POOL, getTargetPoolName(0) ]);
@@ -740,7 +740,7 @@ describe(parsePools.name, () => {
     const input = { x: Relationship.as("a").value() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ "a", ENTITY_POOL, getTargetPoolName(0) ]);
@@ -751,7 +751,7 @@ describe(parsePools.name, () => {
     const input = [ Relationship.once().value() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0) ]);
@@ -762,7 +762,7 @@ describe(parsePools.name, () => {
     const input = { x: Relationship.once().value() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0) ]);
@@ -773,7 +773,7 @@ describe(parsePools.name, () => {
     const input = [ Relationship.on("source").value() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, "source", getTargetPoolName(0) ]);
@@ -784,7 +784,7 @@ describe(parsePools.name, () => {
     const input = { x: Relationship.on("source").value() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, "source", getTargetPoolName(0) ]);
@@ -795,7 +795,7 @@ describe(parsePools.name, () => {
     const input = [ Relationship.to("target").value() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, "target" ]);
@@ -806,7 +806,7 @@ describe(parsePools.name, () => {
     const input = { x: Relationship.to("target").value() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, "target" ]);
@@ -818,7 +818,7 @@ describe(parsePools.name, () => {
     const input = [ Relationship.on(entity).value() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(
@@ -833,7 +833,7 @@ describe(parsePools.name, () => {
     const input = { x: Relationship.on(entity).value() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(
@@ -848,7 +848,7 @@ describe(parsePools.name, () => {
     const input = [ Relationship.to(entity).value() ] as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, getInstancePoolName(entity) ]);
@@ -860,7 +860,7 @@ describe(parsePools.name, () => {
     const input = { x: Relationship.to(entity).value() } as const;
 
     // Act
-    const pools = parsePools(input);
+    const pools = parsePoolNames(input);
 
     // Assert
     assert.deepStrictEqual(Object.keys(pools), [ RELATIONSHIP_POOL, ENTITY_POOL, getInstancePoolName(entity) ]);
@@ -1133,20 +1133,16 @@ describe(parseConstraints.name, () => {
 
     const isComponent = is(component);
     const hasComponent = has(component);
-    const sourceHasComponent = poolHasPool("source", getInstancePoolName(component));
 
     test.mock.fn(is, () => isComponent);
     test.mock.fn(has, () => hasComponent);
-    test.mock.fn(poolHasPool, () => sourceHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
         [getInstancePoolName(component)]: [ isComponent ],
         "source": [ hasComponent ],
       },
-      crossPool: [
-        sourceHasComponent,
-      ],
+      crossPool: [],
     };
 
     // Act
@@ -1163,20 +1159,16 @@ describe(parseConstraints.name, () => {
 
     const isComponent = is(component);
     const hasComponent = has(component);
-    const sourceHasComponent = poolHasPool("source", getInstancePoolName(component));
 
     test.mock.fn(is, () => isComponent);
     test.mock.fn(has, () => hasComponent);
-    test.mock.fn(poolHasPool, () => sourceHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
         [getInstancePoolName(component)]: [ isComponent ],
         "source": [ hasComponent ],
       },
-      crossPool: [
-        sourceHasComponent,
-      ],
+      crossPool: [],
     };
 
     // Act
@@ -1195,7 +1187,6 @@ describe(parseConstraints.name, () => {
     const isComponent = is(component);
     const isEntity = is(entity);
     const hasComponent = has(component);
-    const entityHasComponent = poolHasPool(getInstancePoolName(entity), getInstancePoolName(component));
 
     let callCountOfIs = 0;
     test.mock.fn(is, () => {
@@ -1207,16 +1198,13 @@ describe(parseConstraints.name, () => {
       }
     });
     test.mock.fn(has, () => hasComponent);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
         [getInstancePoolName(component)]: [ isComponent ],
         [getInstancePoolName(entity)]: [ isEntity, hasComponent ],
       },
-      crossPool: [
-        entityHasComponent,
-      ],
+      crossPool: [],
     };
 
     // Act
@@ -1236,7 +1224,6 @@ describe(parseConstraints.name, () => {
     const isComponent = is(component);
     const isEntity = is(entity);
     const hasComponent = has(component);
-    const entityHasComponent = poolHasPool(getInstancePoolName(entity), getInstancePoolName(component));
 
     let callCountOfIs = 0;
     test.mock.fn(is, () => {
@@ -1248,16 +1235,13 @@ describe(parseConstraints.name, () => {
       }
     });
     test.mock.fn(has, () => hasComponent);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
         [getInstancePoolName(component)]: [ isComponent ],
         [getInstancePoolName(entity)]: [ isEntity, hasComponent ],
       },
-      crossPool: [
-        entityHasComponent,
-      ],
+      crossPool: [],
     };
 
     // Act
@@ -1481,8 +1465,7 @@ describe(parseConstraints.name, () => {
 
     const isRelationship = is(relationship);
     const isEntity = is(entity);
-    const hasRelationship = has(relationship);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, getInstancePoolName(relationship), getInstancePoolName(entity));
+    const hasRelationshipComponent = has(relationship.to(entity));
 
     let callCountOfIs = 0;
     test.mock.fn(is, () => {
@@ -1493,18 +1476,15 @@ describe(parseConstraints.name, () => {
         return isEntity;
       }
     });
-    test.mock.fn(has, () => hasRelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    test.mock.fn(has, () => hasRelationshipComponent);
 
     const expected: Constraints = {
       poolSpecific: {
         [getInstancePoolName(relationship)]: [ isRelationship ],
-        [ENTITY_POOL]: [ hasRelationship ],
+        [ENTITY_POOL]: [ hasRelationshipComponent ],
         [getInstancePoolName(entity)]: [ isEntity ],
       },
-      crossPool: [
-        entityTargetsRelationship,
-      ],
+      crossPool: [],
     };
 
     // Act
@@ -1522,8 +1502,7 @@ describe(parseConstraints.name, () => {
 
     const isRelationship = is(relationship);
     const isEntity = is(entity);
-    const hasRelationship = has(relationship);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, getInstancePoolName(relationship), getInstancePoolName(entity));
+    const hasRelationshipComponent = has(relationship.to(entity));
 
     let callCountOfIs = 0;
     test.mock.fn(is, () => {
@@ -1534,18 +1513,15 @@ describe(parseConstraints.name, () => {
         return isEntity;
       }
     });
-    test.mock.fn(has, () => hasRelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    test.mock.fn(has, () => hasRelationshipComponent);
 
     const expected: Constraints = {
       poolSpecific: {
         [getInstancePoolName(relationship)]: [ isRelationship ],
-        [ENTITY_POOL]: [ hasRelationship ],
+        [ENTITY_POOL]: [ hasRelationshipComponent ],
         [getInstancePoolName(entity)]: [ isEntity ],
       },
-      crossPool: [
-        entityTargetsRelationship,
-      ],
+      crossPool: [],
     };
 
     // Act

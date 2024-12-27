@@ -4,12 +4,12 @@ import type {
   QueryInput,
   QueryObjectInput,
 } from "./input.ts";
-import type { QueryPart } from "./part.ts";
 import type {
   QueryOutput,
   QueryOutputItem,
 } from "./output.ts";
 import {
+  createPools,
   filterPools,
   parseInput,
   permutePools,
@@ -30,8 +30,9 @@ export function* query<Input extends QueryInput>(
   entities: Entity[],
   input: Input,
 ): QueryOutput<Input> {
-  const { pools, constraints, outputMapper } = parseInput(input);
+  const { poolNames, constraints, outputMapper } = parseInput(input);
 
+  const pools = createPools(entities, poolNames);
   const filteredPools = filterPools(pools, constraints.poolSpecific);
   const permutations = permutePools(filteredPools);
 
@@ -50,7 +51,3 @@ export function* query<Input extends QueryInput>(
     yield output;
   }
 }
-
-const test = query([], [
-
-]);
