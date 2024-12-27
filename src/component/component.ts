@@ -43,7 +43,7 @@ export class Component<
 
 
   withValue(value: ComponentValue<this>): ComponentValuePair<typeof this> {
-    return [ this, value ];
+    return [this, value];
   }
 
 
@@ -58,7 +58,7 @@ export type ComponentSource = string | Entity;
 
 export type ComponentValue<ComponentType extends Component<any>> = (
   ComponentType extends Component<infer ValueType> ? ValueType :
-  never
+    never
   );
 
 export type ComponentValuePair<

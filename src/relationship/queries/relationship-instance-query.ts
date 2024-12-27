@@ -1,8 +1,4 @@
-import type {
-  Relationship,
-  RelationshipSource,
-  RelationshipTarget,
-} from "../relationship.ts";
+import type { Relationship, RelationshipSource, RelationshipTarget, } from "../relationship.ts";
 
 export class RelationshipInstanceQuery<
   RelationshipType extends Relationship<any>,

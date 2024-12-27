@@ -1,9 +1,4 @@
-import type {
-  Component,
-  ComponentValue,
-  ComponentValuePair,
-  Tag,
-} from "../component/index.ts";
+import type { Component, ComponentValue, ComponentValuePair, Tag, } from "../component/index.ts";
 
 export class ComponentValueStore {
   // Stores null for components that have no value, so we can differentiate between
@@ -67,9 +62,9 @@ export class ComponentValueStore {
         if (done) {
           return { done, value };
         }
-        const [ component, componentValue ] = value;
+        const [component, componentValue] = value;
 
-        const valuePair: ComponentValuePair =  [
+        const valuePair: ComponentValuePair = [
           component,
           componentValue === null ? undefined : componentValue,
         ];

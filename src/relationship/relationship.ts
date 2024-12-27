@@ -2,7 +2,6 @@ import { Entity } from "../entity/index.ts";
 import { RelationshipComponentStore } from "./relationship-component-store.ts";
 import { Component } from "../component/index.ts";
 import { RelationshipInstanceQuery } from "./queries/relationship-instance-query.ts";
-import type { Wildcard } from "../query/index.ts";
 import { RelationshipWildcardQuery } from "./queries/relationship-wildcard-query.ts";
 import { RelationshipWildcardValueQuery } from "./queries/relationship-wildcard-value-query.js";
 
@@ -90,11 +89,11 @@ export class Relationship<
   static getComponentName(relationship: Relationship<any>, target: Entity): string | undefined {
     switch (true) {
       case !!relationship.name && !!target.name:
-        return `${ relationship.name }->${ target.name }`;
+        return `${relationship.name}->${target.name}`;
       case !!relationship.name && !target.name:
-        return `${ relationship.name }->?`;
+        return `${relationship.name}->?`;
       case !relationship.name && !!target.name:
-        return `?->${ target.name }`;
+        return `?->${target.name}`;
       default:
         return undefined;
     }
@@ -114,6 +113,6 @@ export type RelationshipSource = string | Entity;
 
 export type RelationshipValue<RelationshipType extends Relationship<any>> = (
   RelationshipType extends Relationship<infer Value>
-  ? Value
-  : never
+    ? Value
+    : never
   );

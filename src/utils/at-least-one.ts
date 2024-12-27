@@ -1,1 +1,1 @@
-export type AtLeastOne<T> = [ T, ...T[] ];
+export type AtLeastOne<T> = [T, ...T[]];

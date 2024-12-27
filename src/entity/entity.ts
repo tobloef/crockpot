@@ -1,11 +1,6 @@
 import { ComponentValueStore } from "./component-value-store.ts";
 import { EntityWildcardQuery } from "./queries/entity-wildcard-query.ts";
-import type {
-  Component,
-  ComponentValue,
-  ComponentValuePair,
-  Tag,
-} from "../component/index.ts";
+import type { Component, ComponentValue, ComponentValuePair, Tag, } from "../component/index.ts";
 import type { Nullable } from "../utils/nullable.ts";
 import type { RelationshipValue } from "../relationship/index.ts";
 import { Relationship } from "../relationship/index.ts";
@@ -40,7 +35,7 @@ export class Entity {
   ): this {
     for (const pairOrTag of components) {
       if (Array.isArray(pairOrTag)) {
-        const [ component, value ] = pairOrTag;
+        const [component, value] = pairOrTag;
         this.__components.set(component, value);
       } else {
         const tag = pairOrTag;
@@ -66,9 +61,6 @@ export class Entity {
   components(): ComponentValuePair[] {
     return [...this.__components];
   }
-
-
-
 
 
   get<RelationshipType extends Relationship<any>>(
@@ -134,7 +126,7 @@ export class Entity {
 
       const values = [];
 
-      for (const [ component, value ] of this.__components) {
+      for (const [component, value] of this.__components) {
         if (component.relationship === relationship) {
           values.push(value);
         }
@@ -178,7 +170,7 @@ export class Entity {
     if (input instanceof Relationship) {
       const relationship: Relationship<any> = input;
 
-      for (const [ component ] of this.__components) {
+      for (const [component] of this.__components) {
         if (component.relationship === relationship) {
           return true;
         }
@@ -210,9 +202,9 @@ type GetOutput<Input extends (
   | Record<string, ComponentOrRelationship>
   )> = (
   Input extends any[] ? GetOutputArray<Input> :
-  Input extends Record<string, any> ? GetOutputObject<Input> :
-  Input extends ComponentOrRelationship ? GetOutputSingle<Input> :
-  never
+    Input extends Record<string, any> ? GetOutputObject<Input> :
+      Input extends ComponentOrRelationship ? GetOutputSingle<Input> :
+        never
   );
 
 type GetOutputObject<ComponentTypes extends Record<string, ComponentOrRelationship>> = {
@@ -225,8 +217,8 @@ type GetOutputArray<ComponentTypes extends ComponentOrRelationship[]> = {
 
 type GetOutputSingle<Input extends ComponentOrRelationship> = (
   Input extends Relationship<any> ? RelationshipValue<Input>[] :
-  Input extends Component<any> ? Nullable<ComponentValue<Input>> :
-  never
+    Input extends Component<any> ? Nullable<ComponentValue<Input>> :
+      never
   );
 
 type CombinedInput = (

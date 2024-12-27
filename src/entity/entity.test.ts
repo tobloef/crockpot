@@ -1,7 +1,4 @@
-import {
-  describe,
-  it,
-} from "node:test";
+import { describe, it, } from "node:test";
 import * as assert from "node:assert";
 import { Entity } from "./entity.ts";
 import { Component } from "../component/index.ts";
@@ -60,7 +57,7 @@ describe(Entity.prototype.add.name, () => {
 
     const componentValue = entity.__components.get(TestComponent);
     assert.deepStrictEqual(componentValue, 2);
-    assert.strictEqual([ ...entity.__components ].length, 1);
+    assert.strictEqual([...entity.__components].length, 1);
   });
 });
 
@@ -155,11 +152,11 @@ describe(Entity.prototype.get.name, () => {
       TestComponent2.withValue("42"),
     );
 
-    const components = entity.get([ TestComponent1, TestComponent2 ]);
+    const components = entity.get([TestComponent1, TestComponent2]);
 
     assert.deepStrictEqual(
       components,
-      [ 42, "42" ],
+      [42, "42"],
     );
   });
 
@@ -190,7 +187,7 @@ describe(Entity.prototype.get.name, () => {
 
     assert.deepStrictEqual(entity.get(TestTag), undefined);
     assert.deepStrictEqual(entity.get({ tag: TestTag }), { tag: undefined });
-    assert.deepStrictEqual(entity.get([ TestTag, TestTag ]), [ undefined, undefined ]);
+    assert.deepStrictEqual(entity.get([TestTag, TestTag]), [undefined, undefined]);
   });
 
   it("Get non-existent component", () => {
@@ -206,9 +203,9 @@ describe(Entity.prototype.get.name, () => {
     const entity = new Entity();
     const TestComponent = new Component<number>();
 
-    const components = entity.get([ TestComponent, TestComponent ]);
+    const components = entity.get([TestComponent, TestComponent]);
 
-    assert.deepStrictEqual(components, [ null, null ]);
+    assert.deepStrictEqual(components, [null, null]);
   });
 
   it("Get non-existent components by object", () => {
@@ -254,7 +251,7 @@ describe(Entity.prototype.has.name, () => {
       TestComponent2.withValue("42"),
     );
 
-    const hasComponents = entity.has([ TestComponent1, TestComponent2 ]);
+    const hasComponents = entity.has([TestComponent1, TestComponent2]);
 
     assert.strictEqual(hasComponents, true);
   });
@@ -299,7 +296,7 @@ describe(Entity.prototype.has.name, () => {
     const entity = new Entity();
     const TestComponent = new Component<number>();
 
-    const hasComponents = entity.has([ TestComponent, TestComponent ]);
+    const hasComponents = entity.has([TestComponent, TestComponent]);
 
     assert.strictEqual(hasComponents, false);
   });
@@ -332,7 +329,7 @@ describe(Entity.prototype.destroy.name, () => {
 
     entity.destroy();
 
-    const components = [ ...entity.__components ];
+    const components = [...entity.__components];
     assert.deepStrictEqual(components, []);
   });
 });

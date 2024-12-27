@@ -1,11 +1,5 @@
-import {
-  describe,
-  it,
-} from "node:test";
-import {
-  Relationship,
-  type RelationshipValue,
-} from "./relationship.ts";
+import { describe, it, } from "node:test";
+import { Relationship, type RelationshipValue, } from "./relationship.ts";
 import * as assert from "node:assert";
 import { Entity } from "../entity/index.ts";
 import { type ComponentValue } from "../component/index.ts";

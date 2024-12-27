@@ -1,15 +1,7 @@
-import {
-  describe,
-  it,
-} from "node:test";
+import { describe, it, } from "node:test";
 import * as assert from "node:assert";
-import {
-  Component,
-  type ComponentValue,
-  type ComponentValuePair,
-} from "./component.ts";
+import { Component, type ComponentValue, type ComponentValuePair, } from "./component.ts";
 import { Entity } from "../entity/index.ts";
-import { Relationship } from "../relationship/index.ts";
 import type { ComponentWildcardQuery } from "./queries/component-wildcard-query.js";
 import type { ComponentInstanceQuery } from "./queries/component-instance-query.js";
 import { ComponentWildcardValueQuery } from "./queries/component-wildcard-value-query.js";
@@ -53,7 +45,7 @@ describe(Component.prototype.withValue.name, () => {
 
     const pair: ComponentValuePair = component.withValue(value);
 
-    assert.deepStrictEqual(pair, [ component, value ]);
+    assert.deepStrictEqual(pair, [component, value]);
   });
 });
 

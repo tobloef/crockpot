@@ -1,24 +1,12 @@
 import { Entity } from "../entity/index.ts";
-import type {
-  QueryArrayInput,
-  QueryInput,
-  QueryObjectInput,
-} from "./input.ts";
-import type {
-  QueryOutput,
-  QueryOutputItem,
-} from "./output.ts";
-import {
-  createPools,
-  filterPools,
-  parseInput,
-  permutePools,
-} from "./pools.ts";
+import type { QueryArrayInput, QueryInput, QueryObjectInput, } from "./input.ts";
+import type { QueryOutput, QueryOutputItem, } from "./output.ts";
+import { createPools, filterPools, parseInput, permutePools, } from "./pools.ts";
 
 
 export function query<Input extends QueryArrayInput>(
   entities: Entity[],
-  input: [ ...Input ],
+  input: [...Input],
 ): QueryOutput<Input>;
 
 export function query<Input extends QueryObjectInput>(

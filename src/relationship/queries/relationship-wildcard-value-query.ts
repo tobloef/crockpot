@@ -1,7 +1,4 @@
-import type {
-  RelationshipSource,
-  RelationshipTarget,
-} from "../relationship.ts";
+import type { RelationshipSource, RelationshipTarget, } from "../relationship.ts";
 
 export class RelationshipWildcardValueQuery {
   typeName?: string;

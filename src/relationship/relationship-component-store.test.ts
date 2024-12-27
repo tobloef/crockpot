@@ -1,7 +1,4 @@
-import {
-  describe,
-  it,
-} from "node:test";
+import { describe, it, } from "node:test";
 import * as assert from "node:assert";
 import { RelationshipComponentStore } from "./relationship-component-store.ts";
 import { Relationship } from "./relationship.ts";

@@ -1,7 +1,4 @@
-import type {
-  Component,
-  ComponentSource,
-} from "../component.ts";
+import type { Component, ComponentSource, } from "../component.ts";
 
 export class ComponentInstanceQuery<
   ComponentType extends Component<any>
