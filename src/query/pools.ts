@@ -226,17 +226,17 @@ export function* filterGenerator<T>(generator: Generator<T>, predicate: (x: T) =
 }
 
 export const isA = (expected: Class<any>): EntityConstraint => {
-  return (entity: Entity): boolean => {
+  const constraint = (entity: Entity): boolean => {
     return entity instanceof expected;
   };
+
+  return constraint;
 };
 
 export const is = (expected: Entity): EntityConstraint => {
   const constraint = (entity: Entity): boolean => {
     return entity === expected;
   };
-
-  constraint.__entity = expected;
 
   return constraint;
 };
@@ -246,13 +246,11 @@ export const has = (expected: ComponentOrRelationship): EntityConstraint => {
     return entity.has(expected);
   };
 
-  constraint.__entity = expected;
-
   return constraint;
 };
 
 export const poolHasPool = (entityPool: string, componentPool: string): PermutationConstraint => {
-  return (permutation: Permutation): boolean => {
+  const constraint = (permutation: Permutation): boolean => {
     const entity = permutation[entityPool];
 
     if (!entity) {
@@ -274,6 +272,8 @@ export const poolHasPool = (entityPool: string, componentPool: string): Permutat
 
     return entity.has(component);
   };
+
+  return constraint;
 }
 
 export const poolTargetsPool = (
@@ -281,7 +281,7 @@ export const poolTargetsPool = (
   relationshipPool: string,
   targetPool: string,
 ): PermutationConstraint => {
-  return (permutation: Permutation): boolean => {
+  const constraint = (permutation: Permutation): boolean => {
     const source = permutation[sourcePool];
 
     if (!source) {
@@ -309,4 +309,6 @@ export const poolTargetsPool = (
 
     return source.has(relationship.to(target));
   };
+
+  return constraint;
 }

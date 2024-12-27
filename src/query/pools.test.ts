@@ -880,16 +880,23 @@ describe(parseConstraints.name, () => {
     assert.deepStrictEqual(actual, expected);
   });
 
-  it("Parses component class for arrays", () => {
+  it("Parses component class for arrays", (test) => {
     // Arrange
     const input = [ Component ] as const;
+
+    const isAComponent = isA(Component);
+    const entityHasComponent = poolHasPool(ENTITY_POOL, COMPONENT_POOL);
+
+    test.mock.fn(isA, () => isAComponent);
+    test.mock.fn(poolHasPool, () => entityHasComponent);
+
     const expected: Constraints = {
       poolSpecific: {
-        [COMPONENT_POOL]: [ isA(Component) ],
+        [COMPONENT_POOL]: [ isAComponent ],
         [ENTITY_POOL]: [],
       },
       crossPool: [
-        poolHasPool(ENTITY_POOL, COMPONENT_POOL),
+        entityHasComponent,
       ],
     };
 
