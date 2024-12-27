@@ -4,8 +4,14 @@ export type Not<Part extends QueryPart> = {
   __not: Part;
 };
 
-export function not<Part extends QueryPart>(
+const notFunction = <Part extends QueryPart>(
   queryPart: Part,
-): Not<Part> {
-  return { __not: queryPart };
-}
+): Not<Part> => {
+  return not(queryPart);
+};
+
+/** @alias not */
+export const noneOf = notFunction;
+
+/** @alias noneOf */
+export const not = notFunction;
