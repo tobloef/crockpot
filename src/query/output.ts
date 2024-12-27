@@ -48,7 +48,7 @@ export type QueryObjectOutput<Input extends QueryObjectInput<QueryPart>> = {
   [Key in keyof Input]: QueryPartOutput<Input[Key]>;
 };
 
-type QueryPartOutput<Part> =
+export type QueryPartOutput<Part> =
   Part extends Optional<infer Type> ? (QueryPartOutput<Type> | undefined) :
   Part extends Not<any> ? never :
   Part extends Or<infer Types> ? ParseOr<Types> :

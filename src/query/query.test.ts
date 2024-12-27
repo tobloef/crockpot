@@ -31,6 +31,7 @@ describe("Empty query", () => {
   });
 });
 
+/*
 describe("Entity instance query", () => {
   it("Finds specific entity instance", () => {
     // Arrange
@@ -97,6 +98,7 @@ describe("Entity instance query", () => {
     assert.deepStrictEqual(objectResult, {});
   });
 });
+*/
 
 describe("Entity wildcard query", () => {
   it("Finds all entities", () => {
@@ -486,6 +488,7 @@ describe("Component instance query", () => {
     assert.deepStrictEqual(objectResult, [ { ent: entities[1], val: 1 }, { ent: entities[3], val: 2 } ]);
   });
 
+  /*
   it("Finds component value on any entity using wildcard", () => {
     // Arrange
     const { all, entities, components: { Number1 } } = createEntities({ count: 4 });
@@ -543,6 +546,7 @@ describe("Component instance query", () => {
     assert.deepStrictEqual(arrayResult, [ [ 3 ], [ 4 ] ]);
     assert.deepStrictEqual(objectResult, [ { val: 3 }, { val: 4 } ]);
   });
+   */
 
   it("Does not find component value on specific entity if it does not have it", () => {
     // Arrange
@@ -686,7 +690,8 @@ describe("Component wildcard query", () => {
     assert.deepStrictEqual(objectResult, expectedObject);
   });
 
-  it("Finds all components on any component", () => {
+  /*
+  it("Finds all components on any component using wildcard", () => {
     // Arrange
     const { all, entities, components } = createEntities({ count: 3 });
 
@@ -709,7 +714,55 @@ describe("Component wildcard query", () => {
     assert.deepStrictEqual(objectResult, expectedObject);
   });
 
-  it("Finds all components on any relationship", () => {
+  it("Finds all components on any relationship using wildcard", () => {
+    // Arrange
+    const { all, entities, components, relationships } = createEntities({ count: 3 });
+
+    entities[1].add(components.Number1.withValue(0));
+    components.Number1.add(components.Number1.withValue(1));
+    relationships.Tag1.add(components.Number1.withValue(2), components.Tag2);
+    relationships.Number2.add(components.Number1.withValue(3));
+
+    const expectedArray = [ [ 2 ], [ undefined ], [ 3 ] ];
+    const expectedObject = expectedArray.map((val) => ({ comp: val }));
+
+    // Act
+    const arrayResult = query(all, [ Component.on(Relationship) ]);
+    const objectResult = query(all, { comp: Component.on(Relationship) });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, Generator<[ unknown ]>>(true);
+    assertTypesEqual<typeof objectResult, Generator<{ comp: unknown }>>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
+  */
+
+  it("Finds all components on any component using references", () => {
+    // Arrange
+    const { all, entities, components } = createEntities({ count: 3 });
+
+    entities[1].add(components.Number1.withValue(0));
+    components.Tag1.add(components.Number1.withValue(1), components.Tag2);
+    components.Number2.add(components.Number1.withValue(2));
+
+    const expectedArray = [ [ 1 ], [ undefined ], [ 2 ] ];
+    const expectedObject = expectedArray.map((val) => ({ comp: val }));
+
+    // Act
+    const arrayResult = query(all, [ Component.on("ref"), Component.as("ref") ]);
+    const objectResult = query(all, { val: Component.on("ref"), comp: Component.as("ref") });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, Generator<[ unknown,  ]>>(true);
+    assertTypesEqual<typeof objectResult, Generator<{ comp: unknown }>>(true);
+
+    assert.deepStrictEqual(arrayResult, expectedArray);
+    assert.deepStrictEqual(objectResult, expectedObject);
+  });
+
+  it("Finds all components on any relationship using references", () => {
     // Arrange
     const { all, entities, components, relationships } = createEntities({ count: 3 });
 

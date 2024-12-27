@@ -1,18 +1,13 @@
 import type { ComponentSource } from "../component.ts";
 import { EntityWildcardQuery } from "../../entity/index.ts";
 
-export class ComponentWildcardQuery extends EntityWildcardQuery {
+export class ComponentWildcardQuery {
+  isOnce: boolean = false;
   source?: ComponentSource;
 
 
-  override as(name: string): ComponentWildcardQuery {
-    super.as(name);
-    return this;
-  }
-
-
-  override once(): ComponentWildcardQuery {
-    super.once();
+  once(): ComponentWildcardQuery {
+    this.isOnce = true;
     return this;
   }
 

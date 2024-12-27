@@ -3,23 +3,24 @@ import type {
   RelationshipSource,
   RelationshipTarget,
 } from "../relationship.ts";
-import { EntityInstanceQuery } from "../../entity/queries/entity-instance-query.ts";
 
 export class RelationshipInstanceQuery<
   RelationshipType extends Relationship<any>,
-> extends EntityInstanceQuery {
-  declare entity: RelationshipType;
+> {
+  relationship: RelationshipType;
+  isOnce: boolean = false;
   source?: RelationshipSource;
   target?: RelationshipTarget;
 
 
   constructor(relationship: RelationshipType) {
-    super(relationship);
+    this.relationship = relationship;
   }
 
 
-  get relationship(): RelationshipType {
-    return this.entity;
+  once(): RelationshipInstanceQuery<RelationshipType> {
+    this.isOnce = true;
+    return this;
   }
 
 

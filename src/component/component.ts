@@ -46,7 +46,7 @@ export class Component<
 
 export type Tag = Component<undefined>;
 
-export type ComponentSource = string | Entity | Wildcard;
+export type ComponentSource = string | Entity;
 
 export type ComponentValue<ComponentType extends Component<any>> = (
   ComponentType extends Component<infer ValueType> ? ValueType :

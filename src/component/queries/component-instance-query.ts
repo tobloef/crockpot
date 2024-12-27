@@ -2,23 +2,23 @@ import type {
   Component,
   ComponentSource,
 } from "../component.ts";
-import { EntityInstanceQuery } from "../../entity/queries/entity-instance-query.ts";
 
 export class ComponentInstanceQuery<
   ComponentType extends Component<any>
-> extends EntityInstanceQuery {
-
-  declare entity: ComponentType;
+> {
+  component: ComponentType;
+  isOnce: boolean = false;
   source?: ComponentSource;
 
 
   constructor(component: ComponentType) {
-    super(component);
+    this.component = component;
   }
 
 
-  get component(): ComponentType {
-    return this.entity;
+  once(): ComponentInstanceQuery<ComponentType> {
+    this.isOnce = true;
+    return this;
   }
 
 

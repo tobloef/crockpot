@@ -80,27 +80,6 @@ describe(Component.prototype.on.name, () => {
     assert.strictEqual(query.source, "source");
     assert.strictEqual(query.entity, component);
   });
-
-  it("Create component instance query with Entity wildcard as source", () => {
-    const component = new Component();
-    const query = component.on(Entity);
-
-    assert.strictEqual(query.source, Entity);
-  });
-
-  it("Create component instance query with Component wildcard as source", () => {
-    const component = new Component();
-    const query = component.on(Component);
-
-    assert.strictEqual(query.source, Component);
-  });
-
-  it("Create component instance query with Relationship wildcard as source", () => {
-    const component = new Component();
-    const query = component.on(Relationship);
-
-    assert.strictEqual(query.source, Relationship);
-  });
 });
 
 describe(Component.as.name, () => {
@@ -125,23 +104,5 @@ describe(Component.on.name, () => {
     const query = Component.on("source");
 
     assert.strictEqual(query.source, "source");
-  });
-
-  it("Create component wildcard query with Entity wildcard as source", () => {
-    const query = Component.on(Entity);
-
-    assert.strictEqual(query.source, Entity);
-  });
-
-  it("Create component wildcard query with Component wildcard as source", () => {
-    const query = Component.on(Component);
-
-    assert.strictEqual(query.source, Component);
-  });
-
-  it("Create component wildcard query with Relationship wildcard as source", () => {
-    const query = Component.on(Relationship);
-
-    assert.strictEqual(query.source, Relationship);
   });
 });

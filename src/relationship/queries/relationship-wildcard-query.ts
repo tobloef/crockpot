@@ -1,22 +1,16 @@
-import { EntityWildcardQuery } from "../../entity/index.ts";
 import type {
   RelationshipSource,
   RelationshipTarget,
 } from "../relationship.ts";
 
-export class RelationshipWildcardQuery extends EntityWildcardQuery {
+export class RelationshipWildcardQuery {
+  isOnce: boolean = false;
   source?: RelationshipSource;
   target?: RelationshipTarget;
 
 
-  override as(name: string): RelationshipWildcardQuery {
-    super.as(name);
-    return this;
-  }
-
-
-  override once(): RelationshipWildcardQuery {
-    super.once();
+  once(): RelationshipWildcardQuery {
+    this.isOnce = true;
     return this;
   }
 

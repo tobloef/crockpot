@@ -1,23 +1,42 @@
-import type { Entity } from "../entity/index.ts";
 import type { QueryInput } from "./input.ts";
-import type { QueryOutputItem } from "./output.ts";
-import { Component } from "../component/index.js";
-import { Relationship } from "../relationship/index.js";
+import type {
+  QueryOutputItem,
+  QueryPartOutput,
+} from "./output.ts";
+import {
+  Entity,
+  EntityWildcardQuery,
+} from "../entity/index.ts";
+import {
+  Component,
+  ComponentInstanceQuery,
+} from "../component/index.js";
+import {
+  Relationship,
+  RelationshipInstanceQuery,
+} from "../relationship/index.js";
+import type { QueryPart } from "./part.js";
+import { RelationshipWildcardQuery } from "../relationship/queries/relationship-wildcard-query.js";
+import type { Class } from "../utils/class.js";
+import { ComponentWildcardQuery } from "../component/queries/component-wildcard-query.js";
 
 export type Pools = Record<string, Pool>;
 export type Pool = () => Generator<Entity>;
 export type Permutation = Record<string, Entity>;
-export type Constraint = (permutation: Permutation) => boolean;
-export type Constraints = { poolSpecific: Record<string, Constraint[]>; crossPool: Constraint[] };
-export type Mapper<Input extends QueryInput> = (
+export type EntityConstraint = (entity: Entity) => boolean;
+export type PermutationConstraint = (permutation: Permutation) => boolean;
+export type Constraints = { poolSpecific: Record<string, EntityConstraint[]>; crossPool: PermutationConstraint[] };
+export type PermutationMapper<Input extends QueryInput> = (
   (permutation: Permutation, output: Partial<QueryOutputItem<Input>>) => void
   );
+type PartMapper<Part extends QueryPart> = (part: Part) => QueryPartOutput<Part>;
 export type OutputMapper<Input extends QueryInput> = (permutation: Permutation) => QueryOutputItem<Input>;
 export type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
 export const DEFAULT_ENTITY_POOL = "__default_entity";
 export const DEFAULT_COMPONENT_POOL = "__default_component";
 export const DEFAULT_RELATIONSHIP_POOL = "__default_relationship";
+export const getDefaultTargetPoolName = (i: number): string => `__default_target_${ i }`;
 
 // TODO: Give this file a better name
 
@@ -59,14 +78,83 @@ export function parseConstraints<Input extends QueryInput>(
 
 export function parseMappers<Input extends QueryInput>(
   input: Input,
-): Mapper<Input>[] {
-  // TODO
-  return [];
+): PermutationMapper<Input>[] {
+  const mappers: PermutationMapper<Input>[] = [];
+
+  if (Array.isArray(input)) {
+    for (let i = 0; i < input.length; i++) {
+      const part = input[i];
+
+      if (part === Entity) {
+        mappers.push((permutation, output) => {
+          const entity = permutation[DEFAULT_ENTITY_POOL];
+
+          (output[i] as any) = entity;
+        });
+      } else if (part === Component) {
+        mappers.push((permutation, output) => {
+          const entity = permutation[DEFAULT_ENTITY_POOL];
+          const component = permutation[DEFAULT_COMPONENT_POOL] as Component<any>;
+
+          const value = entity.get(component);
+
+          (output[i] as any) = value;
+        });
+      } else if (part === Relationship) {
+        mappers.push((permutation, output) => {
+          const entity = permutation[DEFAULT_ENTITY_POOL];
+          const relationship = permutation[DEFAULT_RELATIONSHIP_POOL] as Relationship<any>;
+
+          const value = entity.get(relationship);
+
+          (output[i] as any) = value;
+        });
+      } else if (part instanceof Relationship) {
+        mappers.push((permutation, output) => {
+          const entity = permutation[DEFAULT_ENTITY_POOL];
+          const relationship = permutation[DEFAULT_RELATIONSHIP_POOL] as Relationship<any>;
+
+          const value = entity.get(relationship);
+
+          (output[i] as any) = value;
+        });
+      } else if (part instanceof Component) {
+        mappers.push((permutation, output) => {
+          const entity = permutation[DEFAULT_ENTITY_POOL];
+          const component = permutation[DEFAULT_COMPONENT_POOL] as Component<any>;
+
+          const value = entity.get(component);
+
+          (output[i] as any) = value;
+        });
+      } else if (part instanceof Entity) {
+
+      } else if (part instanceof RelationshipWildcardQuery) {
+
+      } else if (part instanceof ComponentWildcardQuery) {
+
+      } else if (part instanceof EntityWildcardQuery) {
+
+      } else if (part instanceof RelationshipInstanceQuery) {
+
+      } else if (part instanceof ComponentInstanceQuery) {
+
+      } else {
+        throw new Error(`Unknown part: ${ part }`);
+      }
+    }
+  } else {
+    for (const key in input) {
+      const part = input[key];
+    }
+  }
+
+  return mappers;
 }
 
 export function combineMappers<Input extends QueryInput>(
   input: Input,
-  mappers: Mapper<Input>[],
+  mappers: PermutationMapper<Input>[],
 ): OutputMapper<Input> {
   return (permutation: Permutation): QueryOutputItem<Input> => {
     const output = Array.isArray(input) ? [] : {};
@@ -109,7 +197,7 @@ export function* permutePools(pools: Pools): Generator<Permutation> {
 
 export function filterPools(
   pools: Pools,
-  constraints: Record<string, Constraint[]>,
+  constraints: Record<string, EntityConstraint[]>,
 ): Pools {
   const filteredPools: Pools = {};
 
@@ -117,7 +205,7 @@ export function filterPools(
     const poolConstraints = constraints[key] ?? [];
 
     const predicate = (entity: Entity) => (
-      poolConstraints.every((constraint) => constraint({ [key]: entity }))
+      poolConstraints.every((constraint) => constraint(entity))
     );
 
     filteredPools[key] = () => filterGenerator(pools[key](), predicate);
@@ -134,39 +222,88 @@ export function* filterGenerator<T>(generator: Generator<T>, predicate: (x: T) =
   }
 }
 
-export const isComponent: Constraint = (permutation: Permutation): boolean => {
-  return Object.values(permutation).every((entity) => entity instanceof Component);
-}
+export const isA = (expected: Class<any>): EntityConstraint => {
+  return (entity: Entity): boolean => {
+    return entity instanceof expected;
+  };
+};
 
-export const isRelationship: Constraint = (permutation: Permutation): boolean => {
-  return Object.values(permutation).every((entity) => entity instanceof Component);
-}
-
-export const is = (entity: Entity): Constraint => {
-  const constraint = (permutation: Permutation): boolean => {
-    return Object.values(permutation).every((pEntity) => pEntity === entity);
+export const is = (expected: Entity): EntityConstraint => {
+  const constraint = (entity: Entity): boolean => {
+    return entity === expected;
   };
 
-  constraint.__entity = entity;
+  constraint.__entity = expected;
 
   return constraint;
-}
+};
 
-export const has = (entity: Component<any> | Relationship<any>): Constraint => {
-  const constraint = (permutation: Permutation): boolean => {
-    return Object.values(permutation).some((entity) => {
-      if (
-        entity instanceof Component ||
-        entity instanceof Relationship
-      ) {
-        return entity.has(entity);
-      } else {
-        return false;
-      }
-    });
+export const has = (expected: Component<any> | Relationship<any>): EntityConstraint => {
+  const constraint = (entity: Entity): boolean => {
+    return entity.has(expected);
   };
 
-  constraint.__entity = entity;
+  constraint.__entity = expected;
 
   return constraint;
+};
+
+export const poolHasPool = (entityPool: string, componentPool: string): PermutationConstraint => {
+  return (permutation: Permutation): boolean => {
+    const entity = permutation[entityPool];
+
+    if (!entity) {
+      return false;
+    }
+
+    const component = permutation[componentPool];
+
+    if (!component) {
+      return false;
+    }
+
+    if (
+      !(entity instanceof Component) ||
+      !(component instanceof Component)
+    ) {
+      return false;
+    }
+
+    return entity.has(component);
+  };
+}
+
+export const poolTargetsPool = (
+  sourcePool: string,
+  relationshipPool: string,
+  targetPool: string,
+): PermutationConstraint => {
+  return (permutation: Permutation): boolean => {
+    const source = permutation[sourcePool];
+
+    if (!source) {
+      return false;
+    }
+
+    const relationship = permutation[relationshipPool];
+
+    if (!relationship) {
+      return false;
+    }
+
+    if (
+      !(source instanceof Relationship) ||
+      !(relationship instanceof Relationship)
+    ) {
+      return false;
+    }
+
+    const target = permutation[targetPool];
+
+    if (!target) {
+      return false;
+    }
+
+    return source.has(relationship.to(target));
+  };
 }

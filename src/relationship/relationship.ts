@@ -42,7 +42,7 @@ export class Relationship<
   to(reference: RelationshipTarget): RelationshipInstanceQuery<typeof this>;
 
   to(
-    entityOrReference: Entity | string | Wildcard,
+    entityOrReference: Entity | string,
   ): (
     | Component<Value>
     | RelationshipInstanceQuery<typeof this>
@@ -70,7 +70,7 @@ export class Relationship<
   }
 
 
-  #queryTo(reference: string | Wildcard): RelationshipInstanceQuery<typeof this> {
+  #queryTo(reference: string): RelationshipInstanceQuery<typeof this> {
     return new RelationshipInstanceQuery(this).to(reference);
   }
 
@@ -97,8 +97,8 @@ export class Relationship<
 
 export type TagRelationship = Relationship<undefined>;
 
-export type RelationshipTarget = string | Entity | Wildcard;
-export type RelationshipSource = string | Entity | Wildcard;
+export type RelationshipTarget = string | Entity;
+export type RelationshipSource = string | Entity;
 
 export type RelationshipValue<RelationshipType extends Relationship<any>> = (
   RelationshipType extends Relationship<infer Value>

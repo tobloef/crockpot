@@ -17,6 +17,8 @@ import type {
   Optional,
   Or,
 } from "./boolean/index.ts";
+import type { ComponentWildcardQuery } from "../component/queries/component-wildcard-query.js";
+import type { RelationshipWildcardQuery } from "../relationship/queries/relationship-wildcard-query.js";
 
 export type QueryPart = (
   | NonBooleanQueryPart
@@ -31,6 +33,8 @@ export type NonBooleanQueryPart = (
   | Component<any>
   | Relationship<any>
   | EntityWildcardQuery
+  | ComponentWildcardQuery
+  | RelationshipWildcardQuery
   | ComponentInstanceQuery<any>
   | RelationshipInstanceQuery<any>
   );
