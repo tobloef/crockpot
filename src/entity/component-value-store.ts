@@ -1,6 +1,7 @@
 import type {
   Component,
   ComponentValue,
+  ComponentValuePair,
   Tag,
 } from "../component/index.ts";
 
@@ -68,12 +69,14 @@ export class ComponentValueStore {
         }
         const [ component, componentValue ] = value;
 
+        const valuePair: ComponentValuePair =  [
+          component,
+          componentValue === null ? undefined : componentValue,
+        ];
+
         return {
           done: false,
-          value: [
-            component,
-            componentValue === null ? undefined : componentValue,
-          ],
+          value: valuePair,
         };
       },
     };

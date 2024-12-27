@@ -34,10 +34,11 @@ type PartMapper<Part extends QueryPart> = (part: Part) => QueryPartOutput<Part>;
 export type OutputMapper<Input extends QueryInput> = (permutation: Permutation) => QueryOutputItem<Input>;
 export type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
-export const DEFAULT_ENTITY_POOL = "__default_entity";
-export const DEFAULT_COMPONENT_POOL = "__default_component";
-export const DEFAULT_RELATIONSHIP_POOL = "__default_relationship";
-export const getDefaultTargetPoolName = (i: number): string => `__default_target_${ i }`;
+export const ENTITY_POOL = "__default_entity";
+export const COMPONENT_POOL = "__default_component";
+export const RELATIONSHIP_POOL = "__default_relationship";
+export const getTargetPoolName = (index: number): string => `__default_target_${ index }`;
+export const getInstancePoolName = (instance: Entity): string => `__instance_pool_${ instance.__id }`;
 
 // TODO: Give this file a better name
 
@@ -88,15 +89,15 @@ export function parseMappers<Input extends QueryInput>(
 
       if (part === Entity) {
         mappers.push((permutation, output) => {
-          const entity = permutation[DEFAULT_ENTITY_POOL];
+          const entity = permutation[ENTITY_POOL];
 
           // @ts-ignore for "Type instantiation is excessively deep and possibly infinite."
           (output[i] as any) = entity;
         });
       } else if (part === Component) {
         mappers.push((permutation, output) => {
-          const entity = permutation[DEFAULT_ENTITY_POOL];
-          const component = permutation[DEFAULT_COMPONENT_POOL] as Component<any>;
+          const entity = permutation[ENTITY_POOL];
+          const component = permutation[COMPONENT_POOL] as Component<any>;
 
           const value = entity.get(component);
 
@@ -104,8 +105,8 @@ export function parseMappers<Input extends QueryInput>(
         });
       } else if (part === Relationship) {
         mappers.push((permutation, output) => {
-          const entity = permutation[DEFAULT_ENTITY_POOL];
-          const relationship = permutation[DEFAULT_RELATIONSHIP_POOL] as Relationship<any>;
+          const entity = permutation[ENTITY_POOL];
+          const relationship = permutation[RELATIONSHIP_POOL] as Relationship<any>;
 
           const value = entity.get(relationship);
 
@@ -113,8 +114,8 @@ export function parseMappers<Input extends QueryInput>(
         });
       } else if (part instanceof Relationship) {
         mappers.push((permutation, output) => {
-          const entity = permutation[DEFAULT_ENTITY_POOL];
-          const relationship = permutation[DEFAULT_RELATIONSHIP_POOL] as Relationship<any>;
+          const entity = permutation[ENTITY_POOL];
+          const relationship = permutation[RELATIONSHIP_POOL] as Relationship<any>;
 
           const value = entity.get(relationship);
 
@@ -122,8 +123,8 @@ export function parseMappers<Input extends QueryInput>(
         });
       } else if (part instanceof Component) {
         mappers.push((permutation, output) => {
-          const entity = permutation[DEFAULT_ENTITY_POOL];
-          const component = permutation[DEFAULT_COMPONENT_POOL] as Component<any>;
+          const entity = permutation[ENTITY_POOL];
+          const component = permutation[COMPONENT_POOL] as Component<any>;
 
           const value = entity.get(component);
 

@@ -2,12 +2,15 @@ import { Entity } from "../entity/index.ts";
 import { ComponentInstanceQuery } from "./queries/component-instance-query.ts";
 import { ComponentWildcardQuery } from "./queries/component-wildcard-query.ts";
 import { ComponentWildcardValueQuery } from "./queries/component-wildcard-value-query.js";
+import { Relationship } from "../relationship/index.js";
 
 
 export class Component<
   Value = undefined,
 > extends Entity {
   static #brand = "Component" as const;
+
+  relationship?: Relationship<unknown>;
 
 
   constructor(name?: string) {
@@ -59,7 +62,7 @@ export type ComponentValue<ComponentType extends Component<any>> = (
   );
 
 export type ComponentValuePair<
-  ComponentType extends Component<any> = any,
+  ComponentType extends Component<any> = Component<any>,
 > = [
   component: ComponentType,
   value: ComponentValue<ComponentType>

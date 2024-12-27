@@ -14,12 +14,14 @@ export class Entity {
   static #brand = "Entity" as const;
 
   name?: string;
+  __id: number;
 
   __components = new ComponentValueStore();
 
 
   constructor(name?: string) {
     this.name = name;
+    this.__id = Math.random();
   }
 
 
@@ -59,6 +61,14 @@ export class Entity {
 
     return this;
   }
+
+
+  components(): ComponentValuePair[] {
+    return [...this.__components];
+  }
+
+
+
 
 
   get<RelationshipType extends Relationship<any>>(
@@ -124,8 +134,8 @@ export class Entity {
 
       const values = [];
 
-      for (const [ key, value ] of this.__components) {
-        if (key.__relationship === relationship) {
+      for (const [ component, value ] of this.__components) {
+        if (component.relationship === relationship) {
           values.push(value);
         }
       }
@@ -168,8 +178,8 @@ export class Entity {
     if (input instanceof Relationship) {
       const relationship: Relationship<any> = input;
 
-      for (const [ key ] of this.__components) {
-        if (key.__relationship === relationship) {
+      for (const [ component ] of this.__components) {
+        if (component.relationship === relationship) {
           return true;
         }
       }

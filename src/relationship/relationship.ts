@@ -74,6 +74,7 @@ export class Relationship<
     if (relationshipComponent === null) {
       let name = Relationship.getComponentName(this, entity);
       relationshipComponent = new Component<Value>(name);
+      relationshipComponent.relationship = this;
       Relationship.__relationshipComponents.set(this, entity, relationshipComponent);
     }
 
