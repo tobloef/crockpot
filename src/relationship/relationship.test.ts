@@ -8,11 +8,11 @@ import {
 } from "./relationship.ts";
 import * as assert from "node:assert";
 import { Entity } from "../entity/index.ts";
-import {
-  Component,
-  type ComponentValue,
-} from "../component/index.ts";
+import { type ComponentValue } from "../component/index.ts";
 import { assertTypesEqual } from "../utils/type-assertions.ts";
+import type { RelationshipInstanceQuery } from "./queries/relationship-instance-query.js";
+import type { RelationshipWildcardQuery } from "./queries/relationship-wildcard-query.js";
+import type { RelationshipWildcardValueQuery } from "./queries/relationship-wildcard-value-query.js";
 
 describe(Relationship.name, () => {
   it("Create relationship without name", () => {
@@ -71,18 +71,18 @@ describe(Relationship.prototype.on.name, () => {
   it("Create relationship query with entity as source", () => {
     const TestRelationship = new Relationship();
     const entity = new Entity();
-    const query = TestRelationship.on(entity);
+    const query: RelationshipInstanceQuery<typeof TestRelationship> = TestRelationship.on(entity);
 
     assert.strictEqual(query.source, entity);
-    assert.strictEqual(query.entity, TestRelationship);
+    assert.strictEqual(query.relationship, TestRelationship);
   });
 
   it("Create relationship query with reference name as source", () => {
     const TestRelationship = new Relationship();
-    const query = TestRelationship.on("source");
+    const query: RelationshipInstanceQuery<typeof TestRelationship> = TestRelationship.on("source");
 
     assert.strictEqual(query.source, "source");
-    assert.strictEqual(query.entity, TestRelationship);
+    assert.strictEqual(query.relationship, TestRelationship);
   });
 });
 
@@ -95,6 +95,7 @@ describe(Relationship.prototype.to.name, () => {
 
     type RelationshipValueType = ComponentValue<typeof RelationshipComponent>;
     type RelationshipComponentValueType = RelationshipValue<typeof TestRelationship>;
+
     assertTypesEqual<RelationshipValueType, RelationshipComponentValueType>(true);
   });
 
@@ -106,6 +107,7 @@ describe(Relationship.prototype.to.name, () => {
 
     type RelationshipValueType = ComponentValue<typeof RelationshipComponent>;
     type RelationshipComponentValueType = RelationshipValue<typeof TestRelationship>;
+
     assertTypesEqual<RelationshipValueType, RelationshipComponentValueType>(true);
   });
 
@@ -130,33 +132,40 @@ describe(Relationship.prototype.to.name, () => {
 
   it("Create relationship query with reference name as target", () => {
     const TestRelationship = new Relationship();
-    const query = TestRelationship.to("target");
+    const query: RelationshipInstanceQuery<typeof TestRelationship> = TestRelationship.to("target");
 
     assert.strictEqual(query.target, "target");
-    assert.strictEqual(query.entity, TestRelationship);
+    assert.strictEqual(query.relationship, TestRelationship);
   });
 });
 
 describe(Relationship.as.name, () => {
   it("Create relationship wildcard query with reference name", () => {
+    const query: RelationshipWildcardQuery = Relationship.as("source");
+
+    assert.strictEqual(query.source, "source");
   });
 });
 
 describe(Relationship.once.name, () => {
-  it("Create relationship once query with reference name", () => {
+  it("Create relationship wildcard query with once clause", () => {
+    const query: RelationshipWildcardQuery = Relationship.once();
+
+    assert.strictEqual(query.once, true);
   });
 });
 
 describe(Relationship.on.name, () => {
   it("Create relationship wildcard query with entity as source", () => {
     const entity = new Entity();
-    const query = Relationship.on(entity);
+
+    const query: RelationshipWildcardQuery = Relationship.on(entity);
 
     assert.strictEqual(query.source, entity);
   });
 
   it("Create relationship wildcard query with reference name as source", () => {
-    const query = Relationship.on("source");
+    const query: RelationshipWildcardQuery = Relationship.on("source");
 
     assert.strictEqual(query.source, "source");
   });
@@ -164,8 +173,23 @@ describe(Relationship.on.name, () => {
 
 describe(Relationship.to.name, () => {
   it("Create relationship wildcard query with reference name as target", () => {
-    const query = Relationship.to("target");
+    const query: RelationshipWildcardQuery = Relationship.to("target");
 
     assert.strictEqual(query.target, "target");
   });
 });
+
+describe(Relationship.value.name, () => {
+  it("Create relationship wildcard value query with reference name first", () => {
+    const query: RelationshipWildcardValueQuery = Relationship.as("ref").value();
+
+    assert.strictEqual(query.typeName, "ref");
+  });
+
+  it("Create relationship wildcard value query with reference name last", () => {
+    const query: RelationshipWildcardValueQuery = Relationship.value().as("ref");
+
+    assert.strictEqual(query.typeName, "ref");
+  });
+});
+

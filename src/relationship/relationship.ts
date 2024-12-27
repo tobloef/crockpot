@@ -72,7 +72,7 @@ export class Relationship<
     );
 
     if (relationshipComponent === null) {
-      let name = this.#getComponentName(this, entity);
+      let name = Relationship.getComponentName(this, entity);
       relationshipComponent = new Component<Value>(name);
       Relationship.__relationshipComponents.set(this, entity, relationshipComponent);
     }
@@ -86,14 +86,14 @@ export class Relationship<
   }
 
 
-  #getComponentName(relationship: Relationship<any>, entity: Entity): string | undefined {
+  static getComponentName(relationship: Relationship<any>, target: Entity): string | undefined {
     switch (true) {
-      case !!relationship.name && !!entity.name:
-        return `${ relationship.name }->${ entity.name }`;
-      case !!relationship.name && !entity.name:
+      case !!relationship.name && !!target.name:
+        return `${ relationship.name }->${ target.name }`;
+      case !!relationship.name && !target.name:
         return `${ relationship.name }->?`;
-      case !relationship.name && !!entity.name:
-        return `?->${ entity.name }`;
+      case !relationship.name && !!target.name:
+        return `?->${ target.name }`;
       default:
         return undefined;
     }
