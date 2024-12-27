@@ -80,9 +80,9 @@ describe(Component.prototype.on.name, () => {
 
 describe(Component.as.name, () => {
   it("Create component wildcard query with reference name", () => {
-    const query: ComponentWildcardQuery = Component.as("source");
+    const query: ComponentWildcardQuery = Component.as("ref");
 
-    assert.strictEqual(query.source, "source");
+    assert.strictEqual(query.name, "ref");
   });
 });
 
@@ -90,7 +90,7 @@ describe(Component.once.name, () => {
   it("Create component once query with reference name", () => {
     const query: ComponentWildcardQuery = Component.once();
 
-    assert.strictEqual(query.once, true);
+    assert.strictEqual(query.isOnce, true);
   });
 });
 
