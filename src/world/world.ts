@@ -10,7 +10,6 @@ import type {
   QueryInput,
   QueryObjectInput,
   QueryOutput,
-  QueryPart,
   SpreadOrObjectQueryInput,
 } from "../query/index.ts";
 
@@ -36,16 +35,16 @@ export class World {
   }
 
 
-  query<Input extends QueryArrayInput<QueryPart>>(
+  query<Input extends QueryArrayInput>(
     ...input: Input
   ): QueryOutput<Input>;
 
-  query<Input extends QueryObjectInput<QueryPart>>(
+  query<Input extends QueryObjectInput>(
     input: Input,
   ): QueryOutput<Input>;
 
-  query<Input extends QueryInput<QueryPart>>(
-    ...input: SpreadOrObjectQueryInput<Input, QueryPart>
+  query<Input extends QueryInput>(
+    ...input: SpreadOrObjectQueryInput<Input>
   ): QueryOutput<Input> {
     throw new NotImplementedError();
   }

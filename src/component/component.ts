@@ -1,7 +1,8 @@
 import { Entity } from "../entity/index.ts";
 import { ComponentInstanceQuery } from "./queries/component-instance-query.ts";
-import type { Wildcard } from "../query/index.ts";
 import { ComponentWildcardQuery } from "./queries/component-wildcard-query.ts";
+import { ComponentWildcardValueQuery } from "./queries/component-wildcard-value-query.js";
+
 
 export class Component<
   Value = undefined,
@@ -26,6 +27,10 @@ export class Component<
 
   static on(source: ComponentSource) {
     return new ComponentWildcardQuery().on(source);
+  }
+
+  static value(): ComponentWildcardValueQuery {
+    return new ComponentWildcardValueQuery();
   }
 
 

@@ -71,11 +71,11 @@ export class Entity {
 
   get<ComponentTypes extends ComponentOrRelationship[]>(
     components: ComponentTypes,
-  ): Nullable<GetOutputArray<ComponentTypes>>;
+  ): GetOutputArray<ComponentTypes>;
 
   get<ComponentTypes extends Record<string, ComponentOrRelationship>>(
     components: ComponentTypes,
-  ): Nullable<GetOutputObject<ComponentTypes>>;
+  ): GetOutputObject<ComponentTypes>;
 
   get<Input extends CombinedInput>(
     input: Input,
@@ -192,7 +192,7 @@ export class Entity {
   }
 }
 
-type ComponentOrRelationship = Component<any> | Relationship<any>;
+export type ComponentOrRelationship = Component<any> | Relationship<any>;
 
 type GetOutput<Input extends (
   | ComponentOrRelationship

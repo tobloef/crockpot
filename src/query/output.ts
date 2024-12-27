@@ -24,19 +24,22 @@ import {
 import type { Class } from "../utils/class.ts";
 import type { ComponentWildcardQuery } from "../component/queries/component-wildcard-query.ts";
 import type { Writeable } from "./pools.ts";
+import type { RelationshipWildcardValueQuery } from "../relationship/queries/relationship-wildcard-value-query.js";
+import type { ComponentWildcardValueQuery } from "../component/queries/component-wildcard-value-query.js";
+import type { RelationshipWildcardQuery } from "../relationship/queries/relationship-wildcard-query.js";
 
 export type QueryOutput<Input extends QueryInput> = Generator<QueryOutputItem<Input>>;
 
 export type QueryOutputItem<Input extends QueryInput> =
   Input extends QueryPart ? QueryPartOutput<Input> :
-  Input extends QueryArrayInput<QueryPart> ? QueryArrayOutput<Writeable<Input>> :
-  Input extends QueryObjectInput<QueryPart> ? QueryObjectOutput<Writeable<Input>> :
+  Input extends QueryArrayInput ? QueryArrayOutput<Writeable<Input>> :
+  Input extends QueryObjectInput ? QueryObjectOutput<Writeable<Input>> :
   never;
 
-export type QueryArrayOutput<Input extends QueryArrayInput<QueryPart>> =
+export type QueryArrayOutput<Input extends QueryArrayInput> =
   Input extends [ infer First, ...infer Rest ]
   ? First extends QueryPart
-    ? Rest extends QueryArrayInput<QueryPart>
+    ? Rest extends QueryArrayInput
       ? [ QueryPartOutput<First> ] extends [ never ]
         ? QueryArrayOutput<Rest>
         : [ QueryPartOutput<First>, ...QueryArrayOutput<Rest> ]
@@ -44,7 +47,7 @@ export type QueryArrayOutput<Input extends QueryArrayInput<QueryPart>> =
     : never
   : [];
 
-export type QueryObjectOutput<Input extends QueryObjectInput<QueryPart>> = {
+export type QueryObjectOutput<Input extends QueryObjectInput> = {
   [Key in keyof Input]: QueryPartOutput<Input[Key]>;
 };
 
@@ -54,14 +57,16 @@ export type QueryPartOutput<Part> =
   Part extends Or<infer Types> ? ParseOr<Types> :
   Part extends RelationshipInstanceQuery<infer RelationshipType> ? RelationshipValue<RelationshipType> :
   Part extends ComponentInstanceQuery<infer ComponentType> ? ComponentValue<ComponentType> :
-  Part extends ComponentWildcardQuery ? unknown :
-  Part extends Class<Relationship<infer Value>> ? Value :
-  Part extends Class<Component<infer Value>> ? Value :
-  Part extends Class<Entity> ? Entity :
+  Part extends RelationshipWildcardValueQuery ? unknown :
+  Part extends ComponentWildcardValueQuery ? unknown :
+  Part extends RelationshipWildcardQuery ? Relationship<unknown> :
+  Part extends ComponentWildcardQuery ? Component<unknown> :
   Part extends EntityWildcardQuery ? Entity :
+  Part extends Class<Relationship<any>> ? Relationship<unknown> :
+  Part extends Class<Component<any>> ? Component<unknown> :
+  Part extends Class<Entity> ? Entity :
   Part extends Relationship<infer Value> ? Value :
   Part extends Component<infer Value> ? Value :
-  Part extends Entity ? Entity :
   never;
 
 type RelationshipValue<T> = T extends Relationship<infer Value> ? Value : never;

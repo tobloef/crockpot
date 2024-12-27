@@ -16,12 +16,12 @@ import {
 } from "./pools.ts";
 
 
-export function query<Input extends QueryArrayInput<QueryPart>>(
+export function query<Input extends QueryArrayInput>(
   entities: Entity[],
   input: [ ...Input ],
 ): QueryOutput<Input>;
 
-export function query<Input extends QueryObjectInput<QueryPart>>(
+export function query<Input extends QueryObjectInput>(
   entities: Entity[],
   input: Input,
 ): QueryOutput<Input>;

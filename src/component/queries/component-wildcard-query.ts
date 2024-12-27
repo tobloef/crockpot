@@ -1,13 +1,19 @@
 import type { ComponentSource } from "../component.ts";
-import { EntityWildcardQuery } from "../../entity/index.ts";
+import { ComponentWildcardValueQuery } from "./component-wildcard-value-query.js";
+import { EntityWildcardQuery } from "../../entity/index.js";
 
-export class ComponentWildcardQuery {
-  isOnce: boolean = false;
+export class ComponentWildcardQuery extends EntityWildcardQuery {
   source?: ComponentSource;
 
 
-  once(): ComponentWildcardQuery {
-    this.isOnce = true;
+  override as(name?: string): ComponentWildcardQuery {
+    super.as(name);
+    return this;
+  }
+
+
+  override once(): ComponentWildcardQuery {
+    super.once();
     return this;
   }
 
@@ -15,5 +21,15 @@ export class ComponentWildcardQuery {
   on(source: ComponentSource): ComponentWildcardQuery {
     this.source = source;
     return this;
+  }
+
+  value(): ComponentWildcardValueQuery {
+    const valueQuery = new ComponentWildcardValueQuery();
+
+    valueQuery.typeName = this.name;
+    valueQuery.isOnce = this.isOnce;
+    valueQuery.source = this.source;
+
+    return valueQuery;
   }
 }

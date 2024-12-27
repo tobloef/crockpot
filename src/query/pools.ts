@@ -4,6 +4,7 @@ import type {
   QueryPartOutput,
 } from "./output.ts";
 import {
+  type ComponentOrRelationship,
   Entity,
   EntityWildcardQuery,
 } from "../entity/index.ts";
@@ -89,6 +90,7 @@ export function parseMappers<Input extends QueryInput>(
         mappers.push((permutation, output) => {
           const entity = permutation[DEFAULT_ENTITY_POOL];
 
+          // @ts-ignore for "Type instantiation is excessively deep and possibly infinite."
           (output[i] as any) = entity;
         });
       } else if (part === Component) {
@@ -238,7 +240,7 @@ export const is = (expected: Entity): EntityConstraint => {
   return constraint;
 };
 
-export const has = (expected: Component<any> | Relationship<any>): EntityConstraint => {
+export const has = (expected: ComponentOrRelationship): EntityConstraint => {
   const constraint = (entity: Entity): boolean => {
     return entity.has(expected);
   };

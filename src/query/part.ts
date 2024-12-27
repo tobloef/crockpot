@@ -19,6 +19,8 @@ import type {
 } from "./boolean/index.ts";
 import type { ComponentWildcardQuery } from "../component/queries/component-wildcard-query.js";
 import type { RelationshipWildcardQuery } from "../relationship/queries/relationship-wildcard-query.js";
+import type { ComponentWildcardValueQuery } from "../component/queries/component-wildcard-value-query.js";
+import type { RelationshipWildcardValueQuery } from "../relationship/queries/relationship-wildcard-value-query.js";
 
 export type QueryPart = (
   | NonBooleanQueryPart
@@ -29,12 +31,13 @@ export type NonBooleanQueryPart = (
   | Class<Entity>
   | Class<Component<any>>
   | Class<Relationship<any>>
-  | Entity
   | Component<any>
   | Relationship<any>
   | EntityWildcardQuery
   | ComponentWildcardQuery
   | RelationshipWildcardQuery
+  | ComponentWildcardValueQuery
+  | RelationshipWildcardValueQuery
   | ComponentInstanceQuery<any>
   | RelationshipInstanceQuery<any>
   );

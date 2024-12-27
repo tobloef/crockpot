@@ -4,6 +4,7 @@ import { Component } from "../component/index.ts";
 import { RelationshipInstanceQuery } from "./queries/relationship-instance-query.ts";
 import type { Wildcard } from "../query/index.ts";
 import { RelationshipWildcardQuery } from "./queries/relationship-wildcard-query.ts";
+import { RelationshipWildcardValueQuery } from "./queries/relationship-wildcard-value-query.js";
 
 export class Relationship<
   Value = undefined,
@@ -32,8 +33,18 @@ export class Relationship<
   }
 
 
+  static value(): RelationshipWildcardValueQuery {
+    return new RelationshipWildcardValueQuery();
+  }
+
+
   on(source: RelationshipSource): RelationshipInstanceQuery<typeof this> {
     return new RelationshipInstanceQuery(this).on(source);
+  }
+
+
+  once(): RelationshipInstanceQuery<typeof this> {
+    return new RelationshipInstanceQuery(this).once();
   }
 
 
