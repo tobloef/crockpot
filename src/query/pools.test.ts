@@ -1,6 +1,7 @@
 import { describe, it, } from "node:test";
 import * as assert from "node:assert";
 import {
+  arrayToGenerator,
   combineMappers,
   COMPONENT_POOL,
   type Constraints,
@@ -37,7 +38,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [ENTITY_POOL]);
+    assert.deepStrictEqual(pools, [ENTITY_POOL]);
   });
 
   it("Parses entity class for objects", () => {
@@ -48,7 +49,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [ENTITY_POOL]);
+    assert.deepStrictEqual(pools, [ENTITY_POOL]);
   });
 
   it("Parses component class for arrays", () => {
@@ -59,7 +60,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, ENTITY_POOL]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, ENTITY_POOL]);
   });
 
   it("Parses component class for objects", () => {
@@ -70,7 +71,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, ENTITY_POOL]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, ENTITY_POOL]);
   });
 
   it("Parses relationship class for arrays", () => {
@@ -81,7 +82,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
   });
 
   it("Parses relationship class for objects", () => {
@@ -92,7 +93,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
   });
 
   it("Parses component instance for arrays", () => {
@@ -104,7 +105,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [getInstancePoolName(component), ENTITY_POOL]);
+    assert.deepStrictEqual(pools, [getInstancePoolName(component), ENTITY_POOL]);
   });
 
   it("Parses component instance for objects", () => {
@@ -116,7 +117,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [getInstancePoolName(component), ENTITY_POOL]);
+    assert.deepStrictEqual(pools, [getInstancePoolName(component), ENTITY_POOL]);
   });
 
   it("Parses relationship instance for arrays", () => {
@@ -129,7 +130,7 @@ describe(parsePoolNames.name, () => {
 
     // Assert
     assert.deepStrictEqual(
-      Object.keys(pools),
+      pools,
       [getInstancePoolName(relationship), ENTITY_POOL, getTargetPoolName(0)],
     );
   });
@@ -144,7 +145,7 @@ describe(parsePoolNames.name, () => {
 
     // Assert
     assert.deepStrictEqual(
-      Object.keys(pools),
+      pools,
       [getInstancePoolName(relationship), ENTITY_POOL, getTargetPoolName(0)],
     );
   });
@@ -158,7 +159,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [getInstancePoolName(component), "a"]);
+    assert.deepStrictEqual(pools, [getInstancePoolName(component), "a"]);
   });
 
   it("Parses component instance query with reference source for objects", () => {
@@ -170,7 +171,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [getInstancePoolName(component), "a"]);
+    assert.deepStrictEqual(pools, [getInstancePoolName(component), "a"]);
   });
 
   it("Parses component instance query with entity source for arrays", () => {
@@ -183,7 +184,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [getInstancePoolName(component), getInstancePoolName(entity)]);
+    assert.deepStrictEqual(pools, [getInstancePoolName(component), getInstancePoolName(entity)]);
   });
 
   it("Parses component instance query with entity source for objects", () => {
@@ -196,7 +197,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [getInstancePoolName(component), getInstancePoolName(entity)]);
+    assert.deepStrictEqual(pools, [getInstancePoolName(component), getInstancePoolName(entity)]);
   });
 
   it("Parses relationship instance query with reference source for arrays", () => {
@@ -208,7 +209,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [getInstancePoolName(relationship), "a", getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, [getInstancePoolName(relationship), "a", getTargetPoolName(0)]);
   });
 
   it("Parses relationship instance query with reference source for objects", () => {
@@ -220,7 +221,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [getInstancePoolName(relationship), "a", getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, [getInstancePoolName(relationship), "a", getTargetPoolName(0)]);
   });
 
   it("Parses relationship instance query with entity source for arrays", () => {
@@ -234,7 +235,7 @@ describe(parsePoolNames.name, () => {
 
     // Assert
     assert.deepStrictEqual(
-      Object.keys(pools),
+      pools,
       [getInstancePoolName(relationship), getInstancePoolName(entity), getTargetPoolName(0)],
     );
   });
@@ -250,7 +251,7 @@ describe(parsePoolNames.name, () => {
 
     // Assert
     assert.deepStrictEqual(
-      Object.keys(pools),
+      pools,
       [getInstancePoolName(relationship), getInstancePoolName(entity), getTargetPoolName(0)],
     );
   });
@@ -264,7 +265,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [getInstancePoolName(relationship), ENTITY_POOL, "a"]);
+    assert.deepStrictEqual(pools, [getInstancePoolName(relationship), ENTITY_POOL, "a"]);
   });
 
   it("Parses relationship instance query with reference target for objects", () => {
@@ -276,10 +277,10 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [getInstancePoolName(relationship), ENTITY_POOL, "a"]);
+    assert.deepStrictEqual(pools, [getInstancePoolName(relationship), ENTITY_POOL, "a"]);
   });
 
-  it("Parses relationship instance query with entity target for arrays", () => {
+  it("Parses relationship component with entity target for arrays", () => {
     // Arrange
     const entity = new Entity();
     const relationship = new Relationship<number>();
@@ -290,12 +291,12 @@ describe(parsePoolNames.name, () => {
 
     // Assert
     assert.deepStrictEqual(
-      Object.keys(pools),
-      [getInstancePoolName(relationship), ENTITY_POOL, getInstancePoolName(entity)],
+      pools,
+      [getInstancePoolName(relationship.to(entity)), ENTITY_POOL],
     );
   });
 
-  it("Parses relationship instance query with entity target for objects", () => {
+  it("Parses relationship component with entity target for objects", () => {
     // Arrange
     const entity = new Entity();
     const relationship = new Relationship<number>();
@@ -306,8 +307,8 @@ describe(parsePoolNames.name, () => {
 
     // Assert
     assert.deepStrictEqual(
-      Object.keys(pools),
-      [getInstancePoolName(relationship), ENTITY_POOL, getInstancePoolName(entity)],
+      pools,
+      [getInstancePoolName(relationship.to(entity)), ENTITY_POOL],
     );
   });
 
@@ -319,7 +320,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), ["a"]);
+    assert.deepStrictEqual(pools, ["a"]);
   });
 
   it("Parses entity wildcard with reference name for objects", () => {
@@ -330,7 +331,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), ["a"]);
+    assert.deepStrictEqual(pools, ["a"]);
   });
 
   it("Parses entity wildcard with once clause for arrays", () => {
@@ -341,7 +342,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [ENTITY_POOL]);
+    assert.deepStrictEqual(pools, [ENTITY_POOL]);
   });
 
   it("Parses entity wildcard with once clause for objects", () => {
@@ -352,7 +353,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [ENTITY_POOL]);
+    assert.deepStrictEqual(pools, [ENTITY_POOL]);
   });
 
   it("Parses component wildcard with reference name for arrays", () => {
@@ -363,7 +364,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), ["a", ENTITY_POOL]);
+    assert.deepStrictEqual(pools, ["a", ENTITY_POOL]);
   });
 
   it("Parses component wildcard with reference name for objects", () => {
@@ -374,7 +375,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), ["a", ENTITY_POOL]);
+    assert.deepStrictEqual(pools, ["a", ENTITY_POOL]);
   });
 
   it("Parses component wildcard with once clause for arrays", () => {
@@ -385,7 +386,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, ENTITY_POOL]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, ENTITY_POOL]);
   });
 
   it("Parses component wildcard with once clause for objects", () => {
@@ -396,7 +397,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, ENTITY_POOL]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, ENTITY_POOL]);
   });
 
   it("Parses component wildcard with reference source for arrays", () => {
@@ -407,7 +408,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, "source"]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, "source"]);
   });
 
   it("Parses component wildcard with reference source for objects", () => {
@@ -418,7 +419,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, "source"]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, "source"]);
   });
 
   it("Parses component wildcard with entity source for arrays", () => {
@@ -430,7 +431,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, getInstancePoolName(entity)]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, getInstancePoolName(entity)]);
   });
 
   it("Parses component wildcard with entity source for objects", () => {
@@ -442,7 +443,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, getInstancePoolName(entity)]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, getInstancePoolName(entity)]);
   });
 
   it("Parses relationship wildcard with reference name for arrays", () => {
@@ -453,7 +454,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), ["a", ENTITY_POOL, getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, ["a", ENTITY_POOL, getTargetPoolName(0)]);
   });
 
   it("Parses relationship wildcard with reference name for objects", () => {
@@ -464,7 +465,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), ["a", ENTITY_POOL, getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, ["a", ENTITY_POOL, getTargetPoolName(0)]);
   });
 
   it("Parses relationship wildcard with once clause for arrays", () => {
@@ -475,7 +476,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
   });
 
   it("Parses relationship wildcard with once clause for objects", () => {
@@ -486,7 +487,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
   });
 
   it("Parses relationship wildcard with reference source for arrays", () => {
@@ -497,7 +498,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, "source", getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, "source", getTargetPoolName(0)]);
   });
 
   it("Parses relationship wildcard with reference source for objects", () => {
@@ -508,7 +509,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, "source", getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, "source", getTargetPoolName(0)]);
   });
 
   it("Parses relationship wildcard with entity source for arrays", () => {
@@ -521,7 +522,7 @@ describe(parsePoolNames.name, () => {
 
     // Assert
     assert.deepStrictEqual(
-      Object.keys(pools),
+      pools,
       [RELATIONSHIP_POOL, getInstancePoolName(entity), getTargetPoolName(0)],
     );
   });
@@ -536,7 +537,7 @@ describe(parsePoolNames.name, () => {
 
     // Assert
     assert.deepStrictEqual(
-      Object.keys(pools),
+      pools,
       [RELATIONSHIP_POOL, getInstancePoolName(entity), getTargetPoolName(0)],
     );
   });
@@ -549,7 +550,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, "target"]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, "target"]);
   });
 
   it("Parses relationship wildcard with reference target for objects", () => {
@@ -560,7 +561,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, "target"]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, "target"]);
   });
 
   it("Parses relationship wildcard with entity target for arrays", () => {
@@ -572,7 +573,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, getInstancePoolName(entity)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, getInstancePoolName(entity)]);
   });
 
   it("Parses relationship wildcard with entity target for objects", () => {
@@ -584,7 +585,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, getInstancePoolName(entity)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, getInstancePoolName(entity)]);
   });
 
   it("Parses component wildcard value query for arrays", () => {
@@ -595,7 +596,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, ENTITY_POOL]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, ENTITY_POOL]);
   });
 
   it("Parses component wildcard value query for objects", () => {
@@ -606,7 +607,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, ENTITY_POOL]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, ENTITY_POOL]);
   });
 
   it("Parses component wildcard value query with reference name for arrays", () => {
@@ -617,7 +618,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), ["a", ENTITY_POOL]);
+    assert.deepStrictEqual(pools, ["a", ENTITY_POOL]);
   });
 
   it("Parses component wildcard value query with reference name for objects", () => {
@@ -628,7 +629,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), ["a", ENTITY_POOL]);
+    assert.deepStrictEqual(pools, ["a", ENTITY_POOL]);
   });
 
   it("Parses component wildcard value query with once clause for arrays", () => {
@@ -639,7 +640,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, ENTITY_POOL]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, ENTITY_POOL]);
   });
 
   it("Parses component wildcard value query with once clause for objects", () => {
@@ -650,7 +651,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, ENTITY_POOL]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, ENTITY_POOL]);
   });
 
   it("Parses component wildcard value query with reference source for arrays", () => {
@@ -661,7 +662,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, "source"]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, "source"]);
   });
 
   it("Parses component wildcard value query with reference source for objects", () => {
@@ -672,7 +673,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, "source"]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, "source"]);
   });
 
   it("Parses component wildcard value query with entity source for arrays", () => {
@@ -684,7 +685,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, getInstancePoolName(entity)]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, getInstancePoolName(entity)]);
   });
 
   it("Parses component wildcard value query with entity source for objects", () => {
@@ -696,7 +697,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [COMPONENT_POOL, getInstancePoolName(entity)]);
+    assert.deepStrictEqual(pools, [COMPONENT_POOL, getInstancePoolName(entity)]);
   });
 
   it("Parses relationship wildcard value query for arrays", () => {
@@ -707,7 +708,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
   });
 
   it("Parses relationship wildcard value query for objects", () => {
@@ -718,7 +719,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
   });
 
   it("Parses relationship wildcard value query with reference name for arrays", () => {
@@ -729,7 +730,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), ["a", ENTITY_POOL, getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, ["a", ENTITY_POOL, getTargetPoolName(0)]);
   });
 
   it("Parses relationship wildcard value query with reference name for objects", () => {
@@ -740,7 +741,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), ["a", ENTITY_POOL, getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, ["a", ENTITY_POOL, getTargetPoolName(0)]);
   });
 
   it("Parses relationship wildcard value query with once clause for arrays", () => {
@@ -751,7 +752,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
   });
 
   it("Parses relationship wildcard value query with once clause for objects", () => {
@@ -762,7 +763,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(0)]);
   });
 
   it("Parses relationship wildcard value query with reference source for arrays", () => {
@@ -773,7 +774,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, "source", getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, "source", getTargetPoolName(0)]);
   });
 
   it("Parses relationship wildcard value query with reference source for objects", () => {
@@ -784,7 +785,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, "source", getTargetPoolName(0)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, "source", getTargetPoolName(0)]);
   });
 
   it("Parses relationship wildcard value query with reference target for arrays", () => {
@@ -795,7 +796,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, "target"]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, "target"]);
   });
 
   it("Parses relationship wildcard value query with reference target for objects", () => {
@@ -806,7 +807,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, "target"]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, "target"]);
   });
 
   it("Parses relationship wildcard value query with entity source for arrays", () => {
@@ -819,7 +820,7 @@ describe(parsePoolNames.name, () => {
 
     // Assert
     assert.deepStrictEqual(
-      Object.keys(pools),
+      pools,
       [RELATIONSHIP_POOL, getInstancePoolName(entity), getTargetPoolName(0)],
     );
   });
@@ -834,7 +835,7 @@ describe(parsePoolNames.name, () => {
 
     // Assert
     assert.deepStrictEqual(
-      Object.keys(pools),
+      pools,
       [RELATIONSHIP_POOL, getInstancePoolName(entity), getTargetPoolName(0)],
     );
   });
@@ -848,7 +849,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, getInstancePoolName(entity)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, getInstancePoolName(entity)]);
   });
 
   it("Parses relationship wildcard value query with entity target for objects", () => {
@@ -860,7 +861,7 @@ describe(parsePoolNames.name, () => {
     const pools = parsePoolNames(input);
 
     // Assert
-    assert.deepStrictEqual(Object.keys(pools), [RELATIONSHIP_POOL, ENTITY_POOL, getInstancePoolName(entity)]);
+    assert.deepStrictEqual(pools, [RELATIONSHIP_POOL, ENTITY_POOL, getInstancePoolName(entity)]);
   });
 });
 
@@ -4135,6 +4136,9 @@ describe(parseMappers.name, () => {
 describe(combineMappers.name, () => {
   it("Combine mappers for object", () => {
     // Arrange
+    const entity1 = new Entity("Entity 1");
+    const entity2 = new Entity("Entity 2");
+
     const input = {
       a: Entity.as("c"),
       b: Entity.as("d"),
@@ -4142,26 +4146,29 @@ describe(combineMappers.name, () => {
 
     const mappers: PermutationMapper<typeof input>[] = [
       (permutation, output) => {
-        output.a = permutation.a;
+        output.a = permutation.c;
       },
       (permutation, output) => {
-        output.b = permutation.b;
+        output.b = permutation.d;
       },
     ];
 
     // Act
     const mapper = combineMappers(input, mappers);
     const output = mapper({
-      c: new Entity("Entity 1"),
-      d: new Entity("Entity 2"),
+      c: entity1,
+      d: entity2,
     });
 
     // Assert
-    assert.deepStrictEqual(output, { a: "Entity 1", b: "Entity 2" });
+    assert.deepStrictEqual(output, { a: entity1, b: entity2 });
   });
 
   it("Combine mappers for array", () => {
     // Arrange
+    const entity1 = new Entity("Entity 1");
+    const entity2 = new Entity("Entity 2");
+
     const input = [
       Entity.as("a"),
       Entity.as("b"),
@@ -4179,21 +4186,23 @@ describe(combineMappers.name, () => {
     // Act
     const mapper = combineMappers(input, mappers);
     const output = mapper({
-      a: new Entity("Entity 1"),
-      b: new Entity("Entity 2"),
+      a: entity1,
+      b: entity2,
     });
 
     // Assert
-    assert.deepStrictEqual(output, ["Entity 1", "Entity 2"]);
+    assert.deepStrictEqual(output, [entity1, entity2]);
   });
 });
 
 describe(permutePools.name, () => {
   it("Permute pools", () => {
     // Arrange
+    const entities1 = [new Entity("Entity A 0"), new Entity("Entity A 1")];
+    const entities2 = [new Entity("Entity B 0"), new Entity("Entity B 1")];
     const pools: Pools = {
-      a: () => createEntityGenerator(2, "Entity A"),
-      b: () => createEntityGenerator(2, "Entity B"),
+      a: () => arrayToGenerator(entities1),
+      b: () => arrayToGenerator(entities2),
     };
 
     // Act
@@ -4203,10 +4212,10 @@ describe(permutePools.name, () => {
     assert.deepStrictEqual(
       [...result],
       [
-        { a: new Entity("Entity A 0"), b: new Entity("Entity B 0") },
-        { a: new Entity("Entity A 0"), b: new Entity("Entity B 1") },
-        { a: new Entity("Entity A 1"), b: new Entity("Entity B 0") },
-        { a: new Entity("Entity A 1"), b: new Entity("Entity B 1") },
+        { a: entities1[0], b: entities2[0] },
+        { a: entities1[0], b: entities2[1] },
+        { a: entities1[1], b: entities2[0] },
+        { a: entities1[1], b: entities2[1] },
       ],
     );
   });
@@ -4228,15 +4237,18 @@ describe(permutePools.name, () => {
 
 describe(filterPools.name, () => {
   it("Filter pools", () => {
+    const entities1 = [new Entity("0"), new Entity("1")];
+    const entities2 = [new Entity("0"), new Entity("1"), new Entity("2")];
+
     // Arrange
     const pools: Pools = {
-      a: () => createEntityGenerator(2),
-      b: () => createEntityGenerator(3),
+      a: () => arrayToGenerator(entities1),
+      b: () => arrayToGenerator(entities2),
     };
 
     const constraints: Record<string, EntityConstraint[]> = {
-      a: [(entity) => entity.name !== "Entity 0"],
-      b: [(entity) => entity.name !== "Entity 1"],
+      a: [(entity) => entity.name !== "0"],
+      b: [(entity) => entity.name !== "1"],
     };
 
     // Act
@@ -4245,11 +4257,11 @@ describe(filterPools.name, () => {
     // Assert
     assert.deepStrictEqual(
       [...result.a()],
-      [new Entity("Entity 1")],
+      [entities1[1]],
     );
     assert.deepStrictEqual(
       [...result.b()],
-      [new Entity("Entity 0"), new Entity("Entity 2")],
+      [entities2[0], entities2[2]],
     );
   });
 
