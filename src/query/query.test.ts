@@ -409,7 +409,7 @@ describe("Component instance query", () => {
 
     // Act
     const arrayResult = query(all, [Entity.as("ref"), Number1.on("ref")]);
-    const objectResult = query(all, { ent: Entity, val: Number1.on("ref") });
+    const objectResult = query(all, { ent: Entity.as("ref"), val: Number1.on("ref") });
 
     // Assert
     assertTypesEqual<typeof arrayResult, Generator<[Entity, number]>>(true);

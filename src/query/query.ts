@@ -32,7 +32,7 @@ export function* query<Input extends QueryInput>(
         continue;
       }
 
-      if (seenEntities.get(poolName)?.has(entity)) {
+      if (poolInfos[poolName].isOnce && seenEntities.get(poolName)?.has(entity)) {
         continue permutationLoop;
       }
     }
@@ -46,6 +46,10 @@ export function* query<Input extends QueryInput>(
     }
 
     for (const [poolName, entity] of Object.entries(permutation)) {
+      if (!poolInfos[poolName].isOnce) {
+        continue;
+      }
+
       if (entity == null) {
         continue;
       }
