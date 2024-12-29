@@ -13,6 +13,7 @@ import { EntityWildcardQuery } from "../entity/queries/entity-wildcard-query.ts"
 
 export type Pools = Record<string, Pool>;
 export type Pool = () => Generator<Entity>;
+export type PoolInfos = Record<string, { isOnce: boolean; }>;
 export type Permutation = Record<string, Entity>;
 export type EntityConstraint = (entity: Entity) => boolean;
 export type PermutationConstraint = (permutation: Permutation) => boolean;
@@ -34,15 +35,15 @@ export const getInstancePoolName = (instance: Entity): string => `__instance_poo
 export function parseInput<Input extends QueryInput>(
   input: Input,
 ): {
-  poolNames: string[];
+  poolInfos: PoolInfos;
   constraints: Constraints;
   outputMapper: OutputMapper<Input>;
 } {
-  const { poolNames, constraints, mappers } = parseQueryParts(input);
+  const { poolInfos, constraints, mappers } = parseQueryParts(input);
   const outputMapper = combineMappers(input, mappers);
 
   return {
-    poolNames,
+    poolInfos,
     constraints,
     outputMapper,
   }
@@ -53,7 +54,7 @@ type QueryPartHandler<Part extends QueryPart> = {
   fn: (part: Part, index: number, key?: string) => {
     mapper: PermutationMapper<any>;
     constraints: Constraints;
-    poolNames: string[];
+    poolInfos: PoolInfos;
   };
 }
 
@@ -71,6 +72,12 @@ const relationshipInstanceQueryHandler: QueryPartHandler<RelationshipInstanceQue
         ? getInstancePoolName(part.target)
         : (part.target ?? getTargetPoolName(index)),
     ];
+
+    const poolIsOnce = [part.isOnce, false, false];
+
+    const poolInfos: Record<string, { isOnce: boolean }> = poolNames.reduce((acc, name, i) => {
+      return ({ ...acc, [name]: { isOnce: poolIsOnce[i] } });
+    }, {});
 
     const [relationshipPool, entityPool, targetPool] = poolNames;
 
@@ -93,7 +100,7 @@ const relationshipInstanceQueryHandler: QueryPartHandler<RelationshipInstanceQue
       ],
     };
 
-    return { mapper, constraints, poolNames };
+    return { mapper, constraints, poolInfos };
   },
 };
 
@@ -108,6 +115,12 @@ const componentInstanceQueryHandler: QueryPartHandler<ComponentInstanceQuery<any
         ? getInstancePoolName(part.source)
         : (part.source ?? ENTITY_POOL),
     ];
+
+    const poolIsOnce = [false, false];
+
+    const poolInfos: Record<string, { isOnce: boolean }> = poolNames.reduce((acc, name, i) => {
+      return ({ ...acc, [name]: { isOnce: poolIsOnce[i] } });
+    }, {});
 
     const [componentPool, entityPool] = poolNames;
 
@@ -125,7 +138,7 @@ const componentInstanceQueryHandler: QueryPartHandler<ComponentInstanceQuery<any
       crossPool: [],
     };
 
-    return { mapper, constraints, poolNames };
+    return { mapper, constraints, poolInfos };
   },
 };
 
@@ -146,6 +159,12 @@ const relationWildcardValueQueryHandler: QueryPartHandler<RelationshipWildcardVa
 
     const [relationshipPool, entityPool, targetPool] = poolNames;
 
+    const poolIsOnce = [part.isOnce, false, false];
+
+    const poolInfos: Record<string, { isOnce: boolean }> = poolNames.reduce((acc, name, i) => {
+      return ({ ...acc, [name]: { isOnce: poolIsOnce[i] } });
+    }, {});
+
     const mapper = createRelationshipValueMapper(mapperKey, relationshipPool, entityPool, targetPool);
 
     const constraints = {
@@ -165,7 +184,7 @@ const relationWildcardValueQueryHandler: QueryPartHandler<RelationshipWildcardVa
       ],
     };
 
-    return { mapper, constraints, poolNames };
+    return { mapper, constraints, poolInfos };
   }
 };
 
@@ -183,6 +202,12 @@ const componentWildcardValueQueryHandler: QueryPartHandler<ComponentWildcardValu
 
     const [componentPool, entityPool] = poolNames;
 
+    const poolIsOnce = [part.isOnce, false];
+
+    const poolInfos: Record<string, { isOnce: boolean }> = poolNames.reduce((acc, name, i) => {
+      return ({ ...acc, [name]: { isOnce: poolIsOnce[i] } });
+    }, {});
+
     const mapper = createComponentValueMapper(mapperKey, componentPool, entityPool);
 
     const constraints = {
@@ -199,7 +224,7 @@ const componentWildcardValueQueryHandler: QueryPartHandler<ComponentWildcardValu
       ],
     };
 
-    return { mapper, constraints, poolNames };
+    return { mapper, constraints, poolInfos };
   }
 };
 
@@ -219,6 +244,12 @@ const relationshipWildcardQueryHandler: QueryPartHandler<RelationshipWildcardQue
     ];
 
     const [relationshipPool, entityPool, targetPool] = poolNames;
+
+    const poolIsOnce = [part.isOnce, false, false];
+
+    const poolInfos: Record<string, { isOnce: boolean }> = poolNames.reduce((acc, name, i) => {
+      return ({ ...acc, [name]: { isOnce: poolIsOnce[i] } });
+    }, {});
 
     const mapper = createRelationshipMapper(mapperKey, relationshipPool);
 
@@ -241,7 +272,7 @@ const relationshipWildcardQueryHandler: QueryPartHandler<RelationshipWildcardQue
       ),
     };
 
-    return { mapper, constraints, poolNames };
+    return { mapper, constraints, poolInfos };
   }
 };
 const componentWildcardQueryHandler: QueryPartHandler<ComponentWildcardQuery> = {
@@ -257,6 +288,12 @@ const componentWildcardQueryHandler: QueryPartHandler<ComponentWildcardQuery> = 
     ];
 
     const [componentPool, entityPool] = poolNames;
+
+    const poolIsOnce = [part.isOnce, false];
+
+    const poolInfos: Record<string, { isOnce: boolean }> = poolNames.reduce((acc, name, i) => {
+      return ({ ...acc, [name]: { isOnce: poolIsOnce[i] } });
+    }, {});
 
     const mapper = createComponentMapper(mapperKey, componentPool);
 
@@ -276,7 +313,7 @@ const componentWildcardQueryHandler: QueryPartHandler<ComponentWildcardQuery> = 
       ),
     };
 
-    return { mapper, constraints, poolNames };
+    return { mapper, constraints, poolInfos };
   }
 };
 const entityWildcardQueryHandler: QueryPartHandler<EntityWildcardQuery> = {
@@ -285,6 +322,12 @@ const entityWildcardQueryHandler: QueryPartHandler<EntityWildcardQuery> = {
     const mapperKey = key ?? index;
 
     const poolNames = [part.name ?? ENTITY_POOL];
+
+    const poolIsOnce = [part.isOnce];
+
+    const poolInfos: Record<string, { isOnce: boolean }> = poolNames.reduce((acc, name, i) => {
+      return ({ ...acc, [name]: { isOnce: poolIsOnce[i] } });
+    }, {});
 
     const [entityPool] = poolNames;
 
@@ -297,7 +340,7 @@ const entityWildcardQueryHandler: QueryPartHandler<EntityWildcardQuery> = {
       crossPool: [],
     };
 
-    return { mapper, constraints, poolNames };
+    return { mapper, constraints, poolInfos };
   }
 };
 const relationshipHandler: QueryPartHandler<Relationship<unknown>> = {
@@ -308,6 +351,12 @@ const relationshipHandler: QueryPartHandler<Relationship<unknown>> = {
     const poolNames = [getInstancePoolName(part), ENTITY_POOL, getTargetPoolName(index)];
 
     const [relationshipPool, entityPool, targetPool] = poolNames;
+
+    const poolIsOnce = [false, false, false];
+
+    const poolInfos: Record<string, { isOnce: boolean }> = poolNames.reduce((acc, name, i) => {
+      return ({ ...acc, [name]: { isOnce: poolIsOnce[i] } });
+    }, {});
 
     const mapper = createRelationshipValueMapper(mapperKey, relationshipPool, entityPool, targetPool);
 
@@ -326,7 +375,7 @@ const relationshipHandler: QueryPartHandler<Relationship<unknown>> = {
       ],
     };
 
-    return { mapper, constraints, poolNames };
+    return { mapper, constraints, poolInfos };
   }
 };
 const componentHandler: QueryPartHandler<Component<unknown>> = {
@@ -335,6 +384,12 @@ const componentHandler: QueryPartHandler<Component<unknown>> = {
     const mapperKey = key ?? index;
 
     const poolNames = [getInstancePoolName(part), ENTITY_POOL];
+
+    const poolIsOnce = [false, false];
+
+    const poolInfos: Record<string, { isOnce: boolean }> = poolNames.reduce((acc, name, i) => {
+      return ({ ...acc, [name]: { isOnce: poolIsOnce[i] } });
+    }, {});
 
     const [componentPool, entityPool] = poolNames;
 
@@ -352,7 +407,7 @@ const componentHandler: QueryPartHandler<Component<unknown>> = {
       crossPool: [],
     };
 
-    return { mapper, constraints, poolNames };
+    return { mapper, constraints, poolInfos };
   }
 };
 
@@ -362,6 +417,12 @@ const relationshipClassHandler: QueryPartHandler<Class<Relationship<unknown>>> =
     const mapperKey = key ?? index;
 
     const poolNames = [RELATIONSHIP_POOL, ENTITY_POOL, getTargetPoolName(index)];
+
+    const poolIsOnce = [false, false, false];
+
+    const poolInfos: Record<string, { isOnce: boolean }> = poolNames.reduce((acc, name, i) => {
+      return ({ ...acc, [name]: { isOnce: poolIsOnce[i] } });
+    }, {});
 
     const [relationshipPool, entityPool, targetPool] = poolNames;
 
@@ -380,7 +441,7 @@ const relationshipClassHandler: QueryPartHandler<Class<Relationship<unknown>>> =
       ],
     };
 
-    return { mapper, constraints, poolNames };
+    return { mapper, constraints, poolInfos };
   }
 };
 
@@ -390,6 +451,12 @@ const componentClassHandler: QueryPartHandler<Class<Component<unknown>>> = {
     const mapperKey = key ?? index;
 
     const poolNames = [COMPONENT_POOL, ENTITY_POOL];
+
+    const poolIsOnce = [false, false];
+
+    const poolInfos: Record<string, { isOnce: boolean }> = poolNames.reduce((acc, name, i) => {
+      return ({ ...acc, [name]: { isOnce: poolIsOnce[i] } });
+    }, {});
 
     const [componentPool, entityPool] = poolNames;
 
@@ -407,7 +474,7 @@ const componentClassHandler: QueryPartHandler<Class<Component<unknown>>> = {
       ],
     };
 
-    return { mapper, constraints, poolNames };
+    return { mapper, constraints, poolInfos };
   }
 };
 
@@ -417,6 +484,12 @@ const entityClassHandler: QueryPartHandler<Class<Entity>> = {
     const mapperKey = key ?? index;
 
     const poolNames = [ENTITY_POOL];
+
+    const poolIsOnce = [false];
+
+    const poolInfos: Record<string, { isOnce: boolean }> = poolNames.reduce((acc, name, i) => {
+      return ({ ...acc, [name]: { isOnce: poolIsOnce[i] } });
+    }, {});
 
     const [entityPool] = poolNames;
 
@@ -429,7 +502,7 @@ const entityClassHandler: QueryPartHandler<Class<Entity>> = {
       crossPool: [],
     };
 
-    return { mapper, constraints, poolNames };
+    return { mapper, constraints, poolInfos };
   }
 };
 
@@ -513,11 +586,11 @@ function createRelationshipValueMapper(
 export function parseQueryParts<Input extends QueryInput>(
   input: Input,
 ): {
-  poolNames: string[];
+  poolInfos: PoolInfos;
   constraints: Constraints;
   mappers: PermutationMapper<Input>[];
 } {
-  const poolNames = new Set<string>();
+  const poolInfos: PoolInfos = {};
   const constraints: Constraints = {
     poolSpecific: {},
     crossPool: [],
@@ -543,11 +616,17 @@ export function parseQueryParts<Input extends QueryInput>(
       const {
         mapper: partMapper,
         constraints: partConstraints,
-        poolNames: partPoolNames
+        poolInfos: partPoolInfos,
       } = handler.fn(part, index, key);
 
-      for (const poolName of partPoolNames) {
-        poolNames.add(poolName);
+      for (const [poolName, poolInfo] of Object.entries(partPoolInfos)) {
+        if (poolInfos[poolName] === undefined) {
+          poolInfos[poolName] = poolInfo;
+        } else {
+          poolInfos[poolName] = {
+            isOnce: poolInfos[poolName].isOnce || poolInfo.isOnce,
+          }
+        }
       }
 
       mappers.push(partMapper);
@@ -571,18 +650,18 @@ export function parseQueryParts<Input extends QueryInput>(
   }
 
   return {
-    poolNames: Array.from(poolNames),
+    poolInfos,
     constraints,
     mappers,
   };
 }
 
-export function parsePoolNames<Input extends QueryInput>(
+export function parsePoolInfos<Input extends QueryInput>(
   input: Input,
-): string[] {
-  const { poolNames } = parseQueryParts(input);
+): PoolInfos {
+  const { poolInfos } = parseQueryParts(input);
 
-  return poolNames;
+  return poolInfos;
 }
 
 export function parseConstraints<Input extends QueryInput>(
@@ -617,8 +696,10 @@ export function combineMappers<Input extends QueryInput>(
   }
 }
 
-export function createPools(entities: Entity[], poolNames: string[]): Pools {
+export function createPools(entities: Entity[], poolInfos: PoolInfos): Pools {
   const pools: Pools = {};
+
+  const poolNames = Object.keys(poolInfos);
 
   for (const poolName of poolNames) {
     pools[poolName] = () => arrayToGenerator(entities);

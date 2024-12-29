@@ -20,79 +20,10 @@ describe("Empty query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{}>>(true);
 
-    assert.deepStrictEqual(arrayResult, []);
-    assert.deepStrictEqual(objectResult, []);
+    assert.deepStrictEqual([...arrayResult], []);
+    assert.deepStrictEqual([...objectResult], []);
   });
 });
-
-/*
-describe("Entity instance query", () => {
-  it("Finds specific entity instance", () => {
-    // Arrange
-    const { all, entities } = createEntities({ count: 3 });
-
-    // Act
-    const arrayResult = query(all, [ entities[1] ]);
-    const objectResult = query(all, { ent: entities[1] });
-
-    // Assert
-    assertTypesEqual<typeof arrayResult, Generator<[ Entity ]>>(true);
-    assertTypesEqual<typeof objectResult, Generator<{ ent: Entity }>>(true);
-
-    assert.deepStrictEqual(arrayResult, [ entities[1] ]);
-    assert.deepStrictEqual(objectResult, { ent: entities[1] });
-  });
-
-  it("Can find multiple different entities in single query", () => {
-    // Arrange
-    const { all, entities } = createEntities({ count: 3 });
-
-    // Act
-    const arrayResult = query(all, [ entities[1], entities[2] ]);
-    const objectResult = query(all, { ent1: entities[1], ent2: entities[2] });
-
-    // Assert
-    assertTypesEqual<typeof arrayResult, Generator<[ Entity, Entity ]>>(true);
-    assertTypesEqual<typeof objectResult, Generator<{ ent1: Entity, ent2: Entity }>>(true);
-
-    assert.deepStrictEqual(arrayResult, [ entities[1], entities[2] ]);
-    assert.deepStrictEqual(objectResult, { ent1: entities[1], ent2: entities[2] });
-  });
-
-  it("Can find same entity multiple times in single query", () => {
-    // Arrange
-    const { all, entities } = createEntities({ count: 3 });
-
-    // Act
-    const arrayResult = query(all, [ entities[1], entities[1] ]);
-    const objectResult = query(all, { ent1: entities[1], ent2: entities[1] });
-
-    // Assert
-    assertTypesEqual<typeof arrayResult, Generator<[ Entity, Entity ]>>(true);
-    assertTypesEqual<typeof objectResult, Generator<{ ent1: Entity, ent2: Entity }>>(true);
-
-    assert.deepStrictEqual(arrayResult, [ entities[1], entities[1] ]);
-    assert.deepStrictEqual(objectResult, { ent1: entities[1], ent2: entities[1] });
-  });
-
-  it("Does not find entity if not on the list", () => {
-    // Arrange
-    const { all } = createEntities({ count: 3 });
-    const otherEntity = new Entity();
-
-    // Act
-    const arrayResult = query(all, [ otherEntity ]);
-    const objectResult = query(all, { ent: otherEntity });
-
-    // Assert
-    assertTypesEqual<typeof arrayResult, Generator<[ Entity ]>>(true);
-    assertTypesEqual<typeof objectResult, Generator<{ ent: Entity }>>(true);
-
-    assert.deepStrictEqual(arrayResult, []);
-    assert.deepStrictEqual(objectResult, {});
-  });
-});
-*/
 
 describe("Entity wildcard query", () => {
   it("Finds all entities", () => {
@@ -107,8 +38,8 @@ describe("Entity wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent: Entity }>>(true);
 
-    assert.deepStrictEqual(arrayResult, entities.map((entity) => [entity]));
-    assert.deepStrictEqual(objectResult, entities.map((entity) => ({ ent: entity })));
+    assert.deepStrictEqual([...arrayResult], entities.map((entity) => [entity]));
+    assert.deepStrictEqual([...objectResult], entities.map((entity) => ({ ent: entity })));
   });
 
   it("Finds all component types", () => {
@@ -126,8 +57,8 @@ describe("Entity wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent: Entity }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds all relationship types", () => {
@@ -145,8 +76,8 @@ describe("Entity wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent: Entity }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds nothing when entity list is empty", () => {
@@ -161,8 +92,8 @@ describe("Entity wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent: Entity }>>(true);
 
-    assert.deepStrictEqual(arrayResult, []);
-    assert.deepStrictEqual(objectResult, {});
+    assert.deepStrictEqual([...arrayResult], []);
+    assert.deepStrictEqual([...objectResult], []);
   });
 
   it("Can give entity wildcard reference name", () => {
@@ -177,8 +108,8 @@ describe("Entity wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent: Entity }>>(true);
 
-    assert.deepStrictEqual(arrayResult, all.map((entity) => [entity]));
-    assert.deepStrictEqual(objectResult, all.map((entity) => ({ ent: entity })));
+    assert.deepStrictEqual([...arrayResult], all.map((entity) => [entity]));
+    assert.deepStrictEqual([...objectResult], all.map((entity) => ({ ent: entity })));
   });
 
   it("Find the same entity multiple times", () => {
@@ -190,14 +121,17 @@ describe("Entity wildcard query", () => {
 
     // Act
     const arrayResult = query(entities, [Entity.as("one"), Entity.as("two")]);
-    const objectResult = query(entities, { ent1: Entity, ent2: Entity });
+    const objectResult = query(entities, { ent1: Entity.as("one"), ent2: Entity.as("two") });
 
     // Assert
     assertTypesEqual<typeof arrayResult, Generator<[Entity, Entity]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent1: Entity, ent2: Entity }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    const actualArray = [...arrayResult];
+    const actualObject = [...objectResult];
+
+    assert.deepStrictEqual(actualArray, expectedArray);
+    assert.deepStrictEqual(actualObject, expectedObject);
   });
 
   it("Can specify that an entity may only be found once for a wildcard", () => {
@@ -226,8 +160,11 @@ describe("Entity wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity, Entity, Entity]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent1: Entity, ent2: Entity, ent3: Entity }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    const actualArray = [...arrayResult];
+    const actualObject = [...objectResult];
+
+    assert.deepStrictEqual(actualArray, expectedArray);
+    assert.deepStrictEqual(actualObject, expectedObject);
   });
 
   it("Can specify that multiple entities may only be found once for their wildcards", () => {
@@ -256,8 +193,8 @@ describe("Entity wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity, Entity, Entity]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent1: Entity, ent2: Entity, ent3: Entity }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Wildcards without reference name refers to same entity", () => {
@@ -274,8 +211,8 @@ describe("Entity wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity, Entity]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent1: Entity, ent2: Entity }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Can specify multiple wildcards with same reference name", () => {
@@ -292,8 +229,8 @@ describe("Entity wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity, Entity]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent1: Entity, ent2: Entity }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Can specify same reference name on a wildcard as another wildcard that may only be found once", () => {
@@ -314,8 +251,8 @@ describe("Entity wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity, Entity, Entity]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent1: Entity, ent2: Entity, ent3: Entity }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 });
 
@@ -334,8 +271,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[undefined]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ tag: undefined }>>(true);
 
-    assert.deepStrictEqual(arrayResult, [[undefined]]);
-    assert.deepStrictEqual(objectResult, [{ tag: undefined }]);
+    assert.deepStrictEqual([...arrayResult], [[undefined]]);
+    assert.deepStrictEqual([...objectResult], [{ tag: undefined }]);
   });
 
   it("Finds value component on entities", () => {
@@ -352,8 +289,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, [[1]]);
-    assert.deepStrictEqual(objectResult, [{ val: 1 }]);
+    assert.deepStrictEqual([...arrayResult], [[1]]);
+    assert.deepStrictEqual([...objectResult], [{ val: 1 }]);
   });
 
   it("Can require multiple different component values in single query", () => {
@@ -372,8 +309,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number, number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val1: number, val2: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, [[1, 2]]);
-    assert.deepStrictEqual(objectResult, [{ val1: 1, val2: 2 }]);
+    assert.deepStrictEqual([...arrayResult], [[1, 2]]);
+    assert.deepStrictEqual([...objectResult], [{ val1: 1, val2: 2 }]);
   });
 
   it("Can find multiple value instances of the same component", () => {
@@ -390,8 +327,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, [[1], [2]]);
-    assert.deepStrictEqual(objectResult, [{ val: 1 }, { val: 2 }]);
+    assert.deepStrictEqual([...arrayResult], [[1], [2]]);
+    assert.deepStrictEqual([...objectResult], [{ val: 1 }, { val: 2 }]);
   });
 
   it("Can find same component value multiple times in single query", () => {
@@ -408,8 +345,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number, number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val1: number, val2: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, [[1, 1], [2, 2]]);
-    assert.deepStrictEqual(objectResult, [{ val1: 1, val2: 1 }, { val1: 2, val2: 2 }]);
+    assert.deepStrictEqual([...arrayResult], [[1, 1], [2, 2]]);
+    assert.deepStrictEqual([...objectResult], [{ val1: 1, val2: 1 }, { val1: 2, val2: 2 }]);
   });
 
   it("Does not find component value if not on an entity", () => {
@@ -424,8 +361,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, []);
-    assert.deepStrictEqual(objectResult, []);
+    assert.deepStrictEqual([...arrayResult], []);
+    assert.deepStrictEqual([...objectResult], []);
   });
 
   it("Finds component value on specific entity", () => {
@@ -442,8 +379,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, [[1]]);
-    assert.deepStrictEqual(objectResult, [{ val: 1 }]);
+    assert.deepStrictEqual([...arrayResult], [[1]]);
+    assert.deepStrictEqual([...objectResult], [{ val: 1 }]);
   });
 
   it("Finds component value on unused reference", () => {
@@ -460,8 +397,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, [[1], [2]]);
-    assert.deepStrictEqual(objectResult, [{ val: 1 }, { val: 2 }]);
+    assert.deepStrictEqual([...arrayResult], [[1], [2]]);
+    assert.deepStrictEqual([...objectResult], [{ val: 1 }, { val: 2 }]);
   });
 
   it("Finds component value on entity reference", () => {
@@ -478,8 +415,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity, number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent: Entity, val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, [[entities[1], 1], [entities[3], 2]]);
-    assert.deepStrictEqual(objectResult, [{ ent: entities[1], val: 1 }, { ent: entities[3], val: 2 }]);
+    assert.deepStrictEqual([...arrayResult], [[entities[1], 1], [entities[3], 2]]);
+    assert.deepStrictEqual([...objectResult], [{ ent: entities[1], val: 1 }, { ent: entities[3], val: 2 }]);
   });
 
   /*
@@ -497,8 +434,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[ number ]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, [ [ 1 ], [ 2 ] ]);
-    assert.deepStrictEqual(objectResult, [ { val: 1 }, { val: 2 } ]);
+    assert.deepStrictEqual([...arrayResult], [ [ 1 ], [ 2 ] ]);
+    assert.deepStrictEqual([...objectResult], [ { val: 1 }, { val: 2 } ]);
   });
 
   it("Finds component value on any component type using wildcard", () => {
@@ -517,8 +454,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[ number ]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, [ [ 3 ], [ 4 ] ]);
-    assert.deepStrictEqual(objectResult, [ { val: 3 }, { val: 4 } ]);
+    assert.deepStrictEqual([...arrayResult], [ [ 3 ], [ 4 ] ]);
+    assert.deepStrictEqual([...objectResult], [ { val: 3 }, { val: 4 } ]);
   });
 
   it("Finds component value on any relationship type using wildcard", () => {
@@ -537,8 +474,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[ number ]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, [ [ 3 ], [ 4 ] ]);
-    assert.deepStrictEqual(objectResult, [ { val: 3 }, { val: 4 } ]);
+    assert.deepStrictEqual([...arrayResult], [ [ 3 ], [ 4 ] ]);
+    assert.deepStrictEqual([...objectResult], [ { val: 3 }, { val: 4 } ]);
   });
    */
 
@@ -554,8 +491,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, []);
-    assert.deepStrictEqual(objectResult, []);
+    assert.deepStrictEqual([...arrayResult], []);
+    assert.deepStrictEqual([...objectResult], []);
   });
 
   it("Does not find component value on specific entity if entity not in list", () => {
@@ -572,8 +509,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, []);
-    assert.deepStrictEqual(objectResult, []);
+    assert.deepStrictEqual([...arrayResult], []);
+    assert.deepStrictEqual([...objectResult], []);
   });
 
   it("Does not find anything if query only has partial match", () => {
@@ -589,8 +526,8 @@ describe("Component instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number, number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val1: number, val2: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, []);
-    assert.deepStrictEqual(objectResult, []);
+    assert.deepStrictEqual([...arrayResult], []);
+    assert.deepStrictEqual([...objectResult], []);
   });
 });
 
@@ -613,8 +550,8 @@ describe("Component wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ comp: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds components on specific entity", () => {
@@ -635,8 +572,8 @@ describe("Component wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ comp: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds components on referenced entity", () => {
@@ -658,8 +595,8 @@ describe("Component wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity, unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent: Entity, comp: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds components on any entity", () => {
@@ -680,8 +617,8 @@ describe("Component wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ comp: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   /*
@@ -704,8 +641,8 @@ describe("Component wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[ unknown ]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ comp: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds all components on any relationship using wildcard", () => {
@@ -728,8 +665,8 @@ describe("Component wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[ unknown ]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ comp: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
   */
 
@@ -752,8 +689,8 @@ describe("Component wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown,]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ comp: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds all components on any relationship using references", () => {
@@ -776,8 +713,8 @@ describe("Component wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ comp: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Can specify reference name for found component (not for found values)", () => {
@@ -800,8 +737,8 @@ describe("Component wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown, unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ comp1: unknown, comp2: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Can find the same component multiple times", () => {
@@ -828,8 +765,8 @@ describe("Component wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown, unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ comp1: unknown, comp2: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Can specify that a given component type may only be found once", () => {
@@ -854,8 +791,8 @@ describe("Component wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown, unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ comp1: unknown, comp2: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 });
 
@@ -879,8 +816,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[undefined]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ rel: undefined }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds value relationship on entities", () => {
@@ -902,8 +839,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ rel: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Can require multiple different relationship values in single query", () => {
@@ -922,8 +859,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number, number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val1: number, val2: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, [[2, 3]]);
-    assert.deepStrictEqual(objectResult, [{ val1: 2, val2: 3 }]);
+    assert.deepStrictEqual([...arrayResult], [[2, 3]]);
+    assert.deepStrictEqual([...objectResult], [{ val1: 2, val2: 3 }]);
   });
 
   it("Does not find relationship value if not on an entity", () => {
@@ -938,8 +875,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, []);
-    assert.deepStrictEqual(objectResult, []);
+    assert.deepStrictEqual([...arrayResult], []);
+    assert.deepStrictEqual([...objectResult], []);
   });
 
   it("Finds relationship value on specific entity", () => {
@@ -961,8 +898,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds relationship value on entity reference", () => {
@@ -984,8 +921,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity, number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent: Entity, val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds relationship value on any entity using wildcard", () => {
@@ -1007,8 +944,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds relationship value on any component type using wildcard", () => {
@@ -1036,8 +973,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds relationship value on any relationship type using wildcard", () => {
@@ -1066,8 +1003,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds relationship value to specific entity", () => {
@@ -1089,8 +1026,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds relationship value to entity reference", () => {
@@ -1112,8 +1049,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity, number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent: Entity, val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds relationship value to any entity using wildcard", () => {
@@ -1135,8 +1072,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds relationship value to any component type using wildcard", () => {
@@ -1168,8 +1105,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds relationship value to any relationship type using wildcard", () => {
@@ -1202,8 +1139,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Does not find relationship value on specific entity if it does not have it", () => {
@@ -1222,8 +1159,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, []);
-    assert.deepStrictEqual(objectResult, []);
+    assert.deepStrictEqual([...arrayResult], []);
+    assert.deepStrictEqual([...objectResult], []);
   });
 
   it("Does not find relationship value to specific entity if it does not have it", () => {
@@ -1242,8 +1179,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, []);
-    assert.deepStrictEqual(objectResult, []);
+    assert.deepStrictEqual([...arrayResult], []);
+    assert.deepStrictEqual([...objectResult], []);
   });
 
   it("Does not find relationship value on specific entity if entity not in list", () => {
@@ -1261,8 +1198,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, []);
-    assert.deepStrictEqual(objectResult, []);
+    assert.deepStrictEqual([...arrayResult], []);
+    assert.deepStrictEqual([...objectResult], []);
   });
 
   it("Finds entity with explicit relationship to self", () => {
@@ -1282,8 +1219,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds relationship with explicit relationship to self using instance", () => {
@@ -1303,8 +1240,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds relationship to self by reference", () => {
@@ -1324,8 +1261,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number, Entity]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: number, target: Entity }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds transitive relationship to self by reference", () => {
@@ -1352,8 +1289,8 @@ describe("Relationship instance query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[number, number]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ rel1: number, rel2: number }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 });
 
@@ -1377,8 +1314,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[any]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ rel: any }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds all relationships on specific entity", () => {
@@ -1400,8 +1337,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds all relationships on referenced entity", () => {
@@ -1423,8 +1360,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity, unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent: Entity, val: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds all relationships on any entity", () => {
@@ -1446,8 +1383,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds all relationships on any component", () => {
@@ -1475,8 +1412,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds all relationships on any relationship", () => {
@@ -1505,8 +1442,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds all relationships to specific entity", () => {
@@ -1528,8 +1465,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds all relationships to referenced entity", () => {
@@ -1551,8 +1488,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[Entity, unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent: Entity, val: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds all relationships to any entity", () => {
@@ -1574,8 +1511,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds all relationships to any component", () => {
@@ -1607,8 +1544,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds all relationships to any relationship", () => {
@@ -1641,8 +1578,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Can specify reference name for found relationship (not for found values)", () => {
@@ -1664,8 +1601,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ rel: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Can find the same relationship multiple times", () => {
@@ -1686,8 +1623,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown, unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val1: unknown, val2: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Can specify that a given relationship type may only be found once", () => {
@@ -1708,8 +1645,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown, unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val1: unknown, val2: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Does not find relationship value on specific entity if entity not in list", () => {
@@ -1727,8 +1664,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, []);
-    assert.deepStrictEqual(objectResult, []);
+    assert.deepStrictEqual([...arrayResult], []);
+    assert.deepStrictEqual([...objectResult], []);
   });
 
   it("Finds entity with explicit relationship to self", () => {
@@ -1748,8 +1685,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds relationship with explicit relationship to self using wildcard", () => {
@@ -1769,8 +1706,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 
   it("Finds transitive relationship to self by reference", () => {
@@ -1797,8 +1734,8 @@ describe("Relationship wildcard query", () => {
     assertTypesEqual<typeof arrayResult, Generator<[unknown, unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ rel1: unknown, rel2: unknown }>>(true);
 
-    assert.deepStrictEqual(arrayResult, expectedArray);
-    assert.deepStrictEqual(objectResult, expectedObject);
+    assert.deepStrictEqual([...arrayResult], expectedArray);
+    assert.deepStrictEqual([...objectResult], expectedObject);
   });
 });
 
