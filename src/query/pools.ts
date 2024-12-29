@@ -74,7 +74,7 @@ const relationshipInstanceQueryHandler: QueryPartHandler<RelationshipInstanceQue
 
     const [relationshipPool, entityPool, targetPool] = poolNames;
 
-    const mapper = createRelationshipMapper(mapperKey, relationshipPool, entityPool, targetPool);
+    const mapper = createRelationshipValueMapper(mapperKey, relationshipPool, entityPool, targetPool);
 
     const constraints = {
       poolSpecific: {
@@ -96,6 +96,7 @@ const relationshipInstanceQueryHandler: QueryPartHandler<RelationshipInstanceQue
     return { mapper, constraints, poolNames };
   },
 };
+
 const componentInstanceQueryHandler: QueryPartHandler<ComponentInstanceQuery<any>> = {
   predicate: (part): part is ComponentInstanceQuery<any> => part instanceof ComponentInstanceQuery,
   fn: (part, index, key) => {
@@ -110,7 +111,7 @@ const componentInstanceQueryHandler: QueryPartHandler<ComponentInstanceQuery<any
 
     const [componentPool, entityPool] = poolNames;
 
-    const mapper = createComponentMapper(mapperKey, componentPool, entityPool);
+    const mapper = createComponentValueMapper(mapperKey, componentPool, entityPool);
 
     const constraints = {
       poolSpecific: {
@@ -127,6 +128,7 @@ const componentInstanceQueryHandler: QueryPartHandler<ComponentInstanceQuery<any
     return { mapper, constraints, poolNames };
   },
 };
+
 const relationWildcardValueQueryHandler: QueryPartHandler<RelationshipWildcardValueQuery> = {
   predicate: (part): part is RelationshipWildcardValueQuery => part instanceof RelationshipWildcardValueQuery,
   fn: (part, index, key) => {
@@ -144,7 +146,7 @@ const relationWildcardValueQueryHandler: QueryPartHandler<RelationshipWildcardVa
 
     const [relationshipPool, entityPool, targetPool] = poolNames;
 
-    const mapper = createRelationshipMapper(mapperKey, relationshipPool, entityPool, targetPool);
+    const mapper = createRelationshipValueMapper(mapperKey, relationshipPool, entityPool, targetPool);
 
     const constraints = {
       poolSpecific: {
@@ -166,6 +168,7 @@ const relationWildcardValueQueryHandler: QueryPartHandler<RelationshipWildcardVa
     return { mapper, constraints, poolNames };
   }
 };
+
 const componentWildcardValueQueryHandler: QueryPartHandler<ComponentWildcardValueQuery> = {
   predicate: (part): part is ComponentWildcardValueQuery => part instanceof ComponentWildcardValueQuery,
   fn: (part, index, key) => {
@@ -180,7 +183,7 @@ const componentWildcardValueQueryHandler: QueryPartHandler<ComponentWildcardValu
 
     const [componentPool, entityPool] = poolNames;
 
-    const mapper = createComponentMapper(mapperKey, componentPool, entityPool);
+    const mapper = createComponentValueMapper(mapperKey, componentPool, entityPool);
 
     const constraints = {
       poolSpecific: {
@@ -199,6 +202,7 @@ const componentWildcardValueQueryHandler: QueryPartHandler<ComponentWildcardValu
     return { mapper, constraints, poolNames };
   }
 };
+
 const relationshipWildcardQueryHandler: QueryPartHandler<RelationshipWildcardQuery> = {
   predicate: (part): part is RelationshipWildcardQuery => part instanceof RelationshipWildcardQuery,
   fn: (part, index, key) => {
@@ -216,7 +220,7 @@ const relationshipWildcardQueryHandler: QueryPartHandler<RelationshipWildcardQue
 
     const [relationshipPool, entityPool, targetPool] = poolNames;
 
-    const mapper = createRelationshipMapper(mapperKey, relationshipPool, entityPool, targetPool);
+    const mapper = createRelationshipMapper(mapperKey, relationshipPool);
 
     const constraints = {
       poolSpecific: {
@@ -230,9 +234,11 @@ const relationshipWildcardQueryHandler: QueryPartHandler<RelationshipWildcardQue
           ? [is(part.target)]
           : [],
       },
-      crossPool: [
-        poolTargetsPool(entityPool, relationshipPool, targetPool),
-      ],
+      crossPool: (
+        part.source !== undefined || part.target !== undefined
+          ? [poolTargetsPool(entityPool, relationshipPool, targetPool)]
+          : []
+      ),
     };
 
     return { mapper, constraints, poolNames };
@@ -252,7 +258,7 @@ const componentWildcardQueryHandler: QueryPartHandler<ComponentWildcardQuery> = 
 
     const [componentPool, entityPool] = poolNames;
 
-    const mapper = createComponentMapper(mapperKey, componentPool, entityPool);
+    const mapper = createComponentMapper(mapperKey, componentPool);
 
     const constraints = {
       poolSpecific: {
@@ -263,9 +269,11 @@ const componentWildcardQueryHandler: QueryPartHandler<ComponentWildcardQuery> = 
           ? [is(part.source)]
           : [],
       },
-      crossPool: [
-        poolHasPool(entityPool, componentPool),
-      ],
+      crossPool: (
+      part.source !== undefined
+        ? [poolHasPool(entityPool, componentPool)]
+        : []
+      ),
     };
 
     return { mapper, constraints, poolNames };
@@ -301,7 +309,7 @@ const relationshipHandler: QueryPartHandler<Relationship<unknown>> = {
 
     const [relationshipPool, entityPool, targetPool] = poolNames;
 
-    const mapper = createRelationshipMapper(mapperKey, relationshipPool, entityPool, targetPool);
+    const mapper = createRelationshipValueMapper(mapperKey, relationshipPool, entityPool, targetPool);
 
     const constraints = {
       poolSpecific: {
@@ -330,12 +338,12 @@ const componentHandler: QueryPartHandler<Component<unknown>> = {
 
     const [componentPool, entityPool] = poolNames;
 
-    const mapper = createComponentMapper(mapperKey, componentPool, entityPool);
+    const mapper = createComponentValueMapper(mapperKey, componentPool, entityPool);
 
     const constraints = {
       poolSpecific: {
         [componentPool]: [
-          isA(Component),
+          is(part),
         ],
         [entityPool]: [
           has(part),
@@ -357,7 +365,7 @@ const relationshipClassHandler: QueryPartHandler<Class<Relationship<unknown>>> =
 
     const [relationshipPool, entityPool, targetPool] = poolNames;
 
-    const mapper = createRelationshipMapper(mapperKey, relationshipPool, entityPool, targetPool);
+    const mapper = createRelationshipMapper(mapperKey, relationshipPool);
 
     const constraints = {
       poolSpecific: {
@@ -385,7 +393,7 @@ const componentClassHandler: QueryPartHandler<Class<Component<unknown>>> = {
 
     const [componentPool, entityPool] = poolNames;
 
-    const mapper = createComponentMapper(mapperKey, componentPool, entityPool);
+    const mapper = createComponentMapper(mapperKey, componentPool);
 
     const constraints = {
       poolSpecific: {
@@ -453,6 +461,28 @@ function createEntityMapper(
 function createComponentMapper(
   mapperKey: number | string,
   componentPool: string,
+): PermutationMapper<any> {
+  return (permutation: Permutation, output: any) => {
+    const component = permutation[componentPool] as Component<unknown>;
+
+    output[mapperKey] = component;
+  };
+}
+
+function createRelationshipMapper(
+  mapperKey: number | string,
+  relationshipPool: string,
+): PermutationMapper<any> {
+  return (permutation: Permutation, output: any) => {
+    const relationship = permutation[relationshipPool] as Relationship<unknown>;
+
+    output[mapperKey] = relationship;
+  };
+}
+
+function createComponentValueMapper(
+  mapperKey: number | string,
+  componentPool: string,
   entityPool: string
 ): PermutationMapper<any> {
   return (permutation: Permutation, output: any) => {
@@ -464,7 +494,7 @@ function createComponentMapper(
   };
 }
 
-function createRelationshipMapper(
+function createRelationshipValueMapper(
   mapperKey: number | string,
   relationshipPool: string,
   entityPool: string,

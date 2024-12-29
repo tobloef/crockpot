@@ -1455,32 +1455,22 @@ describe(parseConstraints.name, () => {
     assert.deepStrictEqual(actual, expected);
   });
 
-  it("Parses relationship instance query with entity target for arrays", (test) => {
+  it("Parses relationship component with entity target for arrays", (test) => {
     // Arrange
     const entity = new Entity();
     const relationship = new Relationship<number>();
     const input = [relationship.to(entity)] as const;
 
-    const isRelationship = is(relationship);
-    const isEntity = is(entity);
+    const isRelationshipComponent = is(relationship.to(entity));
     const hasRelationshipComponent = has(relationship.to(entity));
 
-    let callCountOfIs = 0;
-    test.mock.fn(is, () => {
-      callCountOfIs += 1;
-      if (callCountOfIs === 1) {
-        return isRelationship;
-      } else {
-        return isEntity;
-      }
-    });
+    test.mock.fn(is, () => isRelationshipComponent);
     test.mock.fn(has, () => hasRelationshipComponent);
 
     const expected: Constraints = {
       poolSpecific: {
-        [getInstancePoolName(relationship)]: [isRelationship],
+        [getInstancePoolName(relationship.to(entity))]: [isRelationshipComponent],
         [ENTITY_POOL]: [hasRelationshipComponent],
-        [getInstancePoolName(entity)]: [isEntity],
       },
       crossPool: [],
     };
@@ -1492,32 +1482,22 @@ describe(parseConstraints.name, () => {
     assert.deepStrictEqual(actual, expected);
   });
 
-  it("Parses relationship instance query with entity target for objects", (test) => {
+  it("Parses relationship component with entity target for objects", (test) => {
     // Arrange
     const entity = new Entity();
     const relationship = new Relationship<number>();
     const input = { x: relationship.to(entity) } as const;
 
-    const isRelationship = is(relationship);
-    const isEntity = is(entity);
+    const isRelationshipComponent = is(relationship.to(entity));
     const hasRelationshipComponent = has(relationship.to(entity));
 
-    let callCountOfIs = 0;
-    test.mock.fn(is, () => {
-      callCountOfIs += 1;
-      if (callCountOfIs === 1) {
-        return isRelationship;
-      } else {
-        return isEntity;
-      }
-    });
+    test.mock.fn(is, () => isRelationshipComponent);
     test.mock.fn(has, () => hasRelationshipComponent);
 
     const expected: Constraints = {
       poolSpecific: {
-        [getInstancePoolName(relationship)]: [isRelationship],
+        [getInstancePoolName(relationship.to(entity))]: [isRelationshipComponent],
         [ENTITY_POOL]: [hasRelationshipComponent],
-        [getInstancePoolName(entity)]: [isEntity],
       },
       crossPool: [],
     };
@@ -1586,9 +1566,7 @@ describe(parseConstraints.name, () => {
         ["a"]: [isAComponent],
         [ENTITY_POOL]: [],
       },
-      crossPool: [
-        entityHasComponent,
-      ],
+      crossPool: [],
     };
 
     // Act
@@ -1613,9 +1591,7 @@ describe(parseConstraints.name, () => {
         ["a"]: [isAComponent],
         [ENTITY_POOL]: [],
       },
-      crossPool: [
-        entityHasComponent,
-      ],
+      crossPool: [],
     };
 
     // Act
@@ -3060,7 +3036,7 @@ describe(parseMappers.name, () => {
     assert.deepStrictEqual(output, { x: value });
   });
 
-  it("Parses relationship instance query with entity target for arrays", () => {
+  it("Parses relationship component with entity target for arrays", () => {
     // Arrange
     const relationship = new Relationship<number>();
     const value = 1;
@@ -3068,9 +3044,8 @@ describe(parseMappers.name, () => {
     const entity2 = new Entity();
     entity1.add(relationship.to(entity2).withValue(value));
     const permutation = {
-      [getInstancePoolName(relationship)]: relationship,
+      [getInstancePoolName(relationship.to(entity2))]: relationship.to(entity2),
       [ENTITY_POOL]: entity1,
-      [getInstancePoolName(entity2)]: entity2,
     };
     const input = [relationship.to(entity2)] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -3083,7 +3058,7 @@ describe(parseMappers.name, () => {
     assert.deepStrictEqual(output, [value]);
   });
 
-  it("Parses relationship instance query with entity target for objects", () => {
+  it("Parses relationship component with entity target for objects", () => {
     // Arrange
     const relationship = new Relationship<number>();
     const value = 1;
@@ -3091,9 +3066,8 @@ describe(parseMappers.name, () => {
     const entity2 = new Entity();
     entity1.add(relationship.to(entity2).withValue(value));
     const permutation = {
-      [getInstancePoolName(relationship)]: relationship,
+      [getInstancePoolName(relationship.to(entity2))]: relationship.to(entity2),
       [ENTITY_POOL]: entity1,
-      [getInstancePoolName(entity2)]: entity2,
     };
     const input = { x: relationship.to(entity2) } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -3624,10 +3598,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, [value]);
   });
 
   it("Parses component wildcard value query for objects", () => {
@@ -3644,10 +3618,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, { x: value });
   });
 
   it("Parses component wildcard value query with reference name for arrays", () => {
@@ -3664,10 +3638,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, [value]);
   });
 
   it("Parses component wildcard value query with reference name for objects", () => {
@@ -3684,10 +3658,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, { x: value });
   });
 
   it("Parses component wildcard value query with once clause for arrays", () => {
@@ -3704,10 +3678,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, [value]);
   });
 
   it("Parses component wildcard value query with once clause for objects", () => {
@@ -3724,10 +3698,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, { x: value });
   });
 
   it("Parses component wildcard value query with reference source for arrays", () => {
@@ -3744,10 +3718,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, [value]);
   });
 
   it("Parses component wildcard value query with reference source for objects", () => {
@@ -3764,10 +3738,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, { x: value });
   });
 
   it("Parses component wildcard value query with entity source for arrays", () => {
@@ -3784,10 +3758,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, [value]);
   });
 
   it("Parses component wildcard value query with entity source for objects", () => {
@@ -3804,10 +3778,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, { x: value });
   });
 
   it("Parses relationship wildcard value query for arrays", () => {
@@ -3827,10 +3801,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, [value]);
   });
 
   it("Parses relationship wildcard value query for objects", () => {
@@ -3850,10 +3824,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, { x: value });
   });
 
   it("Parses relationship wildcard value query with reference name for arrays", () => {
@@ -3873,10 +3847,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, [value]);
   });
 
   it("Parses relationship wildcard value query with reference name for objects", () => {
@@ -3896,10 +3870,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, { x: value });
   });
 
   it("Parses relationship wildcard value query with once clause for arrays", () => {
@@ -3919,10 +3893,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, [value]);
   });
 
   it("Parses relationship wildcard value query with once clause for objects", () => {
@@ -3942,10 +3916,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, { x: value });
   });
 
   it("Parses relationship wildcard value query with reference source for arrays", () => {
@@ -3965,10 +3939,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, [value]);
   });
 
   it("Parses relationship wildcard value query with reference source for objects", () => {
@@ -3988,10 +3962,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, { x: value });
   });
 
   it("Parses relationship wildcard value query with entity source for arrays", () => {
@@ -4011,10 +3985,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, [value]);
   });
 
   it("Parses relationship wildcard value query with entity source for objects", () => {
@@ -4034,10 +4008,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, { x: value });
   });
 
   it("Parses relationship wildcard value query with reference target for arrays", () => {
@@ -4057,10 +4031,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, [value]);
   });
 
   it("Parses relationship wildcard value query with reference target for objects", () => {
@@ -4080,10 +4054,10 @@ describe(parseMappers.name, () => {
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, { x: value });
   });
 
   it("Parses relationship wildcard value query with entity target for arrays", () => {
@@ -4096,17 +4070,17 @@ describe(parseMappers.name, () => {
     const permutation = {
       [RELATIONSHIP_POOL]: relationship,
       [ENTITY_POOL]: entity1,
-      [getTargetPoolName(0)]: entity2,
+      [getInstancePoolName(entity2)]: entity2,
     };
     const input = [Relationship.to(entity2).value()] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, [value]);
   });
 
   it("Parses relationship wildcard value query with entity target for objects", () => {
@@ -4119,17 +4093,17 @@ describe(parseMappers.name, () => {
     const permutation = {
       [RELATIONSHIP_POOL]: relationship,
       [ENTITY_POOL]: entity1,
-      [getTargetPoolName(0)]: entity2,
+      [getInstancePoolName(entity2)]: entity2,
     };
     const input = { x: Relationship.to(entity2).value() } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
 
     // Act
     const [mapper] = parseMappers(input);
-    const result = mapper(permutation, output);
+    mapper(permutation, output);
 
     // Assert
-    assert.deepStrictEqual(result, value);
+    assert.deepStrictEqual(output, { x: value });
   });
 });
 
