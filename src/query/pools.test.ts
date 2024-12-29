@@ -4,6 +4,7 @@ import {
   arrayToGenerator,
   combineMappers,
   COMPONENT_POOL,
+  constraintFunctions,
   type Constraints,
   ENTITY_POOL,
   type EntityConstraint,
@@ -11,17 +12,12 @@ import {
   filterPools,
   getInstancePoolName,
   getTargetPoolName,
-  has,
-  is,
-  isA,
   parseConstraints,
   parseMappers,
   parsePoolNames,
   type PermutationMapper,
   permutePools,
-  poolHasPool,
   type Pools,
-  poolTargetsPool,
   RELATIONSHIP_POOL,
 } from "./pools.ts";
 import { Entity } from "../entity/index.ts";
@@ -904,11 +900,13 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = [Component] as const;
 
-    const isAComponent = isA(Component);
-    const entityHasComponent = poolHasPool(ENTITY_POOL, COMPONENT_POOL);
+    const isAComponent = constraintFunctions.isA(Component);
+    const entityHasComponent = constraintFunctions.poolHasPool(ENTITY_POOL, COMPONENT_POOL);
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => {
+      return isAComponent;
+    });
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -931,11 +929,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = { x: Component } as const;
 
-    const isAComponent = isA(Component);
-    const entityHasComponent = poolHasPool(ENTITY_POOL, COMPONENT_POOL);
+    const isAComponent = constraintFunctions.isA(Component);
+    const entityHasComponent = constraintFunctions.poolHasPool(ENTITY_POOL, COMPONENT_POOL);
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -958,11 +956,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = [Relationship] as const;
 
-    const isARelationship = isA(Relationship);
-    const entityHasRelationshipToTarget0 = poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const entityHasRelationshipToTarget0 = constraintFunctions.poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getTargetPoolName(0));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityHasRelationshipToTarget0);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityHasRelationshipToTarget0);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -986,11 +984,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = { x: Relationship } as const;
 
-    const isARelationship = isA(Relationship);
-    const entityHasRelationshipToTarget0 = poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const entityHasRelationshipToTarget0 = constraintFunctions.poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getTargetPoolName(0));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityHasRelationshipToTarget0);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityHasRelationshipToTarget0);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1015,11 +1013,11 @@ describe(parseConstraints.name, () => {
     const component = new Component<number>();
     const input = [component] as const;
 
-    const isComponent = is(component);
-    const hasComponent = has(component);
+    const isComponent = constraintFunctions.is(component);
+    const hasComponent = constraintFunctions.has(component);
 
-    test.mock.fn(is, () => isComponent);
-    test.mock.fn(has, () => hasComponent);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isComponent);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1041,16 +1039,16 @@ describe(parseConstraints.name, () => {
     const component = new Component<number>();
     const input = { x: component } as const;
 
-    const isComponent = is(component);
-    const hasComponent = has(component);
+    const isComponent = constraintFunctions.is(component);
+    const hasComponent = constraintFunctions.has(component);
 
-    test.mock.fn(is, () => isComponent);
-    test.mock.fn(has, () => hasComponent);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isComponent);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
-        [getInstancePoolName(component)]: [is(component)],
-        [ENTITY_POOL]: [has(component)],
+        [getInstancePoolName(component)]: [isComponent],
+        [ENTITY_POOL]: [hasComponent],
       },
       crossPool: [],
     };
@@ -1067,13 +1065,13 @@ describe(parseConstraints.name, () => {
     const relationship = new Relationship<number>();
     const input = [relationship] as const;
 
-    const isRelationship = is(relationship);
-    const hasRelationship = has(relationship);
-    const entityTargetsPool = poolTargetsPool(ENTITY_POOL, getInstancePoolName(relationship), getTargetPoolName(0));
+    const isRelationship = constraintFunctions.is(relationship);
+    const hasRelationship = constraintFunctions.has(relationship);
+    const entityTargetsPool = constraintFunctions.poolTargetsPool(ENTITY_POOL, getInstancePoolName(relationship), getTargetPoolName(0));
 
-    test.mock.fn(is, () => isRelationship);
-    test.mock.fn(has, () => hasRelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsPool);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isRelationship);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasRelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsPool);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1098,13 +1096,13 @@ describe(parseConstraints.name, () => {
     const relationship = new Relationship<number>();
     const input = { x: relationship } as const;
 
-    const isRelationship = is(relationship);
-    const hasRelationship = has(relationship);
-    const entityTargetsPool = poolTargetsPool(ENTITY_POOL, getInstancePoolName(relationship), getTargetPoolName(0));
+    const isRelationship = constraintFunctions.is(relationship);
+    const hasRelationship = constraintFunctions.has(relationship);
+    const entityTargetsPool = constraintFunctions.poolTargetsPool(ENTITY_POOL, getInstancePoolName(relationship), getTargetPoolName(0));
 
-    test.mock.fn(is, () => isRelationship);
-    test.mock.fn(has, () => hasRelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsPool);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isRelationship);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasRelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsPool);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1129,11 +1127,11 @@ describe(parseConstraints.name, () => {
     const component = new Component<number>();
     const input = [component.on("source")] as const;
 
-    const isComponent = is(component);
-    const hasComponent = has(component);
+    const isComponent = constraintFunctions.is(component);
+    const hasComponent = constraintFunctions.has(component);
 
-    test.mock.fn(is, () => isComponent);
-    test.mock.fn(has, () => hasComponent);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isComponent);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1155,11 +1153,11 @@ describe(parseConstraints.name, () => {
     const component = new Component<number>();
     const input = { x: component.on("source") } as const;
 
-    const isComponent = is(component);
-    const hasComponent = has(component);
+    const isComponent = constraintFunctions.is(component);
+    const hasComponent = constraintFunctions.has(component);
 
-    test.mock.fn(is, () => isComponent);
-    test.mock.fn(has, () => hasComponent);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isComponent);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1182,12 +1180,12 @@ describe(parseConstraints.name, () => {
     const component = new Component<number>();
     const input = [component.on(entity)] as const;
 
-    const isComponent = is(component);
-    const isEntity = is(entity);
-    const hasComponent = has(component);
+    const isComponent = constraintFunctions.is(component);
+    const isEntity = constraintFunctions.is(entity);
+    const hasComponent = constraintFunctions.has(component);
 
     let callCountOfIs = 0;
-    test.mock.fn(is, () => {
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => {
       callCountOfIs += 1;
       if (callCountOfIs === 1) {
         return isComponent;
@@ -1195,7 +1193,7 @@ describe(parseConstraints.name, () => {
         return isEntity;
       }
     });
-    test.mock.fn(has, () => hasComponent);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1219,12 +1217,12 @@ describe(parseConstraints.name, () => {
     const input = { x: component.on(entity) } as const;
 
 
-    const isComponent = is(component);
-    const isEntity = is(entity);
-    const hasComponent = has(component);
+    const isComponent = constraintFunctions.is(component);
+    const isEntity = constraintFunctions.is(entity);
+    const hasComponent = constraintFunctions.has(component);
 
     let callCountOfIs = 0;
-    test.mock.fn(is, () => {
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => {
       callCountOfIs += 1;
       if (callCountOfIs === 1) {
         return isComponent;
@@ -1232,7 +1230,7 @@ describe(parseConstraints.name, () => {
         return isEntity;
       }
     });
-    test.mock.fn(has, () => hasComponent);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1254,13 +1252,13 @@ describe(parseConstraints.name, () => {
     const relationship = new Relationship<number>();
     const input = [relationship.on("source")] as const;
 
-    const isRelationship = is(relationship);
-    const hasRelationship = has(relationship);
-    const sourceTargetsRelationship = poolTargetsPool("source", getInstancePoolName(relationship), getTargetPoolName(0));
+    const isRelationship = constraintFunctions.is(relationship);
+    const hasRelationship = constraintFunctions.has(relationship);
+    const sourceTargetsRelationship = constraintFunctions.poolTargetsPool("source", getInstancePoolName(relationship), getTargetPoolName(0));
 
-    test.mock.fn(is, () => isRelationship);
-    test.mock.fn(has, () => hasRelationship);
-    test.mock.fn(poolTargetsPool, () => sourceTargetsRelationship);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isRelationship);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasRelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => sourceTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1285,13 +1283,13 @@ describe(parseConstraints.name, () => {
     const relationship = new Relationship<number>();
     const input = { x: relationship.on("source") } as const;
 
-    const isRelationship = is(relationship);
-    const hasRelationship = has(relationship);
-    const sourceTargetsRelationship = poolTargetsPool("source", getInstancePoolName(relationship), getTargetPoolName(0));
+    const isRelationship = constraintFunctions.is(relationship);
+    const hasRelationship = constraintFunctions.has(relationship);
+    const sourceTargetsRelationship = constraintFunctions.poolTargetsPool("source", getInstancePoolName(relationship), getTargetPoolName(0));
 
-    test.mock.fn(is, () => isRelationship);
-    test.mock.fn(has, () => hasRelationship);
-    test.mock.fn(poolTargetsPool, () => sourceTargetsRelationship);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isRelationship);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasRelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => sourceTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1317,13 +1315,13 @@ describe(parseConstraints.name, () => {
     const relationship = new Relationship<number>();
     const input = [relationship.on(entity)] as const;
 
-    const isRelationship = is(relationship);
-    const isEntity = is(entity);
-    const hasRelationship = has(relationship);
-    const entityTargetsRelationship = poolTargetsPool(getInstancePoolName(entity), getInstancePoolName(relationship), getTargetPoolName(0));
+    const isRelationship = constraintFunctions.is(relationship);
+    const isEntity = constraintFunctions.is(entity);
+    const hasRelationship = constraintFunctions.has(relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(getInstancePoolName(entity), getInstancePoolName(relationship), getTargetPoolName(0));
 
     let callCountOfIs = 0;
-    test.mock.fn(is, () => {
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => {
       callCountOfIs += 1;
       if (callCountOfIs === 1) {
         return isRelationship;
@@ -1331,8 +1329,12 @@ describe(parseConstraints.name, () => {
         return isEntity;
       }
     });
-    test.mock.fn(has, () => hasRelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => {
+      return hasRelationship;
+    });
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => {
+      return entityTargetsRelationship;
+    });
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1358,13 +1360,13 @@ describe(parseConstraints.name, () => {
     const relationship = new Relationship<number>();
     const input = { x: relationship.on(entity) } as const;
 
-    const isRelationship = is(relationship);
-    const isEntity = is(entity);
-    const hasRelationship = has(relationship);
-    const entityTargetsRelationship = poolTargetsPool(getInstancePoolName(entity), getInstancePoolName(relationship), getTargetPoolName(0));
+    const isRelationship = constraintFunctions.is(relationship);
+    const isEntity = constraintFunctions.is(entity);
+    const hasRelationship = constraintFunctions.has(relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(getInstancePoolName(entity), getInstancePoolName(relationship), getTargetPoolName(0));
 
     let callCountOfIs = 0;
-    test.mock.fn(is, () => {
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => {
       callCountOfIs += 1;
       if (callCountOfIs === 1) {
         return isRelationship;
@@ -1372,8 +1374,8 @@ describe(parseConstraints.name, () => {
         return isEntity;
       }
     });
-    test.mock.fn(has, () => hasRelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasRelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1398,13 +1400,13 @@ describe(parseConstraints.name, () => {
     const relationship = new Relationship<number>();
     const input = [relationship.to("target")] as const;
 
-    const isRelationship = is(relationship);
-    const hasRelationship = has(relationship);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, getInstancePoolName(relationship), "target");
+    const isRelationship = constraintFunctions.is(relationship);
+    const hasRelationship = constraintFunctions.has(relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(ENTITY_POOL, getInstancePoolName(relationship), "target");
 
-    test.mock.fn(is, () => isRelationship);
-    test.mock.fn(has, () => hasRelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isRelationship);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasRelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1429,13 +1431,13 @@ describe(parseConstraints.name, () => {
     const relationship = new Relationship<number>();
     const input = { x: relationship.to("target") } as const;
 
-    const isRelationship = is(relationship);
-    const hasRelationship = has(relationship);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, getInstancePoolName(relationship), "target");
+    const isRelationship = constraintFunctions.is(relationship);
+    const hasRelationship = constraintFunctions.has(relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(ENTITY_POOL, getInstancePoolName(relationship), "target");
 
-    test.mock.fn(is, () => isRelationship);
-    test.mock.fn(has, () => hasRelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isRelationship);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasRelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1461,11 +1463,11 @@ describe(parseConstraints.name, () => {
     const relationship = new Relationship<number>();
     const input = [relationship.to(entity)] as const;
 
-    const isRelationshipComponent = is(relationship.to(entity));
-    const hasRelationshipComponent = has(relationship.to(entity));
+    const isRelationshipComponent = constraintFunctions.is(relationship.to(entity));
+    const hasRelationshipComponent = constraintFunctions.has(relationship.to(entity));
 
-    test.mock.fn(is, () => isRelationshipComponent);
-    test.mock.fn(has, () => hasRelationshipComponent);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isRelationshipComponent);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasRelationshipComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1488,11 +1490,11 @@ describe(parseConstraints.name, () => {
     const relationship = new Relationship<number>();
     const input = { x: relationship.to(entity) } as const;
 
-    const isRelationshipComponent = is(relationship.to(entity));
-    const hasRelationshipComponent = has(relationship.to(entity));
+    const isRelationshipComponent = constraintFunctions.is(relationship.to(entity));
+    const hasRelationshipComponent = constraintFunctions.has(relationship.to(entity));
 
-    test.mock.fn(is, () => isRelationshipComponent);
-    test.mock.fn(has, () => hasRelationshipComponent);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isRelationshipComponent);
+    constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasRelationshipComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1555,11 +1557,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = [Component.as("a")] as const;
 
-    const isAComponent = isA(Component);
-    const entityHasComponent = poolHasPool(ENTITY_POOL, "a");
+    const isAComponent = constraintFunctions.isA(Component);
+    const entityHasComponent = constraintFunctions.poolHasPool(ENTITY_POOL, "a");
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1580,11 +1582,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = { x: Component.as("a") } as const;
 
-    const isAComponent = isA(Component);
-    const entityHasComponent = poolHasPool(ENTITY_POOL, "a");
+    const isAComponent = constraintFunctions.isA(Component);
+    const entityHasComponent = constraintFunctions.poolHasPool(ENTITY_POOL, "a");
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1613,11 +1615,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = [Component.on("source")] as const;
 
-    const isAComponent = isA(Component);
-    const entityHasComponent = poolHasPool("source", COMPONENT_POOL);
+    const isAComponent = constraintFunctions.isA(Component);
+    const entityHasComponent = constraintFunctions.poolHasPool("source", COMPONENT_POOL);
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1640,11 +1642,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = { x: Component.on("source") } as const;
 
-    const isAComponent = isA(Component);
-    const entityHasComponent = poolHasPool("source", COMPONENT_POOL);
+    const isAComponent = constraintFunctions.isA(Component);
+    const entityHasComponent = constraintFunctions.poolHasPool("source", COMPONENT_POOL);
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1668,13 +1670,13 @@ describe(parseConstraints.name, () => {
     const entity = new Entity();
     const input = [Component.on(entity)] as const;
 
-    const isAComponent = isA(Component);
-    const isEntity = is(entity);
-    const entityHasComponent = poolHasPool(getInstancePoolName(entity), COMPONENT_POOL);
+    const isAComponent = constraintFunctions.isA(Component);
+    const isEntity = constraintFunctions.is(entity);
+    const entityHasComponent = constraintFunctions.poolHasPool(getInstancePoolName(entity), COMPONENT_POOL);
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(is, () => isEntity);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isEntity);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1698,13 +1700,13 @@ describe(parseConstraints.name, () => {
     const entity = new Entity();
     const input = { x: Component.on(entity) } as const;
 
-    const isAComponent = isA(Component);
-    const isEntity = is(entity);
-    const entityHasComponent = poolHasPool(getInstancePoolName(entity), COMPONENT_POOL);
+    const isAComponent = constraintFunctions.isA(Component);
+    const isEntity = constraintFunctions.is(entity);
+    const entityHasComponent = constraintFunctions.poolHasPool(getInstancePoolName(entity), COMPONENT_POOL);
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(is, () => isEntity);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isEntity);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1727,11 +1729,9 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = [Relationship.as("a")] as const;
 
-    const isARelationship = isA(Relationship);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, "a", getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1739,9 +1739,7 @@ describe(parseConstraints.name, () => {
         [ENTITY_POOL]: [],
         [getTargetPoolName(0)]: [],
       },
-      crossPool: [
-        entityTargetsRelationship,
-      ],
+      crossPool: [],
     };
 
     // Act
@@ -1755,11 +1753,9 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = { x: Relationship.as("a") } as const;
 
-    const isARelationship = isA(Relationship);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, "a", getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1767,9 +1763,7 @@ describe(parseConstraints.name, () => {
         [ENTITY_POOL]: [],
         [getTargetPoolName(0)]: [],
       },
-      crossPool: [
-        entityTargetsRelationship,
-      ],
+      crossPool: [],
     };
 
     // Act
@@ -1791,11 +1785,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = [Relationship.on("source")] as const;
 
-    const isARelationship = isA(Relationship);
-    const entityTargetsRelationship = poolTargetsPool("source", RELATIONSHIP_POOL, getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool("source", RELATIONSHIP_POOL, getTargetPoolName(0));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1819,11 +1813,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = { x: Relationship.on("source") } as const;
 
-    const isARelationship = isA(Relationship);
-    const entityTargetsRelationship = poolTargetsPool("source", RELATIONSHIP_POOL, getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool("source", RELATIONSHIP_POOL, getTargetPoolName(0));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1848,13 +1842,13 @@ describe(parseConstraints.name, () => {
     const entity = new Entity();
     const input = [Relationship.on(entity)] as const;
 
-    const isARelationship = isA(Relationship);
-    const isEntity = is(entity);
-    const entityTargetsRelationship = poolTargetsPool(getInstancePoolName(entity), RELATIONSHIP_POOL, getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const isEntity = constraintFunctions.is(entity);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(getInstancePoolName(entity), RELATIONSHIP_POOL, getTargetPoolName(0));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(is, () => isEntity);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isEntity);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1879,13 +1873,13 @@ describe(parseConstraints.name, () => {
     const entity = new Entity();
     const input = { x: Relationship.on(entity) } as const;
 
-    const isARelationship = isA(Relationship);
-    const isEntity = is(entity);
-    const entityTargetsRelationship = poolTargetsPool(getInstancePoolName(entity), RELATIONSHIP_POOL, getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const isEntity = constraintFunctions.is(entity);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(getInstancePoolName(entity), RELATIONSHIP_POOL, getTargetPoolName(0));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(is, () => isEntity);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isEntity);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1909,11 +1903,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = [Relationship.to("target")] as const;
 
-    const isARelationship = isA(Relationship);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, "target");
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, "target");
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1937,11 +1931,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = { x: Relationship.to("target") } as const;
 
-    const isARelationship = isA(Relationship);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, "target");
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, "target");
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1966,13 +1960,13 @@ describe(parseConstraints.name, () => {
     const entity = new Entity();
     const input = [Relationship.to(entity)] as const;
 
-    const isARelationship = isA(Relationship);
-    const isEntity = is(entity);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getInstancePoolName(entity));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const isEntity = constraintFunctions.is(entity);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getInstancePoolName(entity));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(is, () => isEntity);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isEntity);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -1997,13 +1991,13 @@ describe(parseConstraints.name, () => {
     const entity = new Entity();
     const input = { x: Relationship.to(entity) } as const;
 
-    const isARelationship = isA(Relationship);
-    const isEntity = is(entity);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getInstancePoolName(entity));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const isEntity = constraintFunctions.is(entity);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getInstancePoolName(entity));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(is, () => isEntity);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isEntity);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2027,11 +2021,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = [Component.value()] as const;
 
-    const isAComponent = isA(Component);
-    const entityHasComponent = poolHasPool(ENTITY_POOL, COMPONENT_POOL);
+    const isAComponent = constraintFunctions.isA(Component);
+    const entityHasComponent = constraintFunctions.poolHasPool(ENTITY_POOL, COMPONENT_POOL);
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2054,11 +2048,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = { x: Component.value() } as const;
 
-    const isAComponent = isA(Component);
-    const entityHasComponent = poolHasPool(ENTITY_POOL, COMPONENT_POOL);
+    const isAComponent = constraintFunctions.isA(Component);
+    const entityHasComponent = constraintFunctions.poolHasPool(ENTITY_POOL, COMPONENT_POOL);
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2081,11 +2075,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = [Component.as("a").value()] as const;
 
-    const isAComponent = isA(Component);
-    const entityHasComponent = poolHasPool(ENTITY_POOL, "a");
+    const isAComponent = constraintFunctions.isA(Component);
+    const entityHasComponent = constraintFunctions.poolHasPool(ENTITY_POOL, "a");
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2108,11 +2102,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = { x: Component.as("a").value() } as const;
 
-    const isAComponent = isA(Component);
-    const entityHasComponent = poolHasPool(ENTITY_POOL, "a");
+    const isAComponent = constraintFunctions.isA(Component);
+    const entityHasComponent = constraintFunctions.poolHasPool(ENTITY_POOL, "a");
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2143,11 +2137,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = [Component.on("source").value()] as const;
 
-    const isAComponent = isA(Component);
-    const entityHasComponent = poolHasPool("source", COMPONENT_POOL);
+    const isAComponent = constraintFunctions.isA(Component);
+    const entityHasComponent = constraintFunctions.poolHasPool("source", COMPONENT_POOL);
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2170,11 +2164,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = { x: Component.on("source").value() } as const;
 
-    const isAComponent = isA(Component);
-    const entityHasComponent = poolHasPool("source", COMPONENT_POOL);
+    const isAComponent = constraintFunctions.isA(Component);
+    const entityHasComponent = constraintFunctions.poolHasPool("source", COMPONENT_POOL);
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2198,13 +2192,13 @@ describe(parseConstraints.name, () => {
     const entity = new Entity();
     const input = [Component.on(entity).value()] as const;
 
-    const isAComponent = isA(Component);
-    const isEntity = is(entity);
-    const entityHasComponent = poolHasPool(getInstancePoolName(entity), COMPONENT_POOL);
+    const isAComponent = constraintFunctions.isA(Component);
+    const isEntity = constraintFunctions.is(entity);
+    const entityHasComponent = constraintFunctions.poolHasPool(getInstancePoolName(entity), COMPONENT_POOL);
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(is, () => isEntity);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isEntity);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2228,13 +2222,13 @@ describe(parseConstraints.name, () => {
     const entity = new Entity();
     const input = { x: Component.on(entity).value() } as const;
 
-    const isAComponent = isA(Component);
-    const isEntity = is(entity);
-    const entityHasComponent = poolHasPool(getInstancePoolName(entity), COMPONENT_POOL);
+    const isAComponent = constraintFunctions.isA(Component);
+    const isEntity = constraintFunctions.is(entity);
+    const entityHasComponent = constraintFunctions.poolHasPool(getInstancePoolName(entity), COMPONENT_POOL);
 
-    test.mock.fn(isA, () => isAComponent);
-    test.mock.fn(is, () => isEntity);
-    test.mock.fn(poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isEntity);
+    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2257,11 +2251,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = [Relationship.value()] as const;
 
-    const isARelationship = isA(Relationship);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getTargetPoolName(0));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2285,11 +2279,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = { x: Relationship.value() } as const;
 
-    const isARelationship = isA(Relationship);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getTargetPoolName(0));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2313,11 +2307,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = [Relationship.as("a").value()] as const;
 
-    const isARelationship = isA(Relationship);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, "a", getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(ENTITY_POOL, "a", getTargetPoolName(0));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2341,11 +2335,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = { x: Relationship.as("a").value() } as const;
 
-    const isARelationship = isA(Relationship);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, "a", getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(ENTITY_POOL, "a", getTargetPoolName(0));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2377,11 +2371,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = [Relationship.on("source").value()] as const;
 
-    const isARelationship = isA(Relationship);
-    const entityTargetsRelationship = poolTargetsPool("source", RELATIONSHIP_POOL, getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool("source", RELATIONSHIP_POOL, getTargetPoolName(0));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2405,11 +2399,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = { x: Relationship.on("source").value() } as const;
 
-    const isARelationship = isA(Relationship);
-    const entityTargetsRelationship = poolTargetsPool("source", RELATIONSHIP_POOL, getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool("source", RELATIONSHIP_POOL, getTargetPoolName(0));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2434,13 +2428,13 @@ describe(parseConstraints.name, () => {
     const entity = new Entity();
     const input = [Relationship.on(entity).value()] as const;
 
-    const isARelationship = isA(Relationship);
-    const isEntity = is(entity);
-    const entityTargetsRelationship = poolTargetsPool(getInstancePoolName(entity), RELATIONSHIP_POOL, getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const isEntity = constraintFunctions.is(entity);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(getInstancePoolName(entity), RELATIONSHIP_POOL, getTargetPoolName(0));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(is, () => isEntity);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isEntity);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2465,13 +2459,13 @@ describe(parseConstraints.name, () => {
     const entity = new Entity();
     const input = { x: Relationship.on(entity).value() } as const;
 
-    const isARelationship = isA(Relationship);
-    const isEntity = is(entity);
-    const entityTargetsRelationship = poolTargetsPool(getInstancePoolName(entity), RELATIONSHIP_POOL, getTargetPoolName(0));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const isEntity = constraintFunctions.is(entity);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(getInstancePoolName(entity), RELATIONSHIP_POOL, getTargetPoolName(0));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(is, () => isEntity);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isEntity);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2495,11 +2489,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = [Relationship.to("target").value()] as const;
 
-    const isARelationship = isA(Relationship);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, "target");
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, "target");
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2523,11 +2517,11 @@ describe(parseConstraints.name, () => {
     // Arrange
     const input = { x: Relationship.to("target").value() } as const;
 
-    const isARelationship = isA(Relationship);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, "target");
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, "target");
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2552,13 +2546,13 @@ describe(parseConstraints.name, () => {
     const entity = new Entity();
     const input = [Relationship.to(entity).value()] as const;
 
-    const isARelationship = isA(Relationship);
-    const isEntity = is(entity);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getInstancePoolName(entity));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const isEntity = constraintFunctions.is(entity);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getInstancePoolName(entity));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(is, () => isEntity);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isEntity);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {
@@ -2583,13 +2577,13 @@ describe(parseConstraints.name, () => {
     const entity = new Entity();
     const input = { x: Relationship.to(entity).value() } as const;
 
-    const isARelationship = isA(Relationship);
-    const isEntity = is(entity);
-    const entityTargetsRelationship = poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getInstancePoolName(entity));
+    const isARelationship = constraintFunctions.isA(Relationship);
+    const isEntity = constraintFunctions.is(entity);
+    const entityTargetsRelationship = constraintFunctions.poolTargetsPool(ENTITY_POOL, RELATIONSHIP_POOL, getInstancePoolName(entity));
 
-    test.mock.fn(isA, () => isARelationship);
-    test.mock.fn(is, () => isEntity);
-    test.mock.fn(poolTargetsPool, () => entityTargetsRelationship);
+    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isEntity);
+    constraintFunctions.poolTargetsPool = test.mock.fn(constraintFunctions.poolTargetsPool, () => entityTargetsRelationship);
 
     const expected: Constraints = {
       poolSpecific: {

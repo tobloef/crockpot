@@ -79,17 +79,17 @@ const relationshipInstanceQueryHandler: QueryPartHandler<RelationshipInstanceQue
     const constraints = {
       poolSpecific: {
         [relationshipPool]: [
-          is(part.relationship),
+          constraintFunctions.is(part.relationship),
         ],
         [entityPool]: part.source instanceof Entity
-          ? [is(part.source), has(part.relationship)]
-          : [has(part.relationship)],
+          ? [constraintFunctions.is(part.source), constraintFunctions.has(part.relationship)]
+          : [constraintFunctions.has(part.relationship)],
         [targetPool]: part.target instanceof Entity
-          ? [is(part.target)]
+          ? [constraintFunctions.is(part.target)]
           : [],
       },
       crossPool: [
-        poolTargetsPool(entityPool, relationshipPool, targetPool),
+        constraintFunctions.poolTargetsPool(entityPool, relationshipPool, targetPool),
       ],
     };
 
@@ -116,11 +116,11 @@ const componentInstanceQueryHandler: QueryPartHandler<ComponentInstanceQuery<any
     const constraints = {
       poolSpecific: {
         [componentPool]: [
-          is(part.component),
+          constraintFunctions.is(part.component),
         ],
         [entityPool]: part.source instanceof Entity
-          ? [is(part.source), has(part.component)]
-          : [has(part.component)],
+          ? [constraintFunctions.is(part.source), constraintFunctions.has(part.component)]
+          : [constraintFunctions.has(part.component)],
       },
       crossPool: [],
     };
@@ -151,17 +151,17 @@ const relationWildcardValueQueryHandler: QueryPartHandler<RelationshipWildcardVa
     const constraints = {
       poolSpecific: {
         [relationshipPool]: [
-          isA(Relationship),
+          constraintFunctions.isA(Relationship),
         ],
         [entityPool]: part.source instanceof Entity
-          ? [is(part.source)]
+          ? [constraintFunctions.is(part.source)]
           : [],
         [targetPool]: part.target instanceof Entity
-          ? [is(part.target)]
+          ? [constraintFunctions.is(part.target)]
           : [],
       },
       crossPool: [
-        poolTargetsPool(entityPool, relationshipPool, targetPool),
+        constraintFunctions.poolTargetsPool(entityPool, relationshipPool, targetPool),
       ],
     };
 
@@ -188,14 +188,14 @@ const componentWildcardValueQueryHandler: QueryPartHandler<ComponentWildcardValu
     const constraints = {
       poolSpecific: {
         [componentPool]: [
-          isA(Component),
+          constraintFunctions.isA(Component),
         ],
         [entityPool]: part.source instanceof Entity
-          ? [is(part.source)]
+          ? [constraintFunctions.is(part.source)]
           : [],
       },
       crossPool: [
-        poolHasPool(entityPool, componentPool),
+        constraintFunctions.poolHasPool(entityPool, componentPool),
       ],
     };
 
@@ -225,18 +225,18 @@ const relationshipWildcardQueryHandler: QueryPartHandler<RelationshipWildcardQue
     const constraints = {
       poolSpecific: {
         [relationshipPool]: [
-          isA(Relationship),
+          constraintFunctions.isA(Relationship),
         ],
         [entityPool]: part.source instanceof Entity
-          ? [is(part.source)]
+          ? [constraintFunctions.is(part.source)]
           : [],
         [targetPool]: part.target instanceof Entity
-          ? [is(part.target)]
+          ? [constraintFunctions.is(part.target)]
           : [],
       },
       crossPool: (
         part.source !== undefined || part.target !== undefined
-          ? [poolTargetsPool(entityPool, relationshipPool, targetPool)]
+          ? [constraintFunctions.poolTargetsPool(entityPool, relationshipPool, targetPool)]
           : []
       ),
     };
@@ -263,15 +263,15 @@ const componentWildcardQueryHandler: QueryPartHandler<ComponentWildcardQuery> = 
     const constraints = {
       poolSpecific: {
         [componentPool]: [
-          isA(Component),
+          constraintFunctions.isA(Component),
         ],
         [entityPool]: part.source instanceof Entity
-          ? [is(part.source)]
+          ? [constraintFunctions.is(part.source)]
           : [],
       },
       crossPool: (
       part.source !== undefined
-        ? [poolHasPool(entityPool, componentPool)]
+        ? [constraintFunctions.poolHasPool(entityPool, componentPool)]
         : []
       ),
     };
@@ -314,15 +314,15 @@ const relationshipHandler: QueryPartHandler<Relationship<unknown>> = {
     const constraints = {
       poolSpecific: {
         [relationshipPool]: [
-          isA(Relationship),
+          constraintFunctions.is(part),
         ],
         [entityPool]: [
-          has(part),
+          constraintFunctions.has(part),
         ],
         [targetPool]: [],
       },
       crossPool: [
-        poolTargetsPool(entityPool, relationshipPool, targetPool),
+        constraintFunctions.poolTargetsPool(entityPool, relationshipPool, targetPool),
       ],
     };
 
@@ -343,10 +343,10 @@ const componentHandler: QueryPartHandler<Component<unknown>> = {
     const constraints = {
       poolSpecific: {
         [componentPool]: [
-          is(part),
+          constraintFunctions.is(part),
         ],
         [entityPool]: [
-          has(part),
+          constraintFunctions.has(part),
         ],
       },
       crossPool: [],
@@ -370,13 +370,13 @@ const relationshipClassHandler: QueryPartHandler<Class<Relationship<unknown>>> =
     const constraints = {
       poolSpecific: {
         [relationshipPool]: [
-          isA(Relationship),
+          constraintFunctions.isA(Relationship),
         ],
         [entityPool]: [],
         [targetPool]: [],
       },
       crossPool: [
-        poolTargetsPool(entityPool, relationshipPool, targetPool),
+        constraintFunctions.poolTargetsPool(entityPool, relationshipPool, targetPool),
       ],
     };
 
@@ -398,12 +398,12 @@ const componentClassHandler: QueryPartHandler<Class<Component<unknown>>> = {
     const constraints = {
       poolSpecific: {
         [componentPool]: [
-          isA(Component),
+          constraintFunctions.isA(Component),
         ],
         [entityPool]: [],
       },
       crossPool: [
-        poolHasPool(entityPool, componentPool),
+        constraintFunctions.poolHasPool(entityPool, componentPool),
       ],
     };
 
@@ -687,31 +687,39 @@ export function* filterGenerator<T>(generator: Generator<T>, predicate: (x: T) =
   }
 }
 
-export const isA = (expected: Class<any>): EntityConstraint => {
+export const constraintFunctions = {
+  isA,
+  is,
+  has,
+  poolHasPool,
+  poolTargetsPool,
+};
+
+function isA(expected: Class<any>): EntityConstraint {
   const constraint = (entity: Entity): boolean => {
     return entity instanceof expected;
   };
 
   return constraint;
-};
+}
 
-export const is = (expected: Entity): EntityConstraint => {
+function is(expected: Entity): EntityConstraint {
   const constraint = (entity: Entity): boolean => {
     return entity === expected;
   };
 
   return constraint;
-};
+}
 
-export const has = (expected: Component<any> | Relationship<any>): EntityConstraint => {
+function has(expected: Component<any> | Relationship<any>): EntityConstraint {
   const constraint = (entity: Entity): boolean => {
     return entity.has(expected);
   };
 
   return constraint;
-};
+}
 
-export const poolHasPool = (entityPool: string, componentPool: string): PermutationConstraint => {
+function poolHasPool(entityPool: string, componentPool: string): PermutationConstraint {
   const constraint = (permutation: Permutation): boolean => {
     const entity = permutation[entityPool];
 
@@ -738,11 +746,11 @@ export const poolHasPool = (entityPool: string, componentPool: string): Permutat
   return constraint;
 }
 
-export const poolTargetsPool = (
+function poolTargetsPool(
   sourcePool: string,
   relationshipPool: string,
   targetPool: string,
-): PermutationConstraint => {
+): PermutationConstraint {
   const constraint = (permutation: Permutation): boolean => {
     const source = permutation[sourcePool];
 
@@ -774,3 +782,4 @@ export const poolTargetsPool = (
 
   return constraint;
 }
+
