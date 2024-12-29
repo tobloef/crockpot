@@ -62,24 +62,19 @@ export class Entity {
     return [...this.__components];
   }
 
-
-  get<RelationshipType extends Relationship<any>>(
-    relationship: RelationshipType,
-  ): RelationshipValue<RelationshipType>[];
-
   get<ComponentType extends Component<any>>(
     component: ComponentType,
   ): ComponentValue<ComponentType> | null;
 
-  get<ComponentTypes extends ComponentOrRelationship[]>(
+  get<ComponentTypes extends Component<any>[]>(
     components: ComponentTypes,
   ): GetOutputArray<ComponentTypes>;
 
-  get<ComponentTypes extends Record<string, ComponentOrRelationship>>(
+  get<ComponentTypes extends Record<string, Component<any>>>(
     components: ComponentTypes,
   ): GetOutputObject<ComponentTypes>;
 
-  get<Input extends CombinedInput>(
+  get<Input extends GetInput>(
     input: Input,
   ): GetOutput<Input> {
     if (Array.isArray(input)) {
@@ -92,17 +87,32 @@ export class Entity {
   }
 
 
+  getAll<RelationshipType extends Relationship<any>>(
+    relationship: RelationshipType,
+  ): RelationshipValue<RelationshipType>[] {
+    let values: RelationshipValue<RelationshipType>[] = [];
+
+    for (const [component] of this.__components) {
+      if (component.relationship === relationship) {
+        values.push(this.__components.get(component) as any);
+      }
+    }
+
+    return values;
+  }
+
+
   has(relationship: Relationship<any>): boolean;
 
   has(component: Component<any>): boolean;
 
-  has(components: ComponentOrRelationship[]): boolean;
+  has(components: ComponentOrRelationshipTmp[]): boolean;
 
-  has(components: Record<string, ComponentOrRelationship>): boolean;
+  has(components: Record<string, ComponentOrRelationshipTmp>): boolean;
 
-  has(input: CombinedInput): boolean;
+  has(input: HasInput): boolean;
 
-  has(input: CombinedInput): boolean {
+  has(input: HasInput): boolean {
     if (Array.isArray(input)) {
       return this.#hasArray(input);
     } else if (input.constructor === Object) {
@@ -118,26 +128,16 @@ export class Entity {
   }
 
 
-  #getSingle<Input extends ComponentOrRelationship>(
+  #getSingle<Input extends Component<any>>(
     input: Input,
   ): GetOutputSingle<Input> {
     const value = this.__components.get(input as any);
-
-    if (value === null) {
-      const values = [];
-      for (const [component, value] of this.__components) {
-        if (component.relationship === input) {
-          values.push(value);
-        }
-      }
-      return values as GetOutputSingle<Input>;
-    }
 
     return value as GetOutputSingle<Input>;
   }
 
 
-  #getArray<Input extends ComponentOrRelationship[]>(
+  #getArray<Input extends Component<any>[]>(
     input: Input,
   ): GetOutputArray<Input> {
     const values: GetOutputArray<Input> = [] as any;
@@ -150,7 +150,7 @@ export class Entity {
   }
 
 
-  #getObject<Input extends Record<string, ComponentOrRelationship>>(
+  #getObject<Input extends Record<string, Component<any>>>(
     input: Input,
   ): GetOutputObject<Input> {
     const values: GetOutputObject<Input> = {} as any;
@@ -163,61 +163,67 @@ export class Entity {
   }
 
 
-  #hasSingle(input: ComponentOrRelationship): boolean {
+  #hasSingle(input: ComponentOrRelationshipTmp): boolean {
     const value = this.__components.get(input as any);
 
-    if (value === null) {
-      for (const [component] of this.__components) {
-        if (component.relationship === input) {
-          return true;
-        }
-      }
-
-      return false;
-    } else {
+    if (value !== null) {
       return true;
     }
+
+    for (const [component] of this.__components) {
+      if (component.relationship === input) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
-  #hasArray(components: ComponentOrRelationship[]): boolean {
+  #hasArray(components: ComponentOrRelationshipTmp[]): boolean {
     return components.every(this.#hasSingle.bind(this));
   }
 
 
-  #hasObject(components: Record<string, ComponentOrRelationship>): boolean {
+  #hasObject(components: Record<string, ComponentOrRelationshipTmp>): boolean {
     return Object.values(components).every(this.#hasSingle.bind(this));
   }
 }
 
-export type ComponentOrRelationship = Component<any> | Relationship<any>;
+export type ComponentOrRelationshipTmp = Component<any> | Relationship<any>;
 
 type GetOutput<Input extends (
-  | ComponentOrRelationship
-  | ComponentOrRelationship[]
-  | Record<string, ComponentOrRelationship>
+  | Component<any>
+  | Component<any>[]
+  | Record<string, Component<any>>
   )> = (
-  Input extends any[] ? GetOutputArray<Input> :
+    Input extends Component<any> ? GetOutputSingle<Input> :
+    Input extends any[] ? GetOutputArray<Input> :
     Input extends Record<string, any> ? GetOutputObject<Input> :
-      Input extends ComponentOrRelationship ? GetOutputSingle<Input> :
-        never
+    never
   );
 
-type GetOutputObject<ComponentTypes extends Record<string, ComponentOrRelationship>> = {
+type GetOutputObject<ComponentTypes extends Record<string, Component<any>>> = {
   [Key in keyof ComponentTypes]: GetOutputSingle<ComponentTypes[Key]>;
 };
 
-type GetOutputArray<ComponentTypes extends ComponentOrRelationship[]> = {
+type GetOutputArray<ComponentTypes extends Component<any>[]> = {
   [Index in keyof ComponentTypes]: GetOutputSingle<ComponentTypes[Index]>;
 };
 
-type GetOutputSingle<Input extends ComponentOrRelationship> = (
-  Input extends Relationship<any> ? RelationshipValue<Input>[] :
-    Input extends Component<any> ? Nullable<ComponentValue<Input>> :
+type GetOutputSingle<Input extends Component<any>> = (
+    Input extends Component<any>
+      ? Nullable<ComponentValue<Input>> :
       never
   );
 
-type CombinedInput = (
-  | ComponentOrRelationship
-  | ComponentOrRelationship[]
-  | Record<string, ComponentOrRelationship>
+type GetInput = (
+  | Component<any>
+  | Component<any>[]
+  | Record<string, Component<any>>
+  );
+
+type HasInput = (
+  | ComponentOrRelationshipTmp
+  | ComponentOrRelationshipTmp[]
+  | Record<string, ComponentOrRelationshipTmp>
   );

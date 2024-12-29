@@ -1,6 +1,6 @@
 import type { QueryInput } from "./input.ts";
 import type { QueryOutputItem, } from "./output.ts";
-import { type ComponentOrRelationship, Entity } from "../entity/index.ts";
+import { Entity } from "../entity/index.ts";
 import { Component, ComponentInstanceQuery, } from "../component/index.ts";
 import { Relationship, RelationshipInstanceQuery, } from "../relationship/index.ts";
 import type { Class } from "../utils/class.ts";
@@ -673,7 +673,7 @@ export const is = (expected: Entity): EntityConstraint => {
   return constraint;
 };
 
-export const has = (expected: ComponentOrRelationship): EntityConstraint => {
+export const has = (expected: Component<any> | Relationship<any>): EntityConstraint => {
   const constraint = (entity: Entity): boolean => {
     return entity.has(expected);
   };
