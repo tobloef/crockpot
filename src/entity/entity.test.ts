@@ -3,6 +3,7 @@ import * as assert from "node:assert";
 import { Entity } from "./entity.ts";
 import { Component } from "../component/index.ts";
 import { Relationship } from "../relationship/index.ts";
+import { assertTypesEqual } from "../utils/type-assertions.ts";
 
 describe(Entity.name, () => {
   it("Create entity without name", () => {
@@ -227,6 +228,72 @@ describe(Entity.prototype.get.name, () => {
     assert.deepStrictEqual(
       component,
       42,
+    );
+  });
+});
+
+describe(Entity.prototype.getAll.name, () => {
+  it("Get all components by relationship", () => {
+    // Arrange
+    const entity = new Entity();
+    const TestRelationship1 = new Relationship<number>();
+    const TestRelationship2 = new Relationship<number>();
+    const TestComponent = new Component<number>();
+    entity.add(TestRelationship1.to(entity).withValue(1));
+    entity.add(TestRelationship2.to(entity).withValue(2));
+    entity.add(TestRelationship1.to(TestRelationship1).withValue(3));
+    entity.add(TestComponent.withValue(4));
+
+    // Act
+    const components = entity.getAll(TestRelationship1);
+
+    // Assert
+    assertTypesEqual<typeof components, number[]>(true);
+    assert.deepStrictEqual(components, [1, 3]);
+  });
+
+  it("Gets empty array when no components for relationship", () => {
+    // Arrange
+    const entity = new Entity();
+    const TestRelationship = new Relationship<number>();
+    const TestComponent = new Component<number>();
+    entity.add(TestComponent.withValue(3));
+
+    // Act
+    const components = entity.getAll(TestRelationship);
+
+    // Assert
+    assertTypesEqual<typeof components, number[]>(true);
+    assert.deepStrictEqual(components, []);
+  });
+});
+
+describe(Entity.prototype.components.name, () => {
+  it("Get all components", () => {
+    // Arrange
+    const entity = new Entity();
+    const TestComponent1 = new Component<number>();
+    const TestComponent2 = new Component<string>();
+    const TestRelationship = new Relationship<number>();
+    entity.add(
+      TestComponent1.withValue(1),
+      TestComponent2.withValue("2"),
+      TestRelationship.to(entity).withValue(3),
+      TestRelationship.to(TestRelationship).withValue(4),
+    );
+
+    // Act
+    const components = entity.components();
+
+    // Assert
+    assert.deepStrictEqual(
+      components,
+      [
+        [TestComponent1, 1],
+        [TestComponent2, "2"],
+        [TestRelationship.to(entity), 3],
+        [TestRelationship.to(TestRelationship), 4],
+      ],
     );
   });
 });

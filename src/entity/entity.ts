@@ -211,9 +211,8 @@ type GetOutputArray<ComponentTypes extends Component<any>[]> = {
 };
 
 type GetOutputSingle<Input extends Component<any>> = (
-    Input extends Component<any>
-      ? Nullable<ComponentValue<Input>> :
-      never
+    Input extends Component<any> ? Nullable<ComponentValue<Input>> :
+    never
   );
 
 type GetInput = (
