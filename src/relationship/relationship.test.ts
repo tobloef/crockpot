@@ -137,7 +137,7 @@ describe(Relationship.as.name, () => {
   it("Create relationship wildcard query with reference name", () => {
     const query: RelationshipWildcardQuery = Relationship.as("source");
 
-    assert.strictEqual(query.source, "source");
+    assert.strictEqual(query.name, "source");
   });
 });
 
@@ -145,7 +145,7 @@ describe(Relationship.once.name, () => {
   it("Create relationship wildcard query with once clause", () => {
     const query: RelationshipWildcardQuery = Relationship.once();
 
-    assert.strictEqual(query.once, true);
+    assert.strictEqual(query.isOnce, true);
   });
 });
 
