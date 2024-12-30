@@ -784,10 +784,7 @@ function poolHasPool(entityPool: string, componentPool: string): PermutationCons
       return false;
     }
 
-    if (
-      !(entity instanceof Component) ||
-      !(component instanceof Component)
-    ) {
+    if (!(component instanceof Component)) {
       return false;
     }
 
@@ -815,10 +812,7 @@ function poolTargetsPool(
       return false;
     }
 
-    if (
-      !(source instanceof Relationship) ||
-      !(relationship instanceof Relationship)
-    ) {
+    if (!(relationship instanceof Relationship)) {
       return false;
     }
 

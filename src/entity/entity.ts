@@ -9,14 +9,14 @@ export class Entity {
   static #brand = "Entity" as const;
 
   name?: string;
-  __id: number;
+  __id: string;
 
   __components = new ComponentValueStore();
 
 
   constructor(name?: string) {
     this.name = name;
-    this.__id = Math.random();
+    this.__id = Entity.#generateId();
   }
 
 
@@ -125,6 +125,12 @@ export class Entity {
 
   destroy() {
     this.__components.clear();
+  }
+
+
+  static #generateId() {
+    // TODO: Increase the number of digits
+    return Math.round(Math.random() * 10**16).toString().padStart(16, "0");
   }
 
 
