@@ -2253,10 +2253,13 @@ describe("Crazy queries", () => {
       ({ rep: number } | undefined)
     ]>>(true);
 
-    assert.deepStrictEqual(result, [
+    const actual = [...result];
+    const expected = [
       ["DS-1", 200, undefined, "normal", undefined, undefined],
       ["BS-1", 2, undefined, "desert", undefined, 40],
-    ]);
+    ];
+
+    assert.deepStrictEqual(actual, expected);
   });
 });
 
