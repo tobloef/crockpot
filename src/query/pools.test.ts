@@ -65,7 +65,6 @@ describe(parsePoolInfos.name, () => {
     // Assert
     assert.deepStrictEqual(pools, {
       [COMPONENT_POOL]: { isOnce: false },
-      [ENTITY_POOL]: { isOnce: false }
     });
   });
 
@@ -79,7 +78,6 @@ describe(parsePoolInfos.name, () => {
     // Assert
     assert.deepStrictEqual(pools, {
       [COMPONENT_POOL]: { isOnce: false },
-      [ENTITY_POOL]: { isOnce: false }
     });
   });
 
@@ -93,8 +91,6 @@ describe(parsePoolInfos.name, () => {
     // Assert
     assert.deepStrictEqual(pools, {
       [RELATIONSHIP_POOL]: { isOnce: false },
-      [ENTITY_POOL]: { isOnce: false },
-      [getTargetPoolName(0)]: { isOnce: false }
     });
   });
 
@@ -108,8 +104,6 @@ describe(parsePoolInfos.name, () => {
     // Assert
     assert.deepStrictEqual(pools, {
       [RELATIONSHIP_POOL]: { isOnce: false },
-      [ENTITY_POOL]: { isOnce: false },
-      [getTargetPoolName(0)]: { isOnce: false }
     });
   });
 
@@ -429,7 +423,6 @@ describe(parsePoolInfos.name, () => {
     // Assert
     assert.deepStrictEqual(pools, {
       "a": { isOnce: false },
-      [ENTITY_POOL]: { isOnce: false }
     });
   });
 
@@ -443,7 +436,6 @@ describe(parsePoolInfos.name, () => {
     // Assert
     assert.deepStrictEqual(pools, {
       "a": { isOnce: false },
-      [ENTITY_POOL]: { isOnce: false }
     });
   });
 
@@ -457,7 +449,6 @@ describe(parsePoolInfos.name, () => {
     // Assert
     assert.deepStrictEqual(pools, {
       [COMPONENT_POOL]: { isOnce: true },
-      [ENTITY_POOL]: { isOnce: false }
     });
   });
 
@@ -471,7 +462,6 @@ describe(parsePoolInfos.name, () => {
     // Assert
     assert.deepStrictEqual(pools, {
       [COMPONENT_POOL]: { isOnce: true },
-      [ENTITY_POOL]: { isOnce: false }
     });
   });
 
@@ -543,8 +533,6 @@ describe(parsePoolInfos.name, () => {
     // Assert
     assert.deepStrictEqual(pools, {
       "a": { isOnce: false },
-      [ENTITY_POOL]: { isOnce: false },
-      [getTargetPoolName(0)]: { isOnce: false }
     });
   });
 
@@ -558,8 +546,6 @@ describe(parsePoolInfos.name, () => {
     // Assert
     assert.deepStrictEqual(pools, {
       "a": { isOnce: false },
-      [ENTITY_POOL]: { isOnce: false },
-      [getTargetPoolName(0)]: { isOnce: false }
     });
   });
 
@@ -573,8 +559,6 @@ describe(parsePoolInfos.name, () => {
     // Assert
     assert.deepStrictEqual(pools, {
       [RELATIONSHIP_POOL]: { isOnce: true },
-      [ENTITY_POOL]: { isOnce: false },
-      [getTargetPoolName(0)]: { isOnce: false }
     });
   });
 
@@ -588,8 +572,6 @@ describe(parsePoolInfos.name, () => {
     // Assert
     assert.deepStrictEqual(pools, {
       [RELATIONSHIP_POOL]: { isOnce: true },
-      [ENTITY_POOL]: { isOnce: false },
-      [getTargetPoolName(0)]: { isOnce: false }
     });
   });
 
@@ -1114,21 +1096,17 @@ describe(parseConstraints.name, () => {
     const input = [ Component ] as const;
 
     const isAComponent = constraintFunctions.isA(Component);
-    const entityHasComponent = constraintFunctions.poolHasPool(ENTITY_POOL, COMPONENT_POOL);
 
-    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => {
-      return isAComponent;
-    });
-    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(
+      constraintFunctions.isA,
+      () => isAComponent
+    );
 
     const expected: Constraints = {
       poolSpecific: {
         [COMPONENT_POOL]: [ isAComponent ],
-        [ENTITY_POOL]: [],
       },
-      crossPool: [
-        entityHasComponent,
-      ],
+      crossPool: [],
     };
 
     // Act
@@ -1143,19 +1121,17 @@ describe(parseConstraints.name, () => {
     const input = { x: Component } as const;
 
     const isAComponent = constraintFunctions.isA(Component);
-    const entityHasComponent = constraintFunctions.poolHasPool(ENTITY_POOL, COMPONENT_POOL);
 
-    constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
-    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
+    constraintFunctions.isA = test.mock.fn(
+      constraintFunctions.isA,
+      () => isAComponent
+    );
 
     const expected: Constraints = {
       poolSpecific: {
-        [ENTITY_POOL]: [],
         [COMPONENT_POOL]: [ isAComponent ],
       },
-      crossPool: [
-        entityHasComponent,
-      ],
+      crossPool: [],
     };
 
     // Act
@@ -1170,27 +1146,14 @@ describe(parseConstraints.name, () => {
     const input = [ Relationship ] as const;
 
     const isARelationship = constraintFunctions.isA(Relationship);
-    const entityHasRelationshipToTarget0 = constraintFunctions.poolTargetsPool(
-      ENTITY_POOL,
-      RELATIONSHIP_POOL,
-      getTargetPoolName(0),
-    );
 
     constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
-    constraintFunctions.poolTargetsPool = test.mock.fn(
-      constraintFunctions.poolTargetsPool,
-      () => entityHasRelationshipToTarget0,
-    );
 
     const expected: Constraints = {
       poolSpecific: {
         [RELATIONSHIP_POOL]: [ isARelationship ],
-        [ENTITY_POOL]: [],
-        [getTargetPoolName(0)]: [],
       },
-      crossPool: [
-        entityHasRelationshipToTarget0,
-      ],
+      crossPool: [],
     };
 
     // Act
@@ -1205,27 +1168,14 @@ describe(parseConstraints.name, () => {
     const input = { x: Relationship } as const;
 
     const isARelationship = constraintFunctions.isA(Relationship);
-    const entityHasRelationshipToTarget0 = constraintFunctions.poolTargetsPool(
-      ENTITY_POOL,
-      RELATIONSHIP_POOL,
-      getTargetPoolName(0),
-    );
 
     constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isARelationship);
-    constraintFunctions.poolTargetsPool = test.mock.fn(
-      constraintFunctions.poolTargetsPool,
-      () => entityHasRelationshipToTarget0,
-    );
 
     const expected: Constraints = {
       poolSpecific: {
         [RELATIONSHIP_POOL]: [ isARelationship ],
-        [ENTITY_POOL]: [],
-        [getTargetPoolName(0)]: [],
       },
-      crossPool: [
-        entityHasRelationshipToTarget0,
-      ],
+      crossPool: [],
     };
 
     // Act
@@ -1818,28 +1768,17 @@ describe(parseConstraints.name, () => {
     assert.deepStrictEqual(actual, expected);
   });
 
-  it("Parses entity wildcard with once clause for arrays", () => {
-    // TODO
-  });
-
-  it("Parses entity wildcard with once clause for objects", () => {
-    // TODO
-  });
-
   it("Parses component wildcard with reference name for arrays", (test) => {
     // Arrange
     const input = [ Component.as("a") ] as const;
 
     const isAComponent = constraintFunctions.isA(Component);
-    const entityHasComponent = constraintFunctions.poolHasPool(ENTITY_POOL, "a");
 
     constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
-    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
         ["a"]: [ isAComponent ],
-        [ENTITY_POOL]: [],
       },
       crossPool: [],
     };
@@ -1856,15 +1795,12 @@ describe(parseConstraints.name, () => {
     const input = { x: Component.as("a") } as const;
 
     const isAComponent = constraintFunctions.isA(Component);
-    const entityHasComponent = constraintFunctions.poolHasPool(ENTITY_POOL, "a");
 
     constraintFunctions.isA = test.mock.fn(constraintFunctions.isA, () => isAComponent);
-    constraintFunctions.poolHasPool = test.mock.fn(constraintFunctions.poolHasPool, () => entityHasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
         ["a"]: [ isAComponent ],
-        [ENTITY_POOL]: [],
       },
       crossPool: [],
     };
@@ -1874,14 +1810,6 @@ describe(parseConstraints.name, () => {
 
     // Assert
     assert.deepStrictEqual(actual, expected);
-  });
-
-  it("Parses component wildcard with once clause for arrays", () => {
-    // TODO
-  });
-
-  it("Parses component wildcard with once clause for objects", () => {
-    // TODO
   });
 
   it("Parses component wildcard with reference source for arrays", (test) => {
@@ -2009,8 +1937,6 @@ describe(parseConstraints.name, () => {
     const expected: Constraints = {
       poolSpecific: {
         ["a"]: [ isARelationship ],
-        [ENTITY_POOL]: [],
-        [getTargetPoolName(0)]: [],
       },
       crossPool: [],
     };
@@ -2033,8 +1959,6 @@ describe(parseConstraints.name, () => {
     const expected: Constraints = {
       poolSpecific: {
         ["a"]: [ isARelationship ],
-        [ENTITY_POOL]: [],
-        [getTargetPoolName(0)]: [],
       },
       crossPool: [],
     };
@@ -2044,14 +1968,6 @@ describe(parseConstraints.name, () => {
 
     // Assert
     assert.deepStrictEqual(actual, expected);
-  });
-
-  it("Parses relationship wildcard with once clause for arrays", () => {
-    // TODO
-  });
-
-  it("Parses relationship wildcard with once clause for objects", () => {
-    // TODO
   });
 
   it("Parses relationship wildcard with reference source for arrays", (test) => {
@@ -2446,14 +2362,6 @@ describe(parseConstraints.name, () => {
     assert.deepStrictEqual(actual, expected);
   });
 
-  it("Parses component wildcard value query with once clause for arrays", () => {
-    // TODO
-  });
-
-  it("Parses component wildcard value query with once clause for objects", () => {
-    // TODO
-  });
-
   it("Parses component wildcard value query with reference source for arrays", (test) => {
     // Arrange
     const input = [ Component.on("source").value() ] as const;
@@ -2698,14 +2606,6 @@ describe(parseConstraints.name, () => {
 
     // Assert
     assert.deepStrictEqual(actual, expected);
-  });
-
-  it("Parses relationship wildcard value query with once clause for arrays", () => {
-    // TODO
-  });
-
-  it("Parses relationship wildcard value query with once clause for objects", () => {
-    // TODO
   });
 
   it("Parses relationship wildcard value query with reference source for arrays", (test) => {
@@ -3031,12 +2931,8 @@ describe(parseMappers.name, () => {
   it("Parses component class for arrays", () => {
     // Arrange
     const component = new Component<number>();
-    const entity = new Entity();
-    const value = 1;
-    entity.add(component.withValue(value));
     const permutation = {
       [COMPONENT_POOL]: component,
-      [ENTITY_POOL]: entity,
     };
     const input = [ Component ] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -3052,11 +2948,8 @@ describe(parseMappers.name, () => {
   it("Parses component class for objects", () => {
     // Arrange
     const component = new Component<number>();
-    const value = 1;
-    const entity = new Entity().add(component.withValue(value));
     const permutation = {
       [COMPONENT_POOL]: component,
-      [ENTITY_POOL]: entity,
     };
     const input = { x: Component } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -3072,14 +2965,8 @@ describe(parseMappers.name, () => {
   it("Parses relationship class for arrays", () => {
     // Arrange
     const relationship = new Relationship<number>();
-    const value = 1;
-    const entity1 = new Entity();
-    const entity2 = new Entity();
-    entity1.add(relationship.to(entity2).withValue(value));
     const permutation = {
       [RELATIONSHIP_POOL]: relationship,
-      [ENTITY_POOL]: entity1,
-      [getTargetPoolName(0)]: entity2,
     };
     const input = [ Relationship ] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -3095,14 +2982,8 @@ describe(parseMappers.name, () => {
   it("Parses relationship class for objects", () => {
     // Arrange
     const relationship = new Relationship<number>();
-    const value = 1;
-    const entity1 = new Entity();
-    const entity2 = new Entity();
-    entity1.add(relationship.to(entity2).withValue(value));
     const permutation = {
       [RELATIONSHIP_POOL]: relationship,
-      [ENTITY_POOL]: entity1,
-      [getTargetPoolName(0)]: entity2,
     };
     const input = { x: Relationship } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -3534,11 +3415,8 @@ describe(parseMappers.name, () => {
   it("Parses component wildcard with reference name for arrays", () => {
     // Arrange
     const component = new Component<number>();
-    const value = 1;
-    const entity = new Entity().add(component.withValue(value));
     const permutation = {
       "a": component,
-      [ENTITY_POOL]: entity,
     };
     const input = [ Component.as("a") ] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -3554,11 +3432,8 @@ describe(parseMappers.name, () => {
   it("Parses component wildcard with reference name for objects", () => {
     // Arrange
     const component = new Component<number>();
-    const value = 1;
-    const entity = new Entity().add(component.withValue(value));
     const permutation = {
       "a": component,
-      [ENTITY_POOL]: entity,
     };
     const input = { x: Component.as("a") } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -3574,11 +3449,8 @@ describe(parseMappers.name, () => {
   it("Parses component wildcard with once clause for arrays", () => {
     // Arrange
     const component = new Component<number>();
-    const value = 1;
-    const entity = new Entity().add(component.withValue(value));
     const permutation = {
       [COMPONENT_POOL]: component,
-      [ENTITY_POOL]: entity,
     };
     const input = [ Component.once() ] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -3594,11 +3466,8 @@ describe(parseMappers.name, () => {
   it("Parses component wildcard with once clause for objects", () => {
     // Arrange
     const component = new Component<number>();
-    const value = 1;
-    const entity = new Entity().add(component.withValue(value));
     const permutation = {
       [COMPONENT_POOL]: component,
-      [ENTITY_POOL]: entity,
     };
     const input = { x: Component.once() } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -3694,14 +3563,8 @@ describe(parseMappers.name, () => {
   it("Parses relationship wildcard with reference name for arrays", () => {
     // Arrange
     const relationship = new Relationship<number>();
-    const value = 1;
-    const entity1 = new Entity();
-    const entity2 = new Entity();
-    entity1.add(relationship.to(entity2).withValue(value));
     const permutation = {
       "a": relationship,
-      [ENTITY_POOL]: entity1,
-      [getTargetPoolName(0)]: entity2,
     };
     const input = [ Relationship.as("a") ] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -3717,14 +3580,8 @@ describe(parseMappers.name, () => {
   it("Parses relationship wildcard with reference name for objects", () => {
     // Arrange
     const relationship = new Relationship<number>();
-    const value = 1;
-    const entity1 = new Entity();
-    const entity2 = new Entity();
-    entity1.add(relationship.to(entity2).withValue(value));
     const permutation = {
       "a": relationship,
-      [ENTITY_POOL]: entity1,
-      [getTargetPoolName(0)]: entity2,
     };
     const input = { x: Relationship.as("a") } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};
@@ -3740,14 +3597,8 @@ describe(parseMappers.name, () => {
   it("Parses relationship wildcard with once clause for arrays", () => {
     // Arrange
     const relationship = new Relationship<number>();
-    const value = 1;
-    const entity1 = new Entity();
-    const entity2 = new Entity();
-    entity1.add(relationship.to(entity2).withValue(value));
     const permutation = {
       [RELATIONSHIP_POOL]: relationship,
-      [ENTITY_POOL]: entity1,
-      [getTargetPoolName(0)]: entity2,
     };
     const input = [ Relationship.once() ] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -3763,14 +3614,8 @@ describe(parseMappers.name, () => {
   it("Parses relationship wildcard with once clause for objects", () => {
     // Arrange
     const relationship = new Relationship<number>();
-    const value = 1;
-    const entity1 = new Entity();
-    const entity2 = new Entity();
-    entity1.add(relationship.to(entity2).withValue(value));
     const permutation = {
       [RELATIONSHIP_POOL]: relationship,
-      [ENTITY_POOL]: entity1,
-      [getTargetPoolName(0)]: entity2,
     };
     const input = { x: Relationship.once() } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};

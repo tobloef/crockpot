@@ -545,8 +545,8 @@ describe("Component wildcard query", () => {
     entities[1].add(components.Tag1);
     entities[2].add(components.Number1.withValue(1), components.Tag2);
 
-    const expectedArray = [ [ components.Tag1 ], [ components.Number1.withValue(1) ], [ components.Tag2 ] ];
-    const expectedObject = expectedArray.map((val) => ({ comp: val }));
+    const expectedArray = Object.values(components).map((c) => [ c ]);
+    const expectedObject = expectedArray.map((comp) => ({ comp }));
 
     // Act
     const arrayResult = query(all, [ Component ]);
