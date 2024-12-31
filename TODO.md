@@ -16,4 +16,5 @@
   * Indexing?
   * Sorting?
 * State machines?
+* Events
 * Benchmarking
