@@ -108,7 +108,6 @@ const componentInstanceQueryHandler: QueryPartHandler<ComponentInstanceQuery<any
     const mapperKey = key ?? index;
 
     const poolInfos: PoolInfos = {
-      [getInstancePoolName(part.component)]: { isOnce: false },
       [(
         part.source instanceof Entity
           ? getInstancePoolName(part.source)
@@ -116,15 +115,12 @@ const componentInstanceQueryHandler: QueryPartHandler<ComponentInstanceQuery<any
       )]: { isOnce: false },
     }
 
-    const [componentPool, entityPool] = Object.keys(poolInfos);
+    const [entityPool] = Object.keys(poolInfos);
 
-    const mapper = createComponentValueMapper(mapperKey, componentPool, entityPool);
+    const mapper = createComponentInstanceValueMapper(mapperKey, part.component, entityPool);
 
     const constraints = {
       poolSpecific: {
-        [componentPool]: [
-          constraintFunctions.is(part.component),
-        ],
         [entityPool]: part.source instanceof Entity
           ? [constraintFunctions.is(part.source), constraintFunctions.has(part.component)]
           : [constraintFunctions.has(part.component)],
@@ -196,7 +192,7 @@ const componentWildcardValueQueryHandler: QueryPartHandler<ComponentWildcardValu
 
     const [componentPool, entityPool] = Object.keys(poolInfos);
 
-    const mapper = createComponentValueMapper(mapperKey, componentPool, entityPool);
+    const mapper = createComponentPoolValueMapper(mapperKey, componentPool, entityPool);
 
     const constraints = {
       poolSpecific: {
@@ -337,7 +333,7 @@ const entityWildcardQueryHandler: QueryPartHandler<EntityWildcardQuery> = {
     return { mapper, constraints, poolInfos };
   }
 };
-const relationshipHandler: QueryPartHandler<Relationship<unknown>> = {
+const relationshipInstanceHandler: QueryPartHandler<Relationship<unknown>> = {
   predicate: (part): part is Relationship<unknown> => part instanceof Relationship,
   fn: (part, index, key) => {
     const mapperKey = key ?? index;
@@ -370,25 +366,21 @@ const relationshipHandler: QueryPartHandler<Relationship<unknown>> = {
     return { mapper, constraints, poolInfos };
   }
 };
-const componentHandler: QueryPartHandler<Component<unknown>> = {
+const componentInstanceHandler: QueryPartHandler<Component<unknown>> = {
   predicate: (part): part is Component<unknown> => part instanceof Component,
   fn: (part, index, key) => {
     const mapperKey = key ?? index;
 
     const poolInfos: PoolInfos = {
-      [getInstancePoolName(part)]: { isOnce: false },
       [ENTITY_POOL]: { isOnce: false },
     };
 
-    const [componentPool, entityPool] = Object.keys(poolInfos);
+    const [entityPool] = Object.keys(poolInfos);
 
-    const mapper = createComponentValueMapper(mapperKey, componentPool, entityPool);
+    const mapper = createComponentInstanceValueMapper(mapperKey, part, entityPool);
 
     const constraints = {
       poolSpecific: {
-        [componentPool]: [
-          constraintFunctions.is(part),
-        ],
         [entityPool]: [
           constraintFunctions.has(part),
         ],
@@ -484,8 +476,8 @@ const queryPartHandlers: QueryPartHandler<any>[] = [
   relationshipWildcardQueryHandler,
   componentWildcardQueryHandler,
   entityWildcardQueryHandler,
-  relationshipHandler,
-  componentHandler,
+  relationshipInstanceHandler,
+  componentInstanceHandler,
   relationshipClassHandler,
   componentClassHandler,
   entityClassHandler,
@@ -523,7 +515,20 @@ function createRelationshipMapper(
   };
 }
 
-function createComponentValueMapper(
+function createComponentInstanceValueMapper(
+  mapperKey: number | string,
+  component: Component<unknown>,
+  entityPool: string
+): PermutationMapper<any> {
+  return (permutation: Permutation, output: any) => {
+    const entity = permutation[entityPool];
+    const value = entity.get(component);
+
+    output[mapperKey] = value;
+  };
+}
+
+function createComponentPoolValueMapper(
   mapperKey: number | string,
   componentPool: string,
   entityPool: string

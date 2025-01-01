@@ -28,7 +28,7 @@ import type { QueryOutputItem } from "./output.ts";
 import { Component } from "../component/index.ts";
 import { Relationship } from "../relationship/index.ts";
 
-describe(parsePoolInfos.name, () => {
+describe("parsePoolInfos", () => {
   it("Parses entity class for arrays", () => {
     // Arrange
     const input = [ Entity ] as const;
@@ -117,7 +117,6 @@ describe(parsePoolInfos.name, () => {
 
     // Assert
     assert.deepStrictEqual(pools, {
-      [getInstancePoolName(component)]: { isOnce: false },
       [ENTITY_POOL]: { isOnce: false }
     });
   });
@@ -132,7 +131,6 @@ describe(parsePoolInfos.name, () => {
 
     // Assert
     assert.deepStrictEqual(pools, {
-      [getInstancePoolName(component)]: { isOnce: false },
       [ENTITY_POOL]: { isOnce: false }
     });
   });
@@ -179,7 +177,6 @@ describe(parsePoolInfos.name, () => {
 
     // Assert
     assert.deepStrictEqual(pools, {
-      [getInstancePoolName(component)]: { isOnce: false },
       "a": { isOnce: false }
     });
   });
@@ -194,7 +191,6 @@ describe(parsePoolInfos.name, () => {
 
     // Assert
     assert.deepStrictEqual(pools, {
-      [getInstancePoolName(component)]: { isOnce: false },
       "a": { isOnce: false }
     });
   });
@@ -210,7 +206,6 @@ describe(parsePoolInfos.name, () => {
 
     // Assert
     assert.deepStrictEqual(pools, {
-      [getInstancePoolName(component)]: { isOnce: false },
       [getInstancePoolName(entity)]: { isOnce: false }
     });
   });
@@ -226,7 +221,6 @@ describe(parsePoolInfos.name, () => {
 
     // Assert
     assert.deepStrictEqual(pools, {
-      [getInstancePoolName(component)]: { isOnce: false },
       [getInstancePoolName(entity)]: { isOnce: false }
     });
   });
@@ -340,7 +334,6 @@ describe(parsePoolInfos.name, () => {
 
     // Assert
     assert.deepStrictEqual(pools, {
-      [getInstancePoolName(relationship.to(entity))]: { isOnce: false },
       [ENTITY_POOL]: { isOnce: false }
     });
   });
@@ -356,7 +349,6 @@ describe(parsePoolInfos.name, () => {
 
     // Assert
     assert.deepStrictEqual(pools, {
-      [getInstancePoolName(relationship.to(entity))]: { isOnce: false },
       [ENTITY_POOL]: { isOnce: false }
     });
   });
@@ -1056,7 +1048,7 @@ describe(parsePoolInfos.name, () => {
   });
 });
 
-describe(parseConstraints.name, () => {
+describe("parseConstraints", () => {
   it("Parses entity class for arrays", () => {
     // Arrange
     const input = [ Entity ] as const;
@@ -1190,15 +1182,12 @@ describe(parseConstraints.name, () => {
     const component = new Component<number>();
     const input = [ component ] as const;
 
-    const isComponent = constraintFunctions.is(component);
     const hasComponent = constraintFunctions.has(component);
 
-    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isComponent);
     constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
-        [getInstancePoolName(component)]: [ isComponent ],
         [ENTITY_POOL]: [ hasComponent ],
       },
       crossPool: [],
@@ -1216,15 +1205,12 @@ describe(parseConstraints.name, () => {
     const component = new Component<number>();
     const input = { x: component } as const;
 
-    const isComponent = constraintFunctions.is(component);
     const hasComponent = constraintFunctions.has(component);
 
-    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isComponent);
     constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
-        [getInstancePoolName(component)]: [ isComponent ],
         [ENTITY_POOL]: [ hasComponent ],
       },
       crossPool: [],
@@ -1312,15 +1298,12 @@ describe(parseConstraints.name, () => {
     const component = new Component<number>();
     const input = [ component.on("source") ] as const;
 
-    const isComponent = constraintFunctions.is(component);
     const hasComponent = constraintFunctions.has(component);
 
-    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isComponent);
     constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
-        [getInstancePoolName(component)]: [ isComponent ],
         "source": [ hasComponent ],
       },
       crossPool: [],
@@ -1338,15 +1321,12 @@ describe(parseConstraints.name, () => {
     const component = new Component<number>();
     const input = { x: component.on("source") } as const;
 
-    const isComponent = constraintFunctions.is(component);
     const hasComponent = constraintFunctions.has(component);
 
-    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isComponent);
     constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
-        [getInstancePoolName(component)]: [ isComponent ],
         "source": [ hasComponent ],
       },
       crossPool: [],
@@ -1365,24 +1345,14 @@ describe(parseConstraints.name, () => {
     const component = new Component<number>();
     const input = [ component.on(entity) ] as const;
 
-    const isComponent = constraintFunctions.is(component);
     const isEntity = constraintFunctions.is(entity);
     const hasComponent = constraintFunctions.has(component);
 
-    let callCountOfIs = 0;
-    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => {
-      callCountOfIs += 1;
-      if (callCountOfIs === 1) {
-        return isComponent;
-      } else {
-        return isEntity;
-      }
-    });
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isEntity);
     constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
-        [getInstancePoolName(component)]: [ isComponent ],
         [getInstancePoolName(entity)]: [ isEntity, hasComponent ],
       },
       crossPool: [],
@@ -1401,24 +1371,14 @@ describe(parseConstraints.name, () => {
     const component = new Component<number>();
     const input = { x: component.on(entity) } as const;
 
-    const isComponent = constraintFunctions.is(component);
     const isEntity = constraintFunctions.is(entity);
     const hasComponent = constraintFunctions.has(component);
 
-    let callCountOfIs = 0;
-    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => {
-      callCountOfIs += 1;
-      if (callCountOfIs === 1) {
-        return isComponent;
-      } else {
-        return isEntity;
-      }
-    });
+    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isEntity);
     constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasComponent);
 
     const expected: Constraints = {
       poolSpecific: {
-        [getInstancePoolName(component)]: [ isComponent ],
         [getInstancePoolName(entity)]: [ isEntity, hasComponent ],
       },
       crossPool: [],
@@ -1686,15 +1646,12 @@ describe(parseConstraints.name, () => {
     const relationship = new Relationship<number>();
     const input = [ relationship.to(entity) ] as const;
 
-    const isRelationshipComponent = constraintFunctions.is(relationship.to(entity));
     const hasRelationshipComponent = constraintFunctions.has(relationship.to(entity));
 
-    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isRelationshipComponent);
     constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasRelationshipComponent);
 
     const expected: Constraints = {
       poolSpecific: {
-        [getInstancePoolName(relationship.to(entity))]: [ isRelationshipComponent ],
         [ENTITY_POOL]: [ hasRelationshipComponent ],
       },
       crossPool: [],
@@ -1713,15 +1670,12 @@ describe(parseConstraints.name, () => {
     const relationship = new Relationship<number>();
     const input = { x: relationship.to(entity) } as const;
 
-    const isRelationshipComponent = constraintFunctions.is(relationship.to(entity));
     const hasRelationshipComponent = constraintFunctions.has(relationship.to(entity));
 
-    constraintFunctions.is = test.mock.fn(constraintFunctions.is, () => isRelationshipComponent);
     constraintFunctions.has = test.mock.fn(constraintFunctions.has, () => hasRelationshipComponent);
 
     const expected: Constraints = {
       poolSpecific: {
-        [getInstancePoolName(relationship.to(entity))]: [ isRelationshipComponent ],
         [ENTITY_POOL]: [ hasRelationshipComponent ],
       },
       crossPool: [],
@@ -2893,7 +2847,7 @@ describe(parseConstraints.name, () => {
   });
 });
 
-describe(parseMappers.name, () => {
+describe("parseMappers", () => {
   it("Parses entity class for arrays", () => {
     // Arrange
     const entity = new Entity();
