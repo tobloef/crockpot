@@ -1445,7 +1445,7 @@ describe("Relationship instance query", () => {
     entities[0].add(Number1.to(entities[0]).withValue(1));
 
     const expectedArray = [[1]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([val]) => ({ val }));
 
     // Act
     const arrayResult = query(all, [Number1.to(entities[0])]);
@@ -1469,7 +1469,7 @@ describe("Relationship instance query", () => {
     Number1.add(Number1.to(Number1).withValue(1));
 
     const expectedArray = [[1]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([val]) => ({ val }));
 
     // Act
     const arrayResult = query(all, [Number1.to(Number1)]);
@@ -1493,7 +1493,7 @@ describe("Relationship instance query", () => {
     Number1.add(Number1.to(Number1).withValue(1));
 
     const expectedArray = [[1, Number1]];
-    const expectedObject = expectedArray.map(([rel, target]) => ({ rel, target }));
+    const expectedObject = expectedArray.map(([val, target]) => ({ val, target }));
 
     // Act
     const arrayResult = query(all, [Number1.to("target"), Entity.as("target")]);
@@ -1517,7 +1517,7 @@ describe("Relationship instance query", () => {
     Number1.add(Number1.to(entities[0]).withValue(1));
     entities[0].add(Number1.to(Number1).withValue(2));
 
-    const expectedArray = [[1, 2]];
+    const expectedArray = [[2, 1], [1, 2]];
     const expectedObject = expectedArray.map(([rel1, rel2]) => ({ rel1, rel2 }));
 
     // Act
@@ -1552,7 +1552,7 @@ describe("Relationship wildcard query", () => {
     entities[1].add(Number1.to(entities[0]).withValue(1));
 
     const expectedArray = [[Tag1], [Tag1], [Number1]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
     const arrayResult = query(all, [Relationship]);
@@ -1578,7 +1578,7 @@ describe("Relationship wildcard query", () => {
     entities[1].add(Number1.to(entities[2]).withValue(3));
 
     const expectedArray = [[1]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
     const arrayResult = query(all, [Relationship.on(entities[0])]);
@@ -1604,7 +1604,7 @@ describe("Relationship wildcard query", () => {
     entities[1].add(Number1.to(entities[2]).withValue(3));
 
     const expectedArray = [[entities[0], 1], [entities[1], 3]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
     const arrayResult = query(all, [Entity.as("ref"), Relationship.on("ref")]);
@@ -1662,7 +1662,7 @@ describe("Relationship wildcard query", () => {
     String1.add(Number1.to(Tag1).withValue(3));
 
     const expectedArray = [[1], [3]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
     const arrayResult = query(all, [Relationship.on(Component)]);
@@ -1695,7 +1695,7 @@ describe("Relationship wildcard query", () => {
     String1.add(Number1.to(Tag1).withValue(5));
 
     const expectedArray = [[3], [5]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
     const arrayResult = query(all, [Relationship.on(Relationship)]);
@@ -1721,7 +1721,7 @@ describe("Relationship wildcard query", () => {
     entities[1].add(Number2.to(entities[1]).withValue(3));
 
     const expectedArray = [[1]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
     const arrayResult = query(all, [Relationship.to(entities[1])]);
@@ -1809,7 +1809,7 @@ describe("Relationship wildcard query", () => {
     Tag1.add(Number1.to(Number1.to(entities[0])).withValue(8));
 
     const expectedArray = [[1], [2], [4]]
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
     const arrayResult = query(all, [Relationship.to(Component)]);
@@ -1846,7 +1846,7 @@ describe("Relationship wildcard query", () => {
     Number1.add(Number1.to(Number1).withValue(9));
 
     const expectedArray = [[7], [9]]
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
     const arrayResult = query(all, [Relationship.to(Relationship)]);
@@ -1872,7 +1872,7 @@ describe("Relationship wildcard query", () => {
     entities[1].add(Number1.to(entities[2]).withValue(3));
 
     const expectedArray = [[1], [3]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
     const arrayResult = query(all, [Relationship.as("rel").on(Entity)]);
@@ -1897,7 +1897,7 @@ describe("Relationship wildcard query", () => {
     entities[0].add(Number1.to(entities[2]).withValue(2));
 
     const expectedArray = [[1, 1], [1, 2], [2, 1], [2, 2]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
     const arrayResult = query(all, [Relationship.on(Entity), Relationship.on(Entity)]);
@@ -1922,7 +1922,7 @@ describe("Relationship wildcard query", () => {
     entities[0].add(Number1.to(entities[2]).withValue(2));
 
     const expectedArray = [[1, 1], [2, 1]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
     const arrayResult = query(all, [Relationship.on(Entity).once(), Relationship.on(Entity)]);
@@ -1965,7 +1965,7 @@ describe("Relationship wildcard query", () => {
     entities[0].add(Number1.to(entities[0]).withValue(1));
 
     const expectedArray = [[1]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
     const arrayResult = query(all, [Relationship.to(entities[0])]);
@@ -1989,7 +1989,7 @@ describe("Relationship wildcard query", () => {
     Number1.add(Number1.to(Number1).withValue(1));
 
     const expectedArray = [[1]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
     const arrayResult = query(all, [Relationship.to(Relationship)]);
