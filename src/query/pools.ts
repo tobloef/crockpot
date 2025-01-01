@@ -64,7 +64,6 @@ const relationshipInstanceQueryHandler: QueryPartHandler<RelationshipInstanceQue
     const mapperKey = key ?? index;
 
     const poolInfos: PoolInfos = {
-      [getInstancePoolName(part.relationship)]: { isOnce: part.isOnce },
       [(
         part.source instanceof Entity
           ? getInstancePoolName(part.source)
@@ -77,15 +76,12 @@ const relationshipInstanceQueryHandler: QueryPartHandler<RelationshipInstanceQue
       )]: { isOnce: false },
     };
 
-    const [relationshipPool, entityPool, targetPool] = Object.keys(poolInfos);
+    const [entityPool, targetPool] = Object.keys(poolInfos);
 
-    const mapper = createRelationshipValueMapper(mapperKey, relationshipPool, entityPool, targetPool);
+    const mapper = createRelationshipInstanceValueMapper(mapperKey, part.relationship, entityPool, targetPool);
 
     const constraints = {
       poolSpecific: {
-        [relationshipPool]: [
-          constraintFunctions.is(part.relationship),
-        ],
         [entityPool]: part.source instanceof Entity
           ? [constraintFunctions.is(part.source), constraintFunctions.has(part.relationship)]
           : [constraintFunctions.has(part.relationship)],
@@ -94,7 +90,7 @@ const relationshipInstanceQueryHandler: QueryPartHandler<RelationshipInstanceQue
           : [],
       },
       crossPool: [
-        constraintFunctions.poolTargetsPool(entityPool, relationshipPool, targetPool),
+        constraintFunctions.poolTargetsPoolByInstance(entityPool, part.relationship, targetPool),
       ],
     };
 
@@ -153,7 +149,7 @@ const relationWildcardValueQueryHandler: QueryPartHandler<RelationshipWildcardVa
 
     const [relationshipPool, entityPool, targetPool] = Object.keys(poolInfos);
 
-    const mapper = createRelationshipValueMapper(mapperKey, relationshipPool, entityPool, targetPool);
+    const mapper = createRelationshipPoolValueMapper(mapperKey, relationshipPool, entityPool, targetPool);
 
     const constraints = {
       poolSpecific: {
@@ -168,7 +164,7 @@ const relationWildcardValueQueryHandler: QueryPartHandler<RelationshipWildcardVa
           : [],
       },
       crossPool: [
-        constraintFunctions.poolTargetsPool(entityPool, relationshipPool, targetPool),
+        constraintFunctions.poolTargetsPoolByPool(entityPool, relationshipPool, targetPool),
       ],
     };
 
@@ -260,7 +256,7 @@ const relationshipWildcardQueryHandler: QueryPartHandler<RelationshipWildcardQue
         : [];
 
       constraints.crossPool.push(
-        constraintFunctions.poolTargetsPool(sourcePoolName, relationshipPool, targetPoolName)
+        constraintFunctions.poolTargetsPoolByPool(sourcePoolName, relationshipPool, targetPoolName)
       );
     }
 
@@ -339,27 +335,23 @@ const relationshipInstanceHandler: QueryPartHandler<Relationship<unknown>> = {
     const mapperKey = key ?? index;
 
     const poolInfos: PoolInfos = {
-      [getInstancePoolName(part)]: { isOnce: false },
       [ENTITY_POOL]: { isOnce: false },
       [getTargetPoolName(index)]: { isOnce: false },
     };
 
-    const [relationshipPool, entityPool, targetPool] = Object.keys(poolInfos);
+    const [entityPool, targetPool] = Object.keys(poolInfos);
 
-    const mapper = createRelationshipValueMapper(mapperKey, relationshipPool, entityPool, targetPool);
+    const mapper = createRelationshipInstanceValueMapper(mapperKey, part, entityPool, targetPool);
 
     const constraints = {
       poolSpecific: {
-        [relationshipPool]: [
-          constraintFunctions.is(part),
-        ],
         [entityPool]: [
           constraintFunctions.has(part),
         ],
         [targetPool]: [],
       },
       crossPool: [
-        constraintFunctions.poolTargetsPool(entityPool, relationshipPool, targetPool),
+        constraintFunctions.poolTargetsPoolByInstance(entityPool, part, targetPool),
       ],
     };
 
@@ -542,7 +534,7 @@ function createComponentPoolValueMapper(
   };
 }
 
-function createRelationshipValueMapper(
+function createRelationshipPoolValueMapper(
   mapperKey: number | string,
   relationshipPool: string,
   entityPool: string,
@@ -550,6 +542,21 @@ function createRelationshipValueMapper(
 ): PermutationMapper<any> {
   return (permutation: Permutation, output: any) => {
     const relationship = permutation[relationshipPool] as Relationship<unknown>;
+    const entity = permutation[entityPool];
+    const target = permutation[targetPool];
+    const value = entity.get(relationship.to(target));
+
+    output[mapperKey] = value;
+  };
+}
+
+function createRelationshipInstanceValueMapper(
+  mapperKey: number | string,
+  relationship: Relationship<unknown>,
+  entityPool: string,
+  targetPool: string
+): PermutationMapper<any> {
+  return (permutation: Permutation, output: any) => {
     const entity = permutation[entityPool];
     const target = permutation[targetPool];
     const value = entity.get(relationship.to(target));
@@ -748,7 +755,8 @@ export const constraintFunctions = {
   is,
   has,
   poolHasPool,
-  poolTargetsPool,
+  poolTargetsPoolByPool,
+  poolTargetsPoolByInstance,
 };
 
 function isA(expected: Class<any>): EntityConstraint {
@@ -799,7 +807,7 @@ function poolHasPool(entityPool: string, componentPool: string): PermutationCons
   return constraint;
 }
 
-function poolTargetsPool(
+function poolTargetsPoolByPool(
   sourcePool: string,
   relationshipPool: string,
   targetPool: string,
@@ -818,6 +826,30 @@ function poolTargetsPool(
     }
 
     if (!(relationship instanceof Relationship)) {
+      return false;
+    }
+
+    const target = permutation[targetPool];
+
+    if (!target) {
+      return false;
+    }
+
+    return source.has(relationship.to(target));
+  };
+
+  return constraint;
+}
+
+function poolTargetsPoolByInstance(
+  sourcePool: string,
+  relationship: Relationship<unknown>,
+  targetPool: string,
+): PermutationConstraint {
+  const constraint = (permutation: Permutation): boolean => {
+    const source = permutation[sourcePool];
+
+    if (!source) {
       return false;
     }
 
