@@ -1545,13 +1545,9 @@ describe("Relationship instance query", () => {
 describe("Relationship wildcard query", () => {
   it("Finds all relationships", () => {
     // Arrange
-    const { all, entities, relationships: { Tag1, Number1 } } = createEntities({ count: 3 });
+    const { all, relationships } = createEntities({ count: 3 });
 
-    entities[0].add(Tag1.to(entities[1]));
-    entities[1].add(Tag1.to(entities[2]));
-    entities[1].add(Number1.to(entities[0]).withValue(1));
-
-    const expectedArray = [[Tag1], [Tag1], [Number1]];
+    const expectedArray = Object.values(relationships).map((rel) => [rel]);
     const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
@@ -1559,8 +1555,8 @@ describe("Relationship wildcard query", () => {
     const objectResult = query(all, { rel: Relationship });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, Generator<[any]>>(true);
-    assertTypesEqual<typeof objectResult, Generator<{ rel: any }>>(true);
+    assertTypesEqual<typeof arrayResult, Generator<[Relationship<unknown>]>>(true);
+    assertTypesEqual<typeof objectResult, Generator<{ rel: Relationship<unknown> }>>(true);
 
     const actualArray = [...arrayResult];
     const actualObject = [...objectResult];
@@ -1577,16 +1573,16 @@ describe("Relationship wildcard query", () => {
     entities[0].add(Number2.to(entities[0]).withValue(2));
     entities[1].add(Number1.to(entities[2]).withValue(3));
 
-    const expectedArray = [[1]];
+    const expectedArray = [[Number1], [Number2]];
     const expectedObject = expectedArray.map(([rel]) => ({ rel }));
 
     // Act
     const arrayResult = query(all, [Relationship.on(entities[0])]);
-    const objectResult = query(all, { val: Relationship.on(entities[0]) });
+    const objectResult = query(all, { rel: Relationship.on(entities[0]) });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
-    assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
+    assertTypesEqual<typeof arrayResult, Generator<[Relationship<unknown>]>>(true);
+    assertTypesEqual<typeof objectResult, Generator<{ val: Relationship<unknown> }>>(true);
 
     const actualArray = [...arrayResult];
     const actualObject = [...objectResult];
@@ -1603,12 +1599,16 @@ describe("Relationship wildcard query", () => {
     entities[0].add(Number2.to(entities[0]).withValue(2));
     entities[1].add(Number1.to(entities[2]).withValue(3));
 
-    const expectedArray = [[entities[0], 1], [entities[1], 3]];
-    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
+    const expectedArray = [
+      [entities[0], Number1],
+      [entities[0], Number2],
+      [entities[1], Number1]
+    ];
+    const expectedObject = expectedArray.map(([ent, rel]) => ({ ent, rel }));
 
     // Act
     const arrayResult = query(all, [Entity.as("ref"), Relationship.on("ref")]);
-    const objectResult = query(all, { ent: Entity.as("ref"), val: Relationship.on("ref") });
+    const objectResult = query(all, { ent: Entity.as("ref"), rel: Relationship.on("ref") });
 
     // Assert
     assertTypesEqual<typeof arrayResult, Generator<[Entity, unknown]>>(true);
