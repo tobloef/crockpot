@@ -1288,7 +1288,7 @@ describe("Relationship instance query", () => {
     entities[1].add(Number1.to(entities[0]).withValue(2));
     entities[1].add(Number2.to(entities[1]).withValue(3));
 
-    const expectedArray = [[entities[1], 1], [entities[0], 2]];
+    const expectedArray = [[entities[0], 2], [entities[1], 1]];
     const expectedObject = expectedArray.map(([ent, val]) => ({ ent, val }));
 
     // Act
@@ -1306,33 +1306,7 @@ describe("Relationship instance query", () => {
     assert.deepStrictEqual(actualObject, expectedObject);
   });
 
-  it("Finds relationship value to any entity using wildcard", () => {
-    // Arrange
-    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
-
-    entities[0].add(Number1.to(entities[1]).withValue(1));
-    entities[1].add(Number1.to(entities[0]).withValue(2));
-    entities[1].add(Number2.to(entities[1]).withValue(3));
-
-    const expectedArray = [[1], [2]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
-
-    // Act
-    const arrayResult = query(all, [Number1.to(Entity)]);
-    const objectResult = query(all, { val: Number1.to(Entity) });
-
-    // Assert
-    assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
-    assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
-
-    const actualArray = [...arrayResult];
-    const actualObject = [...objectResult];
-
-    assert.deepStrictEqual(actualArray, expectedArray);
-    assert.deepStrictEqual(actualObject, expectedObject);
-  });
-
-  it("Finds relationship value to any component type using wildcard", () => {
+  it("Finds relationship value to component reference", () => {
     // Arrange
     const {
       all,
@@ -1350,16 +1324,16 @@ describe("Relationship instance query", () => {
     Tag1.add(Number1.to(Number1).withValue(7));
     Tag1.add(Number1.to(Number1.to(entities[0])).withValue(8));
 
-    const expectedArray = [[1], [2], [4]]
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedArray = [[1, Tag1], [2, Tag1], [4, Tag1], [5, Tag1]]
+    const expectedObject = expectedArray.map(([val, comp]) => ({ val, comp }));
 
     // Act
-    const arrayResult = query(all, [Number1.to(Component)]);
-    const objectResult = query(all, { val: Number1.to(Component) });
+    const arrayResult = query(all, [Number1.to("comp"), Component.as("comp")]);
+    const objectResult = query(all, { val: Number1.to("comp"), comp: Component.as("comp") });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
-    assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
+    assertTypesEqual<typeof arrayResult, Generator<[number, Component<unknown>]>>(true);
+    assertTypesEqual<typeof objectResult, Generator<{ val: number, comp: Component<unknown> }>>(true);
 
     const actualArray = [...arrayResult];
     const actualObject = [...objectResult];
@@ -1387,16 +1361,16 @@ describe("Relationship instance query", () => {
     Tag1.add(Number1.to(Number1.to(entities[0])).withValue(8));
     Number1.add(Number1.to(Number1).withValue(9));
 
-    const expectedArray = [[7], [9]]
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
+    const expectedArray = [[7, Number1], [9, Number1]]
+    const expectedObject = expectedArray.map(([val, rel]) => ({ val, rel }));
 
     // Act
-    const arrayResult = query(all, [Number1.to(Relationship)]);
-    const objectResult = query(all, { val: Number1.to(Relationship) });
+    const arrayResult = query(all, [Number1.to("rel"), Relationship.as("rel")]);
+    const objectResult = query(all, { val: Number1.to("rel"), rel: Relationship.as("rel") });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, Generator<[number]>>(true);
-    assertTypesEqual<typeof objectResult, Generator<{ val: number }>>(true);
+    assertTypesEqual<typeof arrayResult, Generator<[number, Relationship<unknown>]>>(true);
+    assertTypesEqual<typeof objectResult, Generator<{ val: number, rel: Relationship<unknown> }>>(true);
 
     const actualArray = [...arrayResult];
     const actualObject = [...objectResult];
