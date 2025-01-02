@@ -21,3 +21,5 @@ vs
 ]
 ```
 Should it be able to infer the target of the last part?
+
+Fun thought: The querying API is declarative. We're saying what data we want, not how to get it.
