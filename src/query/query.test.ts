@@ -1621,32 +1621,6 @@ describe("Relationship wildcard query", () => {
     assert.deepStrictEqual(actualObject, expectedObject);
   });
 
-  it("Finds all relationships on any entity", () => {
-    // Arrange
-    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
-
-    entities[0].add(Number1.to(entities[1]).withValue(1));
-    entities[0].add(Number2.to(entities[0]).withValue(2));
-    entities[1].add(Number1.to(entities[2]).withValue(3));
-
-    const expectedArray = [[1], [3]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
-
-    // Act
-    const arrayResult = query(all, [Relationship.on(Entity)]);
-    const objectResult = query(all, { val: Relationship.on(Entity) });
-
-    // Assert
-    assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
-    assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
-
-    const actualArray = [...arrayResult];
-    const actualObject = [...objectResult];
-
-    assert.deepStrictEqual(actualArray, expectedArray);
-    assert.deepStrictEqual(actualObject, expectedObject);
-  });
-
   it("Finds all relationships on any component", () => {
     // Arrange
     const {
@@ -1661,16 +1635,68 @@ describe("Relationship wildcard query", () => {
     Tag1.add(Number2.to(Tag1).withValue(2));
     String1.add(Number1.to(Tag1).withValue(3));
 
-    const expectedArray = [[1], [3]];
-    const expectedObject = expectedArray.map(([rel]) => ({ rel }));
+    const expectedArray = [[Number1, Tag1], [Number1, String1], [Number2, Tag1]];
+    const expectedObject = expectedArray.map(([rel, comp]) => ({ rel, comp }));
 
     // Act
-    const arrayResult = query(all, [Relationship.on(Component)]);
-    const objectResult = query(all, { val: Relationship.on(Component) });
+    const arrayResult = query(all, [Relationship.on("comp"), Component.as("comp")]);
+    const objectResult = query(all, { rel: Relationship.on("comp"), comp: Component.as("comp") });
 
     // Assert
-    assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
-    assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
+    assertTypesEqual<typeof arrayResult, Generator<[Relationship<unknown>, Component<unknown>]>>(true);
+    assertTypesEqual<typeof objectResult, Generator<{ rel: Relationship<unknown>, comp: Component<unknown> }>>(true);
+
+    const actualArray = [...arrayResult];
+    const actualObject = [...objectResult];
+
+    assert.deepStrictEqual(actualArray, expectedArray);
+    assert.deepStrictEqual(actualObject, expectedObject);
+  });
+
+  it("Finds all relationships and their values on components", () => {
+    // Arrange
+    const {
+      all,
+      entities,
+      components: { Tag1, String1 },
+      relationships: { Number1, Number2 },
+    } = createEntities({ count: 3 });
+
+    entities[0].add(Number1.to(Tag1).withValue(1));
+    Tag1.add(Number1.to(Tag1).withValue(1));
+    Tag1.add(Number2.to(Tag1).withValue(2));
+    String1.add(Number1.to(Tag1).withValue(3));
+
+    const expectedArray = [
+      [Number1, Tag1, 1],
+      [Number1, String1, 3],
+      [Number2, Tag1, 2],
+    ];
+    const expectedObject = expectedArray.map(([rel, comp, val]) => ({ rel, comp, val }));
+
+    // Act
+    const arrayResult = query(all, [
+      Relationship.as("rel").on("comp"),
+      Component.as("comp"),
+      Relationship.as("rel").on("comp").value(),
+    ]);
+    const objectResult = query(all, {
+      rel: Relationship.as("rel").on("comp"),
+      comp: Component.as("comp"),
+      val: Relationship.as("rel").on("comp").value(),
+    });
+
+    // Assert
+    assertTypesEqual<typeof arrayResult, Generator<[
+      Relationship<unknown>,
+      Component<unknown>,
+      unknown
+    ]>>(true);
+    assertTypesEqual<typeof objectResult, Generator<{
+      rel: Relationship<unknown>,
+      comp: Component<unknown>,
+      val: unknown
+    }>>(true);
 
     const actualArray = [...arrayResult];
     const actualObject = [...objectResult];
@@ -1756,32 +1782,6 @@ describe("Relationship wildcard query", () => {
     // Assert
     assertTypesEqual<typeof arrayResult, Generator<[Entity, unknown]>>(true);
     assertTypesEqual<typeof objectResult, Generator<{ ent: Entity, val: unknown }>>(true);
-
-    const actualArray = [...arrayResult];
-    const actualObject = [...objectResult];
-
-    assert.deepStrictEqual(actualArray, expectedArray);
-    assert.deepStrictEqual(actualObject, expectedObject);
-  });
-
-  it("Finds all relationships to any entity", () => {
-    // Arrange
-    const { all, entities, relationships: { Number1, Number2 } } = createEntities({ count: 3 });
-
-    entities[0].add(Number1.to(entities[1]).withValue(1));
-    entities[1].add(Number1.to(entities[0]).withValue(2));
-    entities[1].add(Number2.to(entities[1]).withValue(3));
-
-    const expectedArray = [[1], [2]];
-    const expectedObject = expectedArray.map((rel) => ({ rel }));
-
-    // Act
-    const arrayResult = query(all, [Relationship.to(Entity)]);
-    const objectResult = query(all, { val: Relationship.to(Entity) });
-
-    // Assert
-    assertTypesEqual<typeof arrayResult, Generator<[unknown]>>(true);
-    assertTypesEqual<typeof objectResult, Generator<{ val: unknown }>>(true);
 
     const actualArray = [...arrayResult];
     const actualObject = [...objectResult];

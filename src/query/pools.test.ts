@@ -866,7 +866,7 @@ describe("parsePoolInfos", () => {
     assert.deepStrictEqual(pools, {
       "a": { isOnce: false },
       [ENTITY_POOL]: { isOnce: false },
-      [getTargetPoolName(0)]: { isOnce: false }
+      [getTargetPoolName("a")]: { isOnce: false }
     });
   });
 
@@ -881,7 +881,7 @@ describe("parsePoolInfos", () => {
     assert.deepStrictEqual(pools, {
       "a": { isOnce: false },
       [ENTITY_POOL]: { isOnce: false },
-      [getTargetPoolName(0)]: { isOnce: false }
+      [getTargetPoolName("a")]: { isOnce: false }
     });
   });
 
@@ -2467,7 +2467,7 @@ describe("parseConstraints", () => {
       poolSpecific: {
         ["a"]: [ isARelationship ],
         [ENTITY_POOL]: [],
-        [getTargetPoolName(0)]: [],
+        [getTargetPoolName("a")]: [],
       },
       crossPool: [
         entityTargetsRelationship,
@@ -2498,7 +2498,7 @@ describe("parseConstraints", () => {
       poolSpecific: {
         ["a"]: [ isARelationship ],
         [ENTITY_POOL]: [],
-        [getTargetPoolName(0)]: [],
+        [getTargetPoolName("a")]: [],
       },
       crossPool: [
         entityTargetsRelationship,
@@ -3972,7 +3972,7 @@ describe("parseMappers", () => {
     const permutation = {
       "a": relationship,
       [ENTITY_POOL]: entity1,
-      [getTargetPoolName(0)]: entity2,
+      [getTargetPoolName("a")]: entity2,
     };
     const input = [ Relationship.as("a").value() ] as const;
     const output: Partial<QueryOutputItem<typeof input>> = [];
@@ -3995,7 +3995,7 @@ describe("parseMappers", () => {
     const permutation = {
       "a": relationship,
       [ENTITY_POOL]: entity1,
-      [getTargetPoolName(0)]: entity2,
+      [getTargetPoolName("a")]: entity2,
     };
     const input = { x: Relationship.as("a").value() } as const;
     const output: Partial<QueryOutputItem<typeof input>> = {};

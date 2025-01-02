@@ -1,3 +1,7 @@
+* Open question, what to do about
+* Get both component and value in same query?
+  * `Relationship.on("comp"), Component.as("comp"), Component.as("comp").values()`?
+  * Doesn't work because the pool of components won't include 
 * Fix query tests
 * Support boolean queries in pools
 * Support or and not for RelationshipTarget, RelationshipSource and ComponentSource

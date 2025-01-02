@@ -27,7 +27,7 @@ export type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 export const ENTITY_POOL = "__default_entity";
 export const COMPONENT_POOL = "__default_component";
 export const RELATIONSHIP_POOL = "__default_relationship";
-export const getTargetPoolName = (index: number): string => `__default_target_${index}`;
+export const getTargetPoolName = (index: number | string): string => `__default_target_${index}`;
 export const getInstancePoolName = (instance: Entity): string => `__instance_pool_${instance.__id}`;
 
 // TODO: Give this file a better name
@@ -143,7 +143,7 @@ const relationWildcardValueQueryHandler: QueryPartHandler<RelationshipWildcardVa
       [(
         part.target instanceof Entity
           ? getInstancePoolName(part.target)
-          : (part.target ?? getTargetPoolName(index))
+          : (part.target ?? getTargetPoolName(part.typeName ?? index))
       )]: { isOnce: false },
     };
 
@@ -241,7 +241,7 @@ const relationshipWildcardQueryHandler: QueryPartHandler<RelationshipWildcardQue
       const targetPoolName = (
         part.target instanceof Entity
           ? getInstancePoolName(part.target)
-          : (part.target ?? getTargetPoolName(index))
+          : (part.target ?? getTargetPoolName(part.name ?? index))
       );
 
       poolInfos[sourcePoolName] = { isOnce: false }
