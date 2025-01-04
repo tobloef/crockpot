@@ -6,12 +6,13 @@
     "lib": ["ESNext"],
     "verbatimModuleSyntax": true,
     "declaration": true,
-    "sourceMap": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "types": ["node"],
     "outDir": "build",
     "useUnknownInCatchVariables": false,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "rewriteRelativeImportExtensions": true
+    "sourceMap": true
   },
   "exclude": [
     "node_modules",

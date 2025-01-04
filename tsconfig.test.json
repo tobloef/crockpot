@@ -1,15 +1,17 @@
 {
   "compilerOptions": {
-    "checkJs": true,
-    "allowJs": true,
     "strict": true,
-    "declaration": false,
     "target": "ESNext",
     "module": "NodeNext",
+    "lib": ["ESNext"],
     "verbatimModuleSyntax": true,
-    "noEmit": true,
+    "declaration": false,
     "allowImportingTsExtensions": true,
-    "rewriteRelativeImportExtensions": true
+    "rewriteRelativeImportExtensions": true,
+    "types": ["node"],
+    "checkJs": true,
+    "allowJs": true,
+    "noEmit": true
   },
   "exclude": [
     "node_modules",
