@@ -298,7 +298,7 @@ describe("Spaceship scenario", () => {
   it("By list of edges with deep query to nodes", () => {
     // Arrange
     const {
-      instances: { edges },
+      instances: { nodes, edges },
       types: {
         nodes: { Spaceship, Planet, Faction },
         edges: { BelongsTo, DockedTo, RuledBy, AlliedWith },
@@ -352,8 +352,9 @@ describe("Spaceship scenario", () => {
   it("By list of edges and edges to implicit nodes", () => {
     // Arrange
     const {
-      instances: { edges },
+      instances: { nodes, edges },
       types: {
+        nodes: { Spaceship, Planet, Faction },
         edges: { BelongsTo, DockedTo, RuledBy, AlliedWith },
       },
     } = setUpSpaceshipScenario();
@@ -405,12 +406,14 @@ describe("Spaceship scenario", () => {
   it("By deep query on spaceship node", () => {
     // Arrange
     const {
-      instances: { nodes },
+      instances: { nodes, edges },
       types: {
         nodes: { Spaceship, Planet, Faction },
         edges: { BelongsTo, DockedTo, RuledBy, AlliedWith },
       },
     } = setUpSpaceshipScenario();
+
+    class Test {}
 
     type ExpectedType = [
       Spaceship,
@@ -446,12 +449,14 @@ describe("Spaceship scenario", () => {
   it("By deep query on spaceship node with implicit nodes", () => {
     // Arrange
     const {
-      instances: { nodes },
+      instances: { nodes, edges },
       types: {
         nodes: { Spaceship, Planet, Faction },
         edges: { BelongsTo, DockedTo, RuledBy, AlliedWith },
       },
     } = setUpSpaceshipScenario();
+
+    class Test {}
 
     type ExpectedType = [
       Spaceship,
@@ -487,7 +492,7 @@ describe("Spaceship scenario", () => {
   it("By deep query on spaceship node with oneOf in edge target", () => {
     // Arrange
     const {
-      instances: { nodes },
+      instances: { nodes, edges },
       types: {
         nodes: { Spaceship, Planet, Faction },
         edges: { BelongsTo, DockedTo, RuledBy, AlliedWith },
@@ -528,7 +533,7 @@ describe("Spaceship scenario", () => {
   it("By list of nodes with deep query to edges", () => {
     // Arrange
     const {
-      instances: { nodes },
+      instances: { nodes, edges },
       types: {
         nodes: { Spaceship, Planet, Faction },
         edges: { BelongsTo, DockedTo, RuledBy, AlliedWith },
