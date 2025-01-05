@@ -1,11 +1,15 @@
 import { CustomError } from "../utils/errors/custom-error.ts";
-import type { Class } from "../utils/class.ts";
+import type { Class, Instance } from "../utils/class.ts";
 
 export type QueryPart = (
   | Class<Node>
   | Class<Edge>
-  | NodeWildcardQuery
+  | NodeWildcardQuery<any>
+  | EdgeWildcardQuery<any>
+  | OneOfQueryPart
   );
+
+type OneOfQueryPart = OneOf<QueryPart[]>;
 
 export type QueryInput = QueryPart[] | Record<string, QueryPart>;
 
@@ -42,10 +46,27 @@ type ParseSingleInput<Input extends QueryPart> = (
       ? Input extends Class<infer EdgeType>
         ? EdgeType
         : never
-      : Input extends NodeWildcardQuery
-        ? Node
-        : never
+      : Input extends NodeWildcardQuery<infer NodeType>
+        ? NodeType
+        : Input extends EdgeWildcardQuery<infer EdgeType>
+          ? EdgeType
+          : Input extends OneOf<infer Parts>
+            ? Parts extends QueryPart[]
+              ? ParseOr<Parts>
+              : never
+            : never
   );
+
+type ParseOr<Parts extends QueryPart[]> =
+  Parts extends [infer First, ...infer Rest]
+    ? First extends QueryPart
+      ? Rest extends QueryPart[]
+        ? ParseSingleInput<First> extends never
+          ? (undefined | ParseOr<Rest>)
+          : (ParseSingleInput<First> | ParseOr<Rest>)
+        : never
+      : never
+    : never;
 
 export type WorldOptions = {
   name?: string;
@@ -88,12 +109,19 @@ export type NodeOptions = {
   world?: World,
 };
 
+export type WithPart = (
+  | Node
+  | string
+  | OneOf<any>
+  | NodeWildcardQuery<any>
+  | EdgeWildcardQuery<any>
+  )
+
 export class Node {
   static defaultWorld = new World();
 
   name?: string;
 
-  #brand = "node" as const;
   #world: World;
   #edges: Edge[] = [];
 
@@ -103,8 +131,12 @@ export class Node {
     this.#world.add(this);
   }
 
-  static as(name: string): NodeWildcardQuery {
-    return new NodeWildcardQuery().as(name);
+  static as<Type extends Node>(this: Class<Type>, name: string) {
+    return new NodeWildcardQuery<Type>(this).as(name);
+  }
+
+  static with<Type extends Node>(this: Class<Type>, ...parts: WithPart[]) {
+    return new NodeWildcardQuery<Type>(this).with(...parts);
   }
 
   get world(): World {
@@ -118,13 +150,30 @@ export class Node {
 
 export type EdgeOptions = NodeOptions;
 
+export const EdgeDirection = {
+  OneWay: "one-way",
+  TwoWay: "two-way",
+} as const;
+
+export type EdgeDirection = typeof EdgeDirection[keyof typeof EdgeDirection];
+
+export type NodePart = (
+  | Node
+  | string
+  | NodeWildcardQuery<any>
+  | OneOfNodePart
+  );
+
+type OneOfNodePart = OneOf<NodePart[]>;
+
 export class Edge {
   name?: string;
 
-  #brand = "edge" as const;
   #from: Node;
   #to: Node;
   #world: World;
+
+  static direction: EdgeDirection = EdgeDirection.TwoWay;
 
   constructor(
     ends: { from: Node, to: Node },
@@ -141,6 +190,14 @@ export class Edge {
     this.#world = ends.from.world;
   }
 
+  static from<Type extends Edge>(this: Class<Type>, node: NodePart) {
+    return new EdgeWildcardQuery<Type>(this).from(node);
+  }
+
+  static to<Type extends Edge>(this: Class<Type>, node: NodePart) {
+    return new EdgeWildcardQuery<Type>(this).to(node);
+  }
+
   get world(): World {
     return this.#world;
   }
@@ -154,12 +211,42 @@ export class Edge {
   }
 }
 
-export class NodeWildcardQuery {
-  name?: string;
+export class NodeWildcardQuery<Type extends Node> {
+  #type: Class<Type>;
+  #name?: string;
+  #with?: WithPart[];
 
-  as(name: string): NodeWildcardQuery {
-    this.name = name;
+  constructor(type: Class<Type>) {
+    this.#type = type;
+  }
 
+  as(name: string): this {
+    this.#name = name;
+    return this;
+  }
+
+  with(...parts: WithPart[]): this {
+    this.#with = parts;
+    return this;
+  }
+}
+
+export class EdgeWildcardQuery<Type extends Edge> {
+  type: Class<Type>;
+  #from?: NodePart;
+  #to?: NodePart;
+
+  constructor(type: Class<Type>) {
+    this.type = type;
+  }
+
+  from(from: NodePart): this {
+    this.#from = from;
+    return this;
+  }
+
+  to(to: NodePart): this {
+    this.#to = to;
     return this;
   }
 }
@@ -244,4 +331,12 @@ export class InvalidQueryInputError extends CustomError {
   }
 }
 
-class TestNode extends Node {}
+export type OneOf<Parts extends unknown[]> = {
+  __or: Parts;
+}
+
+export function oneOf<Parts extends unknown[]>(
+  ...parts: Parts
+): OneOf<Parts> {
+  return { __or: parts };
+}
