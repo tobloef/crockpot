@@ -1,62 +1,74 @@
-How can you create a semantic graph for edges, if you cannot connect a node to an edge?
-
- * Option A: Edge becomes a subtype of Node
- * Option B: Edges cannot have values
- * Option C: Allow edges to connect to edges as well, without them being nodes.
- * Option D: Only create semantics for nodes
+A few different ways of representing the spaceship query:
 
 ```js
+const generator1 = query([
+  Spaceship.as("ship"),
+  Planet.as("planet"),
+  Faction.as("ship faction"),
+  Faction.as("planet faction"),
+  DockedTo.from("ship").to("planet"),
+  BelongsTo.from("ship").to("ship faction"),
+  RuledBy.from("planet").to("planet faction"),
+  oneOf(
+    AlliedWith.from("ship faction").to("planet faction"),
+    BelongsTo.from("ship").to("planet faction"),
+  )
+]);
 
-// -------- A --------
+const generator2 = query([
+  BelongsTo
+    .from(Spaceship.as("ship"))
+    .to(Faction.as("ship faction")),
+  RuledBy
+    .from(Planet.as("planet"))
+    .to(Faction.as("planet faction")),
+  DockedTo.from("ship").to("planet"),
+  oneOf(
+    AlliedWith.from("ship faction").to("planet faction"),
+    BelongsTo.from("ship").to("planet faction"),
+  )
+]);
 
-class Node {}
-class Edge extends Node {}
+const generator3 = query([
+  Spaceship.with(
+    BelongsTo.to(Faction.as("ship faction")),
+    DockedTo.to(Planet.with(
+      oneOf(
+        RuledBy.to("ship faction"),
+        RuledBy.to(Faction.with(
+          AlliedWith.from("ship faction"),
+        )),
+      )
+    )),
+  ),
+]);
 
-class Transform extends Node {}
-class ChildOf extends Edge {}
+const generator4 = query([
+  Spaceship.with(
+    BelongsTo.to(Faction.as("ship faction")),
+    DockedTo.to(Planet.with(
+      RuledBy.to(oneOf(
+        "ship faction",
+        Faction.with(
+          AlliedWith.from("ship faction"),
+        )
+      )),
+    )),
+  ),
+]);
 
-const child = new Transform();
-const parent = new Transform();
-const childOf = new ChildOf({ from: child, to: parent });
-
-new IsA({ from: childOf, to: childOfType }); // From an edge (which is a node) to a node
-query(Node); // Will return the edge as well
-
-// -------- B --------
-
-class Node {}
-
-class Transform extends Node {}
-class ChildOf extends Node {}
-
-const child = new Transform();
-const parent = new Transform();
-const childOf = new ChildOf();
-
-const isA = new IsA();
-isA.edgeTo(childOfType);
-isA.edgeFrom(childOf);
-
-child.edgeTo(childOf);
-parent.edgeFrom(childOf);
-
-query(Node); // Will return the edge as well, but it's more expected
-
-// -------- C --------
-
-class Node {}
-class Edge {}
-
-class Transform extends Node {}
-class ChildOf extends Edge {}
-
-const child = new Transform();
-const parent = new Transform();
-const childOf = new ChildOf({ from: child, to: parent });
-
-new IsA({ from: childOf, to: childOfType }); // From an edge to a node
-
-query(Node); // Will only return nodes
+const generator5 = query([
+  Spaceship.with(
+    BelongsTo.to(Faction.as("ship faction")),
+    DockedTo.to("planet"),
+  ),
+  Planet.with(
+    RuledBy.to(oneOf(
+      "ship faction",
+      Faction.with(
+        AlliedWith.from("ship faction"),
+      )
+    )),
+  ),
+]);
 ```
-
-I'm thinking A or C. But which one...?
