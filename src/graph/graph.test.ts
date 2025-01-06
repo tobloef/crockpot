@@ -109,7 +109,118 @@ describe("Wildcards", () => {
     deepStrictEqual(actualObject, expectedObject);
   });
 
-  it("Find nodes with any connected nodes ", () => {});
+  it("Find nodes with any connected nodes ", () => {
+    // Arrange
+    const node1 = new Node();
+    const node2 = new Node();
+    const node3 = new Node();
+    new Node();
+
+    node1.edgeTo(node2);
+    node1.edgeTo(node3);
+    node3.edgeTo(node1);
+
+    type ExpectedArrayType = [Node];
+    const expectedArray: ExpectedArrayType[] = [
+      [node1],
+      [node2],
+      [node3],
+    ];
+
+    type ExpectedObjectType = { node: Node };
+    const expectedObject: ExpectedObjectType[] = (
+      expectedArray.map(([node]) => ({ node }))
+    );
+
+    // Act
+    const arrayGenerator = query([Node.with(Node)]);
+    const objectGenerator = query({ node: Node.with(Node) });
+
+    // Assert
+    assertTypesEqual<typeof arrayGenerator, Generator<ExpectedArrayType>>(true);
+    assertTypesEqual<typeof objectGenerator, Generator<ExpectedObjectType>>(true);
+
+    const actualArray = Array.from(arrayGenerator);
+    const actualObject = Array.from(objectGenerator);
+
+    deepStrictEqual(actualArray, expectedArray);
+    deepStrictEqual(actualObject, expectedObject);
+  });
+
+  it("Finds nodes with any edge to another node", () => {
+    // Arrange
+    const node1 = new Node();
+    const node2 = new Node();
+    const node3 = new Node();
+    new Node();
+
+    node1.edgeTo(node2);
+    node1.edgeTo(node3);
+    node3.edgeTo(node1);
+
+    type ExpectedArrayType = [Node];
+    const expectedArray: ExpectedArrayType[] = [
+      [node1],
+      [node3],
+    ];
+
+    type ExpectedObjectType = { node: Node };
+    const expectedObject: ExpectedObjectType[] = (
+      expectedArray.map(([node]) => ({ node }))
+    );
+
+    // Act
+    const arrayGenerator = query([Node.with(Edge.to(Node))]);
+    const objectGenerator = query({ node: Node.with(Edge.to(Node)) });
+
+    // Assert
+    assertTypesEqual<typeof arrayGenerator, Generator<ExpectedArrayType>>(true);
+    assertTypesEqual<typeof objectGenerator, Generator<ExpectedObjectType>>(true);
+
+    const actualArray = Array.from(arrayGenerator);
+    const actualObject = Array.from(objectGenerator);
+
+    deepStrictEqual(actualArray, expectedArray);
+    deepStrictEqual(actualObject, expectedObject);
+  });
+
+  it("Finds nodes with any edge from another node", () => {
+    // Arrange
+    const node1 = new Node();
+    const node2 = new Node();
+    const node3 = new Node();
+    new Node();
+
+    node1.edgeTo(node2);
+    node1.edgeTo(node3);
+    node3.edgeTo(node1);
+
+    type ExpectedArrayType = [Node];
+    const expectedArray: ExpectedArrayType[] = [
+      [node2],
+      [node3],
+      [node1],
+    ];
+
+    type ExpectedObjectType = { node: Node };
+    const expectedObject: ExpectedObjectType[] = (
+      expectedArray.map(([node]) => ({ node }))
+    );
+
+    // Act
+    const arrayGenerator = query([Node.with(Edge.from(Node))]);
+    const objectGenerator = query({ node: Node.with(Edge.from(Node)) });
+
+    // Assert
+    assertTypesEqual<typeof arrayGenerator, Generator<ExpectedArrayType>>(true);
+    assertTypesEqual<typeof objectGenerator, Generator<ExpectedObjectType>>(true);
+
+    const actualArray = Array.from(arrayGenerator);
+    const actualObject = Array.from(objectGenerator);
+
+    deepStrictEqual(actualArray, expectedArray);
+    deepStrictEqual(actualObject, expectedObject);
+  });
 });
 
 describe("References", () => {

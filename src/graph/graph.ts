@@ -115,6 +115,7 @@ export type WithPart = (
   | OneOf<any>
   | NodeWildcardQuery<any>
   | EdgeWildcardQuery<any>
+  | Class<Node>
   )
 
 export class Node {
@@ -137,6 +138,14 @@ export class Node {
 
   static with<Type extends Node>(this: Class<Type>, ...parts: WithPart[]) {
     return new NodeWildcardQuery<Type>(this).with(...parts);
+  }
+
+  edgeTo(node: Node): Edge {
+    return new Edge({ from: this, to: node });
+  }
+
+  edgeFrom(node: Node): Edge {
+    return new Edge({ from: node, to: this });
   }
 
   get world(): World {
@@ -162,6 +171,7 @@ export type NodePart = (
   | string
   | NodeWildcardQuery<any>
   | OneOfNodePart
+  | Class<Node>
   );
 
 type OneOfNodePart = OneOf<NodePart[]>;
