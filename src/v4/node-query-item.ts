@@ -6,6 +6,8 @@ export class NodeQueryItem<
   Type extends Class<Node>,
   Name extends string
 > {
+  #brand = 'NodeQueryItem' as const;
+
   type: Type;
   name?: Name;
   withItems?: (Nodelike | Edgelike)[];

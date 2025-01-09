@@ -4,6 +4,8 @@ import { NodeQueryItem } from "./node-query-item.ts";
 import type { Edgelike, Nodelike } from "./query.ts";
 
 export class Node {
+  #brand = 'Node' as const;
+
   static as<
     Type extends Class<Node>,
     Name extends string,

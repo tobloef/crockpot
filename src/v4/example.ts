@@ -1,0 +1,134 @@
+import { Graph } from "./graph.ts";
+import { Node } from "./node.ts";
+import { Edge } from "./edge.ts";
+import { either } from "./either.ts";
+
+class Transform extends Node {}
+
+class Person extends Node {}
+
+class ChildOf extends Edge {}
+
+const graph = new Graph();
+
+const tobias = new Person();
+graph.addNode(tobias);
+
+const r1 = graph.query(
+  Node
+);
+
+const r2 = graph.query(
+  Edge
+);
+
+const r3 = graph.query(
+  Node.with(Transform)
+);
+
+const r4 = graph.query(
+  Node.to(Transform)
+);
+
+const r5 = graph.query(
+  Node.from(Transform)
+);
+
+const r6 = graph.query(
+  Node.with(ChildOf)
+);
+
+const r7 = graph.query(
+  Node.to(ChildOf)
+);
+
+const r8 = graph.query(
+  Node.from(ChildOf)
+);
+
+const r9 = graph.query(
+  Node.with(Transform.with(Transform))
+);
+
+const r10 = graph.query(
+  Node.with(Edge.to(Transform))
+);
+
+const r11 = graph.query(
+  Node.with(Edge.from(Transform))
+);
+
+const r12 = graph.query(
+  [Transform, Transform]
+);
+
+const r13 = graph.query(
+  [Node.with(Edge.to("x")), "x"]
+);
+
+const r14 = graph.query(
+  [Node.with("t"), Transform.as("t")]
+);
+
+const r15 = graph.query(
+  [Node.with("x"), "x"]
+);
+
+const r16 = graph.query(
+  Node.with(ChildOf.to(Node))
+);
+
+const r17 = graph.query(
+  Person.with(tobias)
+);
+
+class Spaceship extends Node {}
+class Faction extends Node {}
+class Planet extends Node {}
+class Belongs extends Edge {}
+class Docked extends Edge {}
+class RuledBy extends Edge {}
+class Allied extends Edge {}
+
+const r18 = graph.query(
+  [
+    Spaceship.as("ship").with(
+      Belongs.to("ship faction"),
+      Docked.to("planet"),
+    ),
+    Faction.as("ship faction"),
+    Planet.as("planet").with(
+      RuledBy.to("planet faction"),
+    ),
+    Faction.as("planet faction").with(
+      either(
+        Allied.with("ship faction"),
+        Belongs.from("ship"),
+      )
+    )
+  ]
+);
+
+const r19 = graph.query(
+  either(
+    Person.with(tobias),
+    Person.with(Person.with(tobias)),
+    Person.with(Person.with(Person.with(tobias))),
+    // Etc.
+  )
+);
+
+class Position extends Node {}
+class Velocity extends Node {}
+
+const r20 = graph.query(
+  [Position.from("n"), Velocity.from("n")]
+);
+
+const r21 = graph.query(
+  Node.to(ChildOf.to(Node))
+);
+
+const r22 = graph.query(
+  Node.from(ChildOf.to(Node))
+);

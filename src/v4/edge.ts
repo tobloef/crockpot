@@ -3,6 +3,8 @@ import type { Nodelike } from "./query.ts";
 import { EdgeQueryItem } from "./edge-query-item.ts";
 
 export class Edge {
+  #brand = 'Edge' as const;
+
   static as<
     Type extends Class<Edge>,
     Name extends string,
