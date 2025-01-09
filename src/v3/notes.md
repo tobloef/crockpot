@@ -7,8 +7,20 @@
 `Node`
 Any node
 
+`Edge`
+Any edge
+
 `Node.with(Transform)`
 Node with any edge to or from a Transform node.
+
+`Node.with(ChildOf)`
+Node with a ChildOf to or from any node.
+
+`Node.to(ChildOf)`
+Node with a ChildOf to any node.
+
+`Node.from(ChildOf)`
+Node with a ChildOf from any node.
 
 `Node.with(Transform.with(Transform))`
 Node with any edge to or from a Transform node with any edge to or from a Transform node.
@@ -71,6 +83,13 @@ Anyone in Tobias' social network (up to a depth of 3).
 
 `[Position.on("n"), Velocity.on("n")]`
 All pairs of Position and Velocity nodes on the same node.
+
+`Node.to(ChildOf.to(Node))`
+Any node with a ChildOf edge to another node.
+
+`Node.from(ChildOf.to(Node))`
+Invalid query, won't find anything (but will parse).
+Or actually, it might find itself. Either way is fine.
 
 ## Misc.
 

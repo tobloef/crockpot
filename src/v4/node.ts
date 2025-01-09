@@ -1,6 +1,7 @@
 import type { Edge } from "./edge.ts";
 import type { Class } from "./utils/class.ts";
-import { type FromItem, NodeQueryItem, type ToItem, type WithItem } from "./node-query-item.ts";
+import { NodeQueryItem } from "./node-query-item.ts";
+import type { Edgelike, Nodelike } from "./query.ts";
 
 export class Node {
   static as<
@@ -20,7 +21,7 @@ export class Node {
     Type extends Class<Node>
   >(
     this: Type,
-    ...items: WithItem[]
+    ...items: (Nodelike | Edgelike)[]
   ): NodeQueryItem<Type, string> {
     return new NodeQueryItem({
       withItems: items,
@@ -32,7 +33,7 @@ export class Node {
     Type extends Class<Node>
   >(
     this: Type,
-    ...items: ToItem[]
+    ...items: (Nodelike | Edgelike)[]
   ): NodeQueryItem<Type, string> {
     return new NodeQueryItem({
       toItems: items,
@@ -44,7 +45,7 @@ export class Node {
     Type extends Class<Node>
   >(
     this: Type,
-    ...items: FromItem[]
+    ...items: (Nodelike | Edgelike)[]
   ): NodeQueryItem<Type, string> {
     return new NodeQueryItem({
       fromItems: items,

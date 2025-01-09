@@ -1,5 +1,6 @@
 import type { Class } from "./utils/class.ts";
 import { Node } from "./node.ts";
+import type { Edgelike, Nodelike } from "./query.ts";
 
 export class NodeQueryItem<
   Type extends Class<Node>,
@@ -7,16 +8,16 @@ export class NodeQueryItem<
 > {
   type: Type;
   name?: Name;
-  withItems?: WithItem[];
-  toItems?: ToItem[];
-  fromItems?: FromItem[];
+  withItems?: (Nodelike | Edgelike)[];
+  toItems?: (Nodelike | Edgelike)[];
+  fromItems?: (Nodelike | Edgelike)[];
 
   constructor(params: {
     type: Type,
     name?: Name,
-    withItems?: WithItem[],
-    toItems?: ToItem[],
-    fromItems?: FromItem[],
+    withItems?: (Nodelike | Edgelike)[],
+    toItems?: (Nodelike | Edgelike)[],
+    fromItems?: (Nodelike | Edgelike)[],
   }) {
     this.type = params.type;
     this.name = params.name;
@@ -38,7 +39,7 @@ export class NodeQueryItem<
   }
 
   with(
-    ...items: WithItem[]
+    ...items: (Nodelike | Edgelike)[]
   ): NodeQueryItem<Type, string> {
     return new NodeQueryItem({
       type: this.type,
@@ -50,7 +51,7 @@ export class NodeQueryItem<
   }
 
   to(
-    ...items: ToItem[]
+    ...items: (Nodelike | Edgelike)[]
   ): NodeQueryItem<Type, string> {
     return new NodeQueryItem({
       type: this.type,
@@ -62,7 +63,7 @@ export class NodeQueryItem<
   }
 
   from(
-    ...items: FromItem[]
+    ...items: (Nodelike | Edgelike)[]
   ): NodeQueryItem<Type, string> {
     return new NodeQueryItem({
       type: this.type,
@@ -73,24 +74,3 @@ export class NodeQueryItem<
     });
   }
 }
-
-export type WithItem = (
-  | Class<Node>
-  | Node
-  | NodeQueryItem<any, any>
-  | string
-);
-
-export type FromItem = (
-  | Class<Node>
-  | Node
-  | NodeQueryItem<any, any>
-  | string
-);
-
-export type ToItem = (
-  | Class<Node>
-  | Node
-  | NodeQueryItem<any, any>
-  | string
-);

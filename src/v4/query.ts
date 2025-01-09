@@ -1,6 +1,22 @@
 import type { Class } from "./utils/class.ts";
 import type { Node } from "./node.ts";
 import type { NodeQueryItem } from "./node-query-item.ts";
+import type { Edge } from "./edge.ts";
+import type { EdgeQueryItem } from "./edge-query-item.ts";
+
+export type Nodelike = (
+  | Class<Node>
+  | Node
+  | NodeQueryItem<any, any>
+  | string
+  );
+
+export type Edgelike = (
+  | Class<Edge>
+  | Edge
+  | EdgeQueryItem<any, any>
+  | string
+  )
 
 export type QueryInput = (
   | QueryInputItem
@@ -9,9 +25,8 @@ export type QueryInput = (
 );
 
 export type QueryInputItem = (
-  | Class<Node>
-  | NodeQueryItem<any, any>
-  | string
+  | Nodelike
+  | Edgelike
 );
 
 export type ArrayQueryInput = QueryInputItem[];
