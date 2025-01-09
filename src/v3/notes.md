@@ -5,7 +5,7 @@
 ### Querying
 
 `Node`
-Any Node,
+Any node
 
 `Node.with(Transform)`
 Node with any edge to or from a Transform node.
