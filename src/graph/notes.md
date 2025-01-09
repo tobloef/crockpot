@@ -69,6 +69,12 @@ either(
 
 Anyone in Tobias' social network (up to a depth of 3).
 
+`[Position.on("n"), Velocity.on("n")]`
+All pairs of Position and Velocity nodes on the same node.
+
 ## Misc.
 
 If you want to look into performance, then working more _with_ the JIT is also a great possibility for optimization.
+
+The common use case of getting "components" on an "entity" should be easy to write and work with, as well as reasonably optimized.
+

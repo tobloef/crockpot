@@ -1,5 +1,5 @@
-import { CustomError } from "../utils/errors/custom-error.ts";
-import type { Class, Instance } from "../utils/class.ts";
+import { CustomError } from "../v1/utils/errors/custom-error.ts";
+import type { Class, Instance } from "../v1/utils/class.ts";
 
 export type QueryPart = (
   | Class<Node>

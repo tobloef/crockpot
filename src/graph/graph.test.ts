@@ -1,7 +1,7 @@
 import { beforeEach, describe, it } from "node:test";
 import { deepStrictEqual } from "node:assert";
 import { Edge, EdgeDirection, Node, oneOf, query, World } from "./graph.ts";
-import { assertTypesEqual } from "../utils/type-assertions.ts";
+import { assertTypesEqual } from "../v1/utils/type-assertions.ts";
 
 beforeEach(() => {
   Node.defaultWorld = new World();
