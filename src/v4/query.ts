@@ -181,11 +181,10 @@ type ReferencedType<
 );
 
 type LastOf<T> = UnionToIntersection<T extends any ? () => T : never> extends () => (infer R) ? R : never
-
 type Push<T extends any[], V> = [...T, V];
 
 type TuplifyUnion<T, L = LastOf<T>, N = [T] extends [never] ? true : false> =
-  true extends N ? [] : Push<TuplifyUnion<Exclude<T, L>>, L>
+  true extends N ? [] : [...TuplifyUnion<Exclude<T, L>>, L];
 
 type ObjectValueTuple<T, KS extends any[] = TuplifyUnion<keyof T>, R extends any[] = []> =
   KS extends [infer K, ...infer KT]
