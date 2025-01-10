@@ -1,9 +1,9 @@
 import type { Class, Instance } from "./utils/class.ts";
-import { Node } from "./node.ts";
+import type { Node } from "./node.ts";
 import type { NodeQueryItem } from "./node-query-item.ts";
-import { Edge } from "./edge.ts";
+import type { Edge } from "./edge.ts";
 import type { EdgeQueryItem } from "./edge-query-item.ts";
-import { Either } from "./either.ts";
+import type { Either } from "./either.ts";
 
 export type QueryInput = (
   | QueryInputItem
@@ -181,7 +181,6 @@ type ReferencedType<
 );
 
 type LastOf<T> = UnionToIntersection<T extends any ? () => T : never> extends () => (infer R) ? R : never
-type Push<T extends any[], V> = [...T, V];
 
 type TuplifyUnion<T, L = LastOf<T>, N = [T] extends [never] ? true : false> =
   true extends N ? [] : [...TuplifyUnion<Exclude<T, L>>, L];
