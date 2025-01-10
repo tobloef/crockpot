@@ -1,7 +1,7 @@
 import { Edge } from "./edge.ts";
 import type { Node } from "./node.ts";
 import { NotImplementedError } from "./utils/errors/not-implemented-error.ts";
-import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem } from "./query.ts";
+import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem } from "./query.types.ts";
 
 export class Graph {
   addNode(node: Node): this {

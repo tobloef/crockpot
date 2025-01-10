@@ -2,7 +2,7 @@ import { Graph } from "./graph.ts";
 import { Node } from "./node.ts";
 import { Edge } from "./edge.ts";
 import { either } from "./either.ts";
-import type { ArrayQueryOutput } from "./query.ts";
+import type { ArrayQueryOutput } from "./query.types.ts";
 import type { Class } from "./utils/class.ts";
 
 class Transform extends Node {}

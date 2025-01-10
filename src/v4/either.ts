@@ -1,4 +1,4 @@
-import type { QueryInputItem } from "./query.ts";
+import type { QueryInputItem } from "./query.types.ts";
 
 export class Either<Items extends QueryInputItem[]> {
   #brand = 'Either' as const;

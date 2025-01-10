@@ -1,7 +1,7 @@
 import type { Edge } from "./edge.ts";
 import type { Class } from "./utils/class.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
-import type { Edgelike, Nodelike } from "./query.ts";
+import type { Edgelike, Nodelike } from "./query.types.ts";
 
 export class Node {
   #brand = 'Node' as const;
