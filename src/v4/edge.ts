@@ -1,5 +1,5 @@
 import type { Class } from "./utils/class.ts";
-import type { Nodelike } from "./query.ts";
+import type { Edgelike, Nodelike } from "./query.ts";
 import { EdgeQueryItem } from "./edge-query-item.ts";
 
 export class Edge {
@@ -11,44 +11,47 @@ export class Edge {
   >(
     this: Type,
     name: Name,
-  ): EdgeQueryItem<Type, Name> {
-    return new EdgeQueryItem<Type, Name>({
+  ) {
+    return new EdgeQueryItem<Type, Name, [], [], []>({
       type: this,
       name,
     });
   }
 
   static with<
-    Type extends Class<Edge>
+    Type extends Class<Edge>,
+    WithItems extends (Nodelike | Edgelike)[]
   >(
     this: Type,
-    ...items: Nodelike[]
-  ): EdgeQueryItem<Type, string> {
-    return new EdgeQueryItem({
+    ...items: WithItems
+  ) {
+    return new EdgeQueryItem<Type, string, WithItems, [], []>({
       withItems: items,
       type: this,
     });
   }
 
   static to<
-    Type extends Class<Edge>
+    Type extends Class<Edge>,
+    ToItems extends (Nodelike | Edgelike)[]
   >(
     this: Type,
-    ...items: Nodelike[]
-  ): EdgeQueryItem<Type, string> {
-    return new EdgeQueryItem({
+    ...items: ToItems
+  ) {
+    return new EdgeQueryItem<Type, string, [], ToItems, []>({
       toItems: items,
       type: this,
     });
   }
 
   static from<
-    Type extends Class<Edge>
+    Type extends Class<Edge>,
+    FromItems extends (Nodelike | Edgelike)[]
   >(
     this: Type,
-    ...items: Nodelike[]
-  ): EdgeQueryItem<Type, string> {
-    return new EdgeQueryItem({
+    ...items: FromItems
+  ) {
+    return new EdgeQueryItem<Type, string, [], [], FromItems>({
       fromItems: items,
       type: this,
     });

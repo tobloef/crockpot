@@ -12,19 +12,20 @@ export class Node {
   >(
     this: Type,
     name: Name,
-  ): NodeQueryItem<Type, Name> {
-    return new NodeQueryItem<Type, Name>({
+  ) {
+    return new NodeQueryItem<Type, Name, [], [], []>({
       type: this,
       name,
     });
   }
 
   static with<
-    Type extends Class<Node>
+    Type extends Class<Node>,
+    WithItems extends (Nodelike | Edgelike)[]
   >(
     this: Type,
-    ...items: (Nodelike | Edgelike)[]
-  ): NodeQueryItem<Type, string> {
+    ...items: WithItems
+  ): NodeQueryItem<Type, string, WithItems, [], []> {
     return new NodeQueryItem({
       withItems: items,
       type: this,
@@ -32,24 +33,26 @@ export class Node {
   }
 
   static to<
-    Type extends Class<Node>
+    Type extends Class<Node>,
+    ToItems extends (Nodelike | Edgelike)[]
   >(
     this: Type,
-    ...items: (Nodelike | Edgelike)[]
-  ): NodeQueryItem<Type, string> {
-    return new NodeQueryItem({
+    ...items: ToItems
+  ) {
+    return new NodeQueryItem<Type, string, [], ToItems, []>({
       toItems: items,
       type: this,
     });
   }
 
   static from<
-    Type extends Class<Node>
+    Type extends Class<Node>,
+    FromItems extends (Nodelike | Edgelike)[]
   >(
     this: Type,
-    ...items: (Nodelike | Edgelike)[]
-  ): NodeQueryItem<Type, string> {
-    return new NodeQueryItem({
+    ...items: FromItems
+  ) {
+    return new NodeQueryItem<Type, string, [], [], FromItems>({
       fromItems: items,
       type: this,
     });

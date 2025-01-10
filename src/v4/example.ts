@@ -2,6 +2,8 @@ import { Graph } from "./graph.ts";
 import { Node } from "./node.ts";
 import { Edge } from "./edge.ts";
 import { either } from "./either.ts";
+import type { ArrayQueryOutput } from "./query.ts";
+import type { Class } from "./utils/class.ts";
 
 class Transform extends Node {}
 
@@ -58,8 +60,23 @@ const r11 = graph.query(
   Node.with(Edge.from(Transform))
 );
 
-const r12 = graph.query(
+const r12a = graph.query(
+  Transform
+);
+
+type FakeInput = [Class<Transform>];
+type X = ArrayQueryOutput<FakeInput, FakeInput>;
+
+const r12b = graph.query(
+  [Transform]
+);
+
+const r12c = graph.query(
   [Transform, Transform]
+);
+
+const r12d = graph.query(
+  {Transform}
 );
 
 const r13 = graph.query(
@@ -70,8 +87,16 @@ const r14 = graph.query(
   [Node.with("t"), Transform.as("t")]
 );
 
-const r15 = graph.query(
-  [Node.with("x"), "x"]
+const r15a = graph.query(
+  [Node.as("x"), "x"]
+);
+
+const r15b = graph.query(
+  [Person.as("x"), "x"]
+);
+
+const r15c = graph.query(
+  [Person.with(Transform.as("x")), "x"]
 );
 
 const r16 = graph.query(
@@ -131,4 +156,28 @@ const r21 = graph.query(
 
 const r22 = graph.query(
   Node.from(ChildOf.to(Node))
+);
+
+const ship = Spaceship.as('ship')
+const planet = Planet.as('planet')
+const shipFaction = Faction.as('ship faction')
+const planetFaction = Faction.as('planet faction')
+
+const r23 = graph.query(
+  [
+    ship.with(
+      Belongs.to(shipFaction),
+      Docked.to(planet),
+    ),
+    shipFaction,
+    planet.with(
+      RuledBy.to(planetFaction),
+    ),
+    planetFaction.with(
+      either(
+        Allied.with(shipFaction),
+        Belongs.from(ship),
+      )
+    )
+  ]
 );

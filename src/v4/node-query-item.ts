@@ -4,22 +4,25 @@ import type { Edgelike, Nodelike } from "./query.ts";
 
 export class NodeQueryItem<
   Type extends Class<Node>,
-  Name extends string
+  Name extends string,
+  WithItems extends (Nodelike | Edgelike)[],
+  ToItems extends (Nodelike | Edgelike)[],
+  FromItems extends (Nodelike | Edgelike)[],
 > {
   #brand = 'NodeQueryItem' as const;
 
   type: Type;
   name?: Name;
-  withItems?: (Nodelike | Edgelike)[];
-  toItems?: (Nodelike | Edgelike)[];
-  fromItems?: (Nodelike | Edgelike)[];
+  withItems?: WithItems;
+  toItems?: ToItems;
+  fromItems?: FromItems;
 
   constructor(params: {
     type: Type,
     name?: Name,
-    withItems?: (Nodelike | Edgelike)[],
-    toItems?: (Nodelike | Edgelike)[],
-    fromItems?: (Nodelike | Edgelike)[],
+    withItems?: WithItems,
+    toItems?: ToItems,
+    fromItems?: FromItems,
   }) {
     this.type = params.type;
     this.name = params.name;
@@ -28,10 +31,18 @@ export class NodeQueryItem<
     this.fromItems = params.fromItems;
   }
 
-  as<Name extends string>(
+  as<
+    Name extends string
+  >(
     name: Name,
-  ): NodeQueryItem<Type, Name> {
-    return new NodeQueryItem<Type, Name>({
+  ) {
+    return new NodeQueryItem<
+      Type,
+      Name,
+      WithItems,
+      ToItems,
+      FromItems
+    >({
       type: this.type,
       name,
       toItems: this.toItems,
@@ -40,10 +51,18 @@ export class NodeQueryItem<
     });
   }
 
-  with(
-    ...items: (Nodelike | Edgelike)[]
-  ): NodeQueryItem<Type, string> {
-    return new NodeQueryItem({
+  with<
+    WithItems extends (Nodelike | Edgelike)[]
+  >(
+    ...items: WithItems
+  ) {
+    return new NodeQueryItem<
+      Type,
+      Name,
+      WithItems,
+      ToItems,
+      FromItems
+    >({
       type: this.type,
       name: this.name,
       toItems: this.toItems,
@@ -52,10 +71,18 @@ export class NodeQueryItem<
     });
   }
 
-  to(
-    ...items: (Nodelike | Edgelike)[]
-  ): NodeQueryItem<Type, string> {
-    return new NodeQueryItem({
+  to<
+    ToItems extends (Nodelike | Edgelike)[]
+  >(
+    ...items: ToItems
+  ) {
+    return new NodeQueryItem<
+      Type,
+      Name,
+      WithItems,
+      ToItems,
+      FromItems
+    >({
       type: this.type,
       name: this.name,
       withItems: this.withItems,
@@ -64,10 +91,18 @@ export class NodeQueryItem<
     });
   }
 
-  from(
-    ...items: (Nodelike | Edgelike)[]
-  ): NodeQueryItem<Type, string> {
-    return new NodeQueryItem({
+  from<
+    FromItems extends (Nodelike | Edgelike)[]
+  >(
+    ...items: FromItems
+  ) {
+    return new NodeQueryItem<
+      Type,
+      Name,
+      WithItems,
+      ToItems,
+      FromItems
+    >({
       type: this.type,
       name: this.name,
       withItems: this.withItems,
