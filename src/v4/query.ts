@@ -5,7 +5,6 @@ import { Node } from "./node.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
 import { Edge } from "./edge.ts";
 import { EdgeQueryItem } from "./edge-query-item.ts";
-import { Either } from "./either.ts";
 import { randomString } from "./utils/random-string.ts";
 
 export function query<
@@ -16,17 +15,13 @@ export function query<
   const queryGraph = parseInput(input)
 }
 
-type EitherQueryGraphNode = {
-  possibilities: ParseResult[];
-}
-
 type QueryGraphNode = {
   name: string;
   type?: Class<Node | Edge>;
   withItems?: string[];
   toItems?: string[];
   fromItems?: string[];
-} | EitherQueryGraphNode;
+};
 
 function parseInput(input: QueryInput) {
   const items = extractItems(input);
@@ -68,8 +63,6 @@ function parseItem(item: QueryInputItem): ParseResult {
     return parseEdgeInstance(item);
   } else if (item instanceof EdgeQueryItem) {
     return parseEdgeQueryItem(item);
-  } else if (item instanceof Either) {
-    return parseEither(item);
   } else {
     throw new Error(`Invalid query item ${item}`);
   }
@@ -201,16 +194,5 @@ function parseEdgeQueryItem(
       fromItems,
     },
     subNodes: allSubNodes,
-  }
-}
-
-function parseEither(
-  item: Either<QueryInputItem[]>
-): ParseResult {
-  return {
-    node: {
-      items,
-    },
-
   }
 }

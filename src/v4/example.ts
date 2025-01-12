@@ -1,7 +1,6 @@
 import { Graph } from "./graph.ts";
 import { Node } from "./node.ts";
 import { Edge } from "./edge.ts";
-import { either } from "./either.ts";
 import type { ArrayQueryOutput } from "./query.types.ts";
 import type { Class } from "./utils/class.ts";
 
@@ -126,21 +125,9 @@ const r18 = graph.query(
       RuledBy.to("planet faction"),
     ),
     Faction.as("planet faction").with(
-      either(
-        Allied.with("ship faction"),
-        Belongs.from("ship"),
-      )
+      Allied.with("ship faction"),
     )
   ]
-);
-
-const r19 = graph.query(
-  either(
-    Person.with(tobias),
-    Person.with(Person.with(tobias)),
-    Person.with(Person.with(Person.with(tobias))),
-    // Etc.
-  )
 );
 
 class Position extends Node {}
@@ -174,10 +161,7 @@ const r23 = graph.query(
       RuledBy.to(planetFaction),
     ),
     planetFaction.with(
-      either(
-        Allied.with(shipFaction),
-        Belongs.from(ship),
-      )
+      Allied.with(shipFaction),
     )
   ]
 );
@@ -185,7 +169,3 @@ const r23 = graph.query(
 const r24 = graph.query(
   [Person.to("x"), "x"]
 );
-
-const r25 = graph.query(
-  [either(Person.as("x"), Spaceship.as("x")), "x"]
-)

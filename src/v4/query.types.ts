@@ -3,7 +3,6 @@ import type { Node } from "./node.ts";
 import type { NodeQueryItem } from "./node-query-item.ts";
 import type { Edge } from "./edge.ts";
 import type { EdgeQueryItem } from "./edge-query-item.ts";
-import type { Either } from "./either.ts";
 
 export type QueryInput = (
   | QueryInputItem
@@ -27,7 +26,6 @@ export type Nodelike = (
   | Node
   | NodeQueryItem<any, any, any, any, any>
   | string
-  | Either<Nodelike[]>
 );
 
 export type Edgelike = (
@@ -35,7 +33,6 @@ export type Edgelike = (
   | Edge
   | EdgeQueryItem<any, any, any, any, any>
   | string
-  | Either<Edgelike[]>
 );
 
 export type QueryOutput<Input extends QueryInput> = (
@@ -85,7 +82,6 @@ export type QueryOutputItem<
   Item extends Edge ? Item :
   Item extends NodeQueryItem<infer Type, any, any, any, any> ? Instance<Type> :
   Item extends EdgeQueryItem<infer Type, any, any, any, any> ? Instance<Type> :
-  Item extends Either<infer Types> ? TypesToUnion<Types, FullInput> :
   Item extends string ? InferTypeByReferenceName<Item, FullInput> :
   unknown
 );
@@ -151,9 +147,7 @@ type ReferencedTypeFromArray<Items extends QueryInputItem[]> = (
           & ExpandQueryItem<Type, Name, WithItems, ToItems, FromItems>
           & ReferencedTypeFromArray<Rest>
         )
-        : First extends Either<infer Types>
-          ? unknown
-          : ReferencedTypeFromArray<Rest>
+        : ReferencedTypeFromArray<Rest>
       : {}
     : {}
 );
