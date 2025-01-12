@@ -169,3 +169,10 @@ const r23 = graph.query(
 const r24 = graph.query(
   [Person.to("x"), "x"]
 );
+
+const r25 = graph.query(
+  [
+    Person.with(Edge.as("e").to(Transform)),
+    Transform.with(Edge.from(Person)),
+  ]
+)

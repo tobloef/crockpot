@@ -1,5 +1,4 @@
 import type { QueryInput, QueryInputItem, QueryOutput } from "./query.types.ts";
-import { NotImplementedError } from "./utils/errors/not-implemented-error.ts";
 import type { Class } from "./utils/class.ts";
 import { Node } from "./node.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
@@ -12,24 +11,65 @@ export function query<
 >(
   input: Input
 ): QueryOutput<Input> {
-  const queryGraph = parseInput(input)
+  const { nodeConstraints, edgeConstraints, outputs } = parseInput(input)
+
+
 }
+
+type NodeName = string;
+type EdgeName = string;
+
+type Outputs = Array<{
+  type: "node" | "edge";
+  name: string;
+  key: number | string;
+}>;
+
+type NodeConstraints = Record<NodeName, NodeConstraint>;
+type EdgeConstraints = Record<EdgeName, EdgeConstraint>;
+
+type NodeConstraint = {
+  class?: Class<Node>;
+  edges?: EdgeName[];
+}
+
+type EdgeConstraint = {
+  class?: Class<Edge>;
+  direction?: "to" | "from";
+  nodeA?: NodeName;
+  nodeB?: NodeName;
+}
+
+type ParsedInput = {
+  nodeConstraints: NodeConstraints;
+  edgeConstraints: EdgeConstraints;
+  outputs: Outputs;
+}
+
 
 type QueryGraphNode = {
   name: string;
-  type?: Class<Node | Edge>;
+  class?: Class<Node | Edge>;
   withItems?: string[];
   toItems?: string[];
   fromItems?: string[];
 };
 
-function parseInput(input: QueryInput) {
+function parseInput(input: QueryInput): ParsedInput {
   const items = extractItems(input);
 
-  let queryGraph = {};
+  // Graph of names
+  let graph: NameNode[] = {};
+
+  // Nodes by name
+  let nodes: Record<string, QueryGraphNode> = {};
 
   for (const item of items) {
-    const queryGraphNode = parseItem(item);
+    const { node, subNodes } = parseItem(item);
+
+    nodes[node.name] = node;
+
+
   }
 }
 
@@ -58,7 +98,7 @@ function parseItem(item: QueryInputItem): ParseResult {
   } else if (typeof item === "string") {
     return parseString(item);
   } else if (isClassThatExtends(item as Class<any>, Edge)) {
-    return parseEdgeClass(item);
+    return parseEdgeClass(item as Class<Edge>);
   } else if (item instanceof Edge) {
     return parseEdgeInstance(item);
   } else if (item instanceof EdgeQueryItem) {
@@ -79,7 +119,7 @@ function parseNodeClass(item: Class<Node>): ParseResult {
   return {
     node: {
       name: randomString(),
-      type: item,
+      class: item,
     },
   };
 }
@@ -88,7 +128,7 @@ function parseNodeInstance(item: Node): ParseResult {
   return {
     node: {
       name: item.id,
-      type: item.constructor as Class<Node>,
+      class: item.constructor as Class<Node>,
     },
   }
 }
@@ -123,7 +163,7 @@ function parseNodeQueryItem(
   return {
     node: {
       name: item.name ?? randomString(),
-      type: item.type,
+      class: item.type,
       withItems,
       toItems,
       fromItems,
@@ -144,7 +184,7 @@ function parseEdgeClass(item: Class<Edge>): ParseResult {
   return {
     node: {
       name: randomString(),
-      type: item,
+      class: item,
     },
   }
 }
@@ -153,7 +193,7 @@ function parseEdgeInstance(item: Edge): ParseResult {
   return {
     node: {
       name: item.id,
-      type: item.constructor as Class<Edge>,
+      class: item.constructor as Class<Edge>,
     },
   }
 }
@@ -188,7 +228,7 @@ function parseEdgeQueryItem(
   return {
     node: {
       name: item.name ?? randomString(),
-      type: item.type,
+      class: item.type,
       withItems,
       toItems,
       fromItems,
