@@ -24,14 +24,14 @@ export type QueryInputItem = (
 export type Nodelike = (
   | Class<Node>
   | Node
-  | NodeQueryItem<any, any, any, any, any>
+  | NodeQueryItem<any, any, any, any, any, any>
   | string
 );
 
 export type Edgelike = (
   | Class<Edge>
   | Edge
-  | EdgeQueryItem<any, any, any, any, any>
+  | EdgeQueryItem<any, any, any, any, any, any>
   | string
 );
 
@@ -111,18 +111,22 @@ type InferTypeByReferenceName<
 );
 
 type UnknownReference = Node | Edge;
+type NodeOrEdgeClass = Class<Node> | Class<Edge>;
 
 type ReferencedTypes<Input extends QueryInput> = (
   Input extends ArrayQueryInput
-    ? ReferencedTypeFromArray<Input>
+    ? ReferencedTypeFromArray<Input, never>
     : Input extends ObjectQueryInput
-      ? ReferencedTypeFromArray<ObjectValueTuple<Input>>
+      ? ReferencedTypeFromArray<ObjectValueTuple<Input>, never>
       : Input extends QueryInputItem
-        ? ReferencedTypeFromArray<[Input]>
+        ? ReferencedTypeFromArray<[Input], never>
         : never
 );
 
-type ReferencedTypeFromArray<Items extends QueryInputItem[]> = (
+type ReferencedTypeFromArray<
+  Items extends QueryInputItem[],
+  FallbackType extends NodeOrEdgeClass
+> = (
   Items extends [infer First, ...infer Rest]
     ? Rest extends QueryInputItem[]
       ? First extends NodeQueryItem<
@@ -130,45 +134,56 @@ type ReferencedTypeFromArray<Items extends QueryInputItem[]> = (
         infer Name,
         infer WithItems,
         infer ToItems,
-        infer FromItems
+        infer FromItems,
+        infer FromOrToItems
       >
         ? (
-          & ExpandQueryItem<ClassType, Name, WithItems, ToItems, FromItems>
-          & ReferencedTypeFromArray<Rest>
+          & ExpandQueryItem<ClassType, Name, WithItems, ToItems, FromItems, FromOrToItems>
+          & ReferencedTypeFromArray<Rest, never>
         )
         : First extends EdgeQueryItem<
           infer ClassType,
           infer Name,
           infer WithItems,
           infer ToItem,
-          infer FromItem
+          infer FromItem,
+          infer FromOrToItem
         >
         ? (
-          & ExpandQueryItem<ClassType, Name, WithItems, [ToItem], [FromItem]>
-          & ReferencedTypeFromArray<Rest>
+          & ExpandQueryItem<ClassType, Name, WithItems, [ToItem], [FromItem], [FromOrToItem]>
+          & ReferencedTypeFromArray<Rest, never>
         )
-        : ReferencedTypeFromArray<Rest>
+        : First extends string
+          ? [FallbackType] extends [never]
+            ? ReferencedTypeFromArray<Rest, never>
+            : (
+              & ReferencedType<FallbackType, First>
+              & ReferencedTypeFromArray<Rest, never>
+            )
+          : ReferencedTypeFromArray<Rest, never>
       : {}
     : {}
 );
 
 type ExpandQueryItem<
-  Type,
+  Type extends NodeOrEdgeClass,
   Name extends string,
   WithItems extends QueryInputItem[],
   ToItems extends QueryInputItem[],
   FromItems extends QueryInputItem[],
+  FromOrToItems extends QueryInputItem[]
 > = (
-  Type extends (Class<Node> | Class<Edge>)
-    ? (
-      & ReferencedType<Type, Name>
-      & ReferencedTypeFromArray<[...WithItems, ...ToItems, ...FromItems]>
-    )
-    : ReferencedTypeFromArray<[...WithItems, ...ToItems, ...FromItems]>
+  (
+    & ReferencedType<Type, Name>
+    & ReferencedTypeFromArray<WithItems, Class<Edge>>
+    & ReferencedTypeFromArray<ToItems, Class<Node>>
+    & ReferencedTypeFromArray<FromItems, Class<Node>>
+    & ReferencedTypeFromArray<FromOrToItems, NodeOrEdgeClass>
+  )
 )
 
 type ReferencedType<
-  Type extends Class<Node> | Class<Edge>,
+  Type extends NodeOrEdgeClass,
   Name extends string
 > = (
   true extends IsValidKey<Name>

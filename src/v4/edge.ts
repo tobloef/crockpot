@@ -59,4 +59,26 @@ export class Edge {
       class: this,
     });
   }
+
+  static fromOrTo<
+    Type extends Class<Edge>,
+    FromOrToItem extends Nodelike
+  >(
+    this: Type,
+    item: FromOrToItem
+  ) {
+    return new EdgeQueryItem<
+      Type,
+      string,
+      [],
+      Nodelike,
+      Nodelike,
+      FromOrToItem
+    >({
+      fromOrToItem: item,
+      class: this,
+    });
+  }
+
+
 }

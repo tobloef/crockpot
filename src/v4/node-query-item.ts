@@ -5,9 +5,10 @@ import type { Edgelike, Nodelike } from "./query.types.ts";
 export class NodeQueryItem<
   ClassType extends Class<Node> = Class<Node>,
   Name extends string = string,
-  WithItems extends (Nodelike | Edgelike)[] = [],
+  WithItems extends Edgelike[] = [],
   ToItems extends Nodelike[] = [],
   FromItems extends Nodelike[] = [],
+  FromOrToItems extends Nodelike[] = [],
 > {
   #brand = 'NodeQueryItem' as const;
 
@@ -16,6 +17,7 @@ export class NodeQueryItem<
   withItems?: WithItems;
   toItems?: ToItems;
   fromItems?: FromItems;
+  fromOrToItems?: FromOrToItems;
 
   constructor(params: {
     class: ClassType,
@@ -23,12 +25,14 @@ export class NodeQueryItem<
     withItems?: WithItems,
     toItems?: ToItems,
     fromItems?: FromItems,
+    fromOrToItems?: FromOrToItems,
   }) {
     this.class = params.class;
     this.name = params.name;
     this.withItems = params.withItems;
     this.toItems = params.toItems;
     this.fromItems = params.fromItems;
+    this.fromOrToItems = params.fromOrToItems;
   }
 
   as<
@@ -41,18 +45,20 @@ export class NodeQueryItem<
       Name,
       WithItems,
       ToItems,
-      FromItems
+      FromItems,
+      FromOrToItems
     >({
       class: this.class,
       name,
       toItems: this.toItems,
       withItems: this.withItems,
       fromItems: this.fromItems,
+      fromOrToItems: this.fromOrToItems,
     });
   }
 
   with<
-    WithItems extends (Nodelike | Edgelike)[]
+    WithItems extends Edgelike[]
   >(
     ...items: WithItems
   ) {
@@ -61,13 +67,15 @@ export class NodeQueryItem<
       Name,
       WithItems,
       ToItems,
-      FromItems
+      FromItems,
+      FromOrToItems
     >({
       class: this.class,
       name: this.name,
       toItems: this.toItems,
       withItems: items,
       fromItems: this.fromItems,
+      fromOrToItems: this.fromOrToItems,
     });
   }
 
@@ -81,13 +89,15 @@ export class NodeQueryItem<
       Name,
       WithItems,
       ToItems,
-      FromItems
+      FromItems,
+      FromOrToItems
     >({
       class: this.class,
       name: this.name,
       withItems: this.withItems,
       toItems: items,
       fromItems: this.fromItems,
+      fromOrToItems: this.fromOrToItems,
     });
   }
 
@@ -101,13 +111,37 @@ export class NodeQueryItem<
       Name,
       WithItems,
       ToItems,
-      FromItems
+      FromItems,
+      FromOrToItems
     >({
       class: this.class,
       name: this.name,
       withItems: this.withItems,
       toItems: this.toItems,
       fromItems: items,
+      fromOrToItems: this.fromOrToItems,
+    });
+  }
+
+  fromOrTo<
+    FromOrToItems extends Nodelike[]
+  >(
+    ...items: FromOrToItems
+  ) {
+    return new NodeQueryItem<
+      ClassType,
+      Name,
+      WithItems,
+      ToItems,
+      FromItems,
+      FromOrToItems
+    >({
+      class: this.class,
+      name: this.name,
+      withItems: this.withItems,
+      toItems: this.toItems,
+      fromItems: this.fromItems,
+      fromOrToItems: items,
     });
   }
 }

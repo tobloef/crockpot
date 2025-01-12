@@ -3,8 +3,6 @@ import { Node } from "./node.ts";
 import { Edge } from "./edge.ts";
 import type { ArrayQueryOutput } from "./query.types.ts";
 import type { Class } from "./utils/class.ts";
-import type { NodeQueryItem } from "./node-query-item.ts";
-import type { EdgeQueryItem } from "./edge-query-item.ts";
 
 class Transform extends Node {}
 
@@ -26,7 +24,7 @@ const r2 = graph.query(
 );
 
 const r3 = graph.query(
-  Node.with(Transform)
+  Node.fromOrTo(Transform)
 );
 
 const r4 = graph.query(
@@ -50,7 +48,7 @@ const r8 = graph.query(
 );
 
 const r9 = graph.query(
-  Node.with(Transform.with(Transform))
+  Node.fromOrTo(Transform.fromOrTo(Transform))
 );
 
 const r10 = graph.query(
@@ -97,7 +95,7 @@ const r15b = graph.query(
 );
 
 const r15c = graph.query(
-  [Person.with(Transform.as("x")), "x"]
+  [Person.fromOrTo(Transform.as("x")), "x"]
 );
 
 const r16 = graph.query(
@@ -105,7 +103,7 @@ const r16 = graph.query(
 );
 
 const r17 = graph.query(
-  Person.with(tobias)
+  Person.fromOrTo(tobias)
 );
 
 class Spaceship extends Node {}
@@ -205,10 +203,15 @@ const r27 = graph.query(
   ]
 );
 
-const r28a = graph.query(
+const r28 = graph.query(
   [
     Person.as("p1"),
     Person.as("p2"),
     ChildOf.from("p1").to("p2"),
   ]
 );
+
+const r29 = graph.query([
+  Node.with("x"),
+  "x"
+]);

@@ -14,6 +14,7 @@ export class EdgeQueryItem<
   WithItems extends ZeroToTwoNodeLikes = [],
   ToItem extends Nodelike = Nodelike,
   FromItem extends Nodelike = Nodelike,
+  FromOrToItem extends Nodelike = Nodelike,
 > {
   #brand = 'EdgeQueryItem' as const;
 
@@ -22,6 +23,7 @@ export class EdgeQueryItem<
   withItems?: WithItems;
   toItem?: ToItem;
   fromItem?: FromItem;
+  fromOrToItem?: FromOrToItem;
 
   constructor(params: {
     class: ClassType,
@@ -29,12 +31,14 @@ export class EdgeQueryItem<
     withItems?: WithItems,
     toItem?: ToItem,
     fromItem?: FromItem,
+    fromOrToItem?: FromOrToItem,
   }) {
     this.class = params.class;
     this.name = params.name;
     this.withItems = params.withItems;
     this.toItem = params.toItem;
     this.fromItem = params.fromItem;
+    this.fromOrToItem = params.fromOrToItem;
   }
 
   as<
@@ -47,13 +51,15 @@ export class EdgeQueryItem<
       Name,
       WithItems,
       ToItem,
-      FromItem
+      FromItem,
+      FromOrToItem
     >({
       class: this.class,
       name,
       withItems: this.withItems,
       toItem: this.toItem,
       fromItem: this.fromItem,
+      fromOrToItem: this.fromOrToItem,
     });
   }
 
@@ -67,13 +73,15 @@ export class EdgeQueryItem<
       Name,
       WithItems,
       ToItem,
-      FromItem
+      FromItem,
+      FromOrToItem
     >({
       class: this.class,
       name: this.name,
       withItems: items,
       toItem: this.toItem,
       fromItem: this.fromItem,
+      fromOrToItem: this.fromOrToItem
     });
   }
 
@@ -87,13 +95,15 @@ export class EdgeQueryItem<
       Name,
       WithItems,
       ToItem,
-      FromItem
+      FromItem,
+      FromOrToItem
     >({
       class: this.class,
       name: this.name,
       withItems: this.withItems,
       toItem: item,
       fromItem: this.fromItem,
+      fromOrToItem: this.fromOrToItem
     });
   }
 
@@ -107,13 +117,35 @@ export class EdgeQueryItem<
       Name,
       WithItems,
       ToItem,
-      FromItem
+      FromItem,
+      FromOrToItem
     >({
       class: this.class,
       name: this.name,
       withItems: this.withItems,
       toItem: this.toItem,
       fromItem: item,
+      fromOrToItem: this.fromOrToItem,
+    });
+  }
+
+  fromOrTo<
+    FromOrToItem extends Nodelike
+  >(
+    item: FromOrToItem
+  ) {
+    return new EdgeQueryItem<
+      ClassType,
+      Name,
+      WithItems,
+      ToItem,
+      FromOrToItem
+    >({
+      class: this.class,
+      name: this.name,
+      withItems: this.withItems,
+      toItem: this.toItem,
+      fromOrToItem: item,
     });
   }
 }

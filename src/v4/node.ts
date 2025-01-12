@@ -24,7 +24,7 @@ export class Node {
 
   static with<
     Type extends Class<Node>,
-    WithItems extends (Nodelike | Edgelike)[]
+    WithItems extends Edgelike[]
   >(
     this: Type,
     ...items: WithItems
@@ -57,6 +57,19 @@ export class Node {
   ) {
     return new NodeQueryItem<Type, string, [], [], FromItems>({
       fromItems: items,
+      class: this,
+    });
+  }
+
+  static fromOrTo<
+    Type extends Class<Node>,
+    FromOrToItems extends Nodelike[]
+  >(
+    this: Type,
+    ...items: FromOrToItems
+  ) {
+    return new NodeQueryItem<Type, string, [], [], [], FromOrToItems>({
+      fromOrToItems: items,
       class: this,
     });
   }
