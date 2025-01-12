@@ -181,3 +181,11 @@ const r23 = graph.query(
     )
   ]
 );
+
+const r24 = graph.query(
+  [Person.to("x"), "x"]
+);
+
+const r25 = graph.query(
+  [either(Person.as("x"), Spaceship.as("x")), "x"]
+)

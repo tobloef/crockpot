@@ -151,7 +151,9 @@ type ReferencedTypeFromArray<Items extends QueryInputItem[]> = (
           & ExpandQueryItem<Type, Name, WithItems, ToItems, FromItems>
           & ReferencedTypeFromArray<Rest>
         )
-        : ReferencedTypeFromArray<Rest>
+        : First extends Either<infer Types>
+          ? unknown
+          : ReferencedTypeFromArray<Rest>
       : {}
     : {}
 );

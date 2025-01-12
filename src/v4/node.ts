@@ -2,9 +2,12 @@ import type { Edge } from "./edge.ts";
 import type { Class } from "./utils/class.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
 import type { Edgelike, Nodelike } from "./query.types.ts";
+import { randomString } from "./utils/random-string.ts";
 
 export class Node {
   #brand = 'Node' as const;
+
+  id: string = randomString();
 
   static as<
     Type extends Class<Node>,

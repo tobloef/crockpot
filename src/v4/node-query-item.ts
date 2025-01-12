@@ -3,11 +3,11 @@ import { Node } from "./node.ts";
 import type { Edgelike, Nodelike } from "./query.types.ts";
 
 export class NodeQueryItem<
-  Type extends Class<Node>,
-  Name extends string,
-  WithItems extends (Nodelike | Edgelike)[],
-  ToItems extends (Nodelike | Edgelike)[],
-  FromItems extends (Nodelike | Edgelike)[],
+  Type extends Class<Node> = Class<Node>,
+  Name extends string = string,
+  WithItems extends (Nodelike | Edgelike)[] = [],
+  ToItems extends (Nodelike | Edgelike)[] = [],
+  FromItems extends (Nodelike | Edgelike)[] = [],
 > {
   #brand = 'NodeQueryItem' as const;
 
