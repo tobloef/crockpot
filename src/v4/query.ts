@@ -412,7 +412,7 @@ function parseNodeQueryItem(
   const subItems: ParsedItem[] = [];
 
   constraints[poolName] = {
-    class: item.type,
+    class: item.class,
   }
 
   for (const subItem of item.withItems ?? []) {
@@ -457,7 +457,7 @@ function parseNodeQueryItem(
   return {
     node: {
       poolName: item.name ?? randomString(),
-      class: item.type,
+      class: item.class,
       withItems,
       toItems,
       fromItems,
@@ -522,7 +522,7 @@ function parseEdgeQueryItem(
   return {
     node: {
       poolName: item.name ?? randomString(),
-      class: item.type,
+      class: item.class,
       withItems,
       toItems,
       fromItems,

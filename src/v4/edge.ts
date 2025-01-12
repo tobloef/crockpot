@@ -1,6 +1,6 @@
 import type { Class } from "./utils/class.ts";
 import type { Edgelike, Nodelike } from "./query.types.ts";
-import { EdgeQueryItem } from "./edge-query-item.ts";
+import { EdgeQueryItem, type ZeroToTwoNodeLikes } from "./edge-query-item.ts";
 import { randomString } from "./utils/random-string.ts";
 
 export class Edge {
@@ -15,7 +15,7 @@ export class Edge {
     this: Type,
     name: Name,
   ) {
-    return new EdgeQueryItem<Type, Name, [], [], []>({
+    return new EdgeQueryItem<Type, Name>({
       class: this,
       name,
     });
@@ -23,12 +23,12 @@ export class Edge {
 
   static with<
     Type extends Class<Edge>,
-    WithItems extends Nodelike[]
+    WithItems extends ZeroToTwoNodeLikes
   >(
     this: Type,
     ...items: WithItems
   ) {
-    return new EdgeQueryItem<Type, string, WithItems, [], []>({
+    return new EdgeQueryItem<Type, string, WithItems>({
       withItems: items,
       class: this,
     });
@@ -36,26 +36,26 @@ export class Edge {
 
   static to<
     Type extends Class<Edge>,
-    ToItems extends Nodelike[]
+    ToItem extends Nodelike
   >(
     this: Type,
-    ...items: ToItems
+    item: ToItem
   ) {
-    return new EdgeQueryItem<Type, string, [], ToItems, []>({
-      toItems: items,
+    return new EdgeQueryItem<Type, string, [], ToItem>({
+      toItem: item,
       class: this,
     });
   }
 
   static from<
     Type extends Class<Edge>,
-    FromItems extends Nodelike[]
+    FromItem extends Nodelike
   >(
     this: Type,
-    ...items: FromItems
+    item: FromItem
   ) {
-    return new EdgeQueryItem<Type, string, [], [], FromItems>({
-      fromItems: items,
+    return new EdgeQueryItem<Type, string, [], Nodelike, FromItem>({
+      fromItem: item,
       class: this,
     });
   }

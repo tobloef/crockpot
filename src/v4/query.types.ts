@@ -126,25 +126,25 @@ type ReferencedTypeFromArray<Items extends QueryInputItem[]> = (
   Items extends [infer First, ...infer Rest]
     ? Rest extends QueryInputItem[]
       ? First extends NodeQueryItem<
-        infer Type,
+        infer ClassType,
         infer Name,
         infer WithItems,
         infer ToItems,
         infer FromItems
       >
         ? (
-          & ExpandQueryItem<Type, Name, WithItems, ToItems, FromItems>
+          & ExpandQueryItem<ClassType, Name, WithItems, ToItems, FromItems>
           & ReferencedTypeFromArray<Rest>
         )
         : First extends EdgeQueryItem<
-          infer Type,
+          infer ClassType,
           infer Name,
           infer WithItems,
-          infer ToItems,
-          infer FromItems
+          infer ToItem,
+          infer FromItem
         >
         ? (
-          & ExpandQueryItem<Type, Name, WithItems, ToItems, FromItems>
+          & ExpandQueryItem<ClassType, Name, WithItems, [ToItem], [FromItem]>
           & ReferencedTypeFromArray<Rest>
         )
         : ReferencedTypeFromArray<Rest>

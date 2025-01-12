@@ -3,6 +3,8 @@ import { Node } from "./node.ts";
 import { Edge } from "./edge.ts";
 import type { ArrayQueryOutput } from "./query.types.ts";
 import type { Class } from "./utils/class.ts";
+import type { NodeQueryItem } from "./node-query-item.ts";
+import type { EdgeQueryItem } from "./edge-query-item.ts";
 
 class Transform extends Node {}
 
@@ -133,8 +135,12 @@ const r18 = graph.query(
 class Position extends Node {}
 class Velocity extends Node {}
 
-const r20 = graph.query(
+const r20a = graph.query(
   [Position.from("n"), Velocity.from("n")]
+);
+
+const r20b = graph.query(
+  [Node.to(Position.as("p"), Velocity.as("v")), "p", "v"]
 );
 
 const r21 = graph.query(
@@ -176,3 +182,33 @@ const r25 = graph.query(
     Transform.with(Edge.from(Person)),
   ]
 )
+
+const r26 = graph.query(
+  [
+      Edge.as("e").from("f").to("t"),
+      Person.with("e"),
+      Transform.with("e"),
+      "e",
+      "f",
+      "t"
+  ]
+);
+
+const r27 = graph.query(
+  [
+      Edge.as("e").with("f", "t"),
+      Person.with("e"),
+      Transform.with("e"),
+      "e",
+      "f",
+      "t"
+  ]
+);
+
+const r28a = graph.query(
+  [
+    Person.as("p1"),
+    Person.as("p2"),
+    ChildOf.from("p1").to("p2"),
+  ]
+);

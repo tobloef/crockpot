@@ -1,34 +1,40 @@
 import type { Class } from "./utils/class.ts";
 import { Edge } from "./edge.ts";
-import type { Edgelike, Nodelike } from "./query.types.ts";
+import type { Nodelike } from "./query.types.ts";
+
+export type ZeroToTwoNodeLikes = (
+  | []
+  | [Nodelike]
+  | [Nodelike, Nodelike]
+);
 
 export class EdgeQueryItem<
-  Type extends Class<Edge> = Class<Edge>,
+  ClassType extends Class<Edge> = Class<Edge>,
   Name extends string = string,
-  WithItems extends Nodelike[] = [],
-  ToItems extends Nodelike[] = [],
-  FromItems extends Nodelike[] = [],
+  WithItems extends ZeroToTwoNodeLikes = [],
+  ToItem extends Nodelike = Nodelike,
+  FromItem extends Nodelike = Nodelike,
 > {
   #brand = 'EdgeQueryItem' as const;
 
-  type: Type;
+  class: ClassType;
   name?: Name;
   withItems?: WithItems;
-  toItems?: ToItems;
-  fromItems?: FromItems;
+  toItem?: ToItem;
+  fromItem?: FromItem;
 
   constructor(params: {
-    type: Type,
+    class: ClassType,
     name?: Name,
     withItems?: WithItems,
-    toItems?: ToItems,
-    fromItems?: FromItems,
+    toItem?: ToItem,
+    fromItem?: FromItem,
   }) {
-    this.type = params.type;
+    this.class = params.class;
     this.name = params.name;
     this.withItems = params.withItems;
-    this.toItems = params.toItems;
-    this.fromItems = params.fromItems;
+    this.toItem = params.toItem;
+    this.fromItem = params.fromItem;
   }
 
   as<
@@ -37,77 +43,77 @@ export class EdgeQueryItem<
     name: Name,
   ) {
     return new EdgeQueryItem<
-      Type,
+      ClassType,
       Name,
       WithItems,
-      ToItems,
-      FromItems
+      ToItem,
+      FromItem
     >({
-      class: this.type,
+      class: this.class,
       name,
-      toItems: this.toItems,
       withItems: this.withItems,
-      fromItems: this.fromItems,
+      toItem: this.toItem,
+      fromItem: this.fromItem,
     });
   }
 
   with<
-    WithItems extends Nodelike[]
+    WithItems extends ZeroToTwoNodeLikes
   >(
     ...items: WithItems
   ) {
     return new EdgeQueryItem<
-      Type,
+      ClassType,
       Name,
       WithItems,
-      ToItems,
-      FromItems
+      ToItem,
+      FromItem
     >({
-      class: this.type,
+      class: this.class,
       name: this.name,
-      toItems: this.toItems,
       withItems: items,
-      fromItems: this.fromItems,
+      toItem: this.toItem,
+      fromItem: this.fromItem,
     });
   }
 
   to<
-    ToItems extends Nodelike[]
+    ToItem extends Nodelike
   >(
-    ...items: ToItems
+    item: ToItem
   ) {
     return new EdgeQueryItem<
-      Type,
+      ClassType,
       Name,
       WithItems,
-      ToItems,
-      FromItems
+      ToItem,
+      FromItem
     >({
-      class: this.type,
+      class: this.class,
       name: this.name,
       withItems: this.withItems,
-      toItems: items,
-      fromItems: this.fromItems,
+      toItem: item,
+      fromItem: this.fromItem,
     });
   }
 
   from<
-    FromItems extends Nodelike[]
+    FromItem extends Nodelike
   >(
-    ...items: FromItems
+    item: FromItem
   ) {
     return new EdgeQueryItem<
-      Type,
+      ClassType,
       Name,
       WithItems,
-      ToItems,
-      FromItems
+      ToItem,
+      FromItem
     >({
-      class: this.type,
+      class: this.class,
       name: this.name,
       withItems: this.withItems,
-      toItems: this.toItems,
-      fromItems: items,
+      toItem: this.toItem,
+      fromItem: item,
     });
   }
 }

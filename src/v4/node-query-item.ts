@@ -3,7 +3,7 @@ import { Node } from "./node.ts";
 import type { Edgelike, Nodelike } from "./query.types.ts";
 
 export class NodeQueryItem<
-  Type extends Class<Node> = Class<Node>,
+  ClassType extends Class<Node> = Class<Node>,
   Name extends string = string,
   WithItems extends (Nodelike | Edgelike)[] = [],
   ToItems extends Nodelike[] = [],
@@ -11,20 +11,20 @@ export class NodeQueryItem<
 > {
   #brand = 'NodeQueryItem' as const;
 
-  type: Type;
+  class: ClassType;
   name?: Name;
   withItems?: WithItems;
   toItems?: ToItems;
   fromItems?: FromItems;
 
   constructor(params: {
-    type: Type,
+    class: ClassType,
     name?: Name,
     withItems?: WithItems,
     toItems?: ToItems,
     fromItems?: FromItems,
   }) {
-    this.type = params.type;
+    this.class = params.class;
     this.name = params.name;
     this.withItems = params.withItems;
     this.toItems = params.toItems;
@@ -37,13 +37,13 @@ export class NodeQueryItem<
     name: Name,
   ) {
     return new NodeQueryItem<
-      Type,
+      ClassType,
       Name,
       WithItems,
       ToItems,
       FromItems
     >({
-      class: this.type,
+      class: this.class,
       name,
       toItems: this.toItems,
       withItems: this.withItems,
@@ -57,13 +57,13 @@ export class NodeQueryItem<
     ...items: WithItems
   ) {
     return new NodeQueryItem<
-      Type,
+      ClassType,
       Name,
       WithItems,
       ToItems,
       FromItems
     >({
-      class: this.type,
+      class: this.class,
       name: this.name,
       toItems: this.toItems,
       withItems: items,
@@ -77,13 +77,13 @@ export class NodeQueryItem<
     ...items: ToItems
   ) {
     return new NodeQueryItem<
-      Type,
+      ClassType,
       Name,
       WithItems,
       ToItems,
       FromItems
     >({
-      class: this.type,
+      class: this.class,
       name: this.name,
       withItems: this.withItems,
       toItems: items,
@@ -97,13 +97,13 @@ export class NodeQueryItem<
     ...items: FromItems
   ) {
     return new NodeQueryItem<
-      Type,
+      ClassType,
       Name,
       WithItems,
       ToItems,
       FromItems
     >({
-      class: this.type,
+      class: this.class,
       name: this.name,
       withItems: this.withItems,
       toItems: this.toItems,
