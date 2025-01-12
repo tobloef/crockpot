@@ -17,7 +17,7 @@ export class Node {
     name: Name,
   ) {
     return new NodeQueryItem<Type, Name, [], [], []>({
-      type: this,
+      class: this,
       name,
     });
   }
@@ -31,33 +31,33 @@ export class Node {
   ): NodeQueryItem<Type, string, WithItems, [], []> {
     return new NodeQueryItem({
       withItems: items,
-      type: this,
+      class: this,
     });
   }
 
   static to<
     Type extends Class<Node>,
-    ToItems extends (Nodelike | Edgelike)[]
+    ToItems extends Nodelike[]
   >(
     this: Type,
     ...items: ToItems
   ) {
     return new NodeQueryItem<Type, string, [], ToItems, []>({
       toItems: items,
-      type: this,
+      class: this,
     });
   }
 
   static from<
     Type extends Class<Node>,
-    FromItems extends (Nodelike | Edgelike)[]
+    FromItems extends Nodelike[]
   >(
     this: Type,
     ...items: FromItems
   ) {
     return new NodeQueryItem<Type, string, [], [], FromItems>({
       fromItems: items,
-      type: this,
+      class: this,
     });
   }
 
@@ -70,4 +70,5 @@ export class Node {
 export type NodeEdgeInput = (
   | { to: Node, edge?: Edge }
   | { from: Node, edge?: Edge }
+  | { with: Node, edge?: Edge }
 )

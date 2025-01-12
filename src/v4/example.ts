@@ -40,11 +40,11 @@ const r6 = graph.query(
 );
 
 const r7 = graph.query(
-  Node.to(ChildOf)
+  Node.with(ChildOf.to(Node))
 );
 
 const r8 = graph.query(
-  Node.from(ChildOf)
+  Node.with(ChildOf.from(Node))
 );
 
 const r9 = graph.query(
@@ -138,11 +138,11 @@ const r20 = graph.query(
 );
 
 const r21 = graph.query(
-  Node.to(ChildOf.to(Node))
+  Node.with(ChildOf.to("x"))
 );
 
 const r22 = graph.query(
-  Node.from(ChildOf.to(Node))
+  Node.with(ChildOf.to("x"))
 );
 
 const ship = Spaceship.as('ship')

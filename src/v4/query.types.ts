@@ -37,15 +37,15 @@ export type Edgelike = (
 
 export type QueryOutput<Input extends QueryInput> = (
   Input extends []
-    ? Generator<never>
+    ? never
     : {} extends Input
-      ? Generator<never>
+      ? never
       : Input extends ArrayQueryInput
-        ? Generator<ArrayQueryOutput<Input, Input>>
+        ? ArrayQueryOutput<Input, Input>
         : Input extends ObjectQueryInput
-          ? Generator<ObjectQueryOutput<Input, Input>>
+          ? ObjectQueryOutput<Input, Input>
           : Input extends QueryInputItem
-            ? Generator<QueryOutputItem<Input, Input>>
+            ? QueryOutputItem<Input, Input>
             : never
 );
 

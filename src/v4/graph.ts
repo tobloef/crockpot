@@ -12,6 +12,11 @@ import type {
 import { query } from "./query.ts";
 
 export class Graph {
+  nodes: Node[] = [];
+  edges: Edge[] = [];
+  nodeToEdges: Map<Node, Edge[]> = new Map();
+  edgeToNodes: Map<Edge, { from: Node, to: Node }> = new Map();
+
   addNode(node: Node): this {
     throw new NotImplementedError(); // TODO
   }
@@ -32,7 +37,7 @@ export class Graph {
   )>;
 
   query<Input extends QueryInput>(input: Input): QueryOutput<Input> {
-    return query(input);
+    return query(this, input);
   }
 }
 

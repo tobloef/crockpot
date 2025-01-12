@@ -5,9 +5,9 @@ import type { Edgelike, Nodelike } from "./query.types.ts";
 export class EdgeQueryItem<
   Type extends Class<Edge> = Class<Edge>,
   Name extends string = string,
-  WithItems extends (Nodelike | Edgelike)[] = [],
-  ToItems extends (Nodelike | Edgelike)[] = [],
-  FromItems extends (Nodelike | Edgelike)[] = [],
+  WithItems extends Nodelike[] = [],
+  ToItems extends Nodelike[] = [],
+  FromItems extends Nodelike[] = [],
 > {
   #brand = 'EdgeQueryItem' as const;
 
@@ -43,7 +43,7 @@ export class EdgeQueryItem<
       ToItems,
       FromItems
     >({
-      type: this.type,
+      class: this.type,
       name,
       toItems: this.toItems,
       withItems: this.withItems,
@@ -52,7 +52,7 @@ export class EdgeQueryItem<
   }
 
   with<
-    WithItems extends (Nodelike | Edgelike)[]
+    WithItems extends Nodelike[]
   >(
     ...items: WithItems
   ) {
@@ -63,7 +63,7 @@ export class EdgeQueryItem<
       ToItems,
       FromItems
     >({
-      type: this.type,
+      class: this.type,
       name: this.name,
       toItems: this.toItems,
       withItems: items,
@@ -72,7 +72,7 @@ export class EdgeQueryItem<
   }
 
   to<
-    ToItems extends (Nodelike | Edgelike)[]
+    ToItems extends Nodelike[]
   >(
     ...items: ToItems
   ) {
@@ -83,7 +83,7 @@ export class EdgeQueryItem<
       ToItems,
       FromItems
     >({
-      type: this.type,
+      class: this.type,
       name: this.name,
       withItems: this.withItems,
       toItems: items,
@@ -92,7 +92,7 @@ export class EdgeQueryItem<
   }
 
   from<
-    FromItems extends (Nodelike | Edgelike)[]
+    FromItems extends Nodelike[]
   >(
     ...items: FromItems
   ) {
@@ -103,7 +103,7 @@ export class EdgeQueryItem<
       ToItems,
       FromItems
     >({
-      type: this.type,
+      class: this.type,
       name: this.name,
       withItems: this.withItems,
       toItems: this.toItems,

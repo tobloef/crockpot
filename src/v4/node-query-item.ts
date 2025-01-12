@@ -6,8 +6,8 @@ export class NodeQueryItem<
   Type extends Class<Node> = Class<Node>,
   Name extends string = string,
   WithItems extends (Nodelike | Edgelike)[] = [],
-  ToItems extends (Nodelike | Edgelike)[] = [],
-  FromItems extends (Nodelike | Edgelike)[] = [],
+  ToItems extends Nodelike[] = [],
+  FromItems extends Nodelike[] = [],
 > {
   #brand = 'NodeQueryItem' as const;
 
@@ -43,7 +43,7 @@ export class NodeQueryItem<
       ToItems,
       FromItems
     >({
-      type: this.type,
+      class: this.type,
       name,
       toItems: this.toItems,
       withItems: this.withItems,
@@ -63,7 +63,7 @@ export class NodeQueryItem<
       ToItems,
       FromItems
     >({
-      type: this.type,
+      class: this.type,
       name: this.name,
       toItems: this.toItems,
       withItems: items,
@@ -72,7 +72,7 @@ export class NodeQueryItem<
   }
 
   to<
-    ToItems extends (Nodelike | Edgelike)[]
+    ToItems extends Nodelike[]
   >(
     ...items: ToItems
   ) {
@@ -83,7 +83,7 @@ export class NodeQueryItem<
       ToItems,
       FromItems
     >({
-      type: this.type,
+      class: this.type,
       name: this.name,
       withItems: this.withItems,
       toItems: items,
@@ -92,7 +92,7 @@ export class NodeQueryItem<
   }
 
   from<
-    FromItems extends (Nodelike | Edgelike)[]
+    FromItems extends Nodelike[]
   >(
     ...items: FromItems
   ) {
@@ -103,7 +103,7 @@ export class NodeQueryItem<
       ToItems,
       FromItems
     >({
-      type: this.type,
+      class: this.type,
       name: this.name,
       withItems: this.withItems,
       toItems: this.toItems,

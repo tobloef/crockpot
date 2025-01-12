@@ -16,47 +16,47 @@ export class Edge {
     name: Name,
   ) {
     return new EdgeQueryItem<Type, Name, [], [], []>({
-      type: this,
+      class: this,
       name,
     });
   }
 
   static with<
     Type extends Class<Edge>,
-    WithItems extends (Nodelike | Edgelike)[]
+    WithItems extends Nodelike[]
   >(
     this: Type,
     ...items: WithItems
   ) {
     return new EdgeQueryItem<Type, string, WithItems, [], []>({
       withItems: items,
-      type: this,
+      class: this,
     });
   }
 
   static to<
     Type extends Class<Edge>,
-    ToItems extends (Nodelike | Edgelike)[]
+    ToItems extends Nodelike[]
   >(
     this: Type,
     ...items: ToItems
   ) {
     return new EdgeQueryItem<Type, string, [], ToItems, []>({
       toItems: items,
-      type: this,
+      class: this,
     });
   }
 
   static from<
     Type extends Class<Edge>,
-    FromItems extends (Nodelike | Edgelike)[]
+    FromItems extends Nodelike[]
   >(
     this: Type,
     ...items: FromItems
   ) {
     return new EdgeQueryItem<Type, string, [], [], FromItems>({
       fromItems: items,
-      type: this,
+      class: this,
     });
   }
 }
