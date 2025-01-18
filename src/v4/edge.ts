@@ -2,11 +2,18 @@ import type { Class } from "./utils/class.ts";
 import type { Edgelike, Nodelike } from "./query.types.ts";
 import { EdgeQueryItem, type ZeroToTwoNodeLikes } from "./edge-query-item.ts";
 import { randomString } from "./utils/random-string.ts";
+import type { Node } from "./node.ts";
 
 export class Edge {
   #brand = 'Edge' as const;
 
   id: string = randomString();
+
+  // TODO: Should potentially be a getter that uses the graph and an index behind the scenes
+  nodes: {
+    from?: Node,
+    to?: Node,
+  } = {};
 
   static as<
     Type extends Class<Edge>,
@@ -79,6 +86,4 @@ export class Edge {
       class: this,
     });
   }
-
-
 }

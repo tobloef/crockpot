@@ -12,7 +12,8 @@
     "outDir": "build",
     "useUnknownInCatchVariables": false,
     "skipLibCheck": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "noUncheckedIndexedAccess": true
   },
   "exclude": [
     "node_modules",

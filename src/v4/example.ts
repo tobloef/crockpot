@@ -215,3 +215,18 @@ const r29 = graph.query([
   Node.with("x"),
   "x"
 ]);
+
+const r30a = graph.query([
+  Planet.to(
+    Faction.as("faction"),
+    Spaceship.as("spaceship")
+  ),
+  "faction",
+  "spaceship"
+]);
+
+const r30b = graph.query([
+  Planet.as("planet"),
+  Faction.from("planet"),
+  Spaceship.from("planet"),
+]);

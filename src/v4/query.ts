@@ -1,12 +1,11 @@
-import type { QueryInput, QueryInputItem, QueryOutput, QueryOutputItem } from "./query.types.ts";
-import type { Class, Instance } from "./utils/class.ts";
+import type { Edgelike, Nodelike, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem } from "./query.types.ts";
+import type { Class } from "./utils/class.ts";
 import { Node } from "./node.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
 import { Edge } from "./edge.ts";
 import { EdgeQueryItem } from "./edge-query-item.ts";
 import { randomString } from "./utils/random-string.ts";
 import type { Graph } from "./graph.ts";
-import type { Constraints } from "../v2/query/pools.ts";
 
 export function* query<
   Input extends QueryInput
@@ -14,38 +13,22 @@ export function* query<
   graph: Graph,
   input: Input,
 ): Generator<QueryOutput<Input>> {
-  const {
-    poolNames,
-    poolConstraints,
-    poolNameToOutputKeyMap,
-  } = parseInput(input)
+  const pools = parseInput(input);
+  const generators = createGeneratorFunctions(graph, pools);
+  const permutations = permuteGenerators(generators);
 
-  // Here there are many heuristics that we could apply,
-  // in order to find out which node to start resolving first.
-  // Some nodes can utilize better indexes than others.
-  // In `[A.with("n"), B.with("n")]`, for example, you could
-  // the best option would be to start with "n", as it could
-  // have an archetype index on [A, B].
-
-  // But for now, we'll just brute force it completely, by
-  // iterating through all permutations of nodes/edges until
-  // we find a match that satisfies all constraints.
-
-  const pools = createPools(graph, poolNames);
-  const permutations = permutePools(pools);
-
-  let foundOutputs: QueryOutput<Input>[] = [];
+  const foundOutputs: QueryOutput<Input>[] = [];
 
   for (const permutation of permutations) {
-    const isMatch = checkPermutationConstraints(graph, permutation, poolConstraints);
+    const passesConstraints = checkConstraints(permutation, pools);
 
-    if (!isMatch) {
+    if (!passesConstraints) {
       continue;
     }
 
-    const output = mapOutput<Input>(input, permutation, poolNameToOutputKeyMap);
+    const output = permutationToOutput(permutation, pools, input);
 
-    const wasAlreadyFound = checkIfAlreadyFound<Input>(foundOutputs, output);
+    const wasAlreadyFound = checkIfAlreadyFound(output, foundOutputs);
 
     if (wasAlreadyFound) {
       continue;
@@ -57,7 +40,417 @@ export function* query<
   }
 }
 
-function isSingleItem(input: QueryInput): boolean {
+type PoolName = string;
+
+type Pools = {
+  nodes: Record<PoolName, NodePool>,
+  edges: Record<PoolName, EdgePool>,
+}
+
+type NodePool = {
+  constraints: {
+    instance?: Node,
+    class?: Class<Node>,
+    edges?: PoolName[],
+  },
+  outputKey?: string | number,
+}
+
+type EdgePool = {
+  constraints: {
+    instance?: Edge,
+    class?: Class<Edge>,
+    fromNode?: PoolName,
+    toNode?: PoolName,
+  },
+  outputKey?: string | number,
+}
+
+function parseRootItem(
+  item: Nodelike | Edgelike,
+  pools: Pools,
+  input: QueryInput,
+  outputKey?: string | number,
+) {
+  if (isNodelike(item, input)) {
+    const poolName = parseNode(item, pools);
+    pools.nodes[poolName]!.outputKey = outputKey;
+  } else {
+    const poolName = parseEdge(item, pools);
+    pools.edges[poolName]!.outputKey = outputKey;
+  }
+}
+
+function isNodelike(
+  item: Nodelike | Edgelike,
+  input: QueryInput
+): item is Nodelike {
+  return (
+    isClassThatExtends(item as Class<any>, Node) ||
+    item instanceof Node ||
+    item instanceof NodeQueryItem ||
+    (typeof item === "string" && isReferencingNode(item, input))
+  );
+}
+
+type IsNode = boolean;
+
+function isReferencingNode(
+  item: string,
+  input: QueryInput
+): boolean {
+  // TODO: Implement/rework once parsing has been completed
+}
+
+function parseNode(
+  item: Nodelike,
+  pools: Pools,
+  parentEdge?: {
+    poolName: PoolName,
+    direction: "to" | "from",
+  }
+): PoolName {
+  let poolName: PoolName;
+
+  if (isClassThatExtends(item as Class<any>, Node)) {
+    poolName = parseNodeClass(item as Class<Node>, pools);
+  } else if (item instanceof Node) {
+    poolName = parseNodeInstance(item, pools);
+  } else if (item instanceof NodeQueryItem) {
+    poolName = parseNodeQueryItem(item, pools);
+  } else if (typeof item === "string") {
+    poolName = parseNodeReference(item, pools);
+  } else {
+    throw new Error(`Invalid node item ${item}`);
+  }
+
+  if (parentEdge !== undefined) {
+    const edgePool = pools.edges[parentEdge.poolName]!;
+    const constraintKey = parentEdge.direction === "to" ? "toNode" : "fromNode";
+    edgePool.constraints[constraintKey] = poolName;
+
+    const nodePool = pools.nodes[poolName]!;
+    nodePool.constraints.edges ??= [];
+    nodePool.constraints.edges.push(parentEdge.poolName);
+  }
+
+  return poolName;
+}
+
+function parseNodeClass(item: Class<Node>, pools: Pools): PoolName {}
+
+function parseNodeInstance(item: Node, pools: Pools): PoolName {}
+
+function parseNodeQueryItem(item: NodeQueryItem, pools: Pools): PoolName {}
+
+function parseNodeReference(item: string, pools: Pools): PoolName {}
+
+function parseEdge(
+  item: Edgelike,
+  pools: Pools,
+  parentNode?: {
+    poolName: PoolName,
+    direction: "to" | "from",
+  },
+): PoolName {
+  let poolName: PoolName;
+
+  if (isClassThatExtends(item as Class<any>, Edge)) {
+    poolName = parseEdgeClass(item as Class<Edge>, pools);
+  } else if (item instanceof Edge) {
+    poolName = parseEdgeInstance(item, pools);
+  } else if (item instanceof EdgeQueryItem) {
+    poolName = parseEdgeQueryItem(item, pools);
+  } else if (typeof item === "string") {
+    poolName = parseEdgeReference(item, pools);
+  } else {
+    throw new Error(`Invalid edge item ${item}`);
+  }
+
+  if (parentNode !== undefined) {
+    const nodePool = pools.nodes[parentNode.poolName]!;
+    nodePool.constraints.edges ??= [];
+    nodePool.constraints.edges.push(poolName);
+
+    const edgePool = pools.edges[poolName]!;
+    const constraintKey = parentNode.direction === "to" ? "toNode" : "fromNode";
+    edgePool.constraints[constraintKey] = parentNode.poolName;
+  }
+
+  return poolName;
+}
+
+function parseEdgeClass(item: Class<Edge>, pools: Pools): PoolName {}
+
+function parseEdgeInstance(item: Edge, pools: Pools): PoolName {}
+
+function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {}
+
+function parseEdgeReference(item: string, pools: Pools): PoolName {}
+
+function parseInput(
+  input: QueryInput,
+): Pools {
+  const pools: Pools = {
+    nodes: {},
+    edges: {},
+  };
+
+  if (isSingleItem(input)) {
+    parseRootItem(input, pools, input);
+  } else if (Array.isArray(input)) {
+    for (let i = 0; i < input.length; i++) {
+      const item = input[i]!;
+      parseRootItem(item, pools, input, i);
+    }
+  } else {
+    const entries = Object.entries(input);
+    for (const [key, item] of entries) {
+      parseRootItem(item, pools, input, key);
+    }
+  }
+
+  return pools;
+}
+
+type GeneratorFunction<T> = () => Generator<T>;
+
+type GeneratorFunctions = Record<PoolName, GeneratorFunction<any>>;
+type PermutationFromGeneratorFunctions<Generators extends GeneratorFunctions> = {
+  [Key in keyof Generators]: (
+    Generators[Key] extends GeneratorFunction<infer T> ? T : never
+    )
+}
+
+function createGeneratorFunctions(
+  graph: Graph,
+  pools: Pools,
+): Record<PoolName, GeneratorFunction<Node | Edge>> {
+  const generatorFunctions: Record<PoolName, GeneratorFunction<Node | Edge>> = {};
+
+  const nodeGeneratorFunction = () => arrayToGenerator(graph.nodes);
+  const edgeGeneratorFunction = () => arrayToGenerator(graph.edges);
+
+  for (const poolName of Object.keys(pools.nodes)) {
+    generatorFunctions[poolName] = nodeGeneratorFunction;
+  }
+
+  for (const poolName of Object.keys(pools.edges)) {
+    generatorFunctions[poolName] = edgeGeneratorFunction;
+  }
+
+  return generatorFunctions;
+}
+
+function* permuteGenerators<
+  GenFuncs extends GeneratorFunctions
+>(
+  generatorFunctions: GenFuncs,
+): Generator<PermutationFromGeneratorFunctions<GenFuncs>> {
+  const entries = Object.entries(generatorFunctions);
+  const [firstEntry, ...otherEntries] = entries;
+
+  if (firstEntry === undefined) {
+    return;
+  }
+
+  const [firstKey, firstGeneratorFunction] = firstEntry;
+  const otherGeneratorFunctions = Object.fromEntries(otherEntries);
+
+  for (const item of firstGeneratorFunction()) {
+    if (otherEntries.length === 0) {
+      const permutation = { [firstKey]: item };
+      yield permutation as PermutationFromGeneratorFunctions<GenFuncs>;
+    } else {
+      const otherPermutations = permuteGenerators(otherGeneratorFunctions);
+
+      for (const otherPermutation of otherPermutations) {
+        const permutation = { [firstKey]: item, ...otherPermutation };
+        yield permutation as PermutationFromGeneratorFunctions<GenFuncs>;
+      }
+    }
+  }
+}
+
+function permutationToOutput<
+  Input extends QueryInput
+>(
+  permutation: Record<string, Node | Edge>,
+  pools: Pools,
+  input: Input,
+): QueryOutput<Input> {
+  if (isSingleItem(input)) {
+    const onlyPoolName = (
+      Object.keys(pools.nodes)[0]! ??
+      Object.keys(pools.edges)[0]!
+    );
+
+    return permutation[onlyPoolName] as QueryOutput<Input>;
+  } else if (Array.isArray(input)) {
+    const output = [];
+
+    const allPools = { ...pools.nodes, ...pools.edges };
+
+    for (const [poolName, pool] of Object.entries(allPools)) {
+      if (pool.outputKey === undefined) {
+        continue;
+      }
+
+      const item = permutation[poolName];
+
+      output[pool.outputKey as number] = item;
+    }
+
+    return output as QueryOutput<Input>;
+  } else {
+    const output: Record<string, Node | Edge | undefined> = {};
+
+    const allPools = { ...pools.nodes, ...pools.edges };
+
+    for (const [poolName, pool] of Object.entries(allPools)) {
+      if (pool.outputKey === undefined) {
+        continue;
+      }
+
+      const item = permutation[poolName];
+
+      output[pool.outputKey as string] = item;
+    }
+
+    return output as QueryOutput<Input>;
+  }
+}
+
+function checkConstraints(
+  permutation: Record<string, Node | Edge>,
+  pools: Pools,
+): boolean {
+  for (const [poolName, item] of Object.entries(permutation)) {
+    if (item instanceof Node) {
+      const passesConstraints = checkNodeConstraints(
+        item,
+        poolName,
+        permutation,
+        pools,
+      );
+
+      if (!passesConstraints) {
+        return false;
+      }
+    } else {
+      const passesConstraints = checkEdgeConstraints(
+        item,
+        poolName,
+        permutation,
+        pools,
+      );
+
+      if (!passesConstraints) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+function checkNodeConstraints(
+  node: Node,
+  poolName: PoolName,
+  permutation: Record<string, Node | Edge>,
+  pools: Pools,
+): boolean {
+  const pool = pools.nodes[poolName];
+
+  if (pool === undefined) {
+    return false;
+  }
+
+  if (pool.constraints.instance !== undefined) {
+    if (pool.constraints.instance !== node) {
+      return false;
+    }
+  }
+
+  if (pool.constraints.class !== undefined) {
+    if (!(node instanceof pool.constraints.class)) {
+      return false;
+    }
+  }
+
+  if (pool.constraints.edges !== undefined) {
+    for (const edgePoolName of pool.constraints.edges) {
+      const edge = permutation[edgePoolName];
+
+      if (!(edge instanceof Edge)) {
+        return false;
+      }
+
+      if (!node.edges.includes(edge)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+function checkEdgeConstraints(
+  edge: Edge,
+  poolName: PoolName,
+  permutation: Record<string, Node | Edge>,
+  pools: Pools,
+): boolean {
+  const pool = pools.edges[poolName];
+
+  if (pool === undefined) {
+    return false;
+  }
+
+  if (pool.constraints.instance !== undefined) {
+    if (pool.constraints.instance !== edge) {
+      return false;
+    }
+  }
+
+  if (pool.constraints.class !== undefined) {
+    if (!(edge instanceof pool.constraints.class)) {
+      return false;
+    }
+  }
+
+  if (pool.constraints.fromNode !== undefined) {
+    const fromNode = permutation[pool.constraints.fromNode];
+
+    if (!(fromNode instanceof Node)) {
+      return false;
+    }
+
+    if (edge.nodes.from !== fromNode) {
+      return false;
+    }
+  }
+
+  if (pool.constraints.toNode !== undefined) {
+    const toNode = permutation[pool.constraints.toNode];
+
+    if (!(toNode instanceof Node)) {
+      return false;
+    }
+
+    if (edge.nodes.to !== toNode) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+
+/////////////////////////////////////////////////////////////////
+
+function isSingleItem(input: QueryInput): input is QueryInputItem {
   return (
     !Array.isArray(input) &&
     input.constructor.name !== "Object"
@@ -67,8 +460,8 @@ function isSingleItem(input: QueryInput): boolean {
 function checkIfAlreadyFound<
   Input extends QueryInput
 >(
-  foundOutputs: QueryOutput<Input>[],
   output: QueryOutput<Input>,
+  foundOutputs: QueryOutput<Input>[],
 ): boolean {
   const isOutputSingleItem = isSingleItem(output);
 
@@ -91,8 +484,8 @@ function checkIfAlreadyFound<
     let wasMatch = true;
 
     for (let i = 0; i < foundEntries.length; i++) {
-      const [foundKey, foundValue] = foundEntries[i];
-      const [outputKey, outputValue] = outputEntries[i];
+      const [foundKey, foundValue] = foundEntries[i]!;
+      const [outputKey, outputValue] = outputEntries[i]!;
 
       if (foundKey !== outputKey) {
         wasMatch = false;
@@ -300,7 +693,6 @@ export function* combineGenerators<T>(
   }
 }
 
-type PoolName = string;
 type ItemConstraints = NodeConstraints | EdgeConstraints;
 type PoolConstraints = Record<PoolName, ItemConstraints>;
 
@@ -327,31 +719,6 @@ type ParsedItem = {
   poolName: string;
   constraints?: PoolConstraints;
   subItems?: ParsedItem[];
-}
-
-type QueryInputItemEntry = [
-  string,
-  QueryInputItem
-];
-
-function parseInput(input: QueryInput): ParsedInput {
-  const poolNames: string[] = [];
-  const poolConstraints: PoolConstraints = {};
-  const poolNameToOutputKeyMap: Record<string, string> = {};
-
-  const entries: QueryInputItemEntry[] = isSingleItem(input)
-    ? Object.entries([input])
-    : Object.entries(input);
-
-  for (const [key, item] of entries) {
-    // TODO
-  }
-
-  return {
-    poolNames,
-    poolConstraints,
-    poolNameToOutputKeyMap,
-  }
 }
 
 function parseItem(item: QueryInputItem): ParsedItem {
@@ -531,7 +898,10 @@ function parseEdgeQueryItem(
   }
 }
 
-function isClassThatExtends(child: Class<any>, parent: Class<any>) {
+function isClassThatExtends(
+  child: Class<any>,
+  parent: Class<any>,
+) {
   return (
     child === parent ||
     (parent.prototype?.isPrototypeOf(child.prototype) ?? false)

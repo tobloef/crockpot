@@ -9,6 +9,9 @@ export class Node {
 
   id: string = randomString();
 
+  // TODO: Should potentially be a getter that uses the graph and an index behind the scenes
+  edges: Edge[] = [];
+
   static as<
     Type extends Class<Node>,
     Name extends string,
