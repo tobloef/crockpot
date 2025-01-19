@@ -16,6 +16,8 @@ export type ObjectQueryInput = {
   [key: string]: RootQueryInputItem;
 };
 
+export type QueryInputItem = RootQueryInputItem;
+
 export type RootQueryInputItem = (
   | Nodelike
   | Edgelike

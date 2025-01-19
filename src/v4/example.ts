@@ -79,7 +79,7 @@ const r12d = graph.query(
 );
 
 const r13 = graph.query(
-  [Node.with(Edge.to("x")), "x"]
+  [Node.with(Edge.to("x")), Node.as("x")]
 );
 
 const r14 = graph.query(
@@ -87,15 +87,15 @@ const r14 = graph.query(
 );
 
 const r15a = graph.query(
-  [Node.as("x"), "x"]
+  [Node.as("x"), Node.as("x")]
 );
 
 const r15b = graph.query(
-  [Person.as("x"), "x"]
+  [Person.as("x"), Node.as("x")]
 );
 
 const r15c = graph.query(
-  [Person.fromOrTo(Transform.as("x")), "x"]
+  [Person.fromOrTo(Transform.as("x")), Node.as("x")]
 );
 
 const r16 = graph.query(
@@ -125,7 +125,7 @@ const r18 = graph.query(
       RuledBy.to("planet faction"),
     ),
     Faction.as("planet faction").with(
-      Allied.with("ship faction"),
+      Allied.to("ship faction"),
     )
   ]
 );
@@ -138,7 +138,7 @@ const r20a = graph.query(
 );
 
 const r20b = graph.query(
-  [Node.to(Position.as("p"), Velocity.as("v")), "p", "v"]
+  [Node.to(Position.as("p"), Velocity.as("v")), Node.as("p"), Node.as("v")]
 );
 
 const r21 = graph.query(
@@ -165,13 +165,13 @@ const r23 = graph.query(
       RuledBy.to(planetFaction),
     ),
     planetFaction.with(
-      Allied.with(shipFaction),
+      Allied.to(shipFaction),
     )
   ]
 );
 
 const r24 = graph.query(
-  [Person.to("x"), "x"]
+  [Person.to("x"), Node.as("x")]
 );
 
 const r25 = graph.query(
@@ -186,20 +186,20 @@ const r26 = graph.query(
       Edge.as("e").from("f").to("t"),
       Person.with("e"),
       Transform.with("e"),
-      "e",
-      "f",
-      "t"
+      Node.as("e"),
+      Node.as("f"),
+      Node.as("t")
   ]
 );
 
 const r27 = graph.query(
   [
-      Edge.as("e").with("f", "t"),
+      Edge.as("e").to("f").from("t"),
       Person.with("e"),
       Transform.with("e"),
-      "e",
-      "f",
-      "t"
+      Node.as("e"),
+      Node.as("f"),
+      Node.as("t")
   ]
 );
 
@@ -213,7 +213,7 @@ const r28 = graph.query(
 
 const r29 = graph.query([
   Node.with("x"),
-  "x"
+  Node.as("x")
 ]);
 
 const r30a = graph.query([
@@ -221,8 +221,8 @@ const r30a = graph.query([
     Faction.as("faction"),
     Spaceship.as("spaceship")
   ),
-  "faction",
-  "spaceship"
+  Node.as("faction"),
+  Node.as("spaceship")
 ]);
 
 const r30b = graph.query([

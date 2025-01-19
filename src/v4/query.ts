@@ -1,4 +1,10 @@
-import type { Edgelike, Nodelike, QueryInput, QueryOutput } from "./query.types.ts";
+import type {
+  Edgelike,
+  Nodelike,
+  QueryInput,
+  QueryInputItem,
+  QueryOutput,
+} from "./query.types.ts";
 import type { Class } from "./utils/class.ts";
 import { Node } from "./node.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
@@ -40,11 +46,49 @@ export function* query<
   }
 }
 
+function parseInput(
+  input: QueryInput,
+): Pools {
+  const pools: Pools = {
+    nodes: {},
+    edges: {},
+    unknown: {},
+  };
+
+  if (isSingleItem(input)) {
+    parseRootItem(input, pools);
+  } else if (Array.isArray(input)) {
+    for (let i = 0; i < input.length; i++) {
+      const item = input[i]!;
+      const poolName = parseRootItem(item, pools);
+      const pool = getAnyPool(poolName, pools)!;
+      pool.outputKey = i;
+    }
+  } else {
+    const entries = Object.entries(input);
+    for (const [key, item] of entries) {
+      const poolName = parseRootItem(item, pools);
+      const pool = getAnyPool(poolName, pools)!;
+      pool.outputKey = key;
+    }
+  }
+
+  return pools;
+}
+
+function getAnyPool(
+  poolName: PoolName,
+  pools: Pools
+) {
+  return pools.nodes[poolName] ?? pools.edges[poolName] ?? pools.unknown[poolName];
+}
+
 type PoolName = string;
 
 type Pools = {
   nodes: Record<PoolName, NodePool>,
   edges: Record<PoolName, EdgePool>,
+  unknown: Record<PoolName, NodePool & EdgePool>
 }
 
 type NodePool = {
@@ -69,15 +113,10 @@ type EdgePool = {
 function parseRootItem(
   item: Nodelike | Edgelike,
   pools: Pools,
-  outputKey?: string | number,
-) {
-  if (isNodelike(item)) {
-    const poolName = parseNode(item, pools);
-    pools.nodes[poolName]!.outputKey = outputKey;
-  } else {
-    const poolName = parseEdge(item, pools);
-    pools.edges[poolName]!.outputKey = outputKey;
-  }
+): PoolName {
+  return isNodelike(item)
+    ? parseNode(item, pools)
+    : parseEdge(item, pools);
 }
 
 function isNodelike(
@@ -177,31 +216,6 @@ function parseEdgeClass(item: Class<Edge>, pools: Pools): PoolName {}
 function parseEdgeInstance(item: Edge, pools: Pools): PoolName {}
 
 function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {}
-
-function parseInput(
-  input: QueryInput,
-): Pools {
-  const pools: Pools = {
-    nodes: {},
-    edges: {},
-  };
-
-  if (isSingleItem(input)) {
-    parseRootItem(input, pools);
-  } else if (Array.isArray(input)) {
-    for (let i = 0; i < input.length; i++) {
-      const item = input[i]!;
-      parseRootItem(item, pools, i);
-    }
-  } else {
-    const entries = Object.entries(input);
-    for (const [key, item] of entries) {
-      parseRootItem(item, pools, key);
-    }
-  }
-
-  return pools;
-}
 
 type GeneratorFunction<T> = () => Generator<T>;
 

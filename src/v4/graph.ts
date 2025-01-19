@@ -8,6 +8,7 @@ import type {
   QueryInputItem,
   QueryOutput,
   QueryOutputItem,
+  RootQueryInputItem,
 } from "./query.types.ts";
 import { query } from "./query.ts";
 
@@ -25,9 +26,9 @@ export class Graph {
     throw new NotImplementedError(); // TODO
   }
 
-  query<Input extends QueryInputItem>(input: Input): QueryOutput<Input>;
+  query<Input extends QueryInputItem>(input: Input): Generator<QueryOutput<Input>>;
 
-  query<Input extends ArrayQueryInput>(input: [...Input]): QueryOutput<Input>;
+  query<Input extends ArrayQueryInput>(input: [...Input]): Generator<QueryOutput<Input>>;
 
   query<Input extends ObjectQueryInput>(input: Input): Generator<(
     // Return type duplicated from ObjectQueryOutput to make type hints show up correctly
@@ -36,7 +37,7 @@ export class Graph {
     { [K in keyof Input]: QueryOutputItem<Input[K], Input> }
   )>;
 
-  query<Input extends QueryInput>(input: Input): QueryOutput<Input> {
+  query<Input extends QueryInput>(input: Input): Generator<QueryOutput<Input>> {
     return query(this, input);
   }
 }
