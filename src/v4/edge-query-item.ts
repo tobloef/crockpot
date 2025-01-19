@@ -1,16 +1,16 @@
 import type { Class } from "./utils/class.ts";
 import { Edge } from "./edge.ts";
 import type {
-  NodelikeOrReference,
+  Nodelike,
   ReferenceName,
 } from "./query.types.ts";
 
 export class EdgeQueryItem<
   ClassType extends Class<Edge> = Class<Edge>,
   Name extends string = ReferenceName,
-  ToItem extends NodelikeOrReference = NodelikeOrReference,
-  FromItem extends NodelikeOrReference = NodelikeOrReference,
-  FromOrToItem extends NodelikeOrReference = NodelikeOrReference,
+  ToItem extends Nodelike = Nodelike,
+  FromItem extends Nodelike = Nodelike,
+  FromOrToItem extends Nodelike = Nodelike,
 > {
   #brand = 'EdgeQueryItem' as const;
 
@@ -55,7 +55,7 @@ export class EdgeQueryItem<
   }
 
   to<
-    ToItem extends NodelikeOrReference
+    ToItem extends Nodelike
   >(
     item: ToItem
   ) {
@@ -75,7 +75,7 @@ export class EdgeQueryItem<
   }
 
   from<
-    FromItem extends NodelikeOrReference
+    FromItem extends Nodelike
   >(
     item: FromItem
   ) {
@@ -95,7 +95,7 @@ export class EdgeQueryItem<
   }
 
   fromOrTo<
-    FromOrToItem extends NodelikeOrReference
+    FromOrToItem extends Nodelike
   >(
     item: FromOrToItem
   ) {

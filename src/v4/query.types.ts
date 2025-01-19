@@ -5,53 +5,37 @@ import type { Edge } from "./edge.ts";
 import type { EdgeQueryItem } from "./edge-query-item.ts";
 
 export type QueryInput = (
-  | RootQueryInputItem
+  | QueryInputItem
   | ArrayQueryInput
   | ObjectQueryInput
 );
 
-export type ArrayQueryInput = RootQueryInputItem[];
+export type ArrayQueryInput = QueryInputItem[];
 
 export type ObjectQueryInput = {
-  [key: string]: RootQueryInputItem;
+  [key: string]: QueryInputItem;
 };
 
-export type QueryInputItem = RootQueryInputItem;
-
-export type RootQueryInputItem = (
+export type QueryInputItem = (
   | Nodelike
   | Edgelike
-);
-
-export type ChildQueryInputItem = (
-  | Nodelike
-  | Edgelike
-  | ReferenceName
 );
 
 export type Nodelike = (
   | Class<Node>
   | Node
   | NodeQueryItem<any, any, any, any, any, any>
+  | ReferenceName
 );
 
 export type Edgelike = (
   | Class<Edge>
   | Edge
   | EdgeQueryItem<any, any, any, any, any>
+  | ReferenceName
 );
 
 export type ReferenceName = string;
-
-export type NodelikeOrReference = (
-  | Nodelike
-  | ReferenceName
-)
-
-export type EdgelikeOrReference = (
-  | Edgelike
-  | ReferenceName
-)
 
 export type QueryOutput<Input extends QueryInput> = (
   Input extends []
@@ -62,7 +46,7 @@ export type QueryOutput<Input extends QueryInput> = (
         ? ArrayQueryOutput<Input, Input>
         : Input extends ObjectQueryInput
           ? ObjectQueryOutput<Input, Input>
-          : Input extends RootQueryInputItem
+          : Input extends QueryInputItem
             ? QueryOutputItem<Input, Input>
             : never
 );
@@ -72,8 +56,8 @@ export type ArrayQueryOutput<
   FullInput extends QueryInput
 > = (
   Items extends [infer First, ...infer Rest]
-    ? First extends RootQueryInputItem
-      ? Rest extends RootQueryInputItem[]
+    ? First extends QueryInputItem
+      ? Rest extends QueryInputItem[]
         ? [
           QueryOutputItem<First, FullInput>,
           ...ArrayQueryOutput<Rest, FullInput>
@@ -91,7 +75,7 @@ export type ObjectQueryOutput<
 );
 
 export type QueryOutputItem<
-  Item extends RootQueryInputItem,
+  Item extends QueryInputItem,
   FullInput extends QueryInput
 > = (
   Item extends Class<Node> ? Instance<Item> :
@@ -121,17 +105,17 @@ type ReferencedTypes<Input extends QueryInput> = (
     ? ReferencedTypeFromArray<Input, never>
     : Input extends ObjectQueryInput
       ? ReferencedTypeFromArray<ObjectValueTuple<Input>, never>
-      : Input extends RootQueryInputItem
+      : Input extends QueryInputItem
         ? ReferencedTypeFromArray<[Input], never>
         : never
 );
 
 type ReferencedTypeFromArray<
-  Items extends ChildQueryInputItem[],
+  Items extends QueryInputItem[],
   FallbackType extends NodeOrEdgeClass
 > = (
   Items extends [infer First, ...infer Rest]
-    ? Rest extends ChildQueryInputItem[]
+    ? Rest extends QueryInputItem[]
       ? First extends NodeQueryItem<
         infer ClassType,
         infer Name,
@@ -170,10 +154,10 @@ type ReferencedTypeFromArray<
 type ExpandQueryItem<
   Type extends NodeOrEdgeClass,
   Name extends ReferenceName,
-  WithItems extends ChildQueryInputItem[],
-  ToItems extends ChildQueryInputItem[],
-  FromItems extends ChildQueryInputItem[],
-  FromOrToItems extends ChildQueryInputItem[]
+  WithItems extends QueryInputItem[],
+  ToItems extends QueryInputItem[],
+  FromItems extends QueryInputItem[],
+  FromOrToItems extends QueryInputItem[]
 > = (
   (
     & ReferencedType<Type, Name>

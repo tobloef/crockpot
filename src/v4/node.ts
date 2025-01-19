@@ -2,8 +2,8 @@ import type { Edge } from "./edge.ts";
 import type { Class } from "./utils/class.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
 import type {
-  EdgelikeOrReference,
-  NodelikeOrReference,
+  Edgelike,
+  Nodelike,
   ReferenceName,
 } from "./query.types.ts";
 import { randomString } from "./utils/random-string.ts";
@@ -31,7 +31,7 @@ export class Node {
 
   static with<
     Type extends Class<Node>,
-    WithItems extends EdgelikeOrReference[]
+    WithItems extends Edgelike[]
   >(
     this: Type,
     ...items: WithItems
@@ -44,7 +44,7 @@ export class Node {
 
   static to<
     Type extends Class<Node>,
-    ToItems extends NodelikeOrReference[]
+    ToItems extends Nodelike[]
   >(
     this: Type,
     ...items: ToItems
@@ -57,7 +57,7 @@ export class Node {
 
   static from<
     Type extends Class<Node>,
-    FromItems extends NodelikeOrReference[]
+    FromItems extends Nodelike[]
   >(
     this: Type,
     ...items: FromItems
@@ -70,7 +70,7 @@ export class Node {
 
   static fromOrTo<
     Type extends Class<Node>,
-    FromOrToItems extends NodelikeOrReference[]
+    FromOrToItems extends Nodelike[]
   >(
     this: Type,
     ...items: FromOrToItems

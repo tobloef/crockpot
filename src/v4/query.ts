@@ -4,6 +4,7 @@ import type {
   QueryInput,
   QueryInputItem,
   QueryOutput,
+  ReferenceName,
 } from "./query.types.ts";
 import type { Class } from "./utils/class.ts";
 import { Node } from "./node.ts";
@@ -12,6 +13,8 @@ import { Edge } from "./edge.ts";
 import { EdgeQueryItem } from "./edge-query-item.ts";
 import { randomString } from "./utils/random-string.ts";
 import type { Graph } from "./graph.ts";
+import { assertExhaustive } from "./utils/assert-exhaustive.ts";
+import { CustomError } from "./utils/errors/custom-error.ts";
 
 export function* query<
   Input extends QueryInput
@@ -56,18 +59,18 @@ function parseInput(
   };
 
   if (isSingleItem(input)) {
-    parseRootItem(input, pools);
+    parseItem(input, pools);
   } else if (Array.isArray(input)) {
     for (let i = 0; i < input.length; i++) {
       const item = input[i]!;
-      const poolName = parseRootItem(item, pools);
+      const poolName = parseItem(item, pools);
       const pool = getAnyPool(poolName, pools)!;
       pool.outputKey = i;
     }
   } else {
     const entries = Object.entries(input);
     for (const [key, item] of entries) {
-      const poolName = parseRootItem(item, pools);
+      const poolName = parseItem(item, pools);
       const pool = getAnyPool(poolName, pools)!;
       pool.outputKey = key;
     }
@@ -110,10 +113,14 @@ type EdgePool = {
   outputKey?: string | number,
 }
 
-function parseRootItem(
+function parseItem(
   item: Nodelike | Edgelike,
   pools: Pools,
 ): PoolName {
+  if (typeof item === "string") {
+    return parseReferenceName(item, pools);
+  }
+
   return isNodelike(item)
     ? parseNode(item, pools)
     : parseEdge(item, pools);
@@ -138,6 +145,68 @@ function isEdgelike(
     item instanceof EdgeQueryItem
   );
 }
+
+function parseReferenceName(
+  item: ReferenceName,
+  pools: Pools,
+  parent?: {
+    type: "edge" | "node",
+    poolName: PoolName,
+    direction: "to" | "from"
+  }
+): PoolName {
+  const poolName = item;
+
+  const existingNodePool = pools.nodes[poolName];
+  const existingEdgePool = pools.edges[poolName];
+  const existingUnknownPool = pools.unknown[poolName];
+
+  const existingType = (
+    existingNodePool ? "node" :
+      existingEdgePool ? "edge" :
+        existingUnknownPool ? "unknown" :
+          undefined
+  );
+
+  const thisType = (
+    parent?.type === "edge" ? "node" :
+      parent?.type === "node" ? "edge" :
+        "unknown"
+  );
+
+  if (existingType === "node" && thisType === "edge") {
+    throw new ReferenceMismatchError(poolName, { existing: existingType, new: thisType });
+  } else if (existingType === "edge" && thisType === "node") {
+    throw new ReferenceMismatchError(poolName, { existing: existingType, new: thisType });
+  } else if (existingType === undefined && thisType === "node") {
+    pools.nodes[poolName] = { constraints: {} };
+  } else if (existingType === undefined && thisType === "edge") {
+    pools.edges[poolName] = { constraints: {} };
+  } else if (existingType === undefined && thisType === "unknown") {
+    pools.unknown[poolName] = { constraints: {} };
+  } else if (existingType === "unknown" && thisType === "node") {
+    pools.nodes[poolName] = { constraints: {} };
+    delete pools.unknown[poolName];
+  } else if (existingType === "unknown" && thisType === "edge") {
+    pools.edges[poolName] = { constraints: {} };
+    delete pools.unknown[poolName];
+  }
+
+  return poolName;
+}
+
+export class ReferenceMismatchError extends CustomError {
+  constructor(
+    public poolName: PoolName,
+    public types: (
+      | { existing: "node", new: "edge" }
+      | { existing: "edge", new: "node" }
+    )
+  ) {
+    super(`Reference ${poolName} is already defined as a ${types.existing}, cannot redefine as a ${types.new}.`);
+  }
+}
+
 
 function parseNode(
   item: Nodelike,

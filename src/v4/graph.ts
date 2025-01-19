@@ -8,7 +8,6 @@ import type {
   QueryInputItem,
   QueryOutput,
   QueryOutputItem,
-  RootQueryInputItem,
 } from "./query.types.ts";
 import { query } from "./query.ts";
 
