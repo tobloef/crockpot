@@ -25,14 +25,12 @@ export type Nodelike = (
   | Class<Node>
   | Node
   | NodeQueryItem<any, any, any, any, any, any>
-  | string
 );
 
 export type Edgelike = (
   | Class<Edge>
   | Edge
   | EdgeQueryItem<any, any, any, any, any, any>
-  | string
 );
 
 export type QueryOutput<Input extends QueryInput> = (

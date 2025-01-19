@@ -69,10 +69,9 @@ type EdgePool = {
 function parseRootItem(
   item: Nodelike | Edgelike,
   pools: Pools,
-  input: QueryInput,
   outputKey?: string | number,
 ) {
-  if (isNodelike(item, input)) {
+  if (isNodelike(item)) {
     const poolName = parseNode(item, pools);
     pools.nodes[poolName]!.outputKey = outputKey;
   } else {
@@ -83,23 +82,22 @@ function parseRootItem(
 
 function isNodelike(
   item: Nodelike | Edgelike,
-  input: QueryInput
 ): item is Nodelike {
   return (
     isClassThatExtends(item as Class<any>, Node) ||
     item instanceof Node ||
-    item instanceof NodeQueryItem ||
-    (typeof item === "string" && isReferencingNode(item, input))
+    item instanceof NodeQueryItem
   );
 }
 
-type IsNode = boolean;
-
-function isReferencingNode(
-  item: string,
-  input: QueryInput
-): boolean {
-  // TODO: Implement/rework once parsing has been completed
+function isEdgelike(
+  item: Nodelike | Edgelike,
+): item is Edgelike {
+  return (
+    isClassThatExtends(item as Class<any>, Edge) ||
+    item instanceof Edge ||
+    item instanceof EdgeQueryItem
+  );
 }
 
 function parseNode(
@@ -118,8 +116,6 @@ function parseNode(
     poolName = parseNodeInstance(item, pools);
   } else if (item instanceof NodeQueryItem) {
     poolName = parseNodeQueryItem(item, pools);
-  } else if (typeof item === "string") {
-    poolName = parseNodeReference(item, pools);
   } else {
     throw new Error(`Invalid node item ${item}`);
   }
@@ -143,8 +139,6 @@ function parseNodeInstance(item: Node, pools: Pools): PoolName {}
 
 function parseNodeQueryItem(item: NodeQueryItem, pools: Pools): PoolName {}
 
-function parseNodeReference(item: string, pools: Pools): PoolName {}
-
 function parseEdge(
   item: Edgelike,
   pools: Pools,
@@ -161,8 +155,6 @@ function parseEdge(
     poolName = parseEdgeInstance(item, pools);
   } else if (item instanceof EdgeQueryItem) {
     poolName = parseEdgeQueryItem(item, pools);
-  } else if (typeof item === "string") {
-    poolName = parseEdgeReference(item, pools);
   } else {
     throw new Error(`Invalid edge item ${item}`);
   }
@@ -186,8 +178,6 @@ function parseEdgeInstance(item: Edge, pools: Pools): PoolName {}
 
 function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {}
 
-function parseEdgeReference(item: string, pools: Pools): PoolName {}
-
 function parseInput(
   input: QueryInput,
 ): Pools {
@@ -197,16 +187,16 @@ function parseInput(
   };
 
   if (isSingleItem(input)) {
-    parseRootItem(input, pools, input);
+    parseRootItem(input, pools);
   } else if (Array.isArray(input)) {
     for (let i = 0; i < input.length; i++) {
       const item = input[i]!;
-      parseRootItem(item, pools, input, i);
+      parseRootItem(item, pools, i);
     }
   } else {
     const entries = Object.entries(input);
     for (const [key, item] of entries) {
-      parseRootItem(item, pools, input, key);
+      parseRootItem(item, pools, key);
     }
   }
 
