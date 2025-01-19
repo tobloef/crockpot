@@ -1,7 +1,11 @@
 import type { Edge } from "./edge.ts";
 import type { Class } from "./utils/class.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
-import type { Edgelike, Nodelike } from "./query.types.ts";
+import type {
+  EdgelikeOrReference,
+  NodelikeOrReference,
+  ReferenceName,
+} from "./query.types.ts";
 import { randomString } from "./utils/random-string.ts";
 
 export class Node {
@@ -14,12 +18,12 @@ export class Node {
 
   static as<
     Type extends Class<Node>,
-    Name extends string,
+    Name extends ReferenceName,
   >(
     this: Type,
     name: Name,
   ) {
-    return new NodeQueryItem<Type, Name, [], [], []>({
+    return new NodeQueryItem<Type, Name, [], [], [], []>({
       class: this,
       name,
     });
@@ -27,12 +31,12 @@ export class Node {
 
   static with<
     Type extends Class<Node>,
-    WithItems extends Edgelike[]
+    WithItems extends EdgelikeOrReference[]
   >(
     this: Type,
     ...items: WithItems
-  ): NodeQueryItem<Type, string, WithItems, [], []> {
-    return new NodeQueryItem({
+  ) {
+    return new NodeQueryItem<Type, ReferenceName, WithItems, [], [], []>({
       withItems: items,
       class: this,
     });
@@ -40,12 +44,12 @@ export class Node {
 
   static to<
     Type extends Class<Node>,
-    ToItems extends Nodelike[]
+    ToItems extends NodelikeOrReference[]
   >(
     this: Type,
     ...items: ToItems
   ) {
-    return new NodeQueryItem<Type, string, [], ToItems, []>({
+    return new NodeQueryItem<Type, ReferenceName, [], ToItems, [], []>({
       toItems: items,
       class: this,
     });
@@ -53,12 +57,12 @@ export class Node {
 
   static from<
     Type extends Class<Node>,
-    FromItems extends Nodelike[]
+    FromItems extends NodelikeOrReference[]
   >(
     this: Type,
     ...items: FromItems
   ) {
-    return new NodeQueryItem<Type, string, [], [], FromItems>({
+    return new NodeQueryItem<Type, ReferenceName, [], [], FromItems, []>({
       fromItems: items,
       class: this,
     });
@@ -66,12 +70,12 @@ export class Node {
 
   static fromOrTo<
     Type extends Class<Node>,
-    FromOrToItems extends Nodelike[]
+    FromOrToItems extends NodelikeOrReference[]
   >(
     this: Type,
     ...items: FromOrToItems
   ) {
-    return new NodeQueryItem<Type, string, [], [], [], FromOrToItems>({
+    return new NodeQueryItem<Type, ReferenceName, [], [], [], FromOrToItems>({
       fromOrToItems: items,
       class: this,
     });

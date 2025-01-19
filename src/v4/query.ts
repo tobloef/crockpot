@@ -1,4 +1,4 @@
-import type { Edgelike, Nodelike, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem } from "./query.types.ts";
+import type { Edgelike, Nodelike, QueryInput, QueryOutput } from "./query.types.ts";
 import type { Class } from "./utils/class.ts";
 import { Node } from "./node.ts";
 import { NodeQueryItem } from "./node-query-item.ts";

@@ -1,6 +1,9 @@
 import type { Class } from "./utils/class.ts";
-import type { Edgelike, Nodelike } from "./query.types.ts";
-import { EdgeQueryItem, type ZeroToTwoNodeLikes } from "./edge-query-item.ts";
+import type {
+  NodelikeOrReference,
+  ReferenceName,
+} from "./query.types.ts";
+import { EdgeQueryItem } from "./edge-query-item.ts";
 import { randomString } from "./utils/random-string.ts";
 import type { Node } from "./node.ts";
 
@@ -17,38 +20,37 @@ export class Edge {
 
   static as<
     Type extends Class<Edge>,
-    Name extends string,
+    Name extends ReferenceName,
   >(
     this: Type,
     name: Name,
   ) {
-    return new EdgeQueryItem<Type, Name>({
+    return new EdgeQueryItem<
+      Type,
+      Name,
+      NodelikeOrReference,
+      NodelikeOrReference,
+      NodelikeOrReference
+    >({
       class: this,
       name,
     });
   }
 
-  static with<
-    Type extends Class<Edge>,
-    WithItems extends ZeroToTwoNodeLikes
-  >(
-    this: Type,
-    ...items: WithItems
-  ) {
-    return new EdgeQueryItem<Type, string, WithItems>({
-      withItems: items,
-      class: this,
-    });
-  }
-
   static to<
     Type extends Class<Edge>,
-    ToItem extends Nodelike
+    ToItem extends NodelikeOrReference
   >(
     this: Type,
     item: ToItem
   ) {
-    return new EdgeQueryItem<Type, string, [], ToItem>({
+    return new EdgeQueryItem<
+      Type,
+      ReferenceName,
+      ToItem,
+      NodelikeOrReference,
+      NodelikeOrReference
+    >({
       toItem: item,
       class: this,
     });
@@ -56,12 +58,18 @@ export class Edge {
 
   static from<
     Type extends Class<Edge>,
-    FromItem extends Nodelike
+    FromItem extends NodelikeOrReference
   >(
     this: Type,
     item: FromItem
   ) {
-    return new EdgeQueryItem<Type, string, [], Nodelike, FromItem>({
+    return new EdgeQueryItem<
+      Type,
+      ReferenceName,
+      NodelikeOrReference,
+      FromItem,
+      NodelikeOrReference
+    >({
       fromItem: item,
       class: this,
     });
@@ -69,17 +77,16 @@ export class Edge {
 
   static fromOrTo<
     Type extends Class<Edge>,
-    FromOrToItem extends Nodelike
+    FromOrToItem extends NodelikeOrReference
   >(
     this: Type,
     item: FromOrToItem
   ) {
     return new EdgeQueryItem<
       Type,
-      string,
-      [],
-      Nodelike,
-      Nodelike,
+      ReferenceName,
+      NodelikeOrReference,
+      NodelikeOrReference,
       FromOrToItem
     >({
       fromOrToItem: item,

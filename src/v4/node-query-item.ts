@@ -1,14 +1,20 @@
 import type { Class } from "./utils/class.ts";
 import { Node } from "./node.ts";
-import type { Edgelike, Nodelike } from "./query.types.ts";
+import type {
+  Edgelike,
+  EdgelikeOrReference,
+  Nodelike,
+  NodelikeOrReference,
+  ReferenceName,
+} from "./query.types.ts";
 
 export class NodeQueryItem<
   ClassType extends Class<Node> = Class<Node>,
-  Name extends string = string,
-  WithItems extends Edgelike[] = [],
-  ToItems extends Nodelike[] = [],
-  FromItems extends Nodelike[] = [],
-  FromOrToItems extends Nodelike[] = [],
+  Name extends ReferenceName = ReferenceName,
+  WithItems extends EdgelikeOrReference[] = [],
+  ToItems extends NodelikeOrReference[] = [],
+  FromItems extends NodelikeOrReference[] = [],
+  FromOrToItems extends NodelikeOrReference[] = [],
 > {
   #brand = 'NodeQueryItem' as const;
 
@@ -36,7 +42,7 @@ export class NodeQueryItem<
   }
 
   as<
-    Name extends string
+    Name extends ReferenceName
   >(
     name: Name,
   ) {
@@ -58,7 +64,7 @@ export class NodeQueryItem<
   }
 
   with<
-    WithItems extends Edgelike[]
+    WithItems extends EdgelikeOrReference[]
   >(
     ...items: WithItems
   ) {
@@ -80,7 +86,7 @@ export class NodeQueryItem<
   }
 
   to<
-    ToItems extends Nodelike[]
+    ToItems extends NodelikeOrReference[]
   >(
     ...items: ToItems
   ) {
@@ -102,7 +108,7 @@ export class NodeQueryItem<
   }
 
   from<
-    FromItems extends Nodelike[]
+    FromItems extends NodelikeOrReference[]
   >(
     ...items: FromItems
   ) {
@@ -124,7 +130,7 @@ export class NodeQueryItem<
   }
 
   fromOrTo<
-    FromOrToItems extends Nodelike[]
+    FromOrToItems extends NodelikeOrReference[]
   >(
     ...items: FromOrToItems
   ) {
