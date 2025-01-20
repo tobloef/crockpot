@@ -6,17 +6,19 @@ import type {
 import { EdgeQueryItem } from "./edge-query-item.ts";
 import { randomString } from "./utils/random-string.ts";
 import type { Node } from "./node.ts";
+import type { Graph } from "./graph.ts";
+import { writeable } from "./utils/writeable.ts";
 
 export class Edge {
   #brand = 'Edge' as const;
 
   id: string = randomString();
+  graph?: Readonly<Graph>;
 
-  // TODO: Should potentially be a getter that uses the graph and an index behind the scenes
-  nodes: {
+  nodes: Readonly<{
     from?: Node,
     to?: Node,
-  } = {};
+  }> = {};
 
   static as<
     Type extends Class<Edge>,
@@ -92,5 +94,23 @@ export class Edge {
       fromOrToItems: items,
       class: this,
     });
+  }
+
+  removeFromNodes() {
+    if (this.nodes.to?.edges?.to !== undefined) {
+      writeable(this.nodes.to.edges).to = (
+        this.nodes.to.edges.to.filter((e) => e !== this)
+      );
+    }
+
+    if (this.nodes.from?.edges?.from !== undefined) {
+      writeable(this.nodes.from.edges).from = (
+        this.nodes.from.edges.from.filter((e) => e !== this)
+      );
+    }
+
+    writeable(this.nodes).to = undefined;
+    writeable(this.nodes).from = undefined;
+    this.nodes = {};
   }
 }

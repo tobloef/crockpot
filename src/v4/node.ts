@@ -1,4 +1,4 @@
-import type { Edge } from "./edge.ts";
+import { Edge } from "./edge.ts";
 import type { Class } from "./utils/class.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
 import type {
@@ -7,17 +7,19 @@ import type {
   ReferenceName,
 } from "./query.types.ts";
 import { randomString } from "./utils/random-string.ts";
+import type { Graph } from "./graph.ts";
+import { writeable } from "./utils/writeable.ts";
 
 export class Node {
   #brand = 'Node' as const;
 
   id: string = randomString();
+  graph?: Readonly<Graph>;
 
-  // TODO: Should potentially be a getter that uses the graph and an index behind the scenes
-  edges: {
+  edges: Readonly<{
     from: Edge[],
     to: Edge[],
-  } = {
+  }> = {
     from: [],
     to: [],
   }
@@ -87,14 +89,79 @@ export class Node {
     });
   }
 
-  addEdge(input: NodeEdgeInput): this {
-    // TODO
+  addEdge(input: AddEdgeInput): this {
+    const edge = input.edge ?? new Edge();
+
+    let toNode: Node;
+    let fromNode: Node;
+
+    if ("to" in input) {
+      toNode = input.to;
+      fromNode = this;
+    } else {
+      toNode = this;
+      fromNode = input.from;
+    }
+
+    if (edge.nodes.to !== undefined && edge.nodes.to !== toNode) {
+      throw new Error("Edge already has another 'to' node.");
+    }
+
+    if (edge.nodes.from !== undefined && edge.nodes.from !== fromNode) {
+      throw new Error("Edge already has another 'from' node.");
+    }
+
+    writeable(edge.nodes).to = toNode;
+    writeable(edge.nodes).from = fromNode;
+
+    if (!toNode.edges.to.includes(edge)) {
+      toNode.edges.to.push(edge);
+    }
+
+    if (!fromNode.edges.from.includes(edge)) {
+      fromNode.edges.from.push(edge);
+    }
+
+    return this;
+  }
+
+  removeEdges(input: RemoveEdgeInput): this {
+    let edges: Edge[];
+
+    if ("to" in input) {
+      edges = input.to.edges.to;
+    } else {
+      edges = input.from.edges.from;
+    }
+
+    for (const edge of edges) {
+      if (input.type === undefined || edge instanceof input.type) {
+        edge.removeFromNodes();
+      }
+    }
+
+    return this;
+  }
+
+  removeAllEdges() {
+    for (const edge of this.edges.from) {
+      edge.removeFromNodes();
+    }
+
+    for (const edge of this.edges.to) {
+      edge.removeFromNodes();
+    }
+
     return this;
   }
 }
 
-export type NodeEdgeInput = (
+export type AddEdgeInput = (
   | { to: Node, edge?: Edge }
   | { from: Node, edge?: Edge }
-  | { with: Node, edge?: Edge }
+);
+
+export type RemoveEdgeInput = (
+  | { to: Node, type?: Class<Edge> }
+  | { from: Node, type?: Class<Edge> }
 )
