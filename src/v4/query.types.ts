@@ -133,10 +133,10 @@ type ReferencedTypeFromArray<
           infer Name,
           infer ToItem,
           infer FromItem,
-          infer FromOrToItem
+          infer FromOrToItems
         >
         ? (
-          & ExpandQueryItem<ClassType, Name, [], [ToItem], [FromItem], [FromOrToItem]>
+          & ExpandQueryItem<ClassType, Name, [], [ToItem], [FromItem], FromOrToItems>
           & ReferencedTypeFromArray<Rest, never>
         )
         : First extends ReferenceName

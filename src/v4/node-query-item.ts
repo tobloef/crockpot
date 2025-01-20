@@ -9,10 +9,10 @@ import type {
 export class NodeQueryItem<
   ClassType extends Class<Node> = Class<Node>,
   Name extends ReferenceName = ReferenceName,
-  WithItems extends Edgelike[] = [],
-  ToItems extends Nodelike[] = [],
-  FromItems extends Nodelike[] = [],
-  FromOrToItems extends Nodelike[] = [],
+  WithItems extends Edgelike[] = Edgelike[],
+  ToItems extends Nodelike[] = Nodelike[],
+  FromItems extends Nodelike[] = Nodelike[],
+  FromOrToItems extends Nodelike[] = Nodelike[],
 > {
   #brand = 'NodeQueryItem' as const;
 

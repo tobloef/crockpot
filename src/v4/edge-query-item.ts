@@ -10,7 +10,7 @@ export class EdgeQueryItem<
   Name extends string = ReferenceName,
   ToItem extends Nodelike = Nodelike,
   FromItem extends Nodelike = Nodelike,
-  FromOrToItem extends Nodelike = Nodelike,
+  FromOrToItems extends Nodelike[] = Nodelike[],
 > {
   #brand = 'EdgeQueryItem' as const;
 
@@ -18,20 +18,20 @@ export class EdgeQueryItem<
   name?: Name;
   toItem?: ToItem;
   fromItem?: FromItem;
-  fromOrToItem?: FromOrToItem;
+  fromOrToItems?: FromOrToItems;
 
   constructor(params: {
     class: ClassType,
     name?: Name,
     toItem?: ToItem,
     fromItem?: FromItem,
-    fromOrToItem?: FromOrToItem,
+    fromOrToItems?: FromOrToItems,
   }) {
     this.class = params.class;
     this.name = params.name;
     this.toItem = params.toItem;
     this.fromItem = params.fromItem;
-    this.fromOrToItem = params.fromOrToItem;
+    this.fromOrToItems = params.fromOrToItems;
   }
 
   as<
@@ -44,13 +44,13 @@ export class EdgeQueryItem<
       Name,
       ToItem,
       FromItem,
-      FromOrToItem
+      FromOrToItems
     >({
       class: this.class,
       name,
       toItem: this.toItem,
       fromItem: this.fromItem,
-      fromOrToItem: this.fromOrToItem,
+      fromOrToItems: this.fromOrToItems,
     });
   }
 
@@ -64,13 +64,13 @@ export class EdgeQueryItem<
       Name,
       ToItem,
       FromItem,
-      FromOrToItem
+      FromOrToItems
     >({
       class: this.class,
       name: this.name,
       toItem: item,
       fromItem: this.fromItem,
-      fromOrToItem: this.fromOrToItem
+      fromOrToItems: this.fromOrToItems
     });
   }
 
@@ -84,31 +84,36 @@ export class EdgeQueryItem<
       Name,
       ToItem,
       FromItem,
-      FromOrToItem
+      FromOrToItems
     >({
       class: this.class,
       name: this.name,
       toItem: this.toItem,
       fromItem: item,
-      fromOrToItem: this.fromOrToItem,
+      fromOrToItems: this.fromOrToItems,
     });
   }
 
   fromOrTo<
-    FromOrToItem extends Nodelike
+    FromOrToItems extends Nodelike[]
   >(
-    item: FromOrToItem
+    ...items: FromOrToItems
   ) {
+    if (items.length > 2) {
+      throw new Error(`The 'fromOrTo' parameter can only accept up to 2 items, but ${items.length} were given.`);
+    }
+
     return new EdgeQueryItem<
       ClassType,
       Name,
       ToItem,
-      FromOrToItem
+      FromItem,
+      FromOrToItems
     >({
       class: this.class,
       name: this.name,
       toItem: this.toItem,
-      fromOrToItem: item,
+      fromOrToItems: items,
     });
   }
 }

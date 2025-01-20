@@ -13,7 +13,6 @@ import { Edge } from "./edge.ts";
 import { EdgeQueryItem } from "./edge-query-item.ts";
 import { randomString } from "./utils/random-string.ts";
 import type { Graph } from "./graph.ts";
-import { assertExhaustive } from "./utils/assert-exhaustive.ts";
 import { CustomError } from "./utils/errors/custom-error.ts";
 
 export function* query<
@@ -83,10 +82,24 @@ function getAnyPool(
   poolName: PoolName,
   pools: Pools
 ) {
-  return pools.nodes[poolName] ?? pools.edges[poolName] ?? pools.unknown[poolName];
+  return (
+    pools.nodes[poolName] ??
+    pools.edges[poolName] ??
+    pools.unknown[poolName]
+  );
 }
 
 type PoolName = string;
+
+type Direction = "from"  | "to" | "fromOrTo";
+
+function getOppositeDirection(direction: Direction): Direction {
+  switch (direction) {
+    case "from": return "to";
+    case "to": return "from";
+    case "fromOrTo": return "fromOrTo";
+  }
+}
 
 type Pools = {
   nodes: Record<PoolName, NodePool>,
@@ -98,7 +111,12 @@ type NodePool = {
   constraints: {
     instance?: Node,
     class?: Class<Node>,
-    edges?: PoolName[],
+    edges?: {
+      // "from" means that the edge is going from this node
+      from?: PoolName[],
+      to?: PoolName[],
+      fromOrTo?: PoolName[],
+    },
   },
   outputKey?: string | number,
 }
@@ -107,8 +125,11 @@ type EdgePool = {
   constraints: {
     instance?: Edge,
     class?: Class<Edge>,
-    fromNode?: PoolName,
-    toNode?: PoolName,
+    nodes?: {
+      to?: PoolName,
+      from?: PoolName,
+      toOrFrom?: PoolName[],
+    }
   },
   outputKey?: string | number,
 }
@@ -152,7 +173,7 @@ function parseReferenceName(
   parent?: {
     type: "edge" | "node",
     poolName: PoolName,
-    direction: "to" | "from"
+    direction: Direction
   }
 ): PoolName {
   const poolName = item;
@@ -207,84 +228,259 @@ export class ReferenceMismatchError extends CustomError {
   }
 }
 
-
 function parseNode(
   item: Nodelike,
   pools: Pools,
   parentEdge?: {
     poolName: PoolName,
-    direction: "to" | "from",
+    // "to" means that the parent edge is going to this node
+    direction: Direction,
   }
 ): PoolName {
   let poolName: PoolName;
 
-  if (isClassThatExtends(item as Class<any>, Node)) {
-    poolName = parseNodeClass(item as Class<Node>, pools);
+  if (typeof item === "string") {
+    poolName = parseReferenceName(
+      item,
+      pools,
+      parentEdge ? { type: "edge", ...parentEdge } : undefined
+    );
   } else if (item instanceof Node) {
     poolName = parseNodeInstance(item, pools);
   } else if (item instanceof NodeQueryItem) {
     poolName = parseNodeQueryItem(item, pools);
   } else {
-    throw new Error(`Invalid node item ${item}`);
+    poolName = parseNodeClass(item, pools);
   }
 
   if (parentEdge !== undefined) {
     const edgePool = pools.edges[parentEdge.poolName]!;
-    const constraintKey = parentEdge.direction === "to" ? "toNode" : "fromNode";
-    edgePool.constraints[constraintKey] = poolName;
+    edgePool.constraints.nodes ??= {};
+    if (parentEdge.direction === "fromOrTo") {
+      if (edgePool.constraints.nodes.toOrFrom?.length === 2) {
+        throw new Error(`Edge ${parentEdge.poolName} already has both nodes defined.`);
+      }
+
+      edgePool.constraints.nodes.toOrFrom ??= [];
+      edgePool.constraints.nodes.toOrFrom.push(poolName);
+    } else {
+      edgePool.constraints.nodes[parentEdge.direction] = poolName;
+    }
 
     const nodePool = pools.nodes[poolName]!;
-    nodePool.constraints.edges ??= [];
-    nodePool.constraints.edges.push(parentEdge.poolName);
+    nodePool.constraints.edges ??= {};
+    nodePool.constraints.edges[parentEdge.direction] ??= [];
+    nodePool.constraints.edges[parentEdge.direction]?.push(parentEdge.poolName);
   }
 
   return poolName;
 }
 
-function parseNodeClass(item: Class<Node>, pools: Pools): PoolName {}
+function parseNodeClass(item: Class<Node>, pools: Pools): PoolName {
+  const poolName = randomString();
 
-function parseNodeInstance(item: Node, pools: Pools): PoolName {}
+  pools.nodes[poolName] = {
+    constraints: {
+      class: item,
+    }
+  };
 
-function parseNodeQueryItem(item: NodeQueryItem, pools: Pools): PoolName {}
+  return poolName;
+}
+
+function parseNodeInstance(item: Node, pools: Pools): PoolName {
+  const poolName = item.id;
+
+  pools.nodes[poolName] = {
+    constraints: {
+      instance: item,
+    }
+  };
+
+  return poolName;
+}
+
+function parseNodeQueryItem(item: NodeQueryItem, pools: Pools): PoolName {
+  const poolName = item.name ?? randomString();
+
+  const existingPool = pools.nodes[poolName];
+
+  if (existingPool !== undefined) {
+    const existingClass = existingPool.constraints.class;
+
+    if (existingClass !== undefined && existingClass !== item.class) {
+      if (isClassThatExtends(item.class, existingClass)) {
+        existingPool.constraints.class = item.class;
+      } else if (isClassThatExtends(existingClass, item.class)) {
+        // Do nothing
+      } else {
+        throw new Error(`Node class mismatch for ${poolName}: ${existingClass} and ${item.class}`);
+      }
+    }
+  }
+
+  pools.nodes[poolName] ??= {
+    constraints: {
+      class: item.class,
+    }
+  };
+
+  for (const withItem of item.withItems ?? []) {
+    parseEdge(withItem, pools, { poolName, direction: "fromOrTo" });
+  }
+
+  for (const toItem of item.toItems ?? []) {
+    const edgePoolName = randomString();
+
+    pools.edges[edgePoolName] = {
+      constraints: {
+        nodes: {
+          from: poolName,
+        }
+      },
+    };
+
+    pools.nodes[poolName].constraints.edges ??= {};
+    pools.nodes[poolName].constraints.edges.from ??= [];
+    pools.nodes[poolName].constraints.edges.from.push(edgePoolName);
+
+    parseNode(toItem, pools, { poolName: edgePoolName, direction: "to" });
+  }
+
+  for (const fromItem of item.fromItems ?? []) {
+    const edgePoolName = randomString();
+
+    pools.edges[edgePoolName] = {
+      constraints: {
+        nodes: {
+          to: poolName,
+        }
+      },
+    };
+
+    pools.nodes[poolName].constraints.edges ??= {};
+    pools.nodes[poolName].constraints.edges.to ??= [];
+    pools.nodes[poolName].constraints.edges.to.push(edgePoolName);
+
+    parseNode(fromItem, pools, { poolName: edgePoolName, direction: "from" });
+  }
+
+  return poolName;
+}
 
 function parseEdge(
   item: Edgelike,
   pools: Pools,
   parentNode?: {
     poolName: PoolName,
-    direction: "to" | "from",
+    direction: Direction,
   },
 ): PoolName {
   let poolName: PoolName;
 
-  if (isClassThatExtends(item as Class<any>, Edge)) {
-    poolName = parseEdgeClass(item as Class<Edge>, pools);
+  if (typeof item === "string") {
+    poolName = parseReferenceName(
+      item,
+      pools,
+      parentNode ? { type: "node", ...parentNode } : undefined
+    );
   } else if (item instanceof Edge) {
     poolName = parseEdgeInstance(item, pools);
   } else if (item instanceof EdgeQueryItem) {
     poolName = parseEdgeQueryItem(item, pools);
   } else {
-    throw new Error(`Invalid edge item ${item}`);
+    poolName = parseEdgeClass(item, pools);
   }
 
   if (parentNode !== undefined) {
     const nodePool = pools.nodes[parentNode.poolName]!;
-    nodePool.constraints.edges ??= [];
-    nodePool.constraints.edges.push(poolName);
+    nodePool.constraints.edges ??= {};
+    nodePool.constraints.edges[parentNode.direction] ??= [];
+    nodePool.constraints.edges[parentNode.direction]?.push(poolName);
 
     const edgePool = pools.edges[poolName]!;
-    const constraintKey = parentNode.direction === "to" ? "toNode" : "fromNode";
-    edgePool.constraints[constraintKey] = parentNode.poolName;
+    if (parentNode.direction === "fromOrTo") {
+      if (edgePool.constraints.nodes?.toOrFrom?.length === 2) {
+        throw new Error(`Edge ${poolName} already has both nodes defined.`);
+      }
+
+      edgePool.constraints.nodes ??= {};
+      edgePool.constraints.nodes.toOrFrom ??= [];
+      edgePool.constraints.nodes.toOrFrom.push(parentNode.poolName);
+    } else {
+      edgePool.constraints.nodes ??= {};
+      edgePool.constraints.nodes[parentNode.direction] = parentNode.poolName;
+    }
   }
 
   return poolName;
 }
 
-function parseEdgeClass(item: Class<Edge>, pools: Pools): PoolName {}
+function parseEdgeClass(item: Class<Edge>, pools: Pools): PoolName {
+  const poolName = randomString();
 
-function parseEdgeInstance(item: Edge, pools: Pools): PoolName {}
+  pools.edges[poolName] = {
+    constraints: {
+      class: item,
+    }
+  };
 
-function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {}
+  return poolName;
+}
+
+function parseEdgeInstance(item: Edge, pools: Pools): PoolName {
+  const poolName = item.id;
+
+  pools.edges[poolName] = {
+    constraints: {
+      instance: item,
+    }
+  };
+
+  return poolName;
+}
+
+function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {
+  const poolName = item.name ?? randomString();
+
+  const existingPool = pools.edges[poolName];
+
+  if (existingPool !== undefined) {
+    const existingClass = existingPool.constraints.class;
+
+    if (existingClass !== undefined && existingClass !== item.class) {
+      if (isClassThatExtends(item.class, existingClass)) {
+        existingPool.constraints.class = item.class;
+      } else if (isClassThatExtends(existingClass, item.class)) {
+        // Do nothing
+      } else {
+        throw new Error(`Edge class mismatch for ${poolName}: ${existingClass} and ${item.class}`);
+      }
+    }
+  }
+
+  pools.edges[poolName] = {
+    constraints: {
+      class: item.class,
+    }
+  };
+
+  if (item.toItem !== undefined) {
+    parseNode(item.toItem, pools, { poolName, direction: "to" });
+  }
+
+  if (item.fromItem !== undefined) {
+    parseNode(item.fromItem, pools, { poolName, direction: "from" });
+  }
+
+  if (item.fromOrToItems !== undefined) {
+    for (const fromOrToItem of item.fromOrToItems) {
+      parseNode(fromOrToItem, pools, { poolName, direction: "fromOrTo" });
+    }
+  }
+
+  return poolName;
+}
 
 type GeneratorFunction<T> = () => Generator<T>;
 
@@ -451,15 +647,43 @@ function checkNodeConstraints(
     }
   }
 
-  if (pool.constraints.edges !== undefined) {
-    for (const edgePoolName of pool.constraints.edges) {
+  if (pool.constraints.edges?.from !== undefined) {
+    for (const edgePoolName of pool.constraints.edges.from) {
       const edge = permutation[edgePoolName];
 
       if (!(edge instanceof Edge)) {
         return false;
       }
 
-      if (!node.edges.includes(edge)) {
+      if (!node.edges.from.includes(edge)) {
+        return false;
+      }
+    }
+  }
+
+  if (pool.constraints.edges?.to !== undefined) {
+    for (const edgePoolName of pool.constraints.edges.to) {
+      const edge = permutation[edgePoolName];
+
+      if (!(edge instanceof Edge)) {
+        return false;
+      }
+
+      if (!node.edges.to.includes(edge)) {
+        return false;
+      }
+    }
+  }
+
+  if (pool.constraints.edges?.fromOrTo !== undefined) {
+    for (const edgePoolName of pool.constraints.edges.fromOrTo) {
+      const edge = permutation[edgePoolName];
+
+      if (!(edge instanceof Edge)) {
+        return false;
+      }
+
+      if (!node.edges.from.includes(edge) && !node.edges.to.includes(edge)) {
         return false;
       }
     }
@@ -492,8 +716,8 @@ function checkEdgeConstraints(
     }
   }
 
-  if (pool.constraints.fromNode !== undefined) {
-    const fromNode = permutation[pool.constraints.fromNode];
+  if (pool.constraints.nodes?.from !== undefined) {
+    const fromNode = permutation[pool.constraints.nodes.from];
 
     if (!(fromNode instanceof Node)) {
       return false;
@@ -504,8 +728,8 @@ function checkEdgeConstraints(
     }
   }
 
-  if (pool.constraints.toNode !== undefined) {
-    const toNode = permutation[pool.constraints.toNode];
+  if (pool.constraints.nodes?.to !== undefined) {
+    const toNode = permutation[pool.constraints.nodes.to];
 
     if (!(toNode instanceof Node)) {
       return false;
@@ -516,12 +740,22 @@ function checkEdgeConstraints(
     }
   }
 
+  if (pool.constraints.nodes?.toOrFrom !== undefined) {
+    for (const nodePoolName of pool.constraints.nodes.toOrFrom) {
+      const node = permutation[nodePoolName];
+
+      if (!(node instanceof Node)) {
+        return false;
+      }
+
+      if (edge.nodes.from !== node && edge.nodes.to !== node) {
+        return false;
+      }
+    }
+  }
+
   return true;
 }
-
-
-
-/////////////////////////////////////////////////////////////////
 
 function isSingleItem(input: QueryInput): input is QueryInputItem {
   return (
@@ -579,402 +813,18 @@ function checkIfAlreadyFound<
   return false;
 }
 
-function checkPermutationConstraints(
-  graph: Graph,
-  permutation: Record<string, Node | Edge>,
-  constraints: PoolConstraints,
-): boolean {
-  const entries = Object.entries(permutation);
-
-  for (const [poolName, item] of entries) {
-    const isMatch = checkItemConstraints(
-      graph,
-      permutation,
-      constraints,
-      poolName,
-      item,
-    );
-
-    if (!isMatch) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function checkItemConstraints(
-  graph: Graph,
-  permutation: Record<string, Node | Edge>,
-  poolConstraints: PoolConstraints,
-  poolName: string,
-  item: Node | Edge,
-): boolean {
-  const itemConstraints = poolConstraints[poolName];
-
-  if (itemConstraints === undefined) {
-    return true;
-  }
-
-  if (
-    itemConstraints.instance !== undefined &&
-    item !== itemConstraints.instance
-  ) {
-    return false;
-  }
-
-  if (
-    itemConstraints.class !== undefined &&
-    !(item instanceof itemConstraints.class)
-  ) {
-    return false;
-  }
-
-  if (item instanceof Edge) {
-    const edgeConstraints = itemConstraints as EdgeConstraints;
-
-    const nodeA = edgeConstraints.nodeA
-      ? permutation[edgeConstraints.nodeA]
-      : undefined;
-
-    const nodeB = edgeConstraints.nodeB
-      ? permutation[edgeConstraints.nodeB]
-      : undefined;
-
-    const edgeNodes = graph.edgeToNodes.get(item);
-
-    const fromNode = edgeNodes?.from;
-    const toNode = edgeNodes?.to;
-
-    const isAToB = nodeA === fromNode && nodeB === toNode;
-    const isBToA = nodeA === toNode && nodeB === fromNode;
-
-    if (edgeConstraints.direction === "to") {
-      if (!isAToB) {
-        return false;
-      }
-    } else if (edgeConstraints.direction === "from") {
-      if (!isBToA) {
-        return false;
-      }
-    } else {
-      if (!isAToB && !isBToA) {
-        return false;
-      }
-    }
-  } else {
-    // Nothing specific right now
-  }
-
-  return true;
-}
-
-function mapOutput<
-  Input extends QueryInput
->(
-  input: QueryInput,
-  permutation: Record<string, Node | Edge>,
-  poolNameToOutputKeyMap: Record<string, string>,
-): QueryOutput<Input> {
-  if (isSingleItem(input)) {
-    const firstKey = Object.keys(poolNameToOutputKeyMap)[0];
-    return permutation[firstKey] as QueryOutput<Input>;
-  }
-
-  const output = Array.isArray(input) ? [] : {};
-
-  const isArray = Array.isArray(input);
-
-  for (const [poolName, outputKey] of Object.entries(poolNameToOutputKeyMap)) {
-    const key = isArray ? Number(outputKey) : outputKey;
-    (output as any)[key] = permutation[poolName];
-  }
-
-  return output as QueryOutput<Input>;
-}
-
-export function* permutePools(
-  pools: Record<string, Pool>
-): Generator<Record<string, Node | Edge>> {
-  if (Object.keys(pools).length === 0) {
-    return;
-  }
-
-  const poolKeys = Object.keys(pools);
-  const firstKey = poolKeys[0];
-  const firstPool = pools[firstKey];
-  const otherPools = Object.fromEntries(
-    poolKeys.slice(1).map((key) => [key, pools[key]]),
-  );
-
-  for (const entity of firstPool.createIterator()) {
-    if (Object.keys(otherPools).length === 0) {
-      const permutation = { [firstKey]: entity };
-      yield permutation;
-    } else {
-      const otherPermutations = permutePools(otherPools);
-
-      for (const otherPermutation of otherPermutations) {
-        const permutation = { [firstKey]: entity, ...otherPermutation };
-        yield permutation;
-      }
-    }
-  }
-}
-
-type Pool = {
-  createIterator: () => Generator<Node | Edge>;
-}
-
-function createPools(
-  graph: Graph,
-  poolNames: string[]
-): Record<string, Pool> {
-  const pools: Record<string, Pool> = {};
-
-  for (const name of poolNames) {
-    pools[name] = createPool(graph);
-  }
-
-  return pools;
-}
-
-function createPool(
-  graph: Graph,
-): Pool {
-  return {
-    createIterator: () => combineGenerators<Node | Edge>(
-      arrayToGenerator(graph.nodes),
-      arrayToGenerator(graph.edges),
-    )
-  }
-}
-
 export function* arrayToGenerator<T>(array: T[]): Generator<T> {
   for (const item of array) {
     yield item;
   }
 }
 
-export function* combineGenerators<T>(
-  ...generators: Generator<T>[]
-): Generator<T> {
-  for (const generator of generators) {
-    for (const item of generator) {
-      yield item;
-    }
-  }
-}
-
-type ItemConstraints = NodeConstraints | EdgeConstraints;
-type PoolConstraints = Record<PoolName, ItemConstraints>;
-
-type NodeConstraints = {
-  class?: Class<Node>;
-  instance?: Node;
-}
-
-type EdgeConstraints = {
-  class?: Class<Edge>;
-  instance?: Edge;
-  direction?: "to" | "from";
-  nodeA?: PoolName;
-  nodeB?: PoolName;
-}
-
-type ParsedInput = {
-  poolNames: PoolName[];
-  poolConstraints: PoolConstraints;
-  poolNameToOutputKeyMap: Record<PoolName, string>;
-}
-
-type ParsedItem = {
-  poolName: string;
-  constraints?: PoolConstraints;
-  subItems?: ParsedItem[];
-}
-
-function parseItem(item: QueryInputItem): ParsedItem {
-  if (isClassThatExtends(item as Class<any>, Node)) {
-    return parseNodeClass(item as Class<Node>);
-  } else if (item instanceof Node) {
-    return parseNodeInstance(item);
-  } else if (item instanceof NodeQueryItem) {
-    return parseNodeQueryItem(item);
-  } else if (typeof item === "string") {
-    return parseString(item);
-  } else if (isClassThatExtends(item as Class<any>, Edge)) {
-    return parseEdgeClass(item as Class<Edge>);
-  } else if (item instanceof Edge) {
-    return parseEdgeInstance(item);
-  } else if (item instanceof EdgeQueryItem) {
-    return parseEdgeQueryItem(item);
-  } else {
-    throw new Error(`Invalid query item ${item}`);
-  }
-}
-
-function parseNodeClass(item: Class<Node>): ParsedItem {
-  const poolName = randomString();
-
-  const nodeConstraints: NodeConstraints = {
-    class: item,
-  };
-
-  return {
-    poolName,
-    constraints: {
-      [poolName]: nodeConstraints
-    }
-  };
-}
-
-function parseNodeInstance(item: Node): ParsedItem {
-  const poolName = item.id;
-
-  const nodeConstraints: NodeConstraints = {
-    instance: item,
-  };
-
-  return {
-    poolName,
-    constraints: {
-      [poolName]: nodeConstraints
-    }
-  };
-}
-
-function parseNodeQueryItem(
-  item: NodeQueryItem
-): ParsedItem {
-  const poolName = item.name ?? randomString();
-  const constraints: PoolConstraints = {};
-  const subItems: ParsedItem[] = [];
-
-  constraints[poolName] = {
-    class: item.class,
-  }
-
-  for (const subItem of item.withItems ?? []) {
-    const parsedSubItem = parseItem(subItem);
-    subItems.push(parsedSubItem);
-
-
-  }
-
-  return {
-    poolName,
-    constraints,
-    subItems,
-  }
-
-
-
-  const allSubNodes: QueryGraphNode[] = [];
-
-  const withItems: string[] = [];
-  const toItems: string[] = [];
-  const fromItems: string[] = [];
-
-  for (const value of item.withItems ?? []) {
-    const { node, subNodes } = parseItem(value);
-    withItems.push(node.poolName);
-    allSubNodes.push(node, ...subNodes ?? []);
-  }
-
-  for (const value of item.toItems ?? []) {
-    const { node, subNodes } = parseItem(value);
-    toItems.push(node.poolName);
-    allSubNodes.push(node, ...subNodes ?? []);
-  }
-
-  for (const value of item.fromItems ?? []) {
-    const { node, subNodes } = parseItem(value);
-    fromItems.push(node.poolName);
-    allSubNodes.push(node, ...subNodes ?? []);
-  }
-
-  return {
-    node: {
-      poolName: item.name ?? randomString(),
-      class: item.class,
-      withItems,
-      toItems,
-      fromItems,
-    },
-    subNodes: allSubNodes,
-  }
-}
-
-function parseString(item: string): ParsedItem {
-  return {
-    node: {
-      poolName: item,
-    },
-  }
-}
-
-function parseEdgeClass(item: Class<Edge>): ParsedItem {
-  return {
-    node: {
-      poolName: randomString(),
-      class: item,
-    },
-  }
-}
-
-function parseEdgeInstance(item: Edge): ParsedItem {
-  return {
-    node: {
-      poolName: item.id,
-      class: item.constructor as Class<Edge>,
-    },
-  }
-}
-
-function parseEdgeQueryItem(
-  item: EdgeQueryItem
-): ParsedItem {
-  const allSubNodes: QueryGraphNode[] = [];
-
-  const withItems: string[] = [];
-  const toItems: string[] = [];
-  const fromItems: string[] = [];
-
-  for (const value of item.withItems ?? []) {
-    const { node, subNodes } = parseItem(value);
-    withItems.push(node.poolName);
-    allSubNodes.push(node, ...subNodes ?? []);
-  }
-
-  for (const value of item.toItems ?? []) {
-    const { node, subNodes } = parseItem(value);
-    toItems.push(node.poolName);
-    allSubNodes.push(node, ...subNodes ?? []);
-  }
-
-  for (const value of item.fromItems ?? []) {
-    const { node, subNodes } = parseItem(value);
-    fromItems.push(node.poolName);
-    allSubNodes.push(node, ...subNodes ?? []);
-  }
-
-  return {
-    node: {
-      poolName: item.name ?? randomString(),
-      class: item.class,
-      withItems,
-      toItems,
-      fromItems,
-    },
-    subNodes: allSubNodes,
-  }
-}
-
-function isClassThatExtends(
+function isClassThatExtends<
+  Parent extends Class<any>
+>(
   child: Class<any>,
-  parent: Class<any>,
-) {
+  parent: Parent,
+): child is Parent {
   return (
     child === parent ||
     (parent.prototype?.isPrototypeOf(child.prototype) ?? false)

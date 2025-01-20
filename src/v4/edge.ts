@@ -30,7 +30,7 @@ export class Edge {
       Name,
       Nodelike,
       Nodelike,
-      Nodelike
+      Nodelike[]
     >({
       class: this,
       name,
@@ -49,7 +49,7 @@ export class Edge {
       ReferenceName,
       ToItem,
       Nodelike,
-      Nodelike
+      Nodelike[]
     >({
       toItem: item,
       class: this,
@@ -68,7 +68,7 @@ export class Edge {
       ReferenceName,
       Nodelike,
       FromItem,
-      Nodelike
+      Nodelike[]
     >({
       fromItem: item,
       class: this,
@@ -77,19 +77,19 @@ export class Edge {
 
   static fromOrTo<
     Type extends Class<Edge>,
-    FromOrToItem extends Nodelike
+    FromOrToItems extends Nodelike[]
   >(
     this: Type,
-    item: FromOrToItem
+    ...items: FromOrToItems
   ) {
     return new EdgeQueryItem<
       Type,
       ReferenceName,
       Nodelike,
       Nodelike,
-      FromOrToItem
+      FromOrToItems
     >({
-      fromOrToItem: item,
+      fromOrToItems: items,
       class: this,
     });
   }
