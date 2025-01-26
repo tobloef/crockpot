@@ -7,21 +7,22 @@ import type {
   ReferenceName,
 } from "./query.types.ts";
 import { randomString } from "./utils/random-string.ts";
-import type { Graph } from "./graph.ts";
+import { DEFAULT_GRAPH, type Graph } from "./graph.ts";
 import { writeable } from "./utils/writeable.ts";
 
 export class Node {
   #brand = 'Node' as const;
 
-  id: string = randomString();
-  graph?: Readonly<Graph>;
+  static defaultGraph: Graph = DEFAULT_GRAPH;
 
-  edges: Readonly<{
-    from: Edge[],
-    to: Edge[],
-  }> = {
-    from: [],
-    to: [],
+  id: string = randomString();
+  graph: Readonly<Graph> = Node.defaultGraph;
+
+  get edges(): NodeEdges {
+    return (
+      this.graph.indices.edgesByNode.get(this) ??
+      this.#createEmptyEdges()
+    );
   }
 
   static as<
@@ -89,70 +90,56 @@ export class Node {
     });
   }
 
-  addEdge(input: AddEdgeInput): this {
-    const edge = input.edge ?? new Edge();
-
-    let toNode: Node;
-    let fromNode: Node;
-
-    if ("to" in input) {
-      toNode = input.to;
-      fromNode = this;
+  addEdge(input: AddEdgeInput): void {
+    if ('to' in input) {
+      this.graph.addEdge({
+        from: this,
+        to: input.to,
+        edge: input.edge,
+      });
     } else {
-      toNode = this;
-      fromNode = input.from;
+      this.graph.addEdge({
+        from: input.from,
+        to: this,
+        edge: input.edge,
+      });
     }
-
-    if (edge.nodes.to !== undefined && edge.nodes.to !== toNode) {
-      throw new Error("Edge already has another 'to' node.");
-    }
-
-    if (edge.nodes.from !== undefined && edge.nodes.from !== fromNode) {
-      throw new Error("Edge already has another 'from' node.");
-    }
-
-    writeable(edge.nodes).to = toNode;
-    writeable(edge.nodes).from = fromNode;
-
-    if (!toNode.edges.to.includes(edge)) {
-      toNode.edges.to.push(edge);
-    }
-
-    if (!fromNode.edges.from.includes(edge)) {
-      fromNode.edges.from.push(edge);
-    }
-
-    return this;
   }
 
-  removeEdges(input: RemoveEdgeInput): this {
-    let edges: Edge[];
-
-    if ("to" in input) {
-      edges = input.to.edges.to;
-    } else {
-      edges = input.from.edges.from;
-    }
-
-    for (const edge of edges) {
-      if (input.type === undefined || edge instanceof input.type) {
-        edge.removeFromNodes();
-      }
-    }
-
-    return this;
+  removeEdge(edge: Edge): void {
+    this.graph.removeEdge(edge);
   }
 
-  removeAllEdges() {
-    for (const edge of this.edges.from) {
-      edge.removeFromNodes();
+  removeEdges(input?: RemoveEdgeInput): void {
+    if (input!== undefined && 'to' in input) {
+      this.graph.removeEdges({
+        from: this,
+        to: input.to,
+        type: input.type,
+      });
+    } else if (input !== undefined && 'from' in input) {
+      this.graph.removeEdges({
+        from: input.from,
+        to: this,
+        type: input.type,
+      });
+    } else {
+      this.graph.removeEdges({
+        on: this,
+        type: input?.type,
+      });
     }
+  }
 
-    for (const edge of this.edges.to) {
-      edge.removeFromNodes();
-    }
+  remove() {
+    this.graph.removeNode(this);
+  }
 
-    return this;
+  #createEmptyEdges(): NodeEdges {
+    return {
+      from: new Set<Edge>(),
+      to: new Set<Edge>(),
+    };
   }
 }
 
@@ -164,4 +151,10 @@ export type AddEdgeInput = (
 export type RemoveEdgeInput = (
   | { to: Node, type?: Class<Edge> }
   | { from: Node, type?: Class<Edge> }
+  | { type: Class<Edge> }
 )
+
+export type NodeEdges = Readonly<{
+  from: ReadonlySet<Edge>,
+  to: ReadonlySet<Edge>,
+}>;

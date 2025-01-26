@@ -6,19 +6,23 @@ import type {
 import { EdgeQueryItem } from "./edge-query-item.ts";
 import { randomString } from "./utils/random-string.ts";
 import type { Node } from "./node.ts";
-import type { Graph } from "./graph.ts";
+import { DEFAULT_GRAPH, type Graph } from "./graph.ts";
 import { writeable } from "./utils/writeable.ts";
 
 export class Edge {
   #brand = 'Edge' as const;
 
-  id: string = randomString();
-  graph?: Readonly<Graph>;
+  static defaultGraph: Graph = DEFAULT_GRAPH;
 
-  nodes: Readonly<{
-    from?: Node,
-    to?: Node,
-  }> = {};
+  id: string = randomString();
+  graph: Readonly<Graph> = Edge.defaultGraph;
+
+  get nodes(): EdgeNodes {
+    return (
+      this.graph.indices.nodesByEdge.get(this) ??
+      this.#createEmptyNodes()
+    );
+  }
 
   static as<
     Type extends Class<Edge>,
@@ -96,21 +100,26 @@ export class Edge {
     });
   }
 
-  removeFromNodes() {
-    if (this.nodes.to?.edges?.to !== undefined) {
-      writeable(this.nodes.to.edges).to = (
-        this.nodes.to.edges.to.filter((e) => e !== this)
-      );
-    }
+  remove(): void {
+    this.graph.removeEdge(this);
+  }
 
-    if (this.nodes.from?.edges?.from !== undefined) {
-      writeable(this.nodes.from.edges).from = (
-        this.nodes.from.edges.from.filter((e) => e !== this)
-      );
-    }
+  setNodes(nodes: {
+    from: Node;
+    to: Node;
+  }): void {
+    this.graph.setEdgeNodes(this, nodes);
+  }
 
-    writeable(this.nodes).to = undefined;
-    writeable(this.nodes).from = undefined;
-    this.nodes = {};
+  #createEmptyNodes(): EdgeNodes {
+    return {
+      from: undefined,
+      to: undefined,
+    };
   }
 }
+
+export type EdgeNodes = Readonly<{
+  from?: Node;
+  to?: Node;
+}>;

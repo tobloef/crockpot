@@ -13,12 +13,13 @@ import { query } from "./query.ts";
 import { writeable } from "./utils/writeable.ts";
 import type { Class } from "./utils/class.ts";
 
-// TODO: Rethink and refactor responsibility of which class really insert.
-// TODO: Right now, things inserted on nodes/edges are not inserted on the graph.
-
 export class Graph {
-  nodes: Node[] = [];
-  edges: Edge[] = [];
+  indices = {
+    allNodes: new Set<Node>(),
+    allEdges: new Set<Edge>(),
+    nodesByEdge: new Map<Edge, { from: Node, to: Node }>(),
+    edgesByNode: new Map<Node, { from: Set<Edge>, to: Set<Edge> }>(),
+  };
 
   query<Input extends QueryInputItem>(input: Input): Generator<QueryOutput<Input>>;
 
@@ -29,181 +30,65 @@ export class Graph {
     // If ObjectQueryOutput is used directly, for some reason it shows up as:
     // Generator<ObjectQueryOutput<{ Transform: typeof Transform }, { Transform: typeof Transform }>, any, any>
     { [K in keyof Input]: QueryOutputItem<Input[K], Input> }
-    )>;
+  )>;
 
   query<Input extends QueryInput>(input: Input): Generator<QueryOutput<Input>> {
     return query(this, input);
   }
 
-  addNode(node: Node): this {
-    const transaction = this.#beginAddTransaction();
+  addNode<N extends Node>(node: N): N {
+    // TODO
 
-    this.#addNodeRecursively(node, transaction);
-
-    this.#executeAddTransaction(transaction);
-
-    return this;
+    return node;
   }
 
-  removeNode(node: Node): this {
-    this.nodes = this.nodes.filter((n) => n !== node);
+  addNodes<Ns extends Node[]>(nodes: Ns): Ns {
+    // TODO
 
-    for (const edge of node.edges.from) {
-      this.removeEdge(edge);
-    }
-
-    for (const edge of node.edges.to) {
-      this.removeEdge(edge);
-    }
-
-    return this;
+    return nodes;
   }
 
-  removeNodes(type: Class<Node>): this {
-    const nodesToRemove = this.nodes.filter((node) => node instanceof type);
-
-    for (const node of nodesToRemove) {
-      this.removeNode(node);
-    }
-
-    return this;
+  removeNode(node: Node): void {
+    // TODO
   }
 
-  addEdge(input: AddEdgeInput): this {
-    const transaction = this.#beginAddTransaction();
-
-    this.#addEdgeRecursively(input, transaction);
-
-    return this;
+  removeNodes(type: Class<Node>): void {
+    // TODO
   }
 
-  removeEdge(input: Edge): this {
-    this.edges = this.edges.filter((edge) => edge !== input);
+  addEdge<Type extends Edge>(
+    input: AddEdgeInput<Type>
+  ): Type {
+    const edge = input.edge ?? new Edge();
 
-    return this;
+    // TODO
+
+    return edge as Type;
   }
 
-  removeEdges(input: RemoveEdgesInput): this {
-    const edgesToRemove = this.edges.filter((edge) => (
-      (input.from === undefined || edge.nodes.from === input.from) &&
-      (input.to === undefined || edge.nodes.to === input.to) &&
-      (input.type === undefined || edge instanceof input.type)
-    ));
-
-    this.edges = this.edges.filter((edge) => !edgesToRemove.includes(edge));
-
-    for (const edge of edgesToRemove) {
-      edge.removeFromNodes();
-    }
-
-    return this;
+  removeEdge(input: Edge): void {
+    // TODO
   }
 
-  #addNodeRecursively(node: Node, transaction: AddTransaction): void {
-    if (transaction.nodes.includes(node)) {
-      return;
-    }
-
-    if (this.nodes.includes(node)) {
-      throw new Error("Node already exists in the graph.");
-    }
-
-    transaction.nodes.push(node);
-
-    for (const edge of node.edges.from) {
-      if (edge.nodes.from === undefined || edge.nodes.to === undefined) {
-        throw new Error("Node has an edge with missing 'from' or 'to' node.");
-      }
-
-      const input = { edge, from: edge.nodes.from, to: edge.nodes.to };
-      this.#addEdgeRecursively(input, transaction);
-    }
-
-    for (const edge of node.edges.to) {
-      if (edge.nodes.from === undefined || edge.nodes.to === undefined) {
-        throw new Error("Node has an edge with missing 'from' or 'to' node.");
-      }
-
-      const input = { edge, from: edge.nodes.from, to: edge.nodes.to };
-      this.#addEdgeRecursively(input, transaction);
-    }
+  removeEdges(input: RemoveEdgesInput): void {
+    // TODO
   }
 
-  #addEdgeRecursively(input: AddEdgeInput, transaction: AddTransaction): void {
-    let edge: Edge;
-
-    if (input.edge === undefined) {
-      edge = new Edge();
-    } else {
-      if (input.edge.nodes.from !== undefined && input.edge.nodes.from !== input.from) {
-        throw new Error("Edge already has another 'from' node.");
-      }
-
-      if (input.edge.nodes.to !== undefined && input.edge.nodes.to !== input.to) {
-        throw new Error("Edge already has another 'to' node.");
-      }
-
-      const edgeExistsInTransaction = transaction.edges.some((e) => (
-        e.edge === input.edge &&
-        e.from === input.from &&
-        e.to === input.to
-      ));
-
-      if (edgeExistsInTransaction) {
-        return;
-      }
-
-      if (this.edges.includes(input.edge)) {
-        throw new Error("Edge already exists in the graph.");
-      }
-
-      edge = input.edge;
-    }
-
-    transaction.edges.push({
-      edge,
-      from: input.from,
-      to: input.to,
-    });
-
-    this.#addNodeRecursively(input.from, transaction);
-    this.#addNodeRecursively(input.to, transaction);
-  }
-
-  #beginAddTransaction(): AddTransaction {
-    return {
-      nodes: [],
-      edges: [],
-    };
-  }
-
-  #executeAddTransaction(transaction: AddTransaction): void {
-    for (const node of transaction.nodes) {
-      this.nodes.push(node);
-    }
-
-    for (const edgeInput of transaction.edges) {
-      const edge = edgeInput.edge ?? new Edge();
-      writeable(edge.nodes).from = edgeInput.from;
-      writeable(edge.nodes).to = edgeInput.to;
-      this.edges.push(edge);
-    }
+  setEdgeNodes(edge: Edge, nodes: { from: Node; to: Node }): void {
+    // TODO
   }
 }
 
-export type AddEdgeInput = {
+export type AddEdgeInput<E extends Edge> = {
   to: Node;
   from: Node;
-  edge?: Edge;
+  edge?: E;
 };
 
-export type RemoveEdgesInput = {
-  from?: Node;
-  to?: Node;
-  type?: Class<Edge>;
-}
+export type RemoveEdgesInput = (
+  | { from: Node, to?: Node, type?: Class<Edge> }
+  | { from?: Node, to: Node, type?: Class<Edge> }
+  | { on: Node, type?: Class<Edge> }
+  )
 
-type AddTransaction = {
-  nodes: Node[],
-  edges: AddEdgeInput[],
-}
+export const DEFAULT_GRAPH = new Graph();
