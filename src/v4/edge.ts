@@ -104,13 +104,6 @@ export class Edge {
     this.graph.removeEdge(this);
   }
 
-  setNodes(nodes: {
-    from: Node;
-    to: Node;
-  }): void {
-    this.graph.setEdgeNodes(this, nodes);
-  }
-
   #createEmptyNodes(): EdgeNodes {
     return {
       from: undefined,

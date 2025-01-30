@@ -1,4 +1,4 @@
-import { Edge } from "./edge.ts";
+import { Edge, type EdgeNodes } from "./edge.ts";
 import type { Class } from "./utils/class.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
 import type {
