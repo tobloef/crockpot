@@ -217,14 +217,23 @@ function parseReferenceName(
 }
 
 export class ReferenceMismatchError extends CustomError {
+  poolName: PoolName;
+
+  types: (
+    | { existing: "node", new: "edge" }
+    | { existing: "edge", new: "node" }
+    );
+
   constructor(
-    public poolName: PoolName,
-    public types: (
+    poolName: PoolName,
+    types: (
       | { existing: "node", new: "edge" }
       | { existing: "edge", new: "node" }
     )
   ) {
     super(`Reference ${poolName} is already defined as a ${types.existing}, cannot redefine as a ${types.new}.`);
+    this.types = types;
+    this.poolName = poolName;
   }
 }
 

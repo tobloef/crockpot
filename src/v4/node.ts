@@ -1,4 +1,4 @@
-import { Edge, type EdgeNodes } from "./edge.ts";
+import { Edge } from "./edge.ts";
 import type { Class } from "./utils/class.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
 import type {
@@ -7,16 +7,15 @@ import type {
   ReferenceName,
 } from "./query.types.ts";
 import { randomString } from "./utils/random-string.ts";
-import { DEFAULT_GRAPH, type Graph } from "./graph.ts";
-import { writeable } from "./utils/writeable.ts";
+import { type Graph } from "./graph.ts";
 
 export class Node {
   #brand = 'Node' as const;
 
-  static defaultGraph: Graph = DEFAULT_GRAPH;
+  static defaultGraph: Graph;
 
   id: string = randomString();
-  graph: Readonly<Graph> = Node.defaultGraph;
+  graph: Graph = Node.defaultGraph;
 
   get edges(): NodeEdges {
     return (
@@ -90,15 +89,19 @@ export class Node {
     });
   }
 
-  addEdge(input: AddEdgeInput): void {
+  addEdge<
+    Input extends AddEdgeInput
+  >(
+    input: Input
+  ): AddedEdge<Input> {
     if ('to' in input) {
-      this.graph.addEdge({
+      return this.graph.addEdge({
         from: this,
         to: input.to,
         edge: input.edge,
       });
     } else {
-      this.graph.addEdge({
+      return this.graph.addEdge({
         from: input.from,
         to: this,
         edge: input.edge,
@@ -158,3 +161,9 @@ export type NodeEdges = Readonly<{
   from: ReadonlySet<Edge>,
   to: ReadonlySet<Edge>,
 }>;
+
+type AddedEdge<Input extends AddEdgeInput> = (
+  Input["edge"] extends Edge
+    ? Input["edge"]
+    : Edge
+);

@@ -1,5 +1,5 @@
 import { Edge } from "./edge.ts";
-import type { Node } from "./node.ts";
+import { Node } from "./node.ts";
 import type {
   ArrayQueryInput,
   ObjectQueryInput,
@@ -26,9 +26,12 @@ export class Graph {
   query<Input extends ArrayQueryInput>(input: [...Input]): Generator<QueryOutput<Input>>;
 
   query<Input extends ObjectQueryInput>(input: Input): Generator<(
-    // Return type duplicated from ObjectQueryOutput to make type hints show up correctly
+    // Type duplicated from ObjectQueryOutput to fix type hints.
     // If ObjectQueryOutput is used directly, for some reason it shows up as:
-    // Generator<ObjectQueryOutput<{ Transform: typeof Transform }, { Transform: typeof Transform }>, any, any>
+    // Generator<ObjectQueryOutput<
+    //   { Transform: typeof Transform },
+    //   { Transform: typeof Transform }
+    // >, any, any>
     { [K in keyof Input]: QueryOutputItem<Input[K], Input> }
   )>;
 
@@ -55,37 +58,40 @@ export class Graph {
 
     const hasEdges = node.edges.from.size > 0 || node.edges.to.size > 0;
 
-    if (!hasEdges) {
-      return node;
-    }
-
-    let edgesByNode = this.indices.edgesByNode.get(node);
-    if (edgesByNode === undefined) {
-      edgesByNode = {
-        from: new Set(),
-        to: new Set(),
-      };
-      this.indices.edgesByNode.set(node, edgesByNode);
-    }
-
-    for (const edge of node.edges.from) {
-      if (edge.nodes.to === undefined || edge.nodes.from === undefined) {
-        throw new Error(`Edge ${edge.id} is missing from/to nodes.`);
+    if (hasEdges) {
+      let edgesByNode = this.indices.edgesByNode.get(node);
+      if (edgesByNode === undefined) {
+        edgesByNode = {
+          from: new Set(),
+          to: new Set(),
+        };
+        this.indices.edgesByNode.set(node, edgesByNode);
       }
 
-      edgesByNode.from.add(edge);
+      for (const edge of node.edges.from) {
+        if (edge.nodes.to === undefined || edge.nodes.from === undefined) {
+          throw new Error(`Edge ${edge.id} is missing from/to nodes.`);
+        }
 
-      this.addEdge({ edge, from: edge.nodes.from, to: edge.nodes.to });
-    }
+        edgesByNode.from.add(edge);
 
-    for (const edge of node.edges.to) {
-      if (edge.nodes.to === undefined || edge.nodes.from === undefined) {
-        throw new Error(`Edge ${edge.id} is missing from/to nodes.`);
+        this.addEdge({ edge, from: edge.nodes.from, to: edge.nodes.to });
       }
 
-      edgesByNode.to.add(edge);
+      for (const edge of node.edges.to) {
+        if (edge.nodes.to === undefined || edge.nodes.from === undefined) {
+          throw new Error(`Edge ${edge.id} is missing from/to nodes.`);
+        }
 
-      this.addEdge({ edge, from: edge.nodes.from, to: edge.nodes.to });
+        edgesByNode.to.add(edge);
+
+        this.addEdge({ edge, from: edge.nodes.from, to: edge.nodes.to });
+      }
+    }
+
+    if (node.graph !== this) {
+      node.graph.removeNode(node);
+      node.graph = this;
     }
 
     return node;
@@ -137,13 +143,26 @@ export class Graph {
   addEdge<E extends Edge>(
     input: AddEdgeInput<E>
   ): E {
-    if (input.edge !== undefined && this.indices.allEdges.has(input.edge)) {
+    if (
+      input.edge !== undefined &&
+      this.indices.allEdges.has(input.edge)
+    ) {
       return input.edge;
     }
 
     const edge = input.edge ?? new Edge();
 
     this.indices.allEdges.add(edge);
+
+    const type = edge.constructor as Class<Edge>;
+
+    let edgesByType = this.indices.edgesByType.get(type);
+    if (edgesByType === undefined) {
+      edgesByType = new Set();
+      this.indices.edgesByType.set(type, edgesByType);
+    }
+
+    edgesByType.add(edge);
 
     let nodesByEdge = this.indices.nodesByEdge.get(edge);
     if (nodesByEdge === undefined) {
@@ -157,8 +176,34 @@ export class Graph {
     nodesByEdge.from = input.from;
     nodesByEdge.to = input.to;
 
+    let edgesByFromNode = this.indices.edgesByNode.get(input.from);
+    if (edgesByFromNode === undefined) {
+      edgesByFromNode = {
+        from: new Set(),
+        to: new Set(),
+      };
+      this.indices.edgesByNode.set(input.from, edgesByFromNode);
+    }
+
+    let edgesByToNode = this.indices.edgesByNode.get(input.to);
+    if (edgesByToNode === undefined) {
+      edgesByToNode = {
+        from: new Set(),
+        to: new Set(),
+      };
+      this.indices.edgesByNode.set(input.to, edgesByToNode);
+    }
+
+    edgesByFromNode.from.add(edge);
+    edgesByToNode.to.add(edge);
+
     this.addNode(input.from);
     this.addNode(input.to);
+
+    if (edge.graph !== this) {
+      edge.graph.removeEdge(edge);
+      edge.graph = this;
+    }
 
     return edge as E;
   }
@@ -240,4 +285,6 @@ export type RemoveEdgesInput = (
   | { on: Node, type?: Class<Edge> }
 );
 
-export const DEFAULT_GRAPH = new Graph();
+const defaultGraph = new Graph();
+Node.defaultGraph = defaultGraph;
+Edge.defaultGraph = defaultGraph;

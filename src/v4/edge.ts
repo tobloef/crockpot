@@ -6,13 +6,12 @@ import type {
 import { EdgeQueryItem } from "./edge-query-item.ts";
 import { randomString } from "./utils/random-string.ts";
 import type { Node } from "./node.ts";
-import { DEFAULT_GRAPH, type Graph } from "./graph.ts";
-import { writeable } from "./utils/writeable.ts";
+import { type Graph } from "./graph.ts";
 
 export class Edge {
   #brand = 'Edge' as const;
 
-  static defaultGraph: Graph = DEFAULT_GRAPH;
+  static defaultGraph: Graph;
 
   id: string = randomString();
   graph: Readonly<Graph> = Edge.defaultGraph;
