@@ -98,7 +98,7 @@ export class Graph {
   }
 
   addNodes<Nodes extends Node[]>(nodes: Nodes): Nodes {
-    return nodes.map(this.addNode) as Nodes;
+    return nodes.map((n) => this.addNode(n)) as Nodes;
   }
 
   removeNode(node: Node): void {

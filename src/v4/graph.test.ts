@@ -123,3 +123,36 @@ describe("addNode", () => {
     deepStrictEqual(uniqueAddEdgeCalls, expectedAddEdgeCalls);
   });
 });
+
+describe("addNodes", () => {
+  it("Adds multiple nodes", (test) => {
+    // Arrange
+    const graph = new Graph();
+    const node1 = new TestNode(1);
+    const node2 = new TestNode(2);
+    const node3 = new TestNode(3);
+
+    const addNode = test.mock.method(graph, "addNode");
+
+    // Act
+    graph.addNodes([node1, node2, node3]);
+
+    // Assert
+    const addNodeCallArgs = addNode.mock.calls.map((c) => c.arguments);
+    deepStrictEqual(addNodeCallArgs, [[node1], [node2], [node3]]);
+  });
+
+  it("Returns added nodes", () => {
+    // Arrange
+    const graph = new Graph();
+    const node1 = new TestNode(1);
+    const node2 = new TestNode(2);
+    const node3 = new TestNode(3);
+
+    // Act
+    const addedNodes = graph.addNodes([node1, node2, node3]);
+
+    // Assert
+    deepStrictEqual(addedNodes, [node1, node2, node3]);
+  });
+});
