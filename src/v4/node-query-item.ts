@@ -1,10 +1,6 @@
 import type { Class } from "./utils/class.ts";
 import { Node } from "./node.ts";
-import type {
-  Edgelike,
-  Nodelike,
-  ReferenceName,
-} from "./query.types.ts";
+import type { Edgelike, Nodelike, ReferenceName, } from "./query.types.ts";
 
 export class NodeQueryItem<
   ClassType extends Class<Node> = Class<Node>,
