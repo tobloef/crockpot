@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="All tests" type="NodeJsTestRunner">
+    <node-interpreter value="project" />
+    <node-options value="--experimental-strip-types" />
+    <working-dir value="$PROJECT_DIR$/../crockpot" />
+    <language value="JAVA_SCRIPT" />
+    <typescript-loader value="MANUAL_SETUP_IN_NODE_OPTION" />
+    <envs />
+    <scope-kind value="ALL" />
+    <method v="2" />
+  </configuration>
+</component>
