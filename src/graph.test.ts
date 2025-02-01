@@ -1,8 +1,8 @@
 import { describe, it } from "node:test";
 import { deepStrictEqual, ok, strictEqual } from "node:assert";
 import { Graph } from "./graph.ts";
-import { Node } from "./node.ts";
-import { Edge } from "./edge.ts";
+import { Node } from "./node/node.ts";
+import { Edge } from "./edge/edge.ts";
 
 class TestNode extends Node {
   value: number;

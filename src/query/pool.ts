@@ -1,6 +1,6 @@
-import { Node } from "../node.ts";
+import { Node } from "../node/node.ts";
 import type { Class } from "../utils/class.ts";
-import { Edge } from "../edge.ts";
+import { Edge } from "../edge/edge.ts";
 import type { Graph } from "../graph.ts";
 
 export type PoolName = string;

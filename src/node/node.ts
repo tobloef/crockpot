@@ -1,9 +1,9 @@
-import { Edge } from "./edge.ts";
-import type { Class } from "./utils/class.ts";
+import { Edge } from "../edge/edge.ts";
+import type { Class } from "../utils/class.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
-import type { Edgelike, Nodelike, ReferenceName, } from "./query/query.types.ts";
-import { randomString } from "./utils/random-string.ts";
-import { type Graph } from "./graph.ts";
+import type { Edgelike, Nodelike, ReferenceName, } from "../query/query.types.ts";
+import { randomString } from "../utils/random-string.ts";
+import { type Graph } from "../graph.ts";
 
 export class Node {
   #brand = 'Node' as const;

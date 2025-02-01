@@ -1,12 +1,11 @@
-import type { Direction, Edgelike, Nodelike, QueryInput, ReferenceName } from "./query.types.ts";
+import type { Direction, Edgelike, Nodelike, QueryInput, QueryInputItem, ReferenceName } from "./query.types.ts";
 import { getAnyPool, type PoolName, type Pools } from "./pool.ts";
-import { isNodelike, isSingleItem } from "./utils.ts";
-import { Node } from "../node.ts";
-import { NodeQueryItem } from "../node-query-item.ts";
+import { Node } from "../node/node.ts";
+import { NodeQueryItem } from "../node/node-query-item.ts";
 import { type Class, isClassThatExtends } from "../utils/class.ts";
 import { randomString } from "../utils/random-string.ts";
-import { Edge } from "../edge.ts";
-import { EdgeQueryItem } from "../edge-query-item.ts";
+import { Edge } from "../edge/edge.ts";
+import { EdgeQueryItem } from "../edge/edge-query-item.ts";
 import { ReferenceMismatchError } from "./errors/reference-mismatch-error.ts";
 
 export function parseInput(
@@ -353,4 +352,39 @@ function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {
   }
 
   return poolName;
+}
+
+export function isSingleItem(input: QueryInput): input is QueryInputItem {
+  return (
+    !Array.isArray(input) &&
+    input.constructor.name !== "Object"
+  )
+}
+
+export function isNodelike(
+  item: Nodelike | Edgelike,
+): item is Nodelike {
+  return (
+    isClassThatExtends(item as Class<any>, Node) ||
+    item instanceof Node ||
+    item instanceof NodeQueryItem
+  );
+}
+
+export function isEdgelike(
+  item: Nodelike | Edgelike,
+): item is Edgelike {
+  return (
+    isClassThatExtends(item as Class<any>, Edge) ||
+    item instanceof Edge ||
+    item instanceof EdgeQueryItem
+  );
+}
+
+export function getOppositeDirection(direction: Direction): Direction {
+  switch (direction) {
+    case "from": return "to";
+    case "to": return "from";
+    case "fromOrTo": return "fromOrTo";
+  }
 }

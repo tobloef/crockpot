@@ -1,6 +1,6 @@
-import type { Class } from "./utils/class.ts";
+import type { Class } from "../utils/class.ts";
 import { Edge } from "./edge.ts";
-import type { Nodelike, ReferenceName, } from "./query/query.types.ts";
+import type { Nodelike, ReferenceName, } from "../query/query.types.ts";
 
 export class EdgeQueryItem<
   ClassType extends Class<Edge> = Class<Edge>,

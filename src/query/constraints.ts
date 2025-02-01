@@ -1,5 +1,5 @@
-import { Node } from "../node.ts";
-import { Edge } from "../edge.ts";
+import { Node } from "../node/node.ts";
+import { Edge } from "../edge/edge.ts";
 import type { PoolName, Pools } from "./pool.ts";
 
 export function checkConstraints(

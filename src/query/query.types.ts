@@ -1,8 +1,8 @@
 import type { Class, Instance } from "../utils/class.ts";
-import type { Node } from "../node.ts";
-import type { NodeQueryItem } from "../node-query-item.ts";
-import type { Edge } from "../edge.ts";
-import type { EdgeQueryItem } from "../edge-query-item.ts";
+import type { Node } from "../node/node.ts";
+import type { NodeQueryItem } from "../node/node-query-item.ts";
+import type { Edge } from "../edge/edge.ts";
+import type { EdgeQueryItem } from "../edge/edge-query-item.ts";
 
 export type QueryInput = (
   | QueryInputItem

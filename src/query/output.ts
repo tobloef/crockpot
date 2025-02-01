@@ -1,8 +1,8 @@
 import type { QueryInput, QueryOutput } from "./query.types.ts";
-import { Node } from "../node.ts";
-import { Edge } from "../edge.ts";
+import { Node } from "../node/node.ts";
+import { Edge } from "../edge/edge.ts";
 import type { Pools } from "./pool.ts";
-import { isSingleItem } from "./utils.ts";
+import { isSingleItem } from "./misc.ts";
 
 export function permutationToOutput<
   Input extends QueryInput
