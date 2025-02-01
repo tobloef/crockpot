@@ -4,11 +4,13 @@ import { Edge } from "../edge/edge.ts";
 import type { Graph } from "../graph.ts";
 
 export type PoolName = string;
+export type PoolType = keyof Pools;
+export const POOL_TYPES = ['node', 'edge', 'unknown'] as const satisfies PoolType[];
 
 export type Pools = {
-  nodes: Record<PoolName, NodePool>,
-  edges: Record<PoolName, EdgePool>,
-  unknown: Record<PoolName, NodePool & EdgePool>
+  node: Record<PoolName, NodePool>,
+  edge: Record<PoolName, EdgePool>,
+  unknown: Record<PoolName, NodePool | EdgePool>
 }
 
 export type NodePool = {
@@ -38,15 +40,45 @@ export type EdgePool = {
   outputKey?: string | number,
 }
 
-export function getAnyPool(
+export type GeneratorFunction<T> = () => Generator<T>;
+
+export type PoolGeneratorFunctions = Record<PoolName, GeneratorFunction<any>>;
+
+export type PermutationFromPoolGeneratorFunctions<Generators extends PoolGeneratorFunctions> = {
+  [Key in keyof Generators]: (
+    Generators[Key] extends GeneratorFunction<infer T> ? T : never
+  )
+}
+
+export function getPoolByName(
   poolName: PoolName,
   pools: Pools
 ) {
   return (
-    pools.nodes[poolName] ??
-    pools.edges[poolName] ??
+    pools.node[poolName] ??
+    pools.edge[poolName] ??
     pools.unknown[poolName]
   );
+}
+
+export function createPoolGeneratorFunctions(
+  graph: Graph,
+  pools: Pools,
+): Record<PoolName, GeneratorFunction<Node | Edge>> {
+  const generatorFunctions: Record<PoolName, GeneratorFunction<Node | Edge>> = {};
+
+  const nodeGeneratorFunction = () => setToGenerator(graph.indices.allNodes);
+  const edgeGeneratorFunction = () => setToGenerator(graph.indices.allEdges);
+
+  for (const poolName of Object.keys(pools.node)) {
+    generatorFunctions[poolName] = nodeGeneratorFunction;
+  }
+
+  for (const poolName of Object.keys(pools.edge)) {
+    generatorFunctions[poolName] = edgeGeneratorFunction;
+  }
+
+  return generatorFunctions;
 }
 
 export function* permuteGenerators<
@@ -85,33 +117,8 @@ export function* arrayToGenerator<T>(array: T[]): Generator<T> {
   }
 }
 
-export function createPoolGeneratorFunctions(
-  graph: Graph,
-  pools: Pools,
-): Record<PoolName, GeneratorFunction<Node | Edge>> {
-  const generatorFunctions: Record<PoolName, GeneratorFunction<Node | Edge>> = {};
-
-  const nodeGeneratorFunction = () => arrayToGenerator(graph.nodes);
-  const edgeGeneratorFunction = () => arrayToGenerator(graph.edges);
-
-  for (const poolName of Object.keys(pools.nodes)) {
-    generatorFunctions[poolName] = nodeGeneratorFunction;
+export function* setToGenerator<T>(set: Set<T>): Generator<T> {
+  for (const item of set) {
+    yield item;
   }
-
-  for (const poolName of Object.keys(pools.edges)) {
-    generatorFunctions[poolName] = edgeGeneratorFunction;
-  }
-
-  return generatorFunctions;
-}
-
-
-export type GeneratorFunction<T> = () => Generator<T>;
-
-export type PoolGeneratorFunctions = Record<PoolName, GeneratorFunction<any>>;
-
-export type PermutationFromPoolGeneratorFunctions<Generators extends PoolGeneratorFunctions> = {
-  [Key in keyof Generators]: (
-    Generators[Key] extends GeneratorFunction<infer T> ? T : never
-    )
 }

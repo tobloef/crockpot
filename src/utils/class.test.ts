@@ -1,6 +1,7 @@
 import { describe, it, } from "node:test";
 
-import type { Class, Instance, } from "./class.ts";
+import { type Class, type Instance, isClassThatExtends, } from "./class.ts";
+import { ok } from "node:assert";
 
 describe("Class", () => {
   it("Defines a class, not an instance", () => {
@@ -41,5 +42,54 @@ describe("Instance", () => {
 
     // @ts-expect-error
     const instance: Instance<A> = new A();
+  });
+});
+
+describe("isClassThatExtends", () => {
+  it("Returns true if class is a sub-class of other class", () => {
+    // Arrange
+    class A {}
+    class B extends A {}
+
+    // Act
+    const result = isClassThatExtends(B, A);
+
+    // Assert
+    ok(result);
+  });
+
+  it("Returns true if class is the same as other class", () => {
+    // Arrange
+    class A {}
+
+    // Act
+    const result = isClassThatExtends(A, A);
+
+    // Assert
+    ok(result);
+  });
+
+  it("Returns false if class is not a sub-class of other class", () => {
+    // Arrange
+    class A {}
+    class B {}
+
+    // Act
+    const result = isClassThatExtends(B, A);
+
+    // Assert
+    ok(!result);
+  });
+
+  it("Returns false if class is a super class of other class", () => {
+    // Arrange
+    class A {}
+    class B extends A {}
+
+    // Act
+    const result = isClassThatExtends(A, B);
+
+    // Assert
+    ok(!result);
   });
 });

@@ -2,7 +2,7 @@ import type { QueryInput, QueryOutput } from "./query.types.ts";
 import { Node } from "../node/node.ts";
 import { Edge } from "../edge/edge.ts";
 import type { Pools } from "./pool.ts";
-import { isSingleItem } from "./misc.ts";
+import { isSingleItem } from "./parsing.ts";
 
 export function permutationToOutput<
   Input extends QueryInput
@@ -13,15 +13,16 @@ export function permutationToOutput<
 ): QueryOutput<Input> {
   if (isSingleItem(input)) {
     const onlyPoolName = (
-      Object.keys(pools.nodes)[0]! ??
-      Object.keys(pools.edges)[0]!
+      Object.keys(pools.node)[0]! ??
+      Object.keys(pools.edge)[0]! ??
+      Object.keys(pools.unknown)[0]!
     );
 
     return permutation[onlyPoolName] as QueryOutput<Input>;
   } else if (Array.isArray(input)) {
     const output = [];
 
-    const allPools = { ...pools.nodes, ...pools.edges };
+    const allPools = { ...pools.node, ...pools.edge };
 
     for (const [poolName, pool] of Object.entries(allPools)) {
       if (pool.outputKey === undefined) {
@@ -37,7 +38,7 @@ export function permutationToOutput<
   } else {
     const output: Record<string, Node | Edge | undefined> = {};
 
-    const allPools = { ...pools.nodes, ...pools.edges };
+    const allPools = { ...pools.node, ...pools.edge };
 
     for (const [poolName, pool] of Object.entries(allPools)) {
       if (pool.outputKey === undefined) {

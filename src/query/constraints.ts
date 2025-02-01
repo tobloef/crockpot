@@ -7,28 +7,12 @@ export function checkConstraints(
   pools: Pools,
 ): boolean {
   for (const [poolName, item] of Object.entries(permutation)) {
-    if (item instanceof Node) {
-      const passesConstraints = checkNodeConstraints(
-        item,
-        poolName,
-        permutation,
-        pools,
-      );
+    const passesConstraints = item instanceof Node
+      ? checkNodeConstraints(item, poolName, permutation, pools)
+      : checkEdgeConstraints(item, poolName, permutation, pools);
 
-      if (!passesConstraints) {
-        return false;
-      }
-    } else {
-      const passesConstraints = checkEdgeConstraints(
-        item,
-        poolName,
-        permutation,
-        pools,
-      );
-
-      if (!passesConstraints) {
-        return false;
-      }
+    if (!passesConstraints) {
+      return false
     }
   }
 
@@ -41,7 +25,7 @@ export function checkNodeConstraints(
   permutation: Record<string, Node | Edge>,
   pools: Pools,
 ): boolean {
-  const pool = pools.nodes[poolName];
+  const pool = pools.node[poolName];
 
   if (pool === undefined) {
     return false;
@@ -67,7 +51,7 @@ export function checkNodeConstraints(
         return false;
       }
 
-      if (!node.edges.from.includes(edge)) {
+      if (!node.edges.from.has(edge)) {
         return false;
       }
     }
@@ -81,7 +65,7 @@ export function checkNodeConstraints(
         return false;
       }
 
-      if (!node.edges.to.includes(edge)) {
+      if (!node.edges.to.has(edge)) {
         return false;
       }
     }
@@ -95,7 +79,7 @@ export function checkNodeConstraints(
         return false;
       }
 
-      if (!node.edges.from.includes(edge) && !node.edges.to.includes(edge)) {
+      if (!node.edges.from.has(edge) && !node.edges.to.has(edge)) {
         return false;
       }
     }
@@ -110,7 +94,7 @@ export function checkEdgeConstraints(
   permutation: Record<string, Node | Edge>,
   pools: Pools,
 ): boolean {
-  const pool = pools.edges[poolName];
+  const pool = pools.edge[poolName];
 
   if (pool === undefined) {
     return false;

@@ -192,4 +192,3 @@ type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
 type UnionToIntersection<U> = (U extends any ? (x: U) => void : never) extends ((x: infer I) => void) ? I : never;
 type IsValidKey<Key> = (ReferenceName extends Key ? false : true) & IsNotUnion<Key>;
 
-export type Direction = "from"  | "to" | "fromOrTo";

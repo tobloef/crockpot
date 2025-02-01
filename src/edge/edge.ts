@@ -112,3 +112,5 @@ export type EdgeNodes = Readonly<{
   from?: Node;
   to?: Node;
 }>;
+
+export type EdgeDirection = "from" | "to" | "fromOrTo";
