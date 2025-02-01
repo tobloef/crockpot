@@ -59,21 +59,10 @@ export class Graph {
     const hasEdges = node.edges.from.size > 0 || node.edges.to.size > 0;
 
     if (hasEdges) {
-      let edgesByNode = this.indices.edgesByNode.get(node);
-      if (edgesByNode === undefined) {
-        edgesByNode = {
-          from: new Set(),
-          to: new Set(),
-        };
-        this.indices.edgesByNode.set(node, edgesByNode);
-      }
-
       for (const edge of node.edges.from) {
         if (edge.nodes.to === undefined || edge.nodes.from === undefined) {
           throw new Error(`Edge ${edge.id} is missing from/to nodes.`);
         }
-
-        edgesByNode.from.add(edge);
 
         this.addEdge({ edge, from: edge.nodes.from, to: edge.nodes.to });
       }
@@ -82,8 +71,6 @@ export class Graph {
         if (edge.nodes.to === undefined || edge.nodes.from === undefined) {
           throw new Error(`Edge ${edge.id} is missing from/to nodes.`);
         }
-
-        edgesByNode.to.add(edge);
 
         this.addEdge({ edge, from: edge.nodes.from, to: edge.nodes.to });
       }
@@ -226,7 +213,13 @@ export class Graph {
     }
   }
 
-  removeEdges(input: RemoveEdgesInput): void {
+  removeEdges(edges: Edge[]): void {
+    for (const edge of edges) {
+      this.removeEdge(edge);
+    }
+  }
+
+  removeEdgesByNodes(input: RemoveEdgesInput): void {
     let edgesSet: Set<Edge> | undefined;
 
     if ("on" in input) {
@@ -260,16 +253,25 @@ export class Graph {
       return;
     }
 
-    const edgesArray = Array.from(edgesSet);
+    let edgesArray = Array.from(edgesSet);
 
     if (input.type !== undefined) {
       const type = input.type; // For type narrowing inside the filter function
-      edgesArray.filter((edge) => edge instanceof type);
+      edgesArray = edgesArray.filter((edge) => edge instanceof type);
     }
 
     for (const edge of edgesArray) {
       this.removeEdge(edge);
     }
+  }
+
+  removeEdgesByType(type: Class<Edge>): void {
+    const nodes = this.indices.edgesByType.get(type);
+    if (nodes === undefined) {
+      return;
+    }
+
+    this.removeEdges(Array.from(nodes));
   }
 }
 

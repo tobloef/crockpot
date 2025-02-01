@@ -115,19 +115,19 @@ export class Node {
 
   removeEdges(input?: RemoveEdgeInput): void {
     if (input!== undefined && 'to' in input) {
-      this.graph.removeEdges({
+      this.graph.removeEdgesByNodes({
         from: this,
         to: input.to,
         type: input.type,
       });
     } else if (input !== undefined && 'from' in input) {
-      this.graph.removeEdges({
+      this.graph.removeEdgesByNodes({
         from: input.from,
         to: this,
         type: input.type,
       });
     } else {
-      this.graph.removeEdges({
+      this.graph.removeEdgesByNodes({
         on: this,
         type: input?.type,
       });
