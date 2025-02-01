@@ -124,7 +124,7 @@ export class Node {
       });
     } else {
       this.graph.removeEdgesByNodes({
-        on: this,
+        fromOrTo: this,
         type: input?.type,
       });
     }

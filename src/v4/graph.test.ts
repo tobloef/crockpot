@@ -661,7 +661,7 @@ describe("removeEdgesByNodes", () => {
     deepStrictEqual(removeEdgeCallArgs, [[edge1], [edge2], [edge3]]);
   });
 
-  it("Remove edges on node", (test) => {
+  it("Remove edges from or to node", (test) => {
     // Arrange
     const graph = new Graph();
     const fromNode = new TestNode(1);
@@ -691,7 +691,7 @@ describe("removeEdgesByNodes", () => {
 
     // Act
     graph.removeEdgesByNodes({
-      on: fromNode,
+      fromOrTo: fromNode,
     });
 
     // Assert
@@ -733,7 +733,7 @@ describe("removeEdgesByNodes", () => {
     // Act
     graph.removeEdgesByNodes({
       type: TestEdge,
-      on: fromNode,
+      fromOrTo: fromNode,
     });
 
     // Assert

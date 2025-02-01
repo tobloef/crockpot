@@ -215,8 +215,8 @@ export class Graph {
   removeEdgesByNodes(input: RemoveEdgesInput): void {
     let edgesSet: Set<Edge> | undefined;
 
-    if ("on" in input) {
-      const edgesByNode = this.indices.edgesByNode.get(input.on);
+    if ("fromOrTo" in input) {
+      const edgesByNode = this.indices.edgesByNode.get(input.fromOrTo);
 
       if (edgesByNode?.from !== undefined && edgesByNode.to !== undefined) {
         edgesSet = edgesByNode.from.union(edgesByNode.to);
@@ -277,7 +277,7 @@ export type AddEdgeInput<E extends Edge> = {
 export type RemoveEdgesInput = (
   | { from: Node, to?: Node, type?: Class<Edge> }
   | { from?: Node, to: Node, type?: Class<Edge> }
-  | { on: Node, type?: Class<Edge> }
+  | { fromOrTo: Node, type?: Class<Edge> }
 );
 
 const defaultGraph = new Graph();
