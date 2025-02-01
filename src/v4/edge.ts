@@ -1,5 +1,5 @@
 import type { Class } from "./utils/class.ts";
-import type { Nodelike, ReferenceName, } from "./query.types.ts";
+import type { Nodelike, ReferenceName, } from "./query/query.types.ts";
 import { EdgeQueryItem } from "./edge-query-item.ts";
 import { randomString } from "./utils/random-string.ts";
 import type { Node } from "./node.ts";

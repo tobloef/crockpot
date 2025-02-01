@@ -1,8 +1,8 @@
-import type { Class, Instance } from "./utils/class.ts";
-import type { Node } from "./node.ts";
-import type { NodeQueryItem } from "./node-query-item.ts";
-import type { Edge } from "./edge.ts";
-import type { EdgeQueryItem } from "./edge-query-item.ts";
+import type { Class, Instance } from "../utils/class.ts";
+import type { Node } from "../node.ts";
+import type { NodeQueryItem } from "../node-query-item.ts";
+import type { Edge } from "../edge.ts";
+import type { EdgeQueryItem } from "../edge-query-item.ts";
 
 export type QueryInput = (
   | QueryInputItem
@@ -191,3 +191,5 @@ type IsNotUnion<T> = IsUnion<T> extends true ? false : true;
 type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
 type UnionToIntersection<U> = (U extends any ? (x: U) => void : never) extends ((x: infer I) => void) ? I : never;
 type IsValidKey<Key> = (ReferenceName extends Key ? false : true) & IsNotUnion<Key>;
+
+export type Direction = "from"  | "to" | "fromOrTo";

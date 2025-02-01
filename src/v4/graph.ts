@@ -1,7 +1,7 @@
 import { Edge } from "./edge.ts";
 import { Node } from "./node.ts";
-import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem, } from "./query.types.ts";
-import { query } from "./query.ts";
+import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem, } from "./query/query.types.ts";
+import { query } from "./query/query.ts";
 import type { Class } from "./utils/class.ts";
 
 export class Graph {
@@ -280,6 +280,6 @@ export type RemoveEdgesInput = (
   | { fromOrTo: Node, type?: Class<Edge> }
 );
 
-const defaultGraph = new Graph();
+export const defaultGraph = new Graph();
 Node.defaultGraph = defaultGraph;
 Edge.defaultGraph = defaultGraph;
