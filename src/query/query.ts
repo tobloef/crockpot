@@ -1,9 +1,9 @@
 import type { QueryInput, QueryOutput, } from "./query.types.ts";
 import type { Graph } from "../graph.ts";
 import { parseInput } from "./parsing.ts";
-import { createPoolGeneratorFunctions, permuteGenerators } from "../utils/generator.ts";
 import { checkIfAlreadyFound, permutationToOutput } from "./output.ts";
 import { checkConstraints } from "./constraints.ts";
+import { createPoolGeneratorFunctions, permuteGenerators } from "./pool.ts";
 
 export function* query<
   Input extends QueryInput

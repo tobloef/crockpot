@@ -230,3 +230,12 @@ const r30b = graph.query([
   Faction.from("planet"),
   Spaceship.from("planet"),
 ]);
+
+const r30c = graph.query([
+  Planet.to(
+    Faction.as("faction"),
+    Spaceship.as("spaceship")
+  ),
+  "faction",
+  "spaceship"
+]);

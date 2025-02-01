@@ -1,6 +1,6 @@
 import { Edge } from "./edge.ts";
 import { Node } from "./node.ts";
-import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem, } from "./query/query.types.ts";
+import type { ArrayQueryInput, ObjectQueryInput, ObjectQueryOutput, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem, } from "./query/query.types.ts";
 import { query } from "./query/query.ts";
 import type { Class } from "./utils/class.ts";
 
@@ -18,9 +18,11 @@ export class Graph {
 
   query<Input extends ArrayQueryInput>(input: [...Input]): Generator<QueryOutput<Input>>;
 
+  query<Input extends ObjectQueryInput>(input: Input): Generator<QueryOutput<Input>>;
+
   query<Input extends ObjectQueryInput>(input: Input): Generator<(
     // Type duplicated from ObjectQueryOutput to fix type hints.
-    // If ObjectQueryOutput is used directly, for some reason it shows up as:
+    // If ObjectQueryOutput or QueryOutput is used directly, it shows up as:
     // Generator<ObjectQueryOutput<
     //   { Transform: typeof Transform },
     //   { Transform: typeof Transform }
