@@ -332,8 +332,87 @@ describe("query", () => {
     deepStrictEqual(arrayResult, [ [ edgeA, edgeB ] ]);
     deepStrictEqual(objectResult, [ { EdgeA: edgeA, EdgeB: edgeB } ]);
   });
+
+  it("Finds both nodes and edges in one query", () => {
+    // Arrange
+    const graph = new Graph();
+    const nodeA = graph.addNode(new NodeA());
+    const nodeB = graph.addNode(new NodeB(1));
+    const edgeA = graph.addEdge({
+      from: nodeA,
+      to: nodeB,
+      edge: new EdgeA(),
+    });
+
+    // Act
+    const arrayResult = graph.query([ NodeA, EdgeA ]).toArray();
+    const objectResult = graph.query({ NodeA, EdgeA }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ NodeA, EdgeA ][]>(true);
+    typesEqual<typeof objectResult, { NodeA: NodeA, EdgeA: EdgeA }[]>(true);
+
+    deepStrictEqual(arrayResult, [ [ nodeA, edgeA ] ]);
+    deepStrictEqual(objectResult, [ { NodeA: nodeA, EdgeA: edgeA } ]);
+  });
+
+  it("Does not find duplicate outputs", () => {
+    // Arrange
+    const graph = new Graph();
+    const nodeA = graph.addNode(new NodeA());
+    const nodeB = graph.addNode(new NodeB(1));
+    const edge1 = graph.addEdge({ from: nodeA, to: nodeB });
+    const edge2 = graph.addEdge({ from: nodeA, to: nodeB });
+
+    // Act
+    /**
+     * If duplicate outputs were not filtered, this would be expected to return
+     * nodeA two times, one for each edge.
+     */
+    const singleResult = graph.query(Node.with(Edge.to(Node))).toArray();
+    const arrayResult = graph.query([ Node.with(Edge.to(Node)) ]).toArray();
+    const objectResult = graph.query({ Node: Node.with(Edge.to(Node)) }).toArray();
+
+    // Assert
+    typesEqual<typeof singleResult, Node[]>(true);
+    typesEqual<typeof arrayResult, [ Node ][]>(true);
+    typesEqual<typeof objectResult, { Node: Node }[]>(true);
+
+    deepStrictEqual(singleResult, [ nodeA ]);
+    deepStrictEqual(arrayResult, [ [ nodeA ] ]);
+    deepStrictEqual(objectResult, [ { Node: nodeA } ]);
+  });
+
+  it("Finds nodes with specific edge type", () => {
+    // Arrange
+    const graph = new Graph();
+    const nodeA = graph.addNode(new NodeA());
+    const nodeB = graph.addNode(new NodeB(1));
+    const edgeA = graph.addEdge({
+      from: nodeA,
+      to: nodeB,
+      edge: new EdgeA(),
+    });
+    const edgeB = graph.addEdge({
+      from: nodeB,
+      to: nodeA,
+      edge: new EdgeB(1),
+    });
+
+    // Act
+    const singleResult = graph.query(Node.with(EdgeA.to(Node))).toArray();
+    const arrayResult = graph.query([ Node.with(EdgeA.to(Node)) ]).toArray();
+    const objectResult = graph.query({ Node: Node.with(EdgeA.to(Node)) }).toArray();
+
+    // Assert
+    typesEqual<typeof singleResult, Node[]>(true);
+    typesEqual<typeof arrayResult, [ Node ][]>(true);
+    typesEqual<typeof objectResult, { Node: Node }[]>(true);
+
+    deepStrictEqual(singleResult, [ nodeA ]);
+    deepStrictEqual(arrayResult, [ [ nodeA ] ]);
+    deepStrictEqual(objectResult, [ { Node: nodeA } ]);
+  });
 });
 
-describe("TODO", () => {
-  it("Does not find the same output twice", () => {});
-})
+// TODO: Self-referencing nodes

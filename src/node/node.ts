@@ -1,9 +1,9 @@
 import { Edge } from "../edge/edge.ts";
 import type { Class } from "../utils/class.ts";
-import { NodeQueryItem } from "./node-query-item.ts";
 import type { Edgelike, Nodelike, ReferenceName, } from "../query/query.types.ts";
 import { randomString } from "../utils/random-string.ts";
 import { type Graph } from "../graph.ts";
+import { NamedNodeQueryItem, RelatedNodeQueryItem } from "./node-query-item.ts";
 
 export class Node {
   #brand = 'Node' as const;
@@ -27,7 +27,7 @@ export class Node {
     this: Type,
     name: Name,
   ) {
-    return new NodeQueryItem<Type, Name, [], [], [], []>({
+    return new NamedNodeQueryItem<Type, Name>({
       class: this,
       name,
     });
@@ -40,7 +40,7 @@ export class Node {
     this: Type,
     ...items: WithItems
   ) {
-    return new NodeQueryItem<Type, ReferenceName, WithItems, [], [], []>({
+    return new RelatedNodeQueryItem<Type, WithItems, [], [], []>({
       withItems: items,
       class: this,
     });
@@ -53,7 +53,7 @@ export class Node {
     this: Type,
     ...items: ToItems
   ) {
-    return new NodeQueryItem<Type, ReferenceName, [], ToItems, [], []>({
+    return new RelatedNodeQueryItem<Type, [], ToItems, [], []>({
       toItems: items,
       class: this,
     });
@@ -66,7 +66,7 @@ export class Node {
     this: Type,
     ...items: FromItems
   ) {
-    return new NodeQueryItem<Type, ReferenceName, [], [], FromItems, []>({
+    return new RelatedNodeQueryItem<Type, [], [], FromItems, []>({
       fromItems: items,
       class: this,
     });
@@ -79,7 +79,7 @@ export class Node {
     this: Type,
     ...items: FromOrToItems
   ) {
-    return new NodeQueryItem<Type, ReferenceName, [], [], [], FromOrToItems>({
+    return new RelatedNodeQueryItem<Type, [], [], [], FromOrToItems>({
       fromOrToItems: items,
       class: this,
     });

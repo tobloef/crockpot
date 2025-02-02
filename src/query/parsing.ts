@@ -1,12 +1,12 @@
 import type { Edgelike, Nodelike, QueryInput, QueryInputItem, ReferenceName } from "./query.types.ts";
-import { type EdgePool, getPoolByName, type NodePool, POOL_TYPES, type PoolName, type Pools, type PoolType } from "./pool.ts";
+import { getPoolByName, POOL_TYPES, type PoolName, type Pools, type PoolType } from "./pool.ts";
 import { Node } from "../node/node.ts";
-import { NodeQueryItem } from "../node/node-query-item.ts";
 import { type Class, isClassThatExtends } from "../utils/class.ts";
 import { randomString } from "../utils/random-string.ts";
 import { Edge, type EdgeDirection } from "../edge/edge.ts";
-import { EdgeQueryItem } from "../edge/edge-query-item.ts";
 import { ReferenceMismatchError } from "./errors/reference-mismatch-error.ts";
+import { NamedNodeQueryItem, NamedRelatedNodeQueryItem, NodeQueryItem2, RelatedNodeQueryItem } from "../node/node-query-item.ts";
+import { EdgeQueryItem2, NamedEdgeQueryItem, NamedRelatedEdgeQueryItem, RelatedEdgeQueryItem } from "../edge/edge-query-item.ts";
 
 export function parseInput(
   input: QueryInput,
@@ -115,7 +115,7 @@ function parseNode(
     );
   } else if (item instanceof Node) {
     poolName = parseNodeInstance(item, pools);
-  } else if (item instanceof NodeQueryItem) {
+  } else if (item instanceof NodeQueryItem2) {
     poolName = parseNodeQueryItem(item, pools);
   } else {
     poolName = parseNodeClass(item, pools);
@@ -171,8 +171,20 @@ function parseNodeInstance(item: Node, pools: Pools): PoolName {
   return poolName;
 }
 
-function parseNodeQueryItem(item: NodeQueryItem, pools: Pools): PoolName {
-  const poolName = item.name ?? `query (${randomString()})`;
+function parseNodeQueryItem(item: NodeQueryItem2, pools: Pools): PoolName {
+  const hasName = (
+    item instanceof NamedNodeQueryItem ||
+    item instanceof NamedRelatedNodeQueryItem
+  );
+
+  const hasRelations = (
+    item instanceof RelatedNodeQueryItem ||
+    item instanceof NamedRelatedNodeQueryItem
+  );
+
+  const poolName = hasName
+    ? item.name
+    : `node-query (${randomString()})`;
 
   const existingPool = pools.node[poolName];
 
@@ -197,6 +209,10 @@ function parseNodeQueryItem(item: NodeQueryItem, pools: Pools): PoolName {
       class: item.class,
     }
   };
+
+  if (!hasRelations) {
+    return poolName;
+  }
 
   for (const withItem of item.withItems ?? []) {
     parseEdge(withItem, pools, { poolName, direction: "fromOrTo" });
@@ -259,7 +275,7 @@ function parseEdge(
     );
   } else if (item instanceof Edge) {
     poolName = parseEdgeInstance(item, pools);
-  } else if (item instanceof EdgeQueryItem) {
+  } else if (item instanceof EdgeQueryItem2) {
     poolName = parseEdgeQueryItem(item, pools);
   } else {
     poolName = parseEdgeClass(item, pools);
@@ -315,8 +331,20 @@ function parseEdgeInstance(item: Edge, pools: Pools): PoolName {
   return poolName;
 }
 
-function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {
-  const poolName = item.name ?? `query (${randomString()})`;
+function parseEdgeQueryItem(item: EdgeQueryItem2, pools: Pools): PoolName {
+  const hasName = (
+    item instanceof NamedEdgeQueryItem ||
+    item instanceof NamedRelatedEdgeQueryItem
+  );
+
+  const hasRelations = (
+    item instanceof RelatedEdgeQueryItem ||
+    item instanceof NamedRelatedEdgeQueryItem
+  );
+
+  const poolName = hasName
+    ? item.name
+    : `edge-query (${randomString()})`;
 
   const existingPool = pools.edge[poolName];
 
@@ -341,6 +369,10 @@ function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {
       class: item.class,
     }
   };
+
+  if (!hasRelations) {
+    return poolName;
+  }
 
   if (item.toItem !== undefined) {
     parseNode(item.toItem, pools, { poolName, direction: "to" });
@@ -372,7 +404,7 @@ export function isNodelike(
   return (
     isClassThatExtends(item as Class<any>, Node) ||
     item instanceof Node ||
-    item instanceof NodeQueryItem
+    item instanceof NodeQueryItem2
   );
 }
 
@@ -382,7 +414,7 @@ export function isEdgelike(
   return (
     isClassThatExtends(item as Class<any>, Edge) ||
     item instanceof Edge ||
-    item instanceof EdgeQueryItem
+    item instanceof EdgeQueryItem2
   );
 }
 

@@ -1,9 +1,9 @@
 import type { Class } from "../utils/class.ts";
 import type { Nodelike, ReferenceName, } from "../query/query.types.ts";
-import { EdgeQueryItem } from "./edge-query-item.ts";
 import { randomString } from "../utils/random-string.ts";
 import type { Node } from "../node/node.ts";
 import { type Graph } from "../graph.ts";
+import { NamedEdgeQueryItem, RelatedEdgeQueryItem } from "./edge-query-item.ts";
 
 export class Edge {
   #brand = 'Edge' as const;
@@ -27,12 +27,9 @@ export class Edge {
     this: Type,
     name: Name,
   ) {
-    return new EdgeQueryItem<
+    return new NamedEdgeQueryItem<
       Type,
-      Name,
-      Nodelike,
-      Nodelike,
-      Nodelike[]
+      Name
     >({
       class: this,
       name,
@@ -46,9 +43,8 @@ export class Edge {
     this: Type,
     item: ToItem
   ) {
-    return new EdgeQueryItem<
+    return new RelatedEdgeQueryItem<
       Type,
-      ReferenceName,
       ToItem,
       Nodelike,
       Nodelike[]
@@ -65,9 +61,8 @@ export class Edge {
     this: Type,
     item: FromItem
   ) {
-    return new EdgeQueryItem<
+    return new RelatedEdgeQueryItem<
       Type,
-      ReferenceName,
       Nodelike,
       FromItem,
       Nodelike[]
@@ -84,9 +79,8 @@ export class Edge {
     this: Type,
     ...items: FromOrToItems
   ) {
-    return new EdgeQueryItem<
+    return new RelatedEdgeQueryItem<
       Type,
-      ReferenceName,
       Nodelike,
       Nodelike,
       FromOrToItems
