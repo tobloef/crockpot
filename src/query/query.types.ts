@@ -1,8 +1,8 @@
 import type { Class, Instance } from "../utils/class.ts";
 import type { Node } from "../node/node.ts";
 import type { Edge } from "../edge/edge.ts";
-import { type NamedNodeQueryItem, NamedRelatedNodeQueryItem, NodeQueryItem2, RelatedNodeQueryItem } from "../node/node-query-item.ts";
-import { EdgeQueryItem2, type NamedEdgeQueryItem, type NamedRelatedEdgeQueryItem, type RelatedEdgeQueryItem } from "../edge/edge-query-item.ts";
+import { type NamedNodeQueryItem, NamedRelatedNodeQueryItem, NodeQueryItem, RelatedNodeQueryItem } from "../node/node-query-item.ts";
+import { EdgeQueryItem, type NamedEdgeQueryItem, type NamedRelatedEdgeQueryItem, type RelatedEdgeQueryItem } from "../edge/edge-query-item.ts";
 
 export type QueryInput = (
   | QueryInputItem
@@ -86,13 +86,13 @@ export type QueryOutputItem<
   Item extends Class<Edge> ? Instance<Item> :
   Item extends Node ? Item :
   Item extends Edge ? Item :
-  Item extends NodeQueryItem2<infer Type> ? Instance<Type> :
-  Item extends EdgeQueryItem2<infer Type> ? Instance<Type> :
+  Item extends NodeQueryItem<infer Type> ? Instance<Type> :
+  Item extends EdgeQueryItem<infer Type> ? Instance<Type> :
   Item extends ReferenceName ? InferTypeByReferenceName<Item, FullInput> :
   unknown
 );
 
-type InferTypeByReferenceName<
+export type InferTypeByReferenceName<
   Name extends ReferenceName,
   FullInput extends QueryInput
 > = (
@@ -104,7 +104,7 @@ type InferTypeByReferenceName<
 type UnknownReference = Node | Edge;
 type NodeOrEdgeClass = Class<Node> | Class<Edge>;
 
-type ReferencedTypes<Input extends QueryInput> = (
+export type ReferencedTypes<Input extends QueryInput> = (
   Input extends ArrayQueryInput
     ? ReferencedTypeFromArray<Input, never>
     : Input extends ObjectQueryInput
@@ -120,7 +120,7 @@ type ReferencedTypeFromArray<
 > = (
   Items extends [infer First, ...infer Rest]
     ? Rest extends QueryInputItem[]
-      ? First extends NodeQueryItem2
+      ? First extends NodeQueryItem
         ? First extends NamedRelatedNodeQueryItem<
           infer ClassType,
           infer Name,
@@ -150,7 +150,7 @@ type ReferencedTypeFromArray<
                 & ReferencedTypeFromArray<Rest, never>
                 )
               : never
-        : First extends EdgeQueryItem2
+        : First extends EdgeQueryItem
           ? First extends NamedRelatedEdgeQueryItem<
             infer ClassType,
             infer Name,

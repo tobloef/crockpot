@@ -5,8 +5,8 @@ import { type Class, isClassThatExtends } from "../utils/class.ts";
 import { randomString } from "../utils/random-string.ts";
 import { Edge, type EdgeDirection } from "../edge/edge.ts";
 import { ReferenceMismatchError } from "./errors/reference-mismatch-error.ts";
-import { NamedNodeQueryItem, NamedRelatedNodeQueryItem, NodeQueryItem2, RelatedNodeQueryItem } from "../node/node-query-item.ts";
-import { EdgeQueryItem2, NamedEdgeQueryItem, NamedRelatedEdgeQueryItem, RelatedEdgeQueryItem } from "../edge/edge-query-item.ts";
+import { NamedNodeQueryItem, NamedRelatedNodeQueryItem, NodeQueryItem, RelatedNodeQueryItem } from "../node/node-query-item.ts";
+import { EdgeQueryItem, NamedEdgeQueryItem, NamedRelatedEdgeQueryItem, RelatedEdgeQueryItem } from "../edge/edge-query-item.ts";
 
 export function parseInput(
   input: QueryInput,
@@ -114,7 +114,7 @@ function parseNode(
     );
   } else if (item instanceof Node) {
     poolName = parseNodeInstance(item, pools);
-  } else if (item instanceof NodeQueryItem2) {
+  } else if (item instanceof NodeQueryItem) {
     poolName = parseNodeQueryItem(item, pools);
   } else {
     poolName = parseNodeClass(item, pools);
@@ -172,7 +172,7 @@ function parseNodeInstance(item: Node, pools: Pools): PoolName {
   return poolName;
 }
 
-function parseNodeQueryItem(item: NodeQueryItem2, pools: Pools): PoolName {
+function parseNodeQueryItem(item: NodeQueryItem, pools: Pools): PoolName {
   const hasName = (
     item instanceof NamedNodeQueryItem ||
     item instanceof NamedRelatedNodeQueryItem
@@ -308,7 +308,7 @@ function parseEdge(
     );
   } else if (item instanceof Edge) {
     poolName = parseEdgeInstance(item, pools);
-  } else if (item instanceof EdgeQueryItem2) {
+  } else if (item instanceof EdgeQueryItem) {
     poolName = parseEdgeQueryItem(item, pools);
 
     const hasRelations = (
@@ -384,7 +384,7 @@ function parseEdgeInstance(item: Edge, pools: Pools): PoolName {
   return poolName;
 }
 
-function parseEdgeQueryItem(item: EdgeQueryItem2, pools: Pools): PoolName {
+function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {
   const hasName = (
     item instanceof NamedEdgeQueryItem ||
     item instanceof NamedRelatedEdgeQueryItem
@@ -468,7 +468,7 @@ export function isNodelike(
   return (
     isClassThatExtends(item as Class<any>, Node) ||
     item instanceof Node ||
-    item instanceof NodeQueryItem2
+    item instanceof NodeQueryItem
   );
 }
 
@@ -478,7 +478,7 @@ export function isEdgelike(
   return (
     isClassThatExtends(item as Class<any>, Edge) ||
     item instanceof Edge ||
-    item instanceof EdgeQueryItem2
+    item instanceof EdgeQueryItem
   );
 }
 

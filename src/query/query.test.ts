@@ -1200,7 +1200,7 @@ describe("query", () => {
 
     // Act
     const arrayResult = graph.query([ "ref", NodeA.as("ref") ]).toArray();
-    const objectResult = graph.query({ a: "ref", b: NodeA.as("ref") }).toArray();
+    const objectResult = graph.query({ a: "ref", b: NodeA.as("ref") } as const).toArray();
 
     // Assert
     typesEqual<typeof arrayResult, [ NodeA, NodeA ][]>(true);

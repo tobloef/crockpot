@@ -2,7 +2,7 @@ import type { Class } from "../utils/class.ts";
 import { Edge } from "./edge.ts";
 import type { Nodelike, ReferenceName, } from "../query/query.types.ts";
 
-export abstract class EdgeQueryItem2<
+export abstract class EdgeQueryItem<
   ClassType extends Class<Edge> = Class<Edge>,
 > {
   #brand = 'EdgeQueryItem' as const;
@@ -19,7 +19,7 @@ export abstract class EdgeQueryItem2<
 export class NamedEdgeQueryItem<
   ClassType extends Class<Edge> = Class<Edge>,
   Name extends string = ReferenceName
-> extends EdgeQueryItem2<ClassType> {
+> extends EdgeQueryItem<ClassType> {
   #brand = 'NamedEdgeQueryItem' as const;
 
   name: Name;
@@ -96,7 +96,7 @@ export class RelatedEdgeQueryItem<
   ToItem extends Nodelike = Nodelike,
   FromItem extends Nodelike = Nodelike,
   FromOrToItems extends Nodelike[] = Nodelike[],
-> extends EdgeQueryItem2<ClassType> {
+> extends EdgeQueryItem<ClassType> {
   #brand = 'RelatedEdgeQueryItem' as const;
 
   toItem?: ToItem;
@@ -174,7 +174,7 @@ export class NamedRelatedEdgeQueryItem<
   ToItem extends Nodelike = Nodelike,
   FromItem extends Nodelike = Nodelike,
   FromOrToItems extends Nodelike[] = Nodelike[],
-> extends EdgeQueryItem2<ClassType> {
+> extends EdgeQueryItem<ClassType> {
   #brand = 'NamedRelatedEdgeQueryItem' as const;
 
   name: Name;
