@@ -416,3 +416,4 @@ describe("query", () => {
 });
 
 // TODO: Self-referencing nodes
+// TODO: Negative tests, such as a reference with multiple types

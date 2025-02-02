@@ -277,6 +277,24 @@ function parseEdge(
     poolName = parseEdgeInstance(item, pools);
   } else if (item instanceof EdgeQueryItem2) {
     poolName = parseEdgeQueryItem(item, pools);
+
+    const hasRelations = (
+      item instanceof RelatedEdgeQueryItem ||
+      item instanceof NamedRelatedEdgeQueryItem
+    );
+
+    if (hasRelations && parentNode?.direction === "fromOrTo") {
+      const isImplicitlyFrom = item.toItem !== undefined && item.fromItem === undefined;
+      const isImplicitlyTo = item.toItem === undefined && item.fromItem !== undefined;
+
+      if (isImplicitlyFrom) {
+        parentNode.direction = "from";
+      }
+
+      if (isImplicitlyTo) {
+        parentNode.direction = "to";
+      }
+    }
   } else {
     poolName = parseEdgeClass(item, pools);
   }
