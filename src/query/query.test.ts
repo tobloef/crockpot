@@ -1,9 +1,10 @@
 import { describe, it } from "node:test";
-import { deepStrictEqual } from "node:assert";
+import { deepStrictEqual, throws } from "node:assert";
 import { Graph } from "../graph.ts";
 import { Node } from "../node/node.ts";
 import { Edge } from "../edge/edge.ts";
 import { typesEqual } from "../utils/type-assertion.ts";
+import { ReferenceMismatchError } from "./errors/reference-mismatch-error.ts";
 
 class NodeA extends Node {}
 
@@ -1035,10 +1036,112 @@ describe("query", () => {
       { ref: node4, other: node3 },
     ]);
   });
+
+  it("Throws if node reference has conflicting types", () => {
+    // Arrange
+    const graph = new Graph();
+    const node = graph.addNode(new Node());
+    const nodeA = graph.addNode(new NodeA());
+
+    // Act
+    const query = () => graph.query([
+      NodeA.as("ref"),
+      NodeB.as("ref")
+    ]).toArray();
+
+    // Assert
+    throws(
+      query,
+      { name: ReferenceMismatchError.name }
+    );
+  });
+
+  it("Throws if edge reference has conflicting types", () => {
+    // Arrange
+    const graph = new Graph();
+    const node = graph.addNode(new Node());
+    const edgeA = graph.addEdge({
+      from: node,
+      to: node,
+      edge: new EdgeA(),
+    });
+
+    // Act
+    const query = () => graph.query([
+      EdgeA.as("ref"),
+      EdgeB.as("ref")
+    ]).toArray();
+
+    // Assert
+    throws(
+      query,
+      { name: ReferenceMismatchError.name }
+    );
+  });
+
+  it("Finds referenced node when references are for both a child class and a parent class", () => {
+    // Arrange
+    const graph = new Graph();
+    const nodeA = graph.addNode(new ChildOfNodeA());
+    const nodeB = graph.addNode(new NodeB(1));
+
+    // Act
+    const arrayResult = graph.query([
+      ChildOfNodeA.as("ref"),
+      NodeA.as("ref"),
+    ]).toArray();
+    const objectResult = graph.query({
+      a: ChildOfNodeA.as("ref"),
+      b: NodeA.as("ref"),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ ChildOfNodeA, Node ][]>(true);
+    typesEqual<typeof objectResult, { a: ChildOfNodeA, b: Node }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ nodeA, nodeA ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { a: nodeA, b: nodeA },
+    ]);
+  });
+
+  it("Finds referenced edge when references are for both a child class and a parent class", () => {
+    // Arrange
+    const graph = new Graph();
+    const node = graph.addNode(new Node());
+    const edgeA = graph.addEdge({
+      from: node,
+      to: node,
+      edge: new ChildOfEdgeA(),
+    });
+
+    // Act
+    const arrayResult = graph.query([
+      ChildOfEdgeA.as("ref"),
+      EdgeA.as("ref"),
+    ]).toArray();
+    const objectResult = graph.query({
+      a: ChildOfEdgeA.as("ref"),
+      b: EdgeA.as("ref"),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ ChildOfEdgeA, EdgeA ][]>(true);
+    typesEqual<typeof objectResult, { a: ChildOfEdgeA, b: EdgeA }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ edgeA, edgeA ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { a: edgeA, b: edgeA },
+    ]);
+  });
 });
 
-
+// TODO: Negative tests, such as a reference with multiple types
+// TODO: String items
 // TODO: Multiple implicit from/to/fromOrTo/with items
 // TODO: Self-referencing nodes only
-// TODO: Negative tests, such as a reference with multiple types
 // TODO: Instances

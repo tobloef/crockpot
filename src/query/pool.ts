@@ -24,7 +24,7 @@ export type NodePool = {
       fromOrTo?: PoolName[],
     },
   },
-  outputKey?: string | number,
+  outputKeys: string[] | number[],
 }
 
 export type EdgePool = {
@@ -37,7 +37,7 @@ export type EdgePool = {
       toOrFrom?: PoolName[],
     }
   },
-  outputKey?: string | number,
+  outputKeys: string[] | number[],
 }
 
 export type GeneratorFunction<T> = () => Generator<T>;

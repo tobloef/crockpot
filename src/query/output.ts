@@ -25,13 +25,11 @@ export function permutationToOutput<
     const allPools = { ...pools.node, ...pools.edge };
 
     for (const [poolName, pool] of Object.entries(allPools)) {
-      if (pool.outputKey === undefined) {
-        continue;
-      }
-
       const item = permutation[poolName];
 
-      output[pool.outputKey as number] = item;
+      for (const outputKey of pool.outputKeys) {
+        output[outputKey as number] = item;
+      }
     }
 
     return output as QueryOutput<Input>;
@@ -41,13 +39,11 @@ export function permutationToOutput<
     const allPools = { ...pools.node, ...pools.edge };
 
     for (const [poolName, pool] of Object.entries(allPools)) {
-      if (pool.outputKey === undefined) {
-        continue;
-      }
-
       const item = permutation[poolName];
 
-      output[pool.outputKey as string] = item;
+      for (const outputKey of pool.outputKeys) {
+        output[outputKey as string] = item;
+      }
     }
 
     return output as QueryOutput<Input>;

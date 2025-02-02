@@ -24,14 +24,14 @@ export function parseInput(
       const item = input[i]!;
       const poolName = parseItem(item, pools);
       const pool = getPoolByName(poolName, pools)!;
-      pool.outputKey = i;
+      (pool.outputKeys as number[]).push(i);
     }
   } else {
     const entries = Object.entries(input);
     for (const [key, item] of entries) {
       const poolName = parseItem(item, pools);
       const pool = getPoolByName(poolName, pools)!;
-      pool.outputKey = key;
+      (pool.outputKeys as string[]).push(key);
     }
   }
 
@@ -86,6 +86,7 @@ function parseReferenceName(
 
   const newPool = {
     constraints: {},
+    outputKeys: [],
   };
 
   pools[newType][poolName] ??= newPool;
@@ -150,10 +151,11 @@ function parseNode(
 function parseNodeClass(item: Class<Node>, pools: Pools): PoolName {
   const poolName = `${item.name} (${randomString()})`;
 
-  pools.node[poolName] = {
+  pools.node[poolName] ??= {
     constraints: {
       class: item,
-    }
+    },
+    outputKeys: [],
   };
 
   return poolName;
@@ -162,10 +164,11 @@ function parseNodeClass(item: Class<Node>, pools: Pools): PoolName {
 function parseNodeInstance(item: Node, pools: Pools): PoolName {
   const poolName = item.id;
 
-  pools.node[poolName] = {
+  pools.node[poolName] ??= {
     constraints: {
       instance: item,
-    }
+    },
+    outputKeys: [],
   };
 
   return poolName;
@@ -199,7 +202,7 @@ function parseNodeQueryItem(item: NodeQueryItem2, pools: Pools): PoolName {
         // It's more generic, do nothing
       } else {
         // It's a completely different class
-        throw new Error(`Node class mismatch for ${poolName}: ${existingClass} and ${item.class}`);
+        throw new ReferenceMismatchError(poolName, { existing: existingClass, new: item.class });
       }
     }
   }
@@ -207,7 +210,8 @@ function parseNodeQueryItem(item: NodeQueryItem2, pools: Pools): PoolName {
   pools.node[poolName] ??= {
     constraints: {
       class: item.class,
-    }
+    },
+    outputKeys: [],
   };
 
   if (!hasRelations) {
@@ -227,6 +231,7 @@ function parseNodeQueryItem(item: NodeQueryItem2, pools: Pools): PoolName {
           from: poolName,
         }
       },
+      outputKeys: [],
     };
 
     pools.node[poolName].constraints.edges ??= {};
@@ -245,6 +250,7 @@ function parseNodeQueryItem(item: NodeQueryItem2, pools: Pools): PoolName {
           to: poolName,
         }
       },
+      outputKeys: [],
     };
 
     pools.node[poolName].constraints.edges ??= {};
@@ -263,6 +269,7 @@ function parseNodeQueryItem(item: NodeQueryItem2, pools: Pools): PoolName {
           toOrFrom: [poolName],
         }
       },
+      outputKeys: [],
     };
 
     pools.node[poolName].constraints.edges ??= {};
@@ -346,10 +353,11 @@ function parseEdge(
 function parseEdgeClass(item: Class<Edge>, pools: Pools): PoolName {
   const poolName = `${item.name} (${randomString()})`;
 
-  pools.edge[poolName] = {
+  pools.edge[poolName] ??= {
     constraints: {
       class: item,
-    }
+    },
+    outputKeys: [],
   };
 
   return poolName;
@@ -358,10 +366,11 @@ function parseEdgeClass(item: Class<Edge>, pools: Pools): PoolName {
 function parseEdgeInstance(item: Edge, pools: Pools): PoolName {
   const poolName = item.id;
 
-  pools.edge[poolName] = {
+  pools.edge[poolName] ??= {
     constraints: {
       instance: item,
-    }
+    },
+    outputKeys: [],
   };
 
   return poolName;
@@ -395,15 +404,16 @@ function parseEdgeQueryItem(item: EdgeQueryItem2, pools: Pools): PoolName {
         // It's more generic, do nothing
       } else {
         // It's a completely different class
-        throw new Error(`Edge class mismatch for ${poolName}: ${existingClass} and ${item.class}`);
+        throw new ReferenceMismatchError(poolName, { existing: existingClass, new: item.class });
       }
     }
   }
 
-  pools.edge[poolName] = {
+  pools.edge[poolName] ??= {
     constraints: {
       class: item.class,
-    }
+    },
+    outputKeys: [],
   };
 
   if (!hasRelations) {
