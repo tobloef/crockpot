@@ -148,7 +148,7 @@ function parseNode(
 }
 
 function parseNodeClass(item: Class<Node>, pools: Pools): PoolName {
-  const poolName = randomString();
+  const poolName = `${item.name} (${randomString()})`;
 
   pools.node[poolName] = {
     constraints: {
@@ -172,7 +172,7 @@ function parseNodeInstance(item: Node, pools: Pools): PoolName {
 }
 
 function parseNodeQueryItem(item: NodeQueryItem, pools: Pools): PoolName {
-  const poolName = item.name ?? randomString();
+  const poolName = item.name ?? `query (${randomString()})`;
 
   const existingPool = pools.node[poolName];
 
@@ -203,7 +203,7 @@ function parseNodeQueryItem(item: NodeQueryItem, pools: Pools): PoolName {
   }
 
   for (const toItem of item.toItems ?? []) {
-    const edgePoolName = randomString();
+    const edgePoolName = `to-edge (${randomString()})`;
 
     pools.edge[edgePoolName] = {
       constraints: {
@@ -221,7 +221,7 @@ function parseNodeQueryItem(item: NodeQueryItem, pools: Pools): PoolName {
   }
 
   for (const fromItem of item.fromItems ?? []) {
-    const edgePoolName = randomString();
+    const edgePoolName = `from-edge (${randomString()})`;
 
     pools.edge[edgePoolName] = {
       constraints: {
@@ -292,7 +292,7 @@ function parseEdge(
 }
 
 function parseEdgeClass(item: Class<Edge>, pools: Pools): PoolName {
-  const poolName = randomString();
+  const poolName = `${item.name} (${randomString()})`;
 
   pools.edge[poolName] = {
     constraints: {
@@ -316,7 +316,7 @@ function parseEdgeInstance(item: Edge, pools: Pools): PoolName {
 }
 
 function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {
-  const poolName = item.name ?? randomString();
+  const poolName = item.name ?? `query (${randomString()})`;
 
   const existingPool = pools.edge[poolName];
 
