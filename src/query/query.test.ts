@@ -1040,18 +1040,24 @@ describe("query", () => {
   it("Throws if node reference has conflicting types", () => {
     // Arrange
     const graph = new Graph();
-    const node = graph.addNode(new Node());
-    const nodeA = graph.addNode(new NodeA());
 
     // Act
-    const query = () => graph.query([
+    const arrayQuery = () => graph.query([
       NodeA.as("ref"),
       NodeB.as("ref")
     ]).toArray();
+    const objectQuery = () => graph.query({
+      a: NodeA.as("ref"),
+      b: NodeB.as("ref"),
+    }).toArray();
 
     // Assert
     throws(
-      query,
+      arrayQuery,
+      { name: ReferenceMismatchError.name }
+    );
+    throws(
+      objectQuery,
       { name: ReferenceMismatchError.name }
     );
   });
@@ -1059,22 +1065,24 @@ describe("query", () => {
   it("Throws if edge reference has conflicting types", () => {
     // Arrange
     const graph = new Graph();
-    const node = graph.addNode(new Node());
-    const edgeA = graph.addEdge({
-      from: node,
-      to: node,
-      edge: new EdgeA(),
-    });
 
     // Act
-    const query = () => graph.query([
+    const arrayQuery = () => graph.query([
       EdgeA.as("ref"),
       EdgeB.as("ref")
     ]).toArray();
+    const objectQuery = () => graph.query({
+      a: EdgeA.as("ref"),
+      b: EdgeB.as("ref"),
+    }).toArray();
 
     // Assert
     throws(
-      query,
+      arrayQuery,
+      { name: ReferenceMismatchError.name }
+    );
+    throws(
+      objectQuery,
       { name: ReferenceMismatchError.name }
     );
   });
@@ -1137,6 +1145,31 @@ describe("query", () => {
     deepStrictEqual(objectResult, [
       { a: edgeA, b: edgeA },
     ]);
+  });
+
+  it("Throws if reference is both a node and an edge", () => {
+    // Arrange
+    const graph = new Graph();
+
+    // Act
+    const arrayQuery = () => graph.query([
+      Node.as("ref"),
+      Edge.as("ref"),
+    ]).toArray();
+    const objectQuery = () => graph.query({
+      a: Node.as("ref"),
+      b: Edge.as("ref"),
+    }).toArray();
+
+    // Assert
+    throws(
+      arrayQuery,
+      { name: ReferenceMismatchError.name }
+    );
+    throws(
+      objectQuery,
+      { name: ReferenceMismatchError.name }
+    );
   });
 });
 

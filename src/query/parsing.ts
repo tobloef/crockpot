@@ -80,16 +80,14 @@ function parseReferenceName(
   if (isTypesMismatch) {
     throw new ReferenceMismatchError(
       poolName,
-      {existing: existingType, new: newType }
+      { existing: existingType, new: newType }
     );
   }
 
-  const newPool = {
+  pools[newType][poolName] ??= {
     constraints: {},
     outputKeys: [],
   };
-
-  pools[newType][poolName] ??= newPool;
 
   if (existingType === "unknown") {
     delete pools[existingType][poolName];
@@ -202,9 +200,19 @@ function parseNodeQueryItem(item: NodeQueryItem2, pools: Pools): PoolName {
         // It's more generic, do nothing
       } else {
         // It's a completely different class
-        throw new ReferenceMismatchError(poolName, { existing: existingClass, new: item.class });
+        throw new ReferenceMismatchError(
+          poolName,
+          { existing: existingClass, new: item.class }
+        );
       }
     }
+  }
+
+  if (pools.edge[poolName] !== undefined) {
+    throw new ReferenceMismatchError(
+      poolName,
+      { existing: "edge", new: "node" }
+    );
   }
 
   pools.node[poolName] ??= {
@@ -404,9 +412,19 @@ function parseEdgeQueryItem(item: EdgeQueryItem2, pools: Pools): PoolName {
         // It's more generic, do nothing
       } else {
         // It's a completely different class
-        throw new ReferenceMismatchError(poolName, { existing: existingClass, new: item.class });
+        throw new ReferenceMismatchError(
+          poolName,
+          { existing: existingClass, new: item.class }
+        );
       }
     }
+  }
+
+  if (pools.node[poolName] !== undefined) {
+    throw new ReferenceMismatchError(
+      poolName,
+      { existing: "node", new: "edge" }
+    );
   }
 
   pools.edge[poolName] ??= {
