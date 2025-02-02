@@ -137,14 +137,37 @@ export function checkEdgeConstraints(
   }
 
   if (pool.constraints.nodes?.toOrFrom !== undefined) {
-    for (const nodePoolName of pool.constraints.nodes.toOrFrom) {
-      const node = permutation[nodePoolName];
+    const [first, second] = pool.constraints.nodes.toOrFrom;
 
-      if (!(node instanceof Node)) {
+    const firstNode = first !== undefined
+      ? permutation[first]
+      : undefined;
+    const secondNode = second !== undefined
+      ? permutation[second]
+      : undefined;
+
+
+    if (firstNode === undefined) {
+     throw new Error("Attempted to check edge toOrFrom constraints with empty array.");
+    }
+
+    if (!(firstNode instanceof Node)) {
+      throw new Error(`Attempted to check edge toOrFrom constraints with non-Node item: ${firstNode}`);
+    }
+
+    if (secondNode !== undefined && !(secondNode instanceof Node)) {
+      throw new Error(`Attempted to check edge toOrFrom constraints with non-Node item: ${secondNode}`);
+    }
+
+    if (secondNode === undefined) {
+      if (edge.nodes.from !== firstNode && edge.nodes.to !== firstNode) {
         return false;
       }
-
-      if (edge.nodes.from !== node && edge.nodes.to !== node) {
+    } else {
+      if (
+        (edge.nodes.from !== firstNode || edge.nodes.to !== secondNode) &&
+        (edge.nodes.from !== secondNode || edge.nodes.to !== firstNode)
+      ) {
         return false;
       }
     }

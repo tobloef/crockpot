@@ -254,6 +254,24 @@ function parseNodeQueryItem(item: NodeQueryItem2, pools: Pools): PoolName {
     parseNode(fromItem, pools, { poolName: edgePoolName, direction: "from" });
   }
 
+  for (const fromOrToItem of item.fromOrToItems ?? []) {
+    const edgePoolName = `from-or-to-edge (${randomString()})`;
+
+    pools.edge[edgePoolName] = {
+      constraints: {
+        nodes: {
+          toOrFrom: [poolName],
+        }
+      },
+    };
+
+    pools.node[poolName].constraints.edges ??= {};
+    pools.node[poolName].constraints.edges.fromOrTo ??= [];
+    pools.node[poolName].constraints.edges.fromOrTo.push(edgePoolName);
+
+    parseNode(fromOrToItem, pools, { poolName: edgePoolName, direction: "fromOrTo" });
+  }
+
   return poolName;
 }
 
