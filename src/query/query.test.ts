@@ -1171,10 +1171,48 @@ describe("query", () => {
       { name: ReferenceMismatchError.name }
     );
   });
+
+  it("Finds anything when querying just a string item", () => {
+    // Arrange
+    const graph = new Graph();
+    const node = graph.addNode(new Node());
+    const edge = graph.addEdge({
+      from: node,
+      to: node,
+    });
+
+    // Act
+    const arrayResult = graph.query([ "ref" ]).toArray();
+    const objectResult = graph.query({ ref: "ref" }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node | Edge ][]>(true);
+    typesEqual<typeof objectResult, { ref: Node | Edge }[]>(true);
+
+    deepStrictEqual(arrayResult, [ node, edge ]);
+    deepStrictEqual(objectResult, [ { ref: node }, { ref: edge } ]);
+  });
+
+  it("Finds and returns referenced node by string", () => {
+    // Arrange
+    const graph = new Graph();
+    const nodeA = graph.addNode(new NodeA());
+
+    // Act
+    const arrayResult = graph.query([ "ref", NodeA.as("ref") ]).toArray();
+    const objectResult = graph.query({ a: "ref", b: NodeA.as("ref") }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ NodeA, NodeA ][]>(true);
+    typesEqual<typeof objectResult, { a: NodeA, b: NodeA }[]>(true);
+
+    deepStrictEqual(arrayResult, [ [ nodeA, nodeA ] ]);
+    deepStrictEqual(objectResult, [ { a: nodeA, b: nodeA } ]);
+  })
 });
 
-// TODO: Negative tests, such as a reference with multiple types
 // TODO: String items
 // TODO: Multiple implicit from/to/fromOrTo/with items
 // TODO: Self-referencing nodes only
 // TODO: Instances
+// TODO: Negative tests more negative tests
