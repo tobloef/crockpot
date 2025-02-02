@@ -753,7 +753,292 @@ describe("query", () => {
     deepStrictEqual(arrayResult, [[ nodeB ]]);
     deepStrictEqual(objectResult, [{ Node: nodeB }]);
   });
+
+  it("Can (uselessly) name node wild cards", () => {
+    // Arrange
+    const graph = new Graph();
+    const nodeA = graph.addNode(new NodeA());
+    const nodeB = graph.addNode(new NodeB(1));
+
+    // Act
+    const singleResult = graph.query(Node.as("ref")).toArray();
+    const arrayResult = graph.query([ Node.as("ref") ]).toArray();
+    const objectResult = graph.query({ Node: Node.as("ref") }).toArray();
+
+    // Assert
+    typesEqual<typeof singleResult, Node[]>(true);
+    typesEqual<typeof arrayResult, [ Node ][]>(true);
+    typesEqual<typeof objectResult, { Node: Node }[]>(true);
+
+    deepStrictEqual(singleResult, [ nodeA, nodeB ]);
+    deepStrictEqual(arrayResult, [ [ nodeA ], [ nodeB ] ]);
+    deepStrictEqual(objectResult, [ { Node: nodeA }, { Node: nodeB } ]);
+  });
+
+  it("Can (uselessly) name edge wild cards", () => {
+    // Arrange
+    const graph = new Graph();
+    const nodeA = graph.addNode(new NodeA());
+    const nodeB = graph.addNode(new NodeB(1));
+    const edgeA = graph.addEdge({
+      from: nodeA,
+      to: nodeB,
+    });
+
+    // Act
+    const singleResult = graph.query(Edge.as("ref")).toArray();
+    const arrayResult = graph.query([ Edge.as("ref") ]).toArray();
+    const objectResult = graph.query({ Edge: Edge.as("ref") }).toArray();
+
+    // Assert
+    typesEqual<typeof singleResult, Edge[]>(true);
+    typesEqual<typeof arrayResult, [ Edge ][]>(true);
+    typesEqual<typeof objectResult, { Edge: Edge }[]>(true);
+
+    deepStrictEqual(singleResult, [ edgeA ]);
+    deepStrictEqual(arrayResult, [[ edgeA ]]);
+    deepStrictEqual(objectResult, [{ Edge: edgeA }]);
+  });
+
+  it("Finds nodes with edge to referenced node", () => {
+    // Arrange
+    const graph = new Graph();
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+    const node4 = graph.addNode(new Node());
+    graph.addEdge({
+      from: node1,
+      to: node2,
+    });
+    graph.addEdge({
+      from: node3,
+      to: node4,
+    });
+
+    // Act
+    const arrayResult = graph.query([
+      Node.as("ref"),
+      Node.with(Edge.to("ref"))
+    ]).toArray();
+    const objectResult = graph.query({
+      ref: Node.as("ref"),
+      other: Node.with(Edge.to("ref"))
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Node ][]>(true);
+    typesEqual<typeof objectResult, { ref: Node, other: Node }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node2, node1 ],
+      [ node4, node3 ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { ref: node2, other: node1 },
+      { ref: node4, other: node3 }
+    ]);
+  });
+
+  it("Finds nodes with edge from referenced node", () => {
+    // Arrange
+    const graph = new Graph();
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+    const node4 = graph.addNode(new Node());
+    graph.addEdge({
+      from: node1,
+      to: node2,
+    });
+    graph.addEdge({
+      from: node3,
+      to: node4,
+    });
+
+    // Act
+    const arrayResult = graph.query([
+      Node.as("ref"),
+      Node.with(Edge.from("ref"))
+    ]).toArray();
+    const objectResult = graph.query({
+      ref: Node.as("ref"),
+      other: Node.with(Edge.from("ref"))
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Node ][]>(true);
+    typesEqual<typeof objectResult, { ref: Node, other: Node }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node1, node2 ],
+      [ node3, node4 ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { ref: node1, other: node2 },
+      { ref: node3, other: node4 }
+    ]);
+  });
+
+  it("Finds nodes with implicit edge to referenced node", () => {
+    // Arrange
+    const graph = new Graph();
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+    const node4 = graph.addNode(new Node());
+    graph.addEdge({
+      from: node1,
+      to: node2,
+    });
+    graph.addEdge({
+      from: node3,
+      to: node4,
+    });
+
+    // Act
+    const arrayResult = graph.query([
+      Node.as("ref"),
+      Node.to("ref")
+    ]).toArray();
+    const objectResult = graph.query({
+      ref: Node.as("ref"),
+      other: Node.to("ref")
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Node ][]>(true);
+    typesEqual<typeof objectResult, { ref: Node, other: Node }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node2, node1 ],
+      [ node4, node3 ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { ref: node2, other: node1 },
+      { ref: node4, other: node3 }
+    ]);
+  });
+
+  it("Finds nodes with implicit edge from referenced node", () => {
+    // Arrange
+    const graph = new Graph();
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+    const node4 = graph.addNode(new Node());
+    graph.addEdge({
+      from: node1,
+      to: node2,
+    });
+    graph.addEdge({
+      from: node3,
+      to: node4,
+    });
+
+    // Act
+    const arrayResult = graph.query([
+      Node.as("ref"),
+      Node.from("ref")
+    ]).toArray();
+    const objectResult = graph.query({
+      ref: Node.as("ref"),
+      other: Node.from("ref")
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Node ][]>(true);
+    typesEqual<typeof objectResult, { ref: Node, other: Node }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node1, node2 ],
+      [ node3, node4 ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { ref: node1, other: node2 },
+      { ref: node3, other: node4 }
+    ]);
+  });
+
+  it("Finds nodes with edge to referenced node of specific type", () => {
+    // Arrange
+    const graph = new Graph();
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new NodeA());
+    const node3 = graph.addNode(new Node());
+    const node4 = graph.addNode(new NodeB(1));
+    graph.addEdge({
+      from: node1,
+      to: node2,
+    });
+    graph.addEdge({
+      from: node3,
+      to: node4,
+    });
+
+    // Act
+    const arrayResult = graph.query([
+      NodeA.as("ref"),
+      Node.to("ref")
+    ]).toArray();
+    const objectResult = graph.query({
+      ref: NodeA.as("ref"),
+      other: Node.to("ref")
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ NodeA, Node ][]>(true);
+    typesEqual<typeof objectResult, { ref: NodeA, other: Node }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node2, node1 ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { ref: node2, other: node1 },
+    ]);
+  });
+
+  it("Finds nodes with edge from referenced node of specific type", () => {
+    // Arrange
+    const graph = new Graph();
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new NodeA());
+    const node3 = graph.addNode(new Node());
+    const node4 = graph.addNode(new NodeB(1));
+    graph.addEdge({
+      from: node2,
+      to: node1,
+    });
+    graph.addEdge({
+      from: node4,
+      to: node3,
+    });
+
+    // Act
+    const arrayResult = graph.query([
+      NodeB.as("ref"),
+      Node.from("ref")
+    ]).toArray();
+    const objectResult = graph.query({
+      ref: NodeB.as("ref"),
+      other: Node.from("ref")
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ NodeB, Node ][]>(true);
+    typesEqual<typeof objectResult, { ref: NodeB, other: Node }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node4, node3 ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { ref: node4, other: node3 },
+    ]);
+  });
 });
 
+
+// TODO: Multiple implicit from/to/fromOrTo/with items
 // TODO: Self-referencing nodes only
 // TODO: Negative tests, such as a reference with multiple types
+// TODO: Instances
