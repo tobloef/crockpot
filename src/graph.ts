@@ -18,8 +18,6 @@ export class Graph {
 
   query<Input extends ArrayQueryInput>(input: [...Input]): Generator<QueryOutput<Input>>;
 
-  query<Input extends ObjectQueryInput>(input: Input): Generator<QueryOutput<Input>>;
-
   query<Input extends ObjectQueryInput>(input: Input): Generator<(
     // Type duplicated from ObjectQueryOutput to fix type hints.
     // If ObjectQueryOutput or QueryOutput is used directly, it shows up as:
@@ -28,7 +26,7 @@ export class Graph {
     //   { Transform: typeof Transform }
     // >, any, any>
     { [K in keyof Input]: QueryOutputItem<Input[K], Input> }
-  )>;
+    )>;
 
   query<Input extends QueryInput>(input: Input): Generator<QueryOutput<Input>> {
     return query(this, input);
