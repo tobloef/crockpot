@@ -1271,9 +1271,99 @@ describe("query", () => {
     deepStrictEqual(arrayResult, [ [ edge, edge ] ]);
     deepStrictEqual(objectResult, [ { a: edge, b: edge } ]);
   });
+
+  it("Finds and returns node by ref and edge to that node", () => {
+    // Arrange
+    const graph = new Graph();
+    const node = graph.addNode(new Node());
+    const edge = graph.addEdge({
+      from: node,
+      to: node,
+    });
+
+    // Act
+    const arrayResult = graph.query([ "node", Edge.to("node") ]).toArray();
+    const objectResult = graph.query({ node: "node", edge: Edge.to("node") } as const).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Edge ][]>(true);
+    typesEqual<typeof objectResult, { node: Node, edge: Edge }[]>(true);
+
+    deepStrictEqual(arrayResult, [ [ node, edge ] ]);
+    deepStrictEqual(objectResult, [ { node, edge } ]);
+  });
+
+  it("Finds and returns node with referenced edge to referenced target", () => {
+    // Arrange
+    const graph = new Graph();
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const edge = graph.addEdge({
+      from: node1,
+      to: node2,
+    });
+
+    // Act
+    const arrayResult = graph.query([
+      Node.with(Edge.as("edge").to("target")),
+      "edge",
+      "target",
+    ]).toArray();
+    const objectResult = graph.query({
+      node: Node.with(Edge.as("edge").to("target")),
+      edge: "edge",
+      target: "target",
+    } as const).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Edge, Node ][]>(true);
+    typesEqual<typeof objectResult, { node: Node, edge: Edge, target: Node }[]>(true);
+
+    deepStrictEqual(arrayResult, [ [ node1, edge, node2 ] ]);
+    deepStrictEqual(objectResult, [ { node: node1, edge: edge, target: node2 } ]);
+  });
+
+  it("Finds and returns node of specific type with referenced edge of specific type to referenced target of specific type", () => {
+    // Arrange
+    const graph = new Graph();
+    const node1 = graph.addNode(new NodeA());
+    const node2 = graph.addNode(new NodeB(1));
+    const node3 = graph.addNode(new NodeA());
+    const node4 = graph.addNode(new NodeB(1));
+    const node5 = graph.addNode(new NodeA());
+    const node6 = graph.addNode(new NodeB(1));
+    const edge = graph.addEdge({
+      from: node1,
+      to: node2,
+      edge: new EdgeA(),
+    });
+    const edge2 = graph.addEdge({
+      from: node3,
+      to: node4,
+      edge: new EdgeB(1),
+    });
+
+    // Act
+    const arrayResult = graph.query([
+      NodeA.with(EdgeA.as("edge").to(NodeB.as("target"))),
+      "edge",
+      "target",
+    ]).toArray();
+    const objectResult = graph.query({
+      node: NodeA.with(EdgeA.as("edge").to(NodeB.as("target"))),
+      edge: "edge",
+      target: "target",
+    } as const).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ NodeA, EdgeA, NodeB ][]>(true);
+    typesEqual<typeof objectResult, { node: NodeA, edge: EdgeA, target: NodeB }[]>(true);
+
+    deepStrictEqual(arrayResult, [ [ node1, edge, node2 ] ]);
+    deepStrictEqual(objectResult, [ { node: node1, edge: edge, target: node2 } ]);
+  });
 });
 
-// TODO: String items
 // TODO: Multiple implicit from/to/fromOrTo/with items
 // TODO: Self-referencing nodes only
 // TODO: Instances
