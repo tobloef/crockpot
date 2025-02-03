@@ -22,7 +22,7 @@ export function permutationToOutput<
   } else if (Array.isArray(input)) {
     const output = [];
 
-    const allPools = { ...pools.node, ...pools.edge };
+    const allPools = { ...pools.node, ...pools.edge, ...pools.unknown };
 
     for (const [poolName, pool] of Object.entries(allPools)) {
       const item = permutation[poolName];
@@ -36,7 +36,7 @@ export function permutationToOutput<
   } else {
     const output: Record<string, Node | Edge | undefined> = {};
 
-    const allPools = { ...pools.node, ...pools.edge };
+    const allPools = { ...pools.node, ...pools.edge, ...pools.unknown };
 
     for (const [poolName, pool] of Object.entries(allPools)) {
       const item = permutation[poolName];

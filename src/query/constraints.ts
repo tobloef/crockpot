@@ -1,6 +1,6 @@
 import { Node } from "../node/node.ts";
 import { Edge } from "../edge/edge.ts";
-import type { PoolName, Pools } from "./pool.ts";
+import type { EdgePool, NodePool, PoolName, Pools } from "./pool.ts";
 
 export function checkConstraints(
   permutation: Record<string, Node | Edge>,
@@ -25,7 +25,7 @@ export function checkNodeConstraints(
   permutation: Record<string, Node | Edge>,
   pools: Pools,
 ): boolean {
-  const pool = pools.node[poolName];
+  const pool = pools.node[poolName] ?? (pools.unknown[poolName] as NodePool | undefined);
 
   if (pool === undefined) {
     return false;
@@ -94,7 +94,7 @@ export function checkEdgeConstraints(
   permutation: Record<string, Node | Edge>,
   pools: Pools,
 ): boolean {
-  const pool = pools.edge[poolName];
+  const pool = pools.edge[poolName] ?? (pools.unknown[poolName] as EdgePool | undefined);
 
   if (pool === undefined) {
     return false;

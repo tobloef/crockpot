@@ -1182,18 +1182,21 @@ describe("query", () => {
     });
 
     // Act
+    const singleResult = graph.query("ref").toArray();
     const arrayResult = graph.query([ "ref" ]).toArray();
     const objectResult = graph.query({ ref: "ref" }).toArray();
 
     // Assert
+    typesEqual<typeof singleResult, (Node | Edge)[]>(true);
     typesEqual<typeof arrayResult, [ Node | Edge ][]>(true);
     typesEqual<typeof objectResult, { ref: Node | Edge }[]>(true);
 
-    deepStrictEqual(arrayResult, [ node, edge ]);
+    deepStrictEqual(singleResult, [ node, edge ]);
+    deepStrictEqual(arrayResult, [ [node], [edge] ]);
     deepStrictEqual(objectResult, [ { ref: node }, { ref: edge } ]);
   });
 
-  it("Finds and returns referenced node by string", () => {
+  it("Finds and returns referenced node by string when string is first", () => {
     // Arrange
     const graph = new Graph();
     const nodeA = graph.addNode(new NodeA());
@@ -1209,6 +1212,65 @@ describe("query", () => {
     deepStrictEqual(arrayResult, [ [ nodeA, nodeA ] ]);
     deepStrictEqual(objectResult, [ { a: nodeA, b: nodeA } ]);
   })
+
+  it("Finds and returns referenced node by string when string is last", () => {
+    // Arrange
+    const graph = new Graph();
+    const nodeA = graph.addNode(new NodeA());
+
+    // Act
+    const arrayResult = graph.query([ NodeA.as("ref"), "ref" ]).toArray();
+    const objectResult = graph.query({ a: NodeA.as("ref"), b: "ref" } as const).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ NodeA, NodeA ][]>(true);
+    typesEqual<typeof objectResult, { a: NodeA, b: NodeA }[]>(true);
+
+    deepStrictEqual(arrayResult, [ [ nodeA, nodeA ] ]);
+    deepStrictEqual(objectResult, [ { a: nodeA, b: nodeA } ]);
+  })
+
+  it("Finds and returns referenced edge by string when string is first", () => {
+    // Arrange
+    const graph = new Graph();
+    const node = graph.addNode(new Node());
+    const edge = graph.addEdge({
+      from: node,
+      to: node,
+    });
+
+    // Act
+    const arrayResult = graph.query([ "ref", Edge.as("ref") ]).toArray();
+    const objectResult = graph.query({ a: "ref", b: Edge.as("ref") } as const).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Edge, Edge ][]>(true);
+    typesEqual<typeof objectResult, { a: Edge, b: Edge }[]>(true);
+
+    deepStrictEqual(arrayResult, [ [ edge, edge ] ]);
+    deepStrictEqual(objectResult, [ { a: edge, b: edge } ]);
+  });
+
+  it("Finds and returns referenced edge by string when string is last", () => {
+    // Arrange
+    const graph = new Graph();
+    const node = graph.addNode(new Node());
+    const edge = graph.addEdge({
+      from: node,
+      to: node,
+    });
+
+    // Act
+    const arrayResult = graph.query([ Edge.as("ref"), "ref" ]).toArray();
+    const objectResult = graph.query({ a: Edge.as("ref"), b: "ref" } as const).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Edge, Edge ][]>(true);
+    typesEqual<typeof objectResult, { a: Edge, b: Edge }[]>(true);
+
+    deepStrictEqual(arrayResult, [ [ edge, edge ] ]);
+    deepStrictEqual(objectResult, [ { a: edge, b: edge } ]);
+  });
 });
 
 // TODO: String items

@@ -69,6 +69,10 @@ export function createPoolGeneratorFunctions(
 
   const nodeGeneratorFunction = () => setToGenerator(graph.indices.allNodes);
   const edgeGeneratorFunction = () => setToGenerator(graph.indices.allEdges);
+  const nodeAndEdgeGeneratorFunction = () => combineGenerators<Node | Edge>(
+    nodeGeneratorFunction(),
+    edgeGeneratorFunction()
+  );
 
   for (const poolName of Object.keys(pools.node)) {
     generatorFunctions[poolName] = nodeGeneratorFunction;
@@ -76,6 +80,10 @@ export function createPoolGeneratorFunctions(
 
   for (const poolName of Object.keys(pools.edge)) {
     generatorFunctions[poolName] = edgeGeneratorFunction;
+  }
+
+  for (const poolName of Object.keys(pools.unknown)) {
+    generatorFunctions[poolName] = nodeAndEdgeGeneratorFunction;
   }
 
   return generatorFunctions;
@@ -120,5 +128,11 @@ export function* arrayToGenerator<T>(array: T[]): Generator<T> {
 export function* setToGenerator<T>(set: Set<T>): Generator<T> {
   for (const item of set) {
     yield item;
+  }
+}
+
+export function* combineGenerators<T>(...generators: Generator<T>[]): Generator<T> {
+  for (const generator of generators) {
+    yield* generator;
   }
 }

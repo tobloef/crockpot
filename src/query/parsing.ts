@@ -72,6 +72,10 @@ function parseReferenceName(
     return poolName;
   }
 
+  if (newType === "unknown" && existingType !== undefined) {
+    return poolName;
+  }
+
   const isTypesMismatch = (
     (existingType === "node" && newType === "edge") ||
     (existingType === "edge" && newType === "node")
@@ -90,6 +94,11 @@ function parseReferenceName(
   };
 
   if (existingType === "unknown") {
+    const outputKeys = pools[existingType][poolName]?.outputKeys;
+    if (outputKeys !== undefined) {
+      // Assuming that the output key types are the same
+      (pools[newType][poolName].outputKeys as number[]).push(...outputKeys as number[]);
+    }
     delete pools[existingType][poolName];
   }
 
@@ -187,15 +196,22 @@ function parseNodeQueryItem(item: NodeQueryItem, pools: Pools): PoolName {
     ? item.name
     : `node-query (${randomString()})`;
 
-  const existingPool = pools.node[poolName];
+  if (pools.edge[poolName] !== undefined) {
+    throw new ReferenceMismatchError(
+      poolName,
+      { existing: "edge", new: "node" }
+    );
+  }
 
-  if (existingPool !== undefined) {
-    const existingClass = existingPool.constraints.class;
+  const existingNodePool = pools.node[poolName];
+
+  if (existingNodePool !== undefined) {
+    const existingClass = existingNodePool.constraints.class;
 
     if (existingClass !== undefined && existingClass !== item.class) {
       if (isClassThatExtends(item.class, existingClass)) {
         // It's more specific
-        existingPool.constraints.class = item.class;
+        existingNodePool.constraints.class = item.class;
       } else if (isClassThatExtends(existingClass, item.class)) {
         // It's more generic, do nothing
       } else {
@@ -208,19 +224,23 @@ function parseNodeQueryItem(item: NodeQueryItem, pools: Pools): PoolName {
     }
   }
 
-  if (pools.edge[poolName] !== undefined) {
-    throw new ReferenceMismatchError(
-      poolName,
-      { existing: "edge", new: "node" }
-    );
-  }
-
   pools.node[poolName] ??= {
     constraints: {
       class: item.class,
     },
     outputKeys: [],
   };
+
+  const existingUnknownPool = pools.unknown[poolName];
+
+  if (existingUnknownPool !== undefined) {
+    const outputKeys = existingUnknownPool.outputKeys;
+    if (outputKeys !== undefined) {
+      // Assuming that the output key types are the same
+      (pools.node[poolName].outputKeys as number[]).push(...outputKeys as number[]);
+    }
+    delete pools.unknown[poolName];
+  }
 
   if (!hasRelations) {
     return poolName;
@@ -399,6 +419,13 @@ function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {
     ? item.name
     : `edge-query (${randomString()})`;
 
+  if (pools.node[poolName] !== undefined) {
+    throw new ReferenceMismatchError(
+      poolName,
+      { existing: "node", new: "edge" }
+    );
+  }
+
   const existingPool = pools.edge[poolName];
 
   if (existingPool !== undefined) {
@@ -420,19 +447,23 @@ function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {
     }
   }
 
-  if (pools.node[poolName] !== undefined) {
-    throw new ReferenceMismatchError(
-      poolName,
-      { existing: "node", new: "edge" }
-    );
-  }
-
   pools.edge[poolName] ??= {
     constraints: {
       class: item.class,
     },
     outputKeys: [],
   };
+
+  const existingUnknownPool = pools.unknown[poolName];
+
+  if (existingUnknownPool !== undefined) {
+    const outputKeys = existingUnknownPool.outputKeys;
+    if (outputKeys !== undefined) {
+      // Assuming that the output key types are the same
+      (pools.edge[poolName].outputKeys as number[]).push(...outputKeys as number[]);
+    }
+    delete pools.unknown[poolName];
+  }
 
   if (!hasRelations) {
     return poolName;
