@@ -1364,6 +1364,7 @@ describe("query", () => {
   });
 });
 
+// TODO: String reference in multiple places (referencing same thing)
 // TODO: Multiple implicit from/to/fromOrTo/with items
 // TODO: Self-referencing nodes only
 // TODO: Instances
