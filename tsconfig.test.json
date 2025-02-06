@@ -11,7 +11,8 @@
     "types": ["node"],
     "checkJs": true,
     "allowJs": true,
-    "noEmit": true
+    "noEmit": true,
+    "noUncheckedIndexedAccess": true
   },
   "exclude": [
     "node_modules",
