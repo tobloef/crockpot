@@ -10,7 +10,7 @@ export class ReferenceMismatchError extends CustomError {
     poolName: PoolName,
     types: { existing: any, new: any }
   ) {
-    super(`Reference ${poolName} is already defined as a ${types.existing}, cannot redefine as a ${types.new}.`);
+    super(`Reference "${poolName}" is already defined as a ${types.existing}, cannot redefine as a ${types.new}.`);
     this.types = types;
     this.poolName = poolName;
   }

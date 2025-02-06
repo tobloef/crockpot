@@ -1362,9 +1362,142 @@ describe("query", () => {
     deepStrictEqual(arrayResult, [ [ node1, edge, node2 ] ]);
     deepStrictEqual(objectResult, [ { node: node1, edge: edge, target: node2 } ]);
   });
+
+  it("Can reference same node from multiple places", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new NodeA());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+    const node4 = graph.addNode(new NodeA());
+    const node5 = graph.addNode(new Node());
+    const node6 = graph.addNode(new Node());
+    const node7 = graph.addNode(new NodeA());
+
+    graph.addEdge({ from: node1, to: node2 });
+    graph.addEdge({ from: node1, to: node3 });
+    graph.addEdge({ from: node4, to: node5 });
+    graph.addEdge({ from: node7, to: node6 });
+
+    // Act
+    const arrayResult = graph.query([
+      Node.from("ref"),
+      Node.from("ref"),
+      Node.as("ref"),
+    ]).toArray();
+    const objectResult = graph.query({
+      a: Node.from("ref"),
+      b: Node.from("ref"),
+      ref: Node.as("ref"),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Node, Node ][]>(true);
+    typesEqual<typeof objectResult, { a: Node, b: Node, ref: Node }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node2, node2, node1 ],
+      [ node2, node3, node1 ],
+      [ node3, node2, node1 ],
+      [ node3, node3, node1 ],
+      [ node5, node5, node4 ],
+      [ node6, node6, node7 ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { a: node2, b: node2, ref: node1 },
+      { a: node2, b: node3, ref: node1 },
+      { a: node3, b: node2, ref: node1 },
+      { a: node3, b: node3, ref: node1 },
+      { a: node5, b: node5, ref: node4 },
+      { a: node6, b: node6, ref: node7 },
+    ]);
+  });
+
+  it("Can circularly reference nodes", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+    const node4 = graph.addNode(new Node());
+    const node5 = graph.addNode(new Node());
+    const node6 = graph.addNode(new Node());
+    const node7 = graph.addNode(new Node());
+
+    graph.addEdge({ from: node1, to: node2 });
+    graph.addEdge({ from: node2, to: node3 });
+    graph.addEdge({ from: node3, to: node1 });
+    graph.addEdge({ from: node4, to: node5 });
+    graph.addEdge({ from: node5, to: node6 });
+    graph.addEdge({ from: node6, to: node7 });
+
+    // Act
+    const arrayResult = graph.query([
+      Node.as("a").to("b"),
+      Node.as("b").to("c"),
+      Node.as("c").to("a"),
+    ]).toArray();
+    const objectResult = graph.query({
+      a: Node.as("a").to("b"),
+      b: Node.as("b").to("c"),
+      c: Node.as("c").to("a"),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Node, Node ][]>(true);
+    typesEqual<typeof objectResult, { a: Node, b: Node, c: Node }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node1, node2, node3 ],
+      [ node2, node3, node1 ],
+      [ node3, node1, node2 ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { a: node1, b: node2, c: node3 },
+      { a: node2, b: node3, c: node1 },
+      { a: node3, b: node1, c: node2 },
+    ]);
+  });
+
+  it("Can reference edges in multiple places", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new NodeA());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new NodeA());
+    const node4 = graph.addNode(new Node());
+
+    const edge1 = graph.addEdge({ from: node2, to: node1 });
+    const edge2 = graph.addEdge({ from: node3, to: node4 });
+
+    // Act
+    const arrayResult = graph.query([
+      Edge.as("e").to(NodeA),
+      NodeA.with("e"),
+      Node.with("e"),
+    ]).toArray();
+    const objectResult = graph.query({
+      edge: Edge.as("e").to(NodeA),
+      a: NodeA.with("e"),
+      b: Node.with("e"),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Edge, NodeA, Node ][]>(true);
+    typesEqual<typeof objectResult, { edge: Edge, a: NodeA, b: Node }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ edge1, node1, node2 ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { edge: edge1, a: node1, b: node2 },
+    ]);
+  });
 });
 
-// TODO: String reference in multiple places (referencing same thing)
 // TODO: Multiple implicit from/to/fromOrTo/with items
 // TODO: Self-referencing nodes only
 // TODO: Instances
