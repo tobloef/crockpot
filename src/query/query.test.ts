@@ -1669,7 +1669,153 @@ describe("query", () => {
     deepStrictEqual(arrayResult, [ [ node1 ] ]);
     deepStrictEqual(objectResult, [ { node: node1 } ]);
   });
-});
 
-// TODO: Instances
-// TODO: Negative tests more negative tests
+  it("Finds specific node instance", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+
+    // Act
+    const singleResult = graph.query(node2).toArray();
+    const arrayResult = graph.query([ node2 ]).toArray();
+    const objectResult = graph.query({ node2 }).toArray();
+
+    // Assert
+    typesEqual<typeof singleResult, Node[]>(true);
+    typesEqual<typeof arrayResult, [ Node ][]>(true);
+    typesEqual<typeof objectResult, { node2: Node }[]>(true);
+
+    deepStrictEqual(singleResult, [ node2 ]);
+    deepStrictEqual(arrayResult, [ [ node2 ] ]);
+    deepStrictEqual(objectResult, [ { node2 } ]);
+  });
+
+  it("Finds specific edge instance", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const edge1 = graph.addEdge({ from: node1, to: node2 });
+    const edge2 = graph.addEdge({ from: node1, to: node2 });
+
+    // Act
+    const singleResult = graph.query(edge1).toArray();
+    const arrayResult = graph.query([ edge1 ]).toArray();
+    const objectResult = graph.query({ edge1 }).toArray();
+
+    // Assert
+    typesEqual<typeof singleResult, Edge[]>(true);
+    typesEqual<typeof arrayResult, [ Edge ][]>(true);
+    typesEqual<typeof objectResult, { edge1: Edge }[]>(true);
+
+    deepStrictEqual(singleResult, [ edge1 ]);
+    deepStrictEqual(arrayResult, [ [ edge1 ] ]);
+    deepStrictEqual(objectResult, [ { edge1 } ]);
+  });
+
+  it("Finds nodes with implicit edge to specific node instance", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+    graph.addEdge({ from: node1, to: node2 });
+    graph.addEdge({ from: node2, to: node3 });
+
+    // Act
+    const singleResult = graph.query(Node.to(node2)).toArray();
+    const arrayResult = graph.query([ Node.to(node2) ]).toArray();
+    const objectResult = graph.query({ node: Node.to(node2) }).toArray();
+
+    // Assert
+    typesEqual<typeof singleResult, Node[]>(true);
+    typesEqual<typeof arrayResult, [ Node ][]>(true);
+    typesEqual<typeof objectResult, { node: Node }[]>(true);
+
+    deepStrictEqual(singleResult, [ node1 ]);
+    deepStrictEqual(arrayResult, [ [ node1 ] ]);
+    deepStrictEqual(objectResult, [ { node: node1 } ]);
+  });
+
+  it("Finds nodes with implicit edge from specific node instance", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+    graph.addEdge({ from: node2, to: node1 });
+    graph.addEdge({ from: node3, to: node2 });
+
+    // Act
+    const singleResult = graph.query(Node.from(node2)).toArray();
+    const arrayResult = graph.query([ Node.from(node2) ]).toArray();
+    const objectResult = graph.query({ node: Node.from(node2) }).toArray();
+
+    // Assert
+    typesEqual<typeof singleResult, Node[]>(true);
+    typesEqual<typeof arrayResult, [ Node ][]>(true);
+    typesEqual<typeof objectResult, { node: Node }[]>(true);
+
+    deepStrictEqual(singleResult, [ node1 ]);
+    deepStrictEqual(arrayResult, [ [ node1 ] ]);
+    deepStrictEqual(objectResult, [ { node: node1 } ]);
+  });
+
+  it("Finds nodes with implicit edge to or from specific node instance", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+    const node4 = graph.addNode(new Node());
+    const node5 = graph.addNode(new Node());
+    const node6 = graph.addNode(new Node());
+    graph.addEdge({ from: node1, to: node2 });
+    graph.addEdge({ from: node3, to: node1 });
+    graph.addEdge({ from: node4, to: node5 });
+    graph.addEdge({ from: node6, to: node4 });
+
+
+    // Act
+    const singleResult = graph.query(Node.fromOrTo(node1)).toArray();
+    const arrayResult = graph.query([ Node.fromOrTo(node1) ]).toArray();
+    const objectResult = graph.query({ node: Node.fromOrTo(node1) }).toArray();
+
+    // Assert
+    typesEqual<typeof singleResult, Node[]>(true);
+    typesEqual<typeof arrayResult, [ Node ][]>(true);
+    typesEqual<typeof objectResult, { node: Node }[]>(true);
+
+    deepStrictEqual(singleResult, [ node2, node3 ]);
+    deepStrictEqual(arrayResult, [ [ node2 ], [ node3 ] ]);
+    deepStrictEqual(objectResult, [ { node: node2 }, { node: node3 } ]);
+  });
+
+  it("Finds nodes with specific edge instance", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+
+    const edge1 = graph.addEdge({ from: node1, to: node2 });
+    const edge2 = graph.addEdge({ from: node2, to: node3 });
+
+    // Act
+    const singleResult = graph.query(Node.with(edge1)).toArray();
+    const arrayResult = graph.query([ Node.with(edge1) ]).toArray();
+    const objectResult = graph.query({ node: Node.with(edge1) }).toArray();
+
+    // Assert
+    typesEqual<typeof singleResult, Node[]>(true);
+    typesEqual<typeof arrayResult, [ Node ][]>(true);
+    typesEqual<typeof objectResult, { node: Node }[]>(true);
+  });
+});
