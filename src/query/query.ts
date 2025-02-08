@@ -17,7 +17,9 @@ export function* query<
 
   const foundOutputs: QueryOutput<Input>[] = [];
 
+  let i = 0;
   for (const permutation of permutations) {
+    console.log(i++, Object.values(permutation).map((item) => item.id));
     const passesConstraints = checkConstraints(permutation, pools);
 
     if (!passesConstraints) {
