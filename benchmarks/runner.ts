@@ -1,3 +1,5 @@
+// TODO: Run specific versions and compare results
+
 import { readdir, writeFile } from "fs/promises";
 import { join } from "path";
 import { exec } from "child_process";
