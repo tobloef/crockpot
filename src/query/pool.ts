@@ -136,3 +136,7 @@ export function* combineGenerators<T>(...generators: Generator<T>[]): Generator<
     yield* generator;
   }
 }
+
+export function countPermutations(generators: PoolGeneratorFunctions) {
+  return Object.values(generators).reduce((acc, gen) => acc * gen().toArray().length, 1);
+}
