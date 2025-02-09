@@ -8,7 +8,7 @@
     "test": "node --experimental-strip-types --test src/**/*.test.ts",
     "coverage": "npm run coverage:run && npm run coverage:open",
     "coverage:run": "c8 --reporter=html node --experimental-strip-types --test src/**/*.test.ts --experimental-test-coverage",
-    "coevrage:open": "open-cli coverage/index.html",
+    "coverage:open": "open-cli coverage/index.html",
     "check": "npm run check:src && npm run check:test",
     "check:src": "tsc --noEmit --project tsconfig.json",
     "check:test": "tsc --noEmit --project tsconfig.test.json",
