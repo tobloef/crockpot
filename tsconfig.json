@@ -9,7 +9,7 @@
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true,
     "types": ["node"],
-    "outDir": "build",
+    "outDir": "dist",
     "useUnknownInCatchVariables": false,
     "skipLibCheck": true,
     "sourceMap": true,

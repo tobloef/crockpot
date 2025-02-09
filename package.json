@@ -2,12 +2,13 @@
   "name": "@tobloef/crockpot",
   "description": "Slow but delicious ECS",
   "version": "1.0.0",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "engines": {
     "node": ">=23.0.0"
   },
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rimraf ./build && tsc --project tsconfig.json",
+    "build": "rimraf ./dist && tsc --project tsconfig.json",
     "test": "node --experimental-strip-types --test src/**/*.test.ts",
     "coverage": "npm run coverage:run && npm run coverage:open",
     "coverage:run": "c8 --reporter=html node --experimental-strip-types --test src/**/*.test.ts --experimental-test-coverage",
