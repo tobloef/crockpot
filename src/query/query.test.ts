@@ -1818,30 +1818,29 @@ describe("query", () => {
     typesEqual<typeof arrayResult, [ Node ][]>(true);
     typesEqual<typeof objectResult, { node: Node }[]>(true);
   });
+});
 
-  it("The classic spaceship case (verbose version)", () => {
-    // Finds spaceships docked to planets that are ruled by factions
-    // that are allied with the faction of the spaceship.
+describe("Spaceship example", () => {
+  // Finds spaceships docked to planets that are ruled by factions
+  // that are allied with the faction of the spaceship.
 
-    // Arrange
-    class Faction extends Node {}
-    class Planet extends Node {}
-    class Spaceship extends Node {}
-    class Allied extends Edge {}
-    class RuledBy extends Edge {}
-    class Docked extends Edge {}
-    class IsIn extends Edge {}
+  class Faction extends Node {}
+  class Planet extends Node {}
+  class Spaceship extends Node { name: string; constructor(name: string) { super(); this.name = name; } }
+  class Allied extends Edge {}
+  class RuledBy extends Edge {}
+  class Docked extends Edge {}
+  class IsIn extends Edge {}
 
-    const graph = new Graph();
-
+  function setupSpaceships(graph: Graph) {
     const empire = graph.addNode(new Faction());
     const rebels = graph.addNode(new Faction());
     const bountyHunters = graph.addNode(new Faction());
 
-    const deathStar = graph.addNode(new Spaceship());
-    const millenniumFalcon = graph.addNode(new Spaceship());
-    const tieFighter = graph.addNode(new Spaceship());
-    const bountyShip = graph.addNode(new Spaceship());
+    const deathStar = graph.addNode(new Spaceship("Death Star"));
+    const millenniumFalcon = graph.addNode(new Spaceship("Millennium Falcon"));
+    const tieFighter = graph.addNode(new Spaceship("Tie Fighter"));
+    const bountyShip = graph.addNode(new Spaceship("Bounty Ship"));
 
     const alderaan = graph.addNode(new Planet());
     const tatooine = graph.addNode(new Planet());
@@ -1863,6 +1862,18 @@ describe("query", () => {
     bountyShip.addEdge({ edge: new Docked(), to: tatooine });
 
     empire.addEdge({ edge: new Allied(), to: bountyHunters });
+    empire.addEdge({ edge: new Allied(), to: empire });
+    rebels.addEdge({ edge: new Allied(), to: rebels });
+    bountyHunters.addEdge({ edge: new Allied(), to: bountyHunters });
+
+    return { deathStar, millenniumFalcon, tieFighter, bountyShip };
+  }
+
+  it("Verbose version", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const { deathStar, bountyShip } = setupSpaceships(graph);
 
     // Act
     const singleResult = graph.query(
@@ -1889,4 +1900,26 @@ describe("query", () => {
 
     deepStrictEqual(singleResult, [ deathStar, bountyShip ]);
   });
-});
+
+  it("Succinct version", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const { deathStar, bountyShip } = setupSpaceships(graph);
+
+    // Act
+    const singleResult = graph.query(
+      Spaceship.to(
+        Faction.as("faction"),
+        Planet.to(
+          Faction.to("faction")
+        )
+      )
+    ).toArray();
+
+    // Assert
+    typesEqual<typeof singleResult, Spaceship[]>(true);
+
+    deepStrictEqual(singleResult, [ deathStar, bountyShip ]);
+  });
+})
