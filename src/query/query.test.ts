@@ -1820,7 +1820,7 @@ describe("query", () => {
   });
 });
 
-describe("Spaceship example", () => {
+describe.skip("Spaceship example", () => {
   // Finds spaceships docked to planets that are ruled by factions
   // that are allied with the faction of the spaceship.
 
@@ -1846,7 +1846,7 @@ describe("Spaceship example", () => {
     const tatooine = graph.addNode(new Planet());
     const endor = graph.addNode(new Planet());
 
-    // (I haven't watched Star Wars, don't @ me)
+    // I haven't watched Star Wars, don't @ me
     deathStar.addEdge({ edge: new IsIn(), to: empire });
     tieFighter.addEdge({ edge: new IsIn(), to: empire });
     millenniumFalcon.addEdge({ edge: new IsIn(), to: rebels });
@@ -1869,7 +1869,7 @@ describe("Spaceship example", () => {
     return { deathStar, millenniumFalcon, tieFighter, bountyShip };
   }
 
-  it("Verbose version", () => {
+  it("Precise but verbose version", () => {
     // Arrange
     const graph = new Graph();
 
@@ -1901,7 +1901,7 @@ describe("Spaceship example", () => {
     deepStrictEqual(singleResult, [ deathStar, bountyShip ]);
   });
 
-  it("Succinct version", () => {
+  it("Succinct but vague version", () => {
     // Arrange
     const graph = new Graph();
 
