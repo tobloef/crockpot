@@ -1,4 +1,3 @@
-- Query tests
 - Benchmarking
 - Observers
 - Caching
