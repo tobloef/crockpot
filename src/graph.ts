@@ -1,6 +1,6 @@
 import { Edge } from "./edge/edge.ts";
 import { Node } from "./node/node.ts";
-import type { ArrayQueryInput, ObjectQueryInput, ObjectQueryOutput, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem, } from "./query/query.types.ts";
+import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem, } from "./query/query.types.ts";
 import { query } from "./query/query.ts";
 import type { Class } from "./utils/class.ts";
 

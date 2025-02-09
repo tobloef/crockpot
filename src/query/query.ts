@@ -4,7 +4,6 @@ import { parseInput } from "./parsing.ts";
 import { checkIfAlreadyFound, permutationToOutput } from "./output.ts";
 import { checkConstraints } from "./constraints.ts";
 import { createPoolGeneratorFunctions, permuteGenerators } from "./pool.ts";
-import { memoryUsage } from "process";
 
 export function* query<
   Input extends QueryInput
