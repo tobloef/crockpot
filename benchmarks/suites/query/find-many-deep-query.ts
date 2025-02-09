@@ -1,4 +1,4 @@
-import { Graph, Node } from "../../src/index.ts";
+import { Graph, Node } from "../../../src/index.ts";
 
 const PARENT_NODES = 1;
 const LAYERS = 4;
