@@ -1,4 +1,6 @@
 - Benchmarking
+- Optimizations
+- Refactors
 - Observers
 - Caching
 - Hierarchies
