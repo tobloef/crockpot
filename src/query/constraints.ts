@@ -148,7 +148,7 @@ export function checkEdgeConstraints(
 
 
     if (firstNode === undefined) {
-     throw new Error("Attempted to check edge toOrFrom constraints with empty array.");
+      throw new Error("Attempted to check edge toOrFrom constraints with empty array.");
     }
 
     if (!(firstNode instanceof Node)) {

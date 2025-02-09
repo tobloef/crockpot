@@ -110,7 +110,7 @@ export class Node {
   }
 
   removeEdges(input?: RemoveEdgeInput): void {
-    if (input!== undefined && 'to' in input) {
+    if (input !== undefined && 'to' in input) {
       this.graph.removeEdgesByNodes({
         from: this,
         to: input.to,
@@ -151,7 +151,7 @@ export type RemoveEdgeInput = (
   | { to: Node, type?: Class<Edge> }
   | { from: Node, type?: Class<Edge> }
   | { type: Class<Edge> }
-)
+);
 
 export type NodeEdges = Readonly<{
   from: ReadonlySet<Edge>,
