@@ -1,3 +1,34 @@
+## Commands to remember
+
+### Benchmarking
+
+```bash
+hyperfine 'node file.js'
+# Comparing multiple tests:
+hyperfine 'node file1.js' 'node file2.js'
+# Use a markdown exporter:
+hyperfine --export-markdown results.md 'node file1.js' 'node file2.js'
+```
+
+### CPU Profiling
+
+```bash
+node --cpu-prof --cpu-prof-name profile.cpuprofile file.js
+cpupro profile.cpuprofile
+```
+
+Could be aliased like so:
+
+```bash
+profile () {
+  base_name=$(basename "$1" .ts)
+  timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
+  profile_filename="${base_name}_${timestamp}.cpuprofile"
+  node --cpu-prof --cpu-prof-name "$profile_filename" "$1"
+  cpupro "$profile_filename"
+}
+```
+
 ## Stuff I don't like
 
 * Since you can instantiate an Edge without adding it to the graph, the Edge's nodes has to be nullable, despite them not being null in by far the most cases. In a more DOD version, you would not have normal class instantiation and you could make sure that you _have_ to pass nodes when creating an edge.

@@ -1,0 +1,6 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@tobloef/crockpot": "git+https://git@github.com/tobloef/crockpot.git#v1.0.0"
+  }
+}
