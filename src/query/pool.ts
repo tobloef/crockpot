@@ -44,9 +44,17 @@ export type GeneratorFunction<T> = () => Generator<T>;
 
 export type PoolGeneratorFunctions = Record<PoolName, GeneratorFunction<any>>;
 
+export type PoolSets = Record<PoolName, Set<Node | Edge>[]>;
+
 export type PermutationFromPoolGeneratorFunctions<Generators extends PoolGeneratorFunctions> = {
   [Key in keyof Generators]: (
     Generators[Key] extends GeneratorFunction<infer T> ? T : never
+  )
+}
+
+export type PermutationFromPoolSets<Sets extends PoolSets> = {
+  [Key in keyof Sets]: (
+    Sets[Key] extends Set<infer T> ? T : never
   )
 }
 
@@ -87,6 +95,59 @@ export function createPoolGeneratorFunctions(
   }
 
   return generatorFunctions;
+}
+
+export function createPoolSets(
+  graph: Graph,
+  pools: Pools,
+): PoolSets {
+  const sets: PoolSets = {};
+
+  for (const poolName of Object.keys(pools.node)) {
+    sets[poolName] = [graph.indices.allNodes];
+  }
+
+  for (const poolName of Object.keys(pools.edge)) {
+    sets[poolName] = [graph.indices.allEdges];
+  }
+
+  for (const poolName of Object.keys(pools.unknown)) {
+    sets[poolName] = [graph.indices.allNodes, graph.indices.allEdges];
+  }
+
+  return sets;
+}
+
+export function* permuteSets<
+  Sets extends PoolSets
+>(
+  sets: Sets,
+): Generator<PermutationFromPoolSets<Sets>> {
+  const entries = Object.entries(sets);
+  const [firstEntry, ...otherEntries] = entries;
+
+  if (firstEntry === undefined) {
+    return;
+  }
+
+  const [firstKey, firstSets] = firstEntry;
+  const otherSets = Object.fromEntries(otherEntries);
+
+  for (const set of firstSets) {
+    for (const item of set) {
+      if (otherEntries.length === 0) {
+        const permutation = { [firstKey]: item };
+        yield permutation as PermutationFromPoolSets<Sets>;
+      } else {
+        const otherPermutations = permuteSets(otherSets);
+
+        for (const otherPermutation of otherPermutations) {
+          const permutation = { [firstKey]: item, ...otherPermutation };
+          yield permutation as PermutationFromPoolSets<Sets>;
+        }
+      }
+    }
+  }
 }
 
 export function* permuteGenerators<
@@ -137,7 +198,11 @@ export function* combineGenerators<T>(...generators: Generator<T>[]): Generator<
   }
 }
 
-export function countPermutations(generators: PoolGeneratorFunctions) {
+export function countSetPermutations(set: PoolSets) {
+  return Object.values(set).reduce((acc, s) => acc * s.reduce((acc, s) => acc * s.size, 1), 1);
+}
+
+export function countGeneratorPermutations(generators: PoolGeneratorFunctions) {
   return Object.values(generators).reduce((acc, gen) => acc * gen().toArray().length, 1);
 }
 

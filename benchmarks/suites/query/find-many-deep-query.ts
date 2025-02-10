@@ -30,10 +30,6 @@ for (const NodeClass of nodeClassDefinitions.toReversed()) {
   }
 }
 
-let result = graph.query(queryItem!);
-
-if (result.toArray !== undefined) {
-  result = result.toArray();
-}
+let result = graph.query(queryItem!).toArray();
 
 console.log(`Found ${result.length?.toLocaleString()} nodes.`);

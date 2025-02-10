@@ -20,10 +20,6 @@ for (let i = 0; i < PARENT_NODES; i++) {
 
 let result = graph.query(
   Node.to(...nodeClassDefinitions)
-);
-
-if (result.toArray !== undefined) {
-  result = result.toArray();
-}
+).toArray();
 
 console.log(`Found ${result.length?.toLocaleString()} nodes.`);

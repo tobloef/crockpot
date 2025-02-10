@@ -1,4 +1,5 @@
-import { Graph, Node } from "@tobloef/crockpot-local";
+import { Graph, Node } from "../../../src/index.ts";
+import { sleep } from "../../../src/utils/sleep.ts";
 
 const NODES = 100_000;
 
@@ -12,10 +13,8 @@ for (let i = 0; i < NODES - 1; i++) {
 
 graph.addNode(new NodeToFind());
 
-let result = graph.query(Node);
+await sleep(1000)
 
-if (result.toArray !== undefined) {
-  result = result.toArray();
-}
+let result = graph.query(Node).toArray();
 
 console.log(`Found ${result.length.toLocaleString()} nodes.`);

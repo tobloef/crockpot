@@ -10,8 +10,9 @@ export function permutationToOutput<
   permutation: Record<string, Node | Edge>,
   pools: Pools,
   input: Input,
+  isOutputSingleItem: boolean,
 ): QueryOutput<Input> {
-  if (isSingleItem(input)) {
+  if (isOutputSingleItem) {
     const onlyPoolName = (
       Object.keys(pools.node)[0]! ??
       Object.keys(pools.edge)[0]! ??
@@ -58,9 +59,8 @@ export type FoundOutputs = Record<
 export function checkIfAlreadyFound<Input extends QueryInput>(
   output: QueryOutput<Input>,
   foundOutputs: FoundOutputs,
+  isOutputSingleItem: boolean,
 ): boolean {
-  const isOutputSingleItem = isSingleItem(output);
-
   if (isOutputSingleItem) {
     if (foundOutputs[0] === undefined) {
       return false;
@@ -85,9 +85,8 @@ export function checkIfAlreadyFound<Input extends QueryInput>(
 export function addToAlreadyFound<Input extends QueryInput>(
   output: QueryOutput<Input>,
   foundOutputs: FoundOutputs,
+  isOutputSingleItem: boolean,
 ): void {
-  const isOutputSingleItem = isSingleItem(output);
-
   if (isOutputSingleItem) {
     if (foundOutputs[0] === undefined) {
       foundOutputs[0] = new Set();

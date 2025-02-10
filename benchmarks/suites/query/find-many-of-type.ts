@@ -10,10 +10,6 @@ for (let i = 0; i < NODES; i++) {
   graph.addNode(new NodeToFind());
 }
 
-let result = graph.query(NodeToFind);
-
-if (result.toArray !== undefined) {
-  result = result.toArray();
-}
+let result = graph.query(NodeToFind).toArray();
 
 console.log(`Found ${result.length.toLocaleString()} nodes.`);
