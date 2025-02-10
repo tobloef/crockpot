@@ -1,4 +1,4 @@
-import type { QueryInput, QueryOutput, QueryOutputItem } from "./query.types.ts";
+import type { QueryInput, QueryInputItem, QueryOutput, QueryOutputItem } from "./query.types.ts";
 import { Node } from "../node/node.ts";
 import { Edge } from "../edge/edge.ts";
 import type { Pools } from "./pool.ts";
@@ -51,10 +51,7 @@ export function permutationToOutput<
   }
 }
 
-export type FoundOutputs = Record<
-  string | number,
-  Set<QueryOutputItem<any, any>>
->
+export type FoundOutputs = Set<string>;
 
 export function checkIfAlreadyFound<Input extends QueryInput>(
   output: QueryOutput<Input>,
@@ -62,23 +59,12 @@ export function checkIfAlreadyFound<Input extends QueryInput>(
   isOutputSingleItem: boolean,
 ): boolean {
   if (isOutputSingleItem) {
-    if (foundOutputs[0] === undefined) {
-      return false;
-    }
-
-    return foundOutputs[0].has(output);
+    return foundOutputs.has(output.id);
   } else {
-    for (const [key, value] of Object.entries(output)) {
-      if (foundOutputs[key] === undefined) {
-        return false;
-      }
-
-      if (!foundOutputs[key].has(value)) {
-        return false;
-      }
-    }
-
-    return true;
+    const compositeId = Object.values(output)
+      .map((item) => (item as { id: string }).id)
+      .join();
+    return foundOutputs.has(compositeId);
   }
 }
 
@@ -88,18 +74,11 @@ export function addToAlreadyFound<Input extends QueryInput>(
   isOutputSingleItem: boolean,
 ): void {
   if (isOutputSingleItem) {
-    if (foundOutputs[0] === undefined) {
-      foundOutputs[0] = new Set();
-    }
-
-    foundOutputs[0].add(output);
+    foundOutputs.add(output.id);
   } else {
-    for (const [key, value] of Object.entries(output)) {
-      if (foundOutputs[key] === undefined) {
-        foundOutputs[key] = new Set();
-      }
-
-      foundOutputs[key].add(value);
-    }
+    const compositeId = Object.values(output)
+      .map((item) => (item as { id: string }).id)
+      .join();
+    foundOutputs.add(compositeId);
   }
 }

@@ -22,7 +22,7 @@ export function* query<
 
   const isOutputSingleItem = isSingleItem(input);
 
-  const foundOutputs: FoundOutputs = {};
+  const foundOutputs: FoundOutputs = new Set<string>();
 
   for (const permutation of permutations) {
     const output = permutationToOutput(permutation, pools, input, isOutputSingleItem);
