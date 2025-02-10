@@ -18,7 +18,7 @@ export type NodePool = {
     instance?: Node,
     class?: Class<Node>,
     edges?: {
-      // "from" means that the edge is going from this node
+      // "from", as in "edge is going from this node".
       from?: PoolName[],
       to?: PoolName[],
       fromOrTo?: PoolName[],
