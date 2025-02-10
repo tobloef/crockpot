@@ -33,37 +33,39 @@ export function permutationToOutput(permutation, pools, input) {
 }
 export function checkIfAlreadyFound(output, foundOutputs) {
     const isOutputSingleItem = isSingleItem(output);
-    for (const foundOutput of foundOutputs) {
-        if (isOutputSingleItem) {
-            if (foundOutput === output) {
-                return true;
+    if (isOutputSingleItem) {
+        if (foundOutputs[0] === undefined) {
+            return false;
+        }
+        return foundOutputs[0].has(output);
+    }
+    else {
+        for (const [key, value] of Object.entries(output)) {
+            if (foundOutputs[key] === undefined) {
+                return false;
             }
-            else {
-                continue;
+            if (!foundOutputs[key].has(value)) {
+                return false;
             }
         }
-        const outputEntries = Object.entries(output);
-        const foundEntries = Object.entries(foundOutput);
-        if (foundEntries.length !== outputEntries.length) {
-            continue;
+        return true;
+    }
+}
+export function addToAlreadyFound(output, foundOutputs) {
+    const isOutputSingleItem = isSingleItem(output);
+    if (isOutputSingleItem) {
+        if (foundOutputs[0] === undefined) {
+            foundOutputs[0] = new Set();
         }
-        let wasMatch = true;
-        for (let i = 0; i < foundEntries.length; i++) {
-            const [foundKey, foundValue] = foundEntries[i];
-            const [outputKey, outputValue] = outputEntries[i];
-            if (foundKey !== outputKey) {
-                wasMatch = false;
-                break;
+        foundOutputs[0].add(output);
+    }
+    else {
+        for (const [key, value] of Object.entries(output)) {
+            if (foundOutputs[key] === undefined) {
+                foundOutputs[key] = new Set();
             }
-            if (foundValue !== outputValue) {
-                wasMatch = false;
-                break;
-            }
-        }
-        if (wasMatch) {
-            return true;
+            foundOutputs[key].add(value);
         }
     }
-    return false;
 }
 //# sourceMappingURL=output.js.map

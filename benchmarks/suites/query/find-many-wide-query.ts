@@ -1,4 +1,4 @@
-import { Graph, Node } from "@tobloef/crockpot";
+import { Graph, Node } from "@tobloef/crockpot-local";
 
 const PARENT_NODES = 1;
 const CHILD_NODES = 4;
@@ -18,8 +18,12 @@ for (let i = 0; i < PARENT_NODES; i++) {
   }
 }
 
-const result = graph.query(
+let result = graph.query(
   Node.to(...nodeClassDefinitions)
-).toArray();
+);
+
+if (result.toArray !== undefined) {
+  result = result.toArray();
+}
 
 console.log(`Found ${result.length?.toLocaleString()} nodes.`);
