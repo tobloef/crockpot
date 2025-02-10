@@ -1,6 +1,7 @@
 import { Edge } from "./edge/edge.js";
 import { Node } from "./node/node.js";
 import { query } from "./query/query.js";
+import { getClassHierarchy } from "./utils/class.js";
 export class Graph {
     indices = {
         allNodes: new Set(),
@@ -18,13 +19,15 @@ export class Graph {
             return node;
         }
         this.indices.allNodes.add(node);
-        const type = node.constructor;
-        let nodesByType = this.indices.nodesByType.get(type);
-        if (nodesByType === undefined) {
-            nodesByType = new Set();
-            this.indices.nodesByType.set(type, nodesByType);
+        const types = getClassHierarchy(node.constructor);
+        for (const type of types) {
+            let nodesByType = this.indices.nodesByType.get(type);
+            if (nodesByType === undefined) {
+                nodesByType = new Set();
+                this.indices.nodesByType.set(type, nodesByType);
+            }
+            nodesByType.add(node);
         }
-        nodesByType.add(node);
         const hasEdges = node.edges.from.size > 0 || node.edges.to.size > 0;
         if (hasEdges) {
             for (const edge of node.edges.from) {
@@ -61,10 +64,12 @@ export class Graph {
             }
             this.indices.edgesByNode.delete(node);
         }
-        const type = node.constructor;
-        const nodesByType = this.indices.nodesByType.get(type);
-        if (nodesByType !== undefined) {
-            nodesByType.delete(node);
+        const types = getClassHierarchy(node.constructor);
+        for (const type of types) {
+            const nodesByType = this.indices.nodesByType.get(type);
+            if (nodesByType !== undefined) {
+                nodesByType.delete(node);
+            }
         }
     }
     removeNodes(nodes) {
@@ -73,11 +78,15 @@ export class Graph {
         }
     }
     removeNodesByType(type) {
-        const nodes = this.indices.nodesByType.get(type);
-        if (nodes === undefined) {
-            return;
+        for (const [indexType, nodes] of this.indices.nodesByType.entries()) {
+            const classHierarchy = getClassHierarchy(indexType);
+            if (!classHierarchy.includes(type)) {
+                continue;
+            }
+            for (const node of nodes) {
+                this.removeNode(node);
+            }
         }
-        this.removeNodes(Array.from(nodes));
     }
     addEdge(input) {
         if (input.edge !== undefined &&
@@ -86,13 +95,15 @@ export class Graph {
         }
         const edge = input.edge ?? new Edge();
         this.indices.allEdges.add(edge);
-        const type = edge.constructor;
-        let edgesByType = this.indices.edgesByType.get(type);
-        if (edgesByType === undefined) {
-            edgesByType = new Set();
-            this.indices.edgesByType.set(type, edgesByType);
+        const types = getClassHierarchy(edge.constructor);
+        for (const type of types) {
+            let edgesByType = this.indices.edgesByType.get(type);
+            if (edgesByType === undefined) {
+                edgesByType = new Set();
+                this.indices.edgesByType.set(type, edgesByType);
+            }
+            edgesByType.add(edge);
         }
-        edgesByType.add(edge);
         let nodesByEdge = this.indices.nodesByEdge.get(edge);
         if (nodesByEdge === undefined) {
             nodesByEdge = {
@@ -137,10 +148,12 @@ export class Graph {
             this.indices.edgesByNode.get(nodesByEdge.to)?.to.delete(edge);
             this.indices.nodesByEdge.delete(edge);
         }
-        const type = edge.constructor;
-        const edgesByType = this.indices.edgesByType.get(type);
-        if (edgesByType !== undefined) {
-            edgesByType.delete(edge);
+        const types = getClassHierarchy(edge.constructor);
+        for (const type of types) {
+            const edgesByType = this.indices.edgesByType.get(type);
+            if (edgesByType !== undefined) {
+                edgesByType.delete(edge);
+            }
         }
     }
     removeEdges(edges) {
@@ -188,11 +201,15 @@ export class Graph {
         }
     }
     removeEdgesByType(type) {
-        const nodes = this.indices.edgesByType.get(type);
-        if (nodes === undefined) {
-            return;
+        for (const [indexType, edges] of this.indices.edgesByType.entries()) {
+            const classHierarchy = getClassHierarchy(indexType);
+            if (!classHierarchy.includes(type)) {
+                continue;
+            }
+            for (const edge of edges) {
+                this.removeEdge(edge);
+            }
         }
-        this.removeEdges(Array.from(nodes));
     }
 }
 export const defaultGraph = new Graph();

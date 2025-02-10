@@ -33,37 +33,24 @@ export function permutationToOutput(permutation, pools, input, isOutputSingleIte
 }
 export function checkIfAlreadyFound(output, foundOutputs, isOutputSingleItem) {
     if (isOutputSingleItem) {
-        if (foundOutputs[0] === undefined) {
-            return false;
-        }
-        return foundOutputs[0].has(output);
+        return foundOutputs.has(output.id);
     }
     else {
-        for (const [key, value] of Object.entries(output)) {
-            if (foundOutputs[key] === undefined) {
-                return false;
-            }
-            if (!foundOutputs[key].has(value)) {
-                return false;
-            }
-        }
-        return true;
+        const compositeId = Object.values(output)
+            .map((item) => item.id)
+            .join();
+        return foundOutputs.has(compositeId);
     }
 }
 export function addToAlreadyFound(output, foundOutputs, isOutputSingleItem) {
     if (isOutputSingleItem) {
-        if (foundOutputs[0] === undefined) {
-            foundOutputs[0] = new Set();
-        }
-        foundOutputs[0].add(output);
+        foundOutputs.add(output.id);
     }
     else {
-        for (const [key, value] of Object.entries(output)) {
-            if (foundOutputs[key] === undefined) {
-                foundOutputs[key] = new Set();
-            }
-            foundOutputs[key].add(value);
-        }
+        const compositeId = Object.values(output)
+            .map((item) => item.id)
+            .join();
+        foundOutputs.add(compositeId);
     }
 }
 //# sourceMappingURL=output.js.map

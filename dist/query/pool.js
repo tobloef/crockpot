@@ -24,14 +24,44 @@ export function createPoolGeneratorFunctions(graph, pools) {
 }
 export function createPoolSets(graph, pools) {
     const sets = {};
-    for (const poolName of Object.keys(pools.node)) {
-        sets[poolName] = [graph.indices.allNodes];
+    for (const [poolName, pool] of Object.entries(pools.node)) {
+        if (pool.constraints.instance !== undefined) {
+            sets[poolName] = [new Set([pool.constraints.instance])];
+        }
+        else if (pool.constraints.class !== undefined) {
+            sets[poolName] = [graph.indices.nodesByType.get(pool.constraints.class) ?? new Set()];
+        }
+        else {
+            sets[poolName] = [graph.indices.allNodes];
+        }
     }
-    for (const poolName of Object.keys(pools.edge)) {
-        sets[poolName] = [graph.indices.allEdges];
+    for (const [poolName, pool] of Object.entries(pools.edge)) {
+        if (pool.constraints.instance !== undefined) {
+            sets[poolName] = [new Set([pool.constraints.instance])];
+        }
+        else if (pool.constraints.class !== undefined) {
+            sets[poolName] = [graph.indices.edgesByType.get(pool.constraints.class) ?? new Set()];
+        }
+        else {
+            sets[poolName] = [graph.indices.allEdges];
+        }
     }
-    for (const poolName of Object.keys(pools.unknown)) {
-        sets[poolName] = [graph.indices.allNodes, graph.indices.allEdges];
+    for (const [poolName, pool] of Object.entries(pools.unknown)) {
+        if (pool.constraints.instance !== undefined) {
+            sets[poolName] = [new Set([pool.constraints.instance])];
+        }
+        else if (pool.constraints.class !== undefined) {
+            sets[poolName] = [
+                graph.indices.nodesByType.get(pool.constraints.class) ?? new Set(),
+                graph.indices.edgesByType.get(pool.constraints.class) ?? new Set(),
+            ];
+        }
+        else {
+            sets[poolName] = [
+                graph.indices.allNodes,
+                graph.indices.allEdges,
+            ];
+        }
     }
     return sets;
 }

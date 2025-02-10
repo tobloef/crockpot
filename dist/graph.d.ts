@@ -1,7 +1,7 @@
 import { Edge } from "./edge/edge.ts";
 import { Node } from "./node/node.ts";
 import type { ArrayQueryInput, ObjectQueryInput, QueryInputItem, QueryOutput, QueryOutputItem } from "./query/query.types.ts";
-import type { Class } from "./utils/class.ts";
+import { type Class } from "./utils/class.ts";
 export declare class Graph {
     indices: {
         allNodes: Set<Node>;
