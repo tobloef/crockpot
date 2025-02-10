@@ -36,14 +36,21 @@ export type EdgePool = {
 };
 export type GeneratorFunction<T> = () => Generator<T>;
 export type PoolGeneratorFunctions = Record<PoolName, GeneratorFunction<any>>;
+export type PoolSets = Record<PoolName, Set<Node | Edge>[]>;
 export type PermutationFromPoolGeneratorFunctions<Generators extends PoolGeneratorFunctions> = {
     [Key in keyof Generators]: (Generators[Key] extends GeneratorFunction<infer T> ? T : never);
 };
+export type PermutationFromPoolSets<Sets extends PoolSets> = {
+    [Key in keyof Sets]: (Sets[Key] extends Set<infer T> ? T : never);
+};
 export declare function getPoolByName(poolName: PoolName, pools: Pools): NodePool | EdgePool | undefined;
 export declare function createPoolGeneratorFunctions(graph: Graph, pools: Pools): Record<PoolName, GeneratorFunction<Node | Edge>>;
+export declare function createPoolSets(graph: Graph, pools: Pools): PoolSets;
+export declare function permuteSets<Sets extends PoolSets>(sets: Sets): Generator<PermutationFromPoolSets<Sets>>;
 export declare function permuteGenerators<GenFuncs extends PoolGeneratorFunctions>(generatorFunctions: GenFuncs): Generator<PermutationFromPoolGeneratorFunctions<GenFuncs>>;
 export declare function arrayToGenerator<T>(array: T[]): Generator<T>;
 export declare function setToGenerator<T>(set: Set<T>): Generator<T>;
 export declare function combineGenerators<T>(...generators: Generator<T>[]): Generator<T>;
-export declare function countPermutations(generators: PoolGeneratorFunctions): number;
+export declare function countSetPermutations(set: PoolSets): number;
+export declare function countGeneratorPermutations(generators: PoolGeneratorFunctions): number;
 export declare function getPoolKeys(pools: Pools): string[];

@@ -1,4 +1,5 @@
-import { Graph, Node } from "@tobloef/crockpot-local";
+import { Graph, Node } from "../../../src/index.ts";
+import { sleep } from "../../../src/utils/sleep.ts";
 
 const PARENT_NODES = 1;
 const LAYERS = 4;
@@ -29,6 +30,8 @@ for (const NodeClass of nodeClassDefinitions.toReversed()) {
     queryItem = NodeClass.to(queryItem);
   }
 }
+
+await sleep(100);
 
 let result = graph.query(queryItem!).toArray();
 

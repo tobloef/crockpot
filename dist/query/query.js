@@ -1,18 +1,25 @@
-import { parseInput } from "./parsing.js";
+import { isSingleItem, parseInput } from "./parsing.js";
 import { addToAlreadyFound, checkIfAlreadyFound, permutationToOutput } from "./output.js";
 import { checkConstraints } from "./constraints.js";
-import { countPermutations, createPoolGeneratorFunctions, getPoolKeys, permuteGenerators } from "./pool.js";
+import { countGeneratorPermutations, countSetPermutations, createPoolGeneratorFunctions, createPoolSets, getPoolKeys, permuteGenerators, permuteSets } from "./pool.js";
 export function* query(graph, input) {
     const pools = parseInput(input);
+    /*
+    const sets = createPoolSets(graph, pools);
+  
+    const permutations = permuteSets(sets);
+  
+    console.log(`Permutation count: ${countSetPermutations(sets).toLocaleString()}`);
+    */
     const generators = createPoolGeneratorFunctions(graph, pools);
     const permutations = permuteGenerators(generators);
-    console.log(`Permutation count: ${countPermutations(generators).toLocaleString()}`);
+    console.log(`Permutation count: ${countGeneratorPermutations(generators).toLocaleString()}`);
     console.log(`Pools:\n\t${getPoolKeys(pools).join("\n\t")}`);
-    const results = [];
+    const isOutputSingleItem = isSingleItem(input);
     const foundOutputs = {};
     for (const permutation of permutations) {
-        const output = permutationToOutput(permutation, pools, input);
-        const wasAlreadyFound = checkIfAlreadyFound(output, foundOutputs);
+        const output = permutationToOutput(permutation, pools, input, isOutputSingleItem);
+        const wasAlreadyFound = checkIfAlreadyFound(output, foundOutputs, isOutputSingleItem);
         if (wasAlreadyFound) {
             continue;
         }
@@ -20,7 +27,7 @@ export function* query(graph, input) {
         if (!passesConstraints) {
             continue;
         }
-        addToAlreadyFound(output, foundOutputs);
+        addToAlreadyFound(output, foundOutputs, isOutputSingleItem);
         yield output;
     }
 }

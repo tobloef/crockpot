@@ -13,19 +13,11 @@ export function* query<
 ): Generator<QueryOutput<Input>> {
   const pools = parseInput(input);
 
-  /*
   const sets = createPoolSets(graph, pools);
 
   const permutations = permuteSets(sets);
 
   console.log(`Permutation count: ${countSetPermutations(sets).toLocaleString()}`);
-  */
-
-  const generators = createPoolGeneratorFunctions(graph, pools);
-
-  const permutations = permuteGenerators(generators);
-
-  console.log(`Permutation count: ${countGeneratorPermutations(generators).toLocaleString()}`);
   console.log(`Pools:\n\t${getPoolKeys(pools).join("\n\t")}`);
 
   const isOutputSingleItem = isSingleItem(input);

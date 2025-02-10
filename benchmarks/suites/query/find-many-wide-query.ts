@@ -1,4 +1,5 @@
-import { Graph, Node } from "@tobloef/crockpot-local";
+import { Graph, Node } from "../../../src/index.ts";
+import { sleep } from "../../../src/utils/sleep.ts";
 
 const PARENT_NODES = 1;
 const CHILD_NODES = 4;
@@ -17,6 +18,8 @@ for (let i = 0; i < PARENT_NODES; i++) {
     parentNode.addEdge({ to: new ChildNode() });
   }
 }
+
+await sleep(100);
 
 let result = graph.query(
   Node.to(...nodeClassDefinitions)

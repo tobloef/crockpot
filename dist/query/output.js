@@ -1,8 +1,8 @@
 import { Node } from "../node/node.js";
 import { Edge } from "../edge/edge.js";
 import { isSingleItem } from "./parsing.js";
-export function permutationToOutput(permutation, pools, input) {
-    if (isSingleItem(input)) {
+export function permutationToOutput(permutation, pools, input, isOutputSingleItem) {
+    if (isOutputSingleItem) {
         const onlyPoolName = (Object.keys(pools.node)[0] ??
             Object.keys(pools.edge)[0] ??
             Object.keys(pools.unknown)[0]);
@@ -31,8 +31,7 @@ export function permutationToOutput(permutation, pools, input) {
         return output;
     }
 }
-export function checkIfAlreadyFound(output, foundOutputs) {
-    const isOutputSingleItem = isSingleItem(output);
+export function checkIfAlreadyFound(output, foundOutputs, isOutputSingleItem) {
     if (isOutputSingleItem) {
         if (foundOutputs[0] === undefined) {
             return false;
@@ -51,8 +50,7 @@ export function checkIfAlreadyFound(output, foundOutputs) {
         return true;
     }
 }
-export function addToAlreadyFound(output, foundOutputs) {
-    const isOutputSingleItem = isSingleItem(output);
+export function addToAlreadyFound(output, foundOutputs, isOutputSingleItem) {
     if (isOutputSingleItem) {
         if (foundOutputs[0] === undefined) {
             foundOutputs[0] = new Set();

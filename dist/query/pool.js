@@ -22,6 +22,43 @@ export function createPoolGeneratorFunctions(graph, pools) {
     }
     return generatorFunctions;
 }
+export function createPoolSets(graph, pools) {
+    const sets = {};
+    for (const poolName of Object.keys(pools.node)) {
+        sets[poolName] = [graph.indices.allNodes];
+    }
+    for (const poolName of Object.keys(pools.edge)) {
+        sets[poolName] = [graph.indices.allEdges];
+    }
+    for (const poolName of Object.keys(pools.unknown)) {
+        sets[poolName] = [graph.indices.allNodes, graph.indices.allEdges];
+    }
+    return sets;
+}
+export function* permuteSets(sets) {
+    const entries = Object.entries(sets);
+    const [firstEntry, ...otherEntries] = entries;
+    if (firstEntry === undefined) {
+        return;
+    }
+    const [firstKey, firstSets] = firstEntry;
+    const otherSets = Object.fromEntries(otherEntries);
+    for (const set of firstSets) {
+        for (const item of set) {
+            if (otherEntries.length === 0) {
+                const permutation = { [firstKey]: item };
+                yield permutation;
+            }
+            else {
+                const otherPermutations = permuteSets(otherSets);
+                for (const otherPermutation of otherPermutations) {
+                    const permutation = { [firstKey]: item, ...otherPermutation };
+                    yield permutation;
+                }
+            }
+        }
+    }
+}
 export function* permuteGenerators(generatorFunctions) {
     const entries = Object.entries(generatorFunctions);
     const [firstEntry, ...otherEntries] = entries;
@@ -59,7 +96,10 @@ export function* combineGenerators(...generators) {
         yield* generator;
     }
 }
-export function countPermutations(generators) {
+export function countSetPermutations(set) {
+    return Object.values(set).reduce((acc, s) => acc * s.reduce((acc, s) => acc * s.size, 1), 1);
+}
+export function countGeneratorPermutations(generators) {
     return Object.values(generators).reduce((acc, gen) => acc * gen().toArray().length, 1);
 }
 export function getPoolKeys(pools) {

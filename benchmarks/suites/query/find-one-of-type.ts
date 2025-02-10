@@ -13,7 +13,7 @@ for (let i = 0; i < NODES - 1; i++) {
 
 graph.addNode(new NodeToFind());
 
-await sleep(1000)
+await sleep(100);
 
 let result = graph.query(Node).toArray();
 
