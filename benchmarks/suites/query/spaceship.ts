@@ -1,5 +1,7 @@
-import { Graph, Node, Edge } from "../../../src/index.ts";
 import { sleep } from "../../../src/utils/sleep.ts";
+
+const importPath = process.argv[2]!;
+const { Graph, Node, Edge } = await import(importPath);
 
 class Spaceship extends Node {
   name: string;

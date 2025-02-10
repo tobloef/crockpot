@@ -1,5 +1,7 @@
-import { Graph, Node } from "../../../src/index.ts";
 import { sleep } from "../../../src/utils/sleep.ts";
+
+const importPath = process.argv[2]!;
+const { Graph, Node } = await import(importPath);
 
 const NODES = 100_000;
 
@@ -13,7 +15,7 @@ for (let i = 0; i < NODES - 1; i++) {
 
 graph.addNode(new NodeToFind());
 
-await sleep(100);
+// await sleep(100);
 
 let result = graph.query(Node).toArray();
 

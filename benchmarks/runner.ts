@@ -1,32 +1,53 @@
-// TODO: Run specific versions and compare results
-
-import { readdir, writeFile } from "fs/promises";
+import {  writeFile } from "fs/promises";
 import { join } from "path";
 import { exec } from "child_process";
 
-const suitesDirectory = join(process.cwd(), "suites");
-const suiteFiles = await readdir(suitesDirectory, { recursive: true });
+type PackageVersion = string;
+type SuiteFile = string;
 
-const results: Record<string, string> = {};
+const suites: Record<SuiteFile, PackageVersion[]> = {
+  "query/find-one-of-type.ts": [
+    "@tobloef/crockpot-v1.0.0",
+    "@tobloef/crockpot-v1.1.0"
+  ],
+  "query/find-many-of-type.ts": [
+    "@tobloef/crockpot-v1.0.0",
+    "@tobloef/crockpot-v1.1.0"
+  ],
+  "query/find-many-deep-query.ts": [
+    "@tobloef/crockpot-v1.0.0",
+    "@tobloef/crockpot-v1.1.0"
+  ],
+  "query/find-many-wide-query.ts": [
+    "@tobloef/crockpot-v1.0.0",
+    "@tobloef/crockpot-v1.1.0"
+  ],
+  /*"query/spaceship.ts": [
+    "@tobloef/crockpot-v1.0.0",
+    "@tobloef/crockpot-v1.1.0"
+  ],*/
+};
 
-for (const suiteFile of suiteFiles) {
-  if (!suiteFile.endsWith(".ts")) {
-    continue;
-  }
+const results: Record<SuiteFile, string> = {};
 
-  const suiteFilePath = join(suitesDirectory, suiteFile);
+for (const [suiteFile, packageVersions] of Object.entries(suites)) {
+  const suiteFilePath = join("suites", suiteFile);
   const suiteName = suiteFile.replace(/\.ts$/, "");
 
-  const command = `hyperfine 'node ${suiteFilePath}'`;
+  let command = `hyperfine`;
 
-  console.log(`Running suite: ${suiteName}`);
+  for (const version of packageVersions) {
+    command += ` 'node ${suiteFilePath} ${version}'`;
+  }
+
+  console.log(`Running suite "${suiteName}" with command "${command}".`);
 
   await new Promise<void>((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
       if (error) {
         reject(error);
       } else {
-        results[suiteName] = stdout.split("\n").slice(1, 3).join("\n");
+        results[suiteName] = stdout.trim();
         resolve();
       }
     });

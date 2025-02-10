@@ -1,5 +1,7 @@
-import { Graph, Node } from "../../../src/index.ts";
 import { sleep } from "../../../src/utils/sleep.ts";
+
+const importPath = process.argv[2]!;
+const { Graph, Node } = await import(importPath);
 
 const PARENT_NODES = 1;
 const CHILD_NODES = 4;
@@ -19,7 +21,7 @@ for (let i = 0; i < PARENT_NODES; i++) {
   }
 }
 
-await sleep(100);
+// await sleep(100);
 
 let result = graph.query(
   Node.to(...nodeClassDefinitions)
