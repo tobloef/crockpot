@@ -140,3 +140,11 @@ export function* combineGenerators<T>(...generators: Generator<T>[]): Generator<
 export function countPermutations(generators: PoolGeneratorFunctions) {
   return Object.values(generators).reduce((acc, gen) => acc * gen().toArray().length, 1);
 }
+
+export function getPoolKeys(pools: Pools) {
+  return [
+    ...Object.keys(pools.node),
+    ...Object.keys(pools.edge),
+    ...Object.keys(pools.unknown),
+  ];
+}

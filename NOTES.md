@@ -1,4 +1,10 @@
-## Commands to remember
+## Stuff to remember
+
+### Package
+
+* From Git tag: `"git+https://git@github.com/tobloef/crockpot.git#v1.0.0"`
+* From local: `"file:../dist"`
+
 
 ### Benchmarking
 

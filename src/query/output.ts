@@ -1,4 +1,4 @@
-import type { QueryInput, QueryOutput } from "./query.types.ts";
+import type { QueryInput, QueryOutput, QueryOutputItem } from "./query.types.ts";
 import { Node } from "../node/node.ts";
 import { Edge } from "../edge/edge.ts";
 import type { Pools } from "./pool.ts";
@@ -50,51 +50,57 @@ export function permutationToOutput<
   }
 }
 
-export function checkIfAlreadyFound<
-  Input extends QueryInput
->(
+export type FoundOutputs = Record<
+  string | number,
+  Set<QueryOutputItem<any, any>>
+>
+
+export function checkIfAlreadyFound<Input extends QueryInput>(
   output: QueryOutput<Input>,
-  foundOutputs: QueryOutput<Input>[],
+  foundOutputs: FoundOutputs,
 ): boolean {
   const isOutputSingleItem = isSingleItem(output);
 
-  for (const foundOutput of foundOutputs) {
-    if (isOutputSingleItem) {
-      if (foundOutput === output) {
-        return true;
-      } else {
-        continue;
+  if (isOutputSingleItem) {
+    if (foundOutputs[0] === undefined) {
+      return false;
+    }
+
+    return foundOutputs[0].has(output);
+  } else {
+    for (const [key, value] of Object.entries(output)) {
+      if (foundOutputs[key] === undefined) {
+        return false;
+      }
+
+      if (!foundOutputs[key].has(value)) {
+        return false;
       }
     }
 
-    const outputEntries = Object.entries(output);
-    const foundEntries = Object.entries(foundOutput);
+    return true;
+  }
+}
 
-    if (foundEntries.length !== outputEntries.length) {
-      continue;
+export function addToAlreadyFound<Input extends QueryInput>(
+  output: QueryOutput<Input>,
+  foundOutputs: FoundOutputs,
+): void {
+  const isOutputSingleItem = isSingleItem(output);
+
+  if (isOutputSingleItem) {
+    if (foundOutputs[0] === undefined) {
+      foundOutputs[0] = new Set();
     }
 
-    let wasMatch = true;
-
-    for (let i = 0; i < foundEntries.length; i++) {
-      const [foundKey, foundValue] = foundEntries[i]!;
-      const [outputKey, outputValue] = outputEntries[i]!;
-
-      if (foundKey !== outputKey) {
-        wasMatch = false;
-        break;
+    foundOutputs[0].add(output);
+  } else {
+    for (const [key, value] of Object.entries(output)) {
+      if (foundOutputs[key] === undefined) {
+        foundOutputs[key] = new Set();
       }
 
-      if (foundValue !== outputValue) {
-        wasMatch = false;
-        break;
-      }
-    }
-
-    if (wasMatch) {
-      return true;
+      foundOutputs[key].add(value);
     }
   }
-
-  return false;
 }

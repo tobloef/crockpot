@@ -1922,4 +1922,4 @@ describe.skip("Spaceship example", () => {
 
     deepStrictEqual(singleResult, [ deathStar, bountyShip ]);
   });
-})
+});

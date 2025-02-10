@@ -1,9 +1,9 @@
-import type { QueryInput, QueryOutput, } from "./query.types.ts";
+import type { QueryInput, QueryOutput, QueryOutputItem, } from "./query.types.ts";
 import type { Graph } from "../graph.ts";
 import { parseInput } from "./parsing.ts";
-import { checkIfAlreadyFound, permutationToOutput } from "./output.ts";
+import { addToAlreadyFound, checkIfAlreadyFound, type FoundOutputs, permutationToOutput } from "./output.ts";
 import { checkConstraints } from "./constraints.ts";
-import { createPoolGeneratorFunctions, permuteGenerators } from "./pool.ts";
+import { countPermutations, createPoolGeneratorFunctions, getPoolKeys, permuteGenerators } from "./pool.ts";
 
 export function* query<
   Input extends QueryInput
@@ -16,15 +16,12 @@ export function* query<
 
   const permutations = permuteGenerators(generators);
 
-  const foundOutputs: QueryOutput<Input>[] = [];
+  console.log(`Permutation count: ${countPermutations(generators).toLocaleString()}`);
+  console.log(`Pools:\n\t${getPoolKeys(pools).join("\n\t")}`);
+
+  const foundOutputs: FoundOutputs = {};
 
   for (const permutation of permutations) {
-    const passesConstraints = checkConstraints(permutation, pools);
-
-    if (!passesConstraints) {
-      continue;
-    }
-
     const output = permutationToOutput(permutation, pools, input);
 
     const wasAlreadyFound = checkIfAlreadyFound(output, foundOutputs);
@@ -33,7 +30,13 @@ export function* query<
       continue;
     }
 
-    foundOutputs.push(output);
+    const passesConstraints = checkConstraints(permutation, pools);
+
+    if (!passesConstraints) {
+      continue;
+    }
+
+    addToAlreadyFound(output, foundOutputs);
 
     yield output;
   }
