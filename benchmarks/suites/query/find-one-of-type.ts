@@ -2,7 +2,7 @@ import { Graph, Node } from "@tobloef/crockpot-local";
 
 const NODES = 100_000;
 
-class NoToFind extends Node {}
+class NodeToFind extends Node {}
 
 const graph = new Graph();
 
@@ -10,7 +10,7 @@ for (let i = 0; i < NODES - 1; i++) {
   graph.addNode(new Node());
 }
 
-graph.addNode(new NoToFind());
+graph.addNode(new NodeToFind());
 
 let result = graph.query(Node);
 

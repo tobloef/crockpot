@@ -2,15 +2,15 @@ import { Graph, Node } from "@tobloef/crockpot-local";
 
 const NODES = 100_000;
 
-class NoToFind extends Node {}
+class NodeToFind extends Node {}
 
 const graph = new Graph();
 
 for (let i = 0; i < NODES; i++) {
-  graph.addNode(new NoToFind());
+  graph.addNode(new NodeToFind());
 }
 
-let result = graph.query(NoToFind);
+let result = graph.query(NodeToFind);
 
 if (result.toArray !== undefined) {
   result = result.toArray();
