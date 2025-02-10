@@ -1,4 +1,3 @@
-- Benchmarking
 - Optimizations
 - Refactors
 - Observers

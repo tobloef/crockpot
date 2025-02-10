@@ -49,8 +49,6 @@ empire.addEdge({ edge: new Allied(), to: empire });
 rebels.addEdge({ edge: new Allied(), to: rebels });
 bountyHunters.addEdge({ edge: new Allied(), to: bountyHunters });
 
-await sleep(100);
-
 // Finds spaceships docked to planets that are ruled by factions
 // that are allied with the faction of the spaceship.
 const result = graph.query(

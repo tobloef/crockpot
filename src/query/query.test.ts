@@ -1820,7 +1820,7 @@ describe("query", () => {
   });
 });
 
-describe.skip("Spaceship example", () => {
+describe("Spaceship example", () => {
   // Finds spaceships docked to planets that are ruled by factions
   // that are allied with the faction of the spaceship.
 
@@ -1901,7 +1901,7 @@ describe.skip("Spaceship example", () => {
     deepStrictEqual(singleResult, [ deathStar, bountyShip ]);
   });
 
-  it("Succinct but vague version", () => {
+  it.skip("Succinct but vague version", () => {
     // Arrange
     const graph = new Graph();
 

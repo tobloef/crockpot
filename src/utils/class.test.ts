@@ -1,7 +1,7 @@
 import { describe, it, } from "node:test";
 
-import { type Class, type Instance, isClassThatExtends, } from "./class.ts";
-import { ok } from "node:assert";
+import { type Class, getClassHierarchy, type Instance, isClassThatExtends, } from "./class.ts";
+import { deepStrictEqual, ok } from "node:assert";
 
 describe("Class", () => {
   it("Defines a class, not an instance", () => {
@@ -92,4 +92,17 @@ describe("isClassThatExtends", () => {
     // Assert
     ok(!result);
   });
+});
+
+describe("getClassHierarchy", () => {
+  // Arrange
+  class A {}
+  class B extends A {}
+  class C extends B {}
+
+  // Act
+  const hierarchy = getClassHierarchy(C);
+
+  // Assert
+  deepStrictEqual(hierarchy, [C, B, A]);
 });

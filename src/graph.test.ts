@@ -13,6 +13,8 @@ class TestNode extends Node {
   }
 }
 
+class ChildNode extends TestNode {}
+
 class OtherNode extends Node {}
 
 class TestEdge extends Edge {
@@ -23,6 +25,8 @@ class TestEdge extends Edge {
     this.value = value;
   }
 }
+
+class ChildEdge extends TestEdge {}
 
 describe("Graph", () => {
   describe("addNode", () => {
@@ -48,6 +52,19 @@ describe("Graph", () => {
 
       // Assert
       ok(graph.indices.nodesByType.get(TestNode)?.has(nodeToAdd));
+    });
+
+    it("Node is added to nodesByType index of parent class", () => {
+      // Arrange
+      const graph = new Graph();
+      const nodeToAdd = new ChildNode(1);
+
+      // Act
+      graph.addNode(nodeToAdd);
+
+      // Assert
+      ok(graph.indices.nodesByType.get(TestNode)?.has(nodeToAdd));
+      ok(graph.indices.nodesByType.get(Node)?.has(nodeToAdd));
     });
 
     it("Returns the added node", () => {
@@ -208,6 +225,20 @@ describe("Graph", () => {
       strictEqual(hasNode, false);
     });
 
+    it("Node is removed from the nodesByType index of parent class", () => {
+      // Arrange
+      const graph = new Graph();
+      const node = new ChildNode(1);
+      graph.addNode(node);
+
+      // Act
+      graph.removeNode(node);
+
+      // Assert
+      strictEqual(graph.indices.nodesByType.get(Node)?.has(node), false);
+      strictEqual(graph.indices.nodesByType.get(TestNode)?.has(node), false);
+    });
+
     it("Node's edges are removed from the edgesByNode index", () => {
       // Arrange
       const graph = new Graph();
@@ -280,7 +311,7 @@ describe("Graph", () => {
       const graph = new Graph();
       const node1 = new TestNode(1);
       const node2 = new TestNode(2);
-      const node3 = new TestNode(3);
+      const node3 = new ChildNode(3);
       const otherNode = new OtherNode();
 
       graph.addNodes([node1, node2, node3, otherNode]);
@@ -326,6 +357,23 @@ describe("Graph", () => {
       });
 
       // Assert
+      ok(graph.indices.edgesByType.get(TestEdge)?.has(edge));
+    });
+
+    it("Edge is added to edgesByType index of parent class", () => {
+      // Arrange
+      const graph = new Graph();
+      const edge = new ChildEdge(1);
+
+      // Act
+      graph.addEdge({
+        edge,
+        from: new TestNode(1),
+        to: new TestNode(2),
+      });
+
+      // Assert
+      ok(graph.indices.edgesByType.get(Edge)?.has(edge));
       ok(graph.indices.edgesByType.get(TestEdge)?.has(edge));
     });
 
@@ -486,6 +534,24 @@ describe("Graph", () => {
       // Assert
       const hasEdge = graph.indices.edgesByType.get(TestEdge)?.has(edge);
       strictEqual(hasEdge, false);
+    });
+
+    it("Edge is removed from the edgesByType index of parent class", () => {
+      // Arrange
+      const graph = new Graph();
+      const edge = new ChildEdge(1);
+      graph.addEdge({
+        edge,
+        from: new TestNode(1),
+        to: new TestNode(2),
+      });
+
+      // Act
+      graph.removeEdge(edge);
+
+      // Assert
+      strictEqual(graph.indices.edgesByType.get(Edge)?.has(edge), false);
+      strictEqual(graph.indices.edgesByType.get(TestEdge)?.has(edge), false);
     });
 
     it("Edge's nodes are removed from the nodesByEdge index", () => {
@@ -757,7 +823,7 @@ describe("Graph", () => {
       const edge2 = graph.addEdge({
         from: new Node(),
         to: new Node(),
-        edge: new TestEdge(2),
+        edge: new ChildEdge(2),
       });
 
       graph.addEdge({

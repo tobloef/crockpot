@@ -2,7 +2,7 @@ import { Edge } from "./edge/edge.ts";
 import { Node } from "./node/node.ts";
 import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem, } from "./query/query.types.ts";
 import { query } from "./query/query.ts";
-import type { Class } from "./utils/class.ts";
+import { type Class, getClassHierarchy } from "./utils/class.ts";
 
 export class Graph {
   indices = {
@@ -39,15 +39,18 @@ export class Graph {
 
     this.indices.allNodes.add(node);
 
-    const type = node.constructor as Class<Node>;
+    const types = getClassHierarchy(node.constructor as Class<Node>);
 
-    let nodesByType = this.indices.nodesByType.get(type);
-    if (nodesByType === undefined) {
-      nodesByType = new Set();
-      this.indices.nodesByType.set(type, nodesByType);
+    for (const type of types) {
+      let nodesByType = this.indices.nodesByType.get(type);
+
+      if (nodesByType === undefined) {
+        nodesByType = new Set();
+        this.indices.nodesByType.set(type, nodesByType);
+      }
+
+      nodesByType.add(node);
     }
-
-    nodesByType.add(node);
 
     const hasEdges = node.edges.from.size > 0 || node.edges.to.size > 0;
 
@@ -97,11 +100,14 @@ export class Graph {
       this.indices.edgesByNode.delete(node);
     }
 
-    const type = node.constructor as Class<Node>;
+    const types = getClassHierarchy(node.constructor as Class<Node>);
 
-    const nodesByType = this.indices.nodesByType.get(type);
-    if (nodesByType !== undefined) {
-      nodesByType.delete(node);
+    for (const type of types) {
+      const nodesByType = this.indices.nodesByType.get(type);
+
+      if (nodesByType !== undefined) {
+        nodesByType.delete(node);
+      }
     }
   }
 
@@ -112,12 +118,17 @@ export class Graph {
   }
 
   removeNodesByType(type: Class<Node>): void {
-    const nodes = this.indices.nodesByType.get(type);
-    if (nodes === undefined) {
-      return;
-    }
+    for (const [indexType, nodes] of this.indices.nodesByType.entries()) {
+      const classHierarchy = getClassHierarchy(indexType);
 
-    this.removeNodes(Array.from(nodes));
+      if (!classHierarchy.includes(type)) {
+        continue;
+      }
+
+      for (const node of nodes) {
+        this.removeNode(node);
+      }
+    }
   }
 
   addEdge<E extends Edge>(
@@ -134,15 +145,18 @@ export class Graph {
 
     this.indices.allEdges.add(edge);
 
-    const type = edge.constructor as Class<Edge>;
+    const types = getClassHierarchy(edge.constructor as Class<Edge>);
 
-    let edgesByType = this.indices.edgesByType.get(type);
-    if (edgesByType === undefined) {
-      edgesByType = new Set();
-      this.indices.edgesByType.set(type, edgesByType);
+    for (const type of types) {
+      let edgesByType = this.indices.edgesByType.get(type);
+
+      if (edgesByType === undefined) {
+        edgesByType = new Set();
+        this.indices.edgesByType.set(type, edgesByType);
+      }
+
+      edgesByType.add(edge);
     }
-
-    edgesByType.add(edge);
 
     let nodesByEdge = this.indices.nodesByEdge.get(edge);
     if (nodesByEdge === undefined) {
@@ -198,11 +212,14 @@ export class Graph {
       this.indices.nodesByEdge.delete(edge);
     }
 
-    const type = edge.constructor as Class<Edge>;
+    const types = getClassHierarchy(edge.constructor as Class<Edge>);
 
-    const edgesByType = this.indices.edgesByType.get(type);
-    if (edgesByType !== undefined) {
-      edgesByType.delete(edge);
+    for (const type of types) {
+      const edgesByType = this.indices.edgesByType.get(type);
+
+      if (edgesByType !== undefined) {
+        edgesByType.delete(edge);
+      }
     }
   }
 
@@ -259,12 +276,17 @@ export class Graph {
   }
 
   removeEdgesByType(type: Class<Edge>): void {
-    const nodes = this.indices.edgesByType.get(type);
-    if (nodes === undefined) {
-      return;
-    }
+    for (const [indexType, edges] of this.indices.edgesByType.entries()) {
+      const classHierarchy = getClassHierarchy(indexType);
 
-    this.removeEdges(Array.from(nodes));
+      if (!classHierarchy.includes(type)) {
+        continue;
+      }
+
+      for (const edge of edges) {
+        this.removeEdge(edge);
+      }
+    }
   }
 }
 

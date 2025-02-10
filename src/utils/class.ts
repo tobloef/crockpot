@@ -13,3 +13,17 @@ export function isClassThatExtends<
     (parent.prototype?.isPrototypeOf(child.prototype) ?? false)
   );
 }
+
+export function getClassHierarchy(
+  leafClass: Class<any>
+) {
+  const hierarchy: Class<any>[] = [];
+  let current = leafClass;
+
+  while (current != null && current.name !== "") {
+    hierarchy.push(current);
+    current = Object.getPrototypeOf(current);
+  }
+
+  return hierarchy;
+}
