@@ -1,46 +1,19 @@
-import type { QueryInput, QueryOutput, } from "./query.types.ts";
+import type { Edgelike, Nodelike, QueryInput, QueryInputItem, QueryOutput, ReferenceName, } from "./query.types.ts";
 import type { Graph } from "../graph.ts";
-import { isSingleItem, parseInput } from "./parsing.ts";
-import { addToAlreadyFound, checkIfAlreadyFound, type FoundOutputs, permutationToOutput } from "./output.ts";
-import { checkConstraints } from "./constraints.ts";
-import { countSetPermutations, createPoolSets, getPoolKeys, permuteSets } from "./pool.ts";
+import { parseInput } from "./parse-input.ts";
 
-export function* query<
+export function* query2<
   Input extends QueryInput
 >(
   graph: Graph,
   input: Input,
 ): Generator<QueryOutput<Input>> {
-  const pools = parseInput(input);
+  const slots = parseInput(input);
+  const plan = createPlan(slots);
+  const matches = executePlan(plan, graph);
+  const rawOutputs = createOutputs(matches, slots);
+  const deduplicatedOutputs = deduplicateOutputs(rawOutputs);
 
-  const sets = createPoolSets(graph, pools);
-
-  const permutations = permuteSets(sets);
-
-  console.log(`Permutation count: ${countSetPermutations(sets).toLocaleString()}`);
-  console.log(`Pools:\n\t${getPoolKeys(pools).join("\n\t")}`);
-
-  const isOutputSingleItem = isSingleItem(input);
-
-  const foundOutputs: FoundOutputs = new Set<string>();
-
-  for (const permutation of permutations) {
-    const output = permutationToOutput(permutation, pools, input, isOutputSingleItem);
-
-    const wasAlreadyFound = checkIfAlreadyFound(output, foundOutputs, isOutputSingleItem);
-
-    if (wasAlreadyFound) {
-      continue;
-    }
-
-    const passesConstraints = checkConstraints(permutation, pools);
-
-    if (!passesConstraints) {
-      continue;
-    }
-
-    addToAlreadyFound(output, foundOutputs, isOutputSingleItem);
-
-    yield output;
-  }
+  return deduplicatedOutputs;
 }
+

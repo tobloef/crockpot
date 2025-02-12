@@ -17,7 +17,7 @@ export function parseInput(
     unknown: {},
   };
 
-  if (isSingleItem(input)) {
+  if (checkIsSingleItem(input)) {
     parseItem(input, pools);
   } else if (Array.isArray(input)) {
     for (let i = 0; i < input.length; i++) {
@@ -486,7 +486,7 @@ function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {
   return poolName;
 }
 
-export function isSingleItem(input: QueryInput): input is QueryInputItem {
+export function checkIsSingleItem(input: QueryInput): input is QueryInputItem {
   return (
     !Array.isArray(input) &&
     input.constructor.name !== "Object"

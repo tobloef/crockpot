@@ -54,3 +54,5 @@ profile () {
     const output2 = test({ a: "ref" } as const); // Is { a: "ref" }, as expected
     ```
   * In the future, perhaps the compiler will be smart enough. 
+
+* Inheritance hierarchy is a bit funky for query items.
