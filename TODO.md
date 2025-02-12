@@ -1,4 +1,7 @@
 - Optimizations
+  - Graph traversal
+  - Generators vs array functions vs item functions?
+  - Profile more
 - Refactors
 - Observers
 - Caching

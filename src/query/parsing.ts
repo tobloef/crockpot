@@ -83,7 +83,6 @@ function parseReferenceName(
 
   if (isTypesMismatch) {
     throw new ReferenceMismatchError(
-      poolName,
       { existing: existingType, new: newType }
     );
   }
@@ -198,7 +197,6 @@ function parseNodeQueryItem(item: NodeQueryItem, pools: Pools): PoolName {
 
   if (pools.edge[poolName] !== undefined) {
     throw new ReferenceMismatchError(
-      poolName,
       { existing: "edge", new: "node" }
     );
   }
@@ -217,7 +215,6 @@ function parseNodeQueryItem(item: NodeQueryItem, pools: Pools): PoolName {
       } else {
         // It's a completely different class
         throw new ReferenceMismatchError(
-          poolName,
           { existing: existingClass, new: item.class }
         );
       }
@@ -421,7 +418,6 @@ function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {
 
   if (pools.node[poolName] !== undefined) {
     throw new ReferenceMismatchError(
-      poolName,
       { existing: "node", new: "edge" }
     );
   }
@@ -440,7 +436,6 @@ function parseEdgeQueryItem(item: EdgeQueryItem, pools: Pools): PoolName {
       } else {
         // It's a completely different class
         throw new ReferenceMismatchError(
-          poolName,
           { existing: existingClass, new: item.class }
         );
       }

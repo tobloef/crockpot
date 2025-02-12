@@ -6,16 +6,17 @@ import { assertExhaustive } from "../utils/assert-exhaustive.ts";
 import { NamedNodeQueryItem, NamedRelatedNodeQueryItem, NodeQueryItem, RelatedNodeQueryItem } from "../node/node-query-item.ts";
 import { EdgeQueryItem, NamedEdgeQueryItem, NamedRelatedEdgeQueryItem, RelatedEdgeQueryItem } from "../edge/edge-query-item.ts";
 import { ReferenceMismatchError } from "./errors/reference-mismatch-error.ts";
-import type { TuplifyUnion } from "../utils/union.ts";
 import { randomString } from "../utils/random-string";
 
 export type SlotName = string;
 
-export type SlotType = "node" | "edge" | "unknown";
-export const SLOT_TYPES = ["node", "edge", "unknown"] satisfies TuplifyUnion<SlotType>;
+export const SLOT_TYPES = ["edge", "node", "unknown"] as const;
+export type SlotType = typeof SLOT_TYPES[number];
+
+export type QueryFormat = "single" | "array" | "object";
 
 export type QuerySlots = {
-  isSingleItem: boolean;
+  format: QueryFormat,
   node: Record<SlotName, NodeSlot>;
   edge: Record<SlotName, EdgeSlot>;
   unknown: Record<SlotName, UnknownSlot>;
@@ -61,7 +62,11 @@ export function parseInput(
   const isObject = !isSingleItem && !isArray;
 
   const slots: QuerySlots = {
-    isSingleItem,
+    format: (
+      isSingleItem ? "single" :
+      isArray ? "array" :
+      "object"
+    ),
     node: {},
     edge: {},
     unknown: {},

@@ -15,9 +15,9 @@ export function* query<
   const slots = parseInput(input);
   const plan = createPlan(slots, graph);
   const matches = executePlan(plan, graph);
-  const rawOutputs = createOutputs(matches, slots);
-  const deduplicatedOutputs = deduplicateOutputs(rawOutputs);
+  const rawOutputs = createOutputs<Input>(matches, slots);
+  const deduplicatedOutput = deduplicateOutputs<Input>(rawOutputs);
 
-  return deduplicatedOutputs;
+  return deduplicatedOutput;
 }
 
