@@ -1,4 +1,5 @@
 - Optimizations
+  - Tests for new query sub-methods 
   - Graph traversal
   - Generators vs array functions vs item functions?
   - Profile more
