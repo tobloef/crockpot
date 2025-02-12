@@ -41,7 +41,9 @@ profile () {
 
 * In a smarter permutation finding mechanism with graph traversal, you could not only cut down on permutations to check, but you could perhaps also ensure that permutations are only created from the output nodes, so that no output can show up twice. Then you don't have to store and check for duplicate outputs.
 
-* Inferring string reference types is _purely_ for the mad science of it. You could very easily do `query([Person.to("t"), Transform.as("t")])` instead of `query([Person.to(Transform.as("t")), "t"])`. Or even:
+* Making it possible to save query input instances, as well as query plans, would be useful for caching and advanced usage. So perhaps the query methods should be able to take in both, and be a bit more like the builder pattern.
+
+* Inferring string reference types is _purely_ for the mad science of it. You could very easily do `query([Person.to("t"), Transform.as("t")])` instead of `query([Person.to(Transform.as("t")), "t"])`.
 
 * For object-inputs when querying, you can apparently not infer the reference name without using `as const`. See this minimal example of the issue:
   * ```ts
@@ -56,3 +58,6 @@ profile () {
   * In the future, perhaps the compiler will be smart enough. 
 
 * Inheritance hierarchy is a bit funky for query items.
+
+* After you have queried, you still need to check for the existence of the edges when working with the fetched node. This is natural in with the class-based approach, as we cannot guarantee that the reference has not been changed after the query was run. But in a data-oriented approach, the returned result would not have references and would just contain the data directly. You might want to make the distinction between `where` and `with` in such a case, to not fetch data you just want to filter on.
+  * Keep in mind that this can already be worked around today, by having the query return the items you want to work with (`[Node.to(Node.as("x")), "x"]`).
