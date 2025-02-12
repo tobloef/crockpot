@@ -41,6 +41,8 @@ profile () {
 
 * In a smarter permutation finding mechanism with graph traversal, you could not only cut down on permutations to check, but you could perhaps also ensure that permutations are only created from the output nodes, so that no output can show up twice. Then you don't have to store and check for duplicate outputs.
 
+* Making it possible to save query input instances, as well as query plans, would be useful for caching and advanced usage. So perhaps the query methods should be able to take in both, and be a bit more like the builder pattern.
+
 * Inferring string reference types is _purely_ for the mad science of it. You could very easily do `query([Person.to("t"), Transform.as("t")])` instead of `query([Person.to(Transform.as("t")), "t"])`. Or even:
 
 * For object-inputs when querying, you can apparently not infer the reference name without using `as const`. See this minimal example of the issue:
