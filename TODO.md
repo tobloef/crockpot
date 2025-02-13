@@ -2,6 +2,7 @@
   - Tests for new query sub-methods 
   - Graph traversal
   - Generators vs array functions vs item functions?
+  - Find some worst-case scenarios based on implementation
   - Profile more
 - Refactors
 - Observers
