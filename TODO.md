@@ -1,6 +1,7 @@
 - Optimizations
-  - Tests for new query sub-methods 
   - Graph traversal
+    - `createPlan` and tests
+    - `executePlan` and tests
   - Generators vs array functions vs item functions?
   - Find some worst-case scenarios based on implementation
   - Profile more

@@ -1,5 +1,4 @@
 import { CustomError } from "../../utils/errors/custom-error.ts";
-import type { PoolName } from "../pool.ts";
 
 export class ReferenceMismatchError extends CustomError {
   types: { existing: any, new: any };

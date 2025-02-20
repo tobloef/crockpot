@@ -6,7 +6,7 @@ import { assertExhaustive } from "../utils/assert-exhaustive.ts";
 import { NamedNodeQueryItem, NamedRelatedNodeQueryItem, NodeQueryItem, RelatedNodeQueryItem } from "../node/node-query-item.ts";
 import { EdgeQueryItem, NamedEdgeQueryItem, NamedRelatedEdgeQueryItem, RelatedEdgeQueryItem } from "../edge/edge-query-item.ts";
 import { ReferenceMismatchError } from "./errors/reference-mismatch-error.ts";
-import { randomString } from "../utils/random-string";
+import { randomString } from "../utils/random-string.ts";
 
 export type SlotName = string;
 
@@ -19,10 +19,13 @@ export type QuerySlots = {
   format: QueryFormat,
   node: Record<SlotName, NodeSlot>;
   edge: Record<SlotName, EdgeSlot>;
-  unknown: Record<SlotName, UnknownSlot>;
+  unknown: Record<SlotName, UnknownSlot2>;
 };
 
+export type Slot = NodeSlot | EdgeSlot | UnknownSlot2;
+
 export type NodeSlot = {
+  type: "node",
   name: SlotName,
   constraints: {
     instance?: Node,
@@ -38,6 +41,7 @@ export type NodeSlot = {
 };
 
 export type EdgeSlot = {
+  type: "edge",
   name: SlotName,
   constraints: {
     instance?: Edge,
@@ -46,13 +50,18 @@ export type EdgeSlot = {
       // "from", as in "edge is going from this node".
       from?: SlotName,
       to?: SlotName,
-      toOrFrom?: SlotName[],
+      fromOrTo?: SlotName[],
     }
   },
   outputKeys: string[] | number[],
 };
 
-export type UnknownSlot = NodeSlot | EdgeSlot;
+export type UnknownSlot2 = {
+  type: "unknown",
+  name: SlotName,
+  constraints: {},
+  outputKeys: string[] | number[],
+};
 
 export function parseInput(
   input: QueryInput
@@ -93,7 +102,7 @@ export function checkIsSingleItem(input: QueryInput): input is QueryInputItem {
 export function parseItem(
   item: QueryInputItem,
   slots: QuerySlots
-): UnknownSlot {
+): Slot {
   if (checkIsReferenceName(item)) {
     return parseReferenceName(item, slots);
   }
@@ -179,16 +188,15 @@ export function parseReferenceName(
   item: ReferenceName,
   slots: QuerySlots,
   parent?: {
-    type: SlotType,
-    name: SlotName,
+    slot: Slot,
     direction: EdgeDirection,
   }
-): UnknownSlot {
+): Slot {
   const slotName = item;
 
   const existing = getExistingSlot(slots, slotName);
 
-  const newType = getOppositeSlotType(parent?.type);
+  const newType = getOppositeSlotType(parent?.slot?.type);
 
   if (existing?.type === newType) {
     return existing.slot;
@@ -209,8 +217,9 @@ export function parseReferenceName(
     );
   }
 
-  const newSlot: UnknownSlot = existing?.slot ?? {
+  const newSlot: Slot = existing?.slot ?? {
     name: slotName,
+    type: newType,
     constraints: {},
     outputKeys: [],
   };
@@ -227,19 +236,15 @@ export function parseReferenceName(
 export function parseNodelike(
   item: Nodelike,
   slots: QuerySlots,
-  parentEdge?: {
-    name: SlotName,
+  parent?: {
+    slot: EdgeSlot,
     direction: EdgeDirection,
   }
 ): NodeSlot {
   let nodeSlot: NodeSlot;
 
   if (typeof item === "string") {
-    nodeSlot = parseReferenceName(
-      item,
-      slots,
-      parentEdge ? { type: "edge", ...parentEdge } : undefined
-    ) as NodeSlot;
+    nodeSlot = parseReferenceName(item, slots, parent) as NodeSlot;
   } else if (item instanceof Node) {
     nodeSlot = parseNodeInstance(item, slots);
   } else if (item instanceof NodeQueryItem) {
@@ -248,10 +253,10 @@ export function parseNodelike(
     nodeSlot = parseNodeClass(item, slots);
   }
 
-  if (parentEdge !== undefined) {
-    const edgeSlot = slots.edge[parentEdge.name]!;
-    setNodeConstraintsOnEdge(edgeSlot, nodeSlot, parentEdge.direction);
-    setEdgeConstraintsOnNode(nodeSlot, edgeSlot, parentEdge.direction);
+  if (parent !== undefined) {
+    const edgeSlot = slots.edge[parent.slot.name]!;
+    setNodeConstraintsOnEdge(edgeSlot, nodeSlot, parent.direction);
+    setEdgeConstraintsOnNode(nodeSlot, edgeSlot, parent.direction);
   }
 
   return nodeSlot;
@@ -265,8 +270,9 @@ function parseNodeInstance(
 
   const existingSlot = slots.node[slotName];
 
-  const nodeSlot = existingSlot ?? {
+  const nodeSlot: NodeSlot = existingSlot ?? {
     name: slotName,
+    type: "node",
     constraints: {
       instance: item,
     },
@@ -286,8 +292,9 @@ function parseNodeClass(
 
   const existingSlot = slots.node[slotName];
 
-  const nodeSlot = existingSlot ?? {
+  const nodeSlot: NodeSlot = existingSlot ?? {
     name: slotName,
+    type: "node",
     constraints: {
       class: item,
     },
@@ -329,6 +336,7 @@ function parseNodeQueryItem(
 
   const nodeSlot: NodeSlot = existingNodeSlot ?? {
     name: slotName,
+    type: "node",
     constraints: {},
     outputKeys: [],
   };
@@ -354,15 +362,16 @@ function parseNodeQueryItem(
     parseEdgelike(
       withItem,
       slots,
-      { name: slotName, direction: "fromOrTo" }
+      { slot: nodeSlot, direction: "fromOrTo" }
     );
   }
 
   for (const toItem of item.toItems ?? []) {
     const edgeSlotName = `to-edge (${randomString()})`;
 
-    const edgeSlot = {
+    const edgeSlot: EdgeSlot = {
       name: edgeSlotName,
+      type: "edge",
       constraints: {
         nodes: {
           from: slotName,
@@ -378,15 +387,16 @@ function parseNodeQueryItem(
     parseNodelike(
       toItem,
       slots,
-      { name: edgeSlotName, direction: "to" }
+      { slot: edgeSlot, direction: "to" }
     );
   }
 
   for (const fromItem of item.fromItems ?? []) {
     const edgeSlotName = `from-edge (${randomString()})`;
 
-    const edgeSlot = {
+    const edgeSlot: EdgeSlot = {
       name: edgeSlotName,
+      type: "edge",
       constraints: {
         nodes: {
           to: slotName,
@@ -402,18 +412,19 @@ function parseNodeQueryItem(
     parseNodelike(
       fromItem,
       slots,
-      { name: edgeSlotName, direction: "from" }
+      { slot: edgeSlot, direction: "from" }
     );
   }
 
   for (const fromOrToItem of item.fromOrToItems ?? []) {
     const edgeSlotName = `from-or-to-edge (${randomString()})`;
 
-    const edgeSlot = {
+    const edgeSlot: EdgeSlot = {
       name: edgeSlotName,
+      type: "edge",
       constraints: {
         nodes: {
-          toOrFrom: [slotName],
+          fromOrTo: [slotName],
         }
       },
       outputKeys: [],
@@ -426,7 +437,7 @@ function parseNodeQueryItem(
     parseNodelike(
       fromOrToItem,
       slots,
-      { name: edgeSlotName, direction: "fromOrTo" }
+      { slot: edgeSlot, direction: "fromOrTo" }
     );
   }
 
@@ -436,19 +447,15 @@ function parseNodeQueryItem(
 export function parseEdgelike(
   item: Edgelike,
   slots: QuerySlots,
-  parentNode?: {
-    name: SlotName,
+  parent?: {
+    slot: NodeSlot,
     direction: EdgeDirection,
   }
 ): EdgeSlot {
   let edgeSlot: EdgeSlot;
 
   if (typeof item === "string") {
-    edgeSlot = parseReferenceName(
-      item,
-      slots,
-      parentNode ? { type: "node", ...parentNode } : undefined
-    ) as EdgeSlot;
+    edgeSlot = parseReferenceName(item, slots, parent) as EdgeSlot;
   } else if (item instanceof Edge) {
     edgeSlot = parseEdgeInstance(item, slots);
   } else if (item instanceof EdgeQueryItem) {
@@ -457,13 +464,13 @@ export function parseEdgelike(
     edgeSlot = parseEdgeClass(item, slots);
   }
 
-  if (parentNode !== undefined) {
-    const nodeSlot = slots.node[parentNode.name]!;
-    setEdgeConstraintsOnNode(nodeSlot, edgeSlot, parentNode.direction);
-    setNodeConstraintsOnEdge(edgeSlot, nodeSlot, parentNode.direction);
+  if (parent !== undefined) {
+    const nodeSlot = slots.node[parent.slot.name]!;
+    setEdgeConstraintsOnNode(nodeSlot, edgeSlot, parent.direction);
+    setNodeConstraintsOnEdge(edgeSlot, nodeSlot, parent.direction);
 
-    if (parentNode.direction === "fromOrTo") {
-      parentNode.direction = inferParentDirection(item, parentNode);
+    if (parent.direction === "fromOrTo") {
+      parent.direction = inferParentDirection(item, parent);
     }
   }
 
@@ -505,8 +512,9 @@ function parseEdgeInstance(
 
   const existingSlot = slots.edge[slotName];
 
-  const edgeSlot = existingSlot ?? {
+  const edgeSlot: EdgeSlot = existingSlot ?? {
     name: slotName,
+    type: "edge",
     constraints: {
       instance: item,
     },
@@ -526,8 +534,9 @@ function parseEdgeClass(
 
   const existingSlot = slots.edge[slotName];
 
-  const edgeSlot = existingSlot ?? {
+  const edgeSlot: EdgeSlot = existingSlot ?? {
     name: slotName,
+    type: "edge",
     constraints: {
       class: item,
     },
@@ -569,6 +578,7 @@ function parseEdgeQueryItem(
 
   const edgeSlot: EdgeSlot = existingEdgeSlot ?? {
     name: slotName,
+    type: "edge",
     constraints: {},
     outputKeys: [],
   };
@@ -594,7 +604,7 @@ function parseEdgeQueryItem(
     parseNodelike(
       item.fromItem,
       slots,
-      { name: slotName, direction: "from" }
+      { slot: edgeSlot, direction: "from" }
     );
   }
 
@@ -602,7 +612,7 @@ function parseEdgeQueryItem(
     parseNodelike(
       item.toItem,
       slots,
-      { name: slotName, direction: "to" }
+      { slot: edgeSlot, direction: "to" }
     );
   }
 
@@ -610,7 +620,7 @@ function parseEdgeQueryItem(
     parseNodelike(
       fromOrToItems,
       slots,
-      { name: slotName, direction: "fromOrTo" }
+      { slot: edgeSlot, direction: "fromOrTo" }
     );
   }
 
@@ -635,12 +645,12 @@ function setNodeConstraintsOnEdge(
   edgeSlot.constraints.nodes ??= {};
 
   if (parentDirection === "fromOrTo") {
-    if (edgeSlot.constraints.nodes.toOrFrom?.length === 2) {
+    if (edgeSlot.constraints.nodes.fromOrTo?.length === 2) {
       throw new Error(`Edge ${edgeSlot.name} cannot have more than two nodes defined.`);
     }
 
-    edgeSlot.constraints.nodes.toOrFrom ??= [];
-    edgeSlot.constraints.nodes.toOrFrom.push(nodeSlot.name);
+    edgeSlot.constraints.nodes.fromOrTo ??= [];
+    edgeSlot.constraints.nodes.fromOrTo.push(nodeSlot.name);
   } else {
     edgeSlot.constraints.nodes[parentDirection] = nodeSlot.name;
   }
@@ -666,4 +676,52 @@ function pickMostSpecificClass<T>(
   throw new ReferenceMismatchError(
     { existing: existingClass, new: newClass }
   );
+}
+
+export function getAllSlots(slots: QuerySlots): Slot[] {
+  return SLOT_TYPES
+    .map((type) => Object.values(slots[type]))
+    .flat();
+}
+
+export function getAllConnectedSlotNames(slot: Slot): SlotName[] {
+  const slotNames: SlotName[] = [];
+
+  if (slot.type === "edge") {
+    if (slot.constraints.nodes?.from !== undefined) {
+      slotNames.push(slot.constraints.nodes.from);
+    }
+    if (slot.constraints.nodes?.to !== undefined) {
+      slotNames.push(slot.constraints.nodes.to);
+    }
+    if (slot.constraints.nodes?.fromOrTo !== undefined) {
+      slotNames.push(...slot.constraints.nodes.fromOrTo);
+    }
+  }
+
+  if (slot.type === "node") {
+    if (slot.constraints.edges?.from !== undefined) {
+      slotNames.push(...slot.constraints.edges.from);
+    }
+    if (slot.constraints.edges?.to !== undefined) {
+      slotNames.push(...slot.constraints.edges.to);
+    }
+    if (slot.constraints.edges?.fromOrTo !== undefined) {
+      slotNames.push(...slot.constraints.edges.fromOrTo);
+    }
+  }
+
+  return slotNames;
+}
+
+export function getSlotByName(
+  slots: QuerySlots,
+  name: SlotName
+): Slot | undefined {
+  for (const type of SLOT_TYPES) {
+    const slot = slots[type][name];
+    if (slot !== undefined) {
+      return slot;
+    }
+  }
 }

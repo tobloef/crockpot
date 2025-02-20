@@ -1,5 +1,5 @@
 import type { QueryMatch } from "./execute-plan.ts";
-import { type QuerySlots, SLOT_TYPES, type UnknownSlot } from "./parse-input.ts";
+import { getAllSlots, type QuerySlots, type Slot } from "./parse-input.ts";
 import type { Node } from "../node/node.ts";
 import type { Edge } from "../edge/edge.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
@@ -27,7 +27,7 @@ export function createOutputs<
 
 function* createSingleOutputs(
   matches: Generator<QueryMatch>,
-  outputSlots: UnknownSlot[]
+  outputSlots: Slot[]
 ): Generator<QueryOutput<QueryInputItem>> {
   for (const match of matches) {
     const slotName = outputSlots[0]!.name;
@@ -37,7 +37,7 @@ function* createSingleOutputs(
 
 function* createArrayOutputs(
   matches: Generator<QueryMatch>,
-  outputSlots: UnknownSlot[]
+  outputSlots: Slot[]
 ): Generator<QueryOutput<ArrayQueryInput>> {
   for (const match of matches) {
     const output = [];
@@ -52,7 +52,7 @@ function* createArrayOutputs(
 
 function* createRecordOutputs(
   matches: Generator<QueryMatch>,
-  outputSlots: UnknownSlot[]
+  outputSlots: Slot[]
 ): Generator<QueryOutput<ObjectQueryInput>> {
   for (const match of matches) {
     const output: Record<string, Node | Edge> = {};
@@ -68,10 +68,8 @@ function* createRecordOutputs(
 /** Get all slots that have any output keys. */
 function getOutputSlots(
   slots: QuerySlots
-): UnknownSlot[] {
-  const allSlots = SLOT_TYPES
-    .map((type) => Object.values(slots[type]))
-    .flat();
+): Slot[] {
+  const allSlots = getAllSlots(slots);
 
   const slotsWithOutputKeys = allSlots
     .filter((slot) => slot.outputKeys.length > 0);
