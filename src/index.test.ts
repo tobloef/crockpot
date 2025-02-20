@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
-import { parseInput } from "./query/parse-input.ts";
 import { Node, Edge } from "./index.ts";
+import { parseInput } from "./query/parse-input.ts";
 
 describe("test", () => {
   it("should pass", () => {

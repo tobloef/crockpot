@@ -1,19 +1,18 @@
-import type { Slot, SlotName } from "./parse-input.ts";
+import { getOppositeDirection, type Slot, type SlotName } from "./parse-input.ts";
 import type { Graph } from "../graph.ts";
 import type { EnsureConnectionStep, IterateIndexStep, QueryPlan, QueryPlanStep, SubqueryPlan, TraverseStep } from "./create-plan.ts";
 import { Node } from "../node/node.ts";
-import { Edge } from "../edge/edge.ts";
+import { Edge, type EdgeDirection } from "../edge/edge.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
 import { type Class, isClassThatExtends } from "../utils/class.ts";
 
 export type QueryMatch = Record<SlotName, Node | Edge>;
 
 export function executePlan(
-  plan: QueryPlan,
-  graph: Graph
+  plan: QueryPlan
 ): Generator<QueryMatch> {
   const subqueryGeneratorFunctions = plan.subqueries.map((subquery) => {
-    return () => executeSubqueryPlan(subquery, graph)
+    return () => executeSubqueryPlan(subquery)
   });
 
   return permuteGeneratorFunctions(subqueryGeneratorFunctions)
@@ -21,7 +20,6 @@ export function executePlan(
 
 function* executeSubqueryPlan(
   subqueryPlan: SubqueryPlan,
-  graph: Graph,
 ): Generator<QueryMatch> {
   const {
     steps,
@@ -67,56 +65,57 @@ function* executeTraverseStep(
   nextSteps: QueryPlanStep[],
   match: QueryMatch,
 ): Generator<QueryMatch> {
-  const { from, to, direction } = step;
+  const { visitedSlot, unvisitedSlot, direction } = step;
 
-  const fromItem = match[from.name];
+  const visitedItem = match[visitedSlot.name];
 
-  if (fromItem === undefined) {
-    return;
+  if (visitedItem === undefined) {
+    throw new Error(`The slot '${visitedSlot.name}' was not visited.`);
   }
 
-  if (fromItem instanceof Node) {
+  if (visitedItem instanceof Node) {
     if (direction === "from" || direction === "fromOrTo") {
-      for (const fromEdge of fromItem.edges.from) {
-        yield* traverseTo(fromEdge, to, match, nextSteps);
+      for (const fromEdge of visitedItem.edges.from) {
+        yield* traverseTo(fromEdge, unvisitedSlot, match, nextSteps);
       }
     }
 
     if (direction === "to" || direction === "fromOrTo") {
-      for (const toEdge of fromItem.edges.to) {
-        yield* traverseTo(toEdge, to, match, nextSteps);
+      for (const toEdge of visitedItem.edges.to) {
+        yield* traverseTo(toEdge, unvisitedSlot, match, nextSteps);
       }
     }
-  } else if (fromItem instanceof Edge) {
+  } else if (visitedItem instanceof Edge) {
     if (direction === "from" || direction === "fromOrTo") {
-      yield* traverseTo(fromItem.nodes.from, to, match, nextSteps);
+      yield* traverseTo(visitedItem.nodes.from, unvisitedSlot, match, nextSteps);
     }
 
     if (direction === "to" || direction === "fromOrTo") {
-      yield* traverseTo(fromItem.nodes.to, to, match, nextSteps);
+      yield* traverseTo(visitedItem.nodes.to, unvisitedSlot, match, nextSteps);
     }
   } else {
-    assertExhaustive(fromItem);
+    assertExhaustive(visitedItem);
   }
 }
 
 function* traverseTo(
-  item: Node | Edge | undefined,
-  slot: Slot,
+  unvisitedItem: Node | Edge | undefined,
+  unvisitedSlot: Slot,
   match: QueryMatch,
   nextSteps: QueryPlanStep[],
 ): Generator<QueryMatch> {
-  if (item === undefined) {
+  if (unvisitedItem === undefined) {
     return;
   }
 
-  const passesConstraints = checkIsolatedConstraints(item, slot);
+  const isOk = checkIsolatedConstraints(unvisitedItem, unvisitedSlot);
 
-  if (!passesConstraints) {
+  if (!isOk) {
     return;
   }
 
-  match[slot.name] = item;
+  // Now it's been visited
+  match[unvisitedSlot.name] = unvisitedItem;
 
   const [nextStep, ...remainingSteps] = nextSteps;
 
@@ -132,7 +131,47 @@ function* executeEnsureConnectionStep(
   nextSteps: QueryPlanStep[],
   match: QueryMatch,
 ): Generator<QueryMatch> {
-  const { from, to } = step;
+  const { visitedSlot1, visitedSlot2, direction } = step;
+
+  let node: Node;
+  let edge: Edge;
+  let relativeDirection: EdgeDirection;
+
+  if (visitedSlot1.type === "node" && visitedSlot2.type === "edge") {
+    node = match[visitedSlot1.name] as Node;
+    edge = match[visitedSlot2.name] as Edge;
+    relativeDirection = getOppositeDirection(direction);
+  } else if (visitedSlot1.type === "edge" && visitedSlot2.type === "node") {
+    edge = match[visitedSlot1.name] as Edge;
+    node = match[visitedSlot2.name] as Node;
+    relativeDirection = direction;
+  } else {
+    throw new Error(`Items of identical types cannot be connected.`);
+  }
+
+  if (relativeDirection === "from" || relativeDirection === "fromOrTo") {
+    const isOk = edge.nodes.from === node;
+
+    if (!isOk) {
+      return;
+    }
+  }
+
+  if (relativeDirection === "to" || relativeDirection === "fromOrTo") {
+    const isOk = edge.nodes.to === node;
+
+    if (!isOk) {
+      return;
+    }
+  }
+
+  const [nextStep, ...remainingSteps] = nextSteps;
+
+  if (nextStep === undefined) {
+    yield match;
+  } else {
+    yield* executeSteps(nextStep, remainingSteps, match);
+  }
 }
 
 function* executeIterateIndexStep(
@@ -140,18 +179,19 @@ function* executeIterateIndexStep(
   nextSteps: QueryPlanStep[],
   match: QueryMatch,
 ): Generator<QueryMatch> {
-  const { slot, index, matchItem } = step;
+  const { unvisitedSlot, index, matchItem } = step;
 
   const [nextStep, ...remainingSteps] = nextSteps;
 
-  for (const item of index) {
-    const passesConstraints = checkIsolatedConstraints(item, slot);
+  for (const unvisitedItem of index) {
+    const isOk = checkIsolatedConstraints(unvisitedItem, unvisitedSlot);
 
-    if (!passesConstraints) {
+    if (!isOk) {
       continue;
     }
 
-    match[matchItem] = item;
+    // Now it's been visited
+    match[matchItem] = unvisitedItem;
 
     if (nextStep === undefined) {
       yield match;

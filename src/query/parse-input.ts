@@ -89,6 +89,8 @@ export function parseInput(
     parseObject(input, slots);
   }
 
+  inferLeftoverDirections(slots);
+
   return slots;
 }
 
@@ -341,6 +343,8 @@ function parseNodeQueryItem(
     outputKeys: [],
   };
 
+  slots.node[slotName] = nodeSlot;
+
   nodeSlot.constraints.class = pickMostSpecificClass(
     item.class,
     existingNodeSlot?.constraints.class,
@@ -583,6 +587,8 @@ function parseEdgeQueryItem(
     outputKeys: [],
   };
 
+  slots.edge[slotName] = edgeSlot;
+
   edgeSlot.constraints.class = pickMostSpecificClass(
     item.class,
     existingEdgeSlot?.constraints.class,
@@ -723,5 +729,22 @@ export function getSlotByName(
     if (slot !== undefined) {
       return slot;
     }
+  }
+}
+
+function inferLeftoverDirections(slots: QuerySlots) {
+  // TODO: Go through all nodes and edges and see if we can infer any fromOrTo
+  //  direction if it has a matching from or to direction pair.
+  //  Actually, before doing this, check if we can just do whatever we already
+  //  do to infer the direction for examples like A.to(B).
+}
+
+export function getOppositeDirection(
+  direction: EdgeDirection
+): EdgeDirection {
+  switch (direction) {
+    case "from": return "to";
+    case "to": return "from";
+    case "fromOrTo": return "fromOrTo";
   }
 }

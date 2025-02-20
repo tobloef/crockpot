@@ -17,24 +17,35 @@ export type QueryPlanStep = (
   | IterateIndexStep
 );
 
+/**
+ * Traverse and visit from an already visited slot to an unvisited slot.
+ */
 export type TraverseStep = {
   type: "traverse",
-  from: Slot,
-  to: Slot,
+  visitedSlot: Slot,
+  unvisitedSlot: Slot,
   direction: EdgeDirection,
 };
 
+
+/**
+ * Ensure that two already visited slots are connected.
+ */
 export type EnsureConnectionStep = {
   type: "ensure connection",
-  from: Slot,
-  to: Slot,
+  visitedSlot1: Slot,
+  visitedSlot2: Slot,
+  direction: EdgeDirection,
 };
 
+/**
+ * Visit all items in an index.
+ */
 export type IterateIndexStep = {
   type: "iterate index",
   index: Iterable<Node | Edge>,
   matchItem: string,
-  slot: Slot,
+  unvisitedSlot: Slot,
 };
 
 export function createPlan(
