@@ -10,7 +10,7 @@ import { randomString } from "../utils/random-string.ts";
 
 export type SlotName = string;
 
-export const SLOT_TYPES = ["edge", "node", "unknown"] as const;
+export const SLOT_TYPES = ["node", "edge", "unknown"] as const;
 export type SlotType = typeof SLOT_TYPES[number];
 
 export type QueryFormat = "single" | "array" | "object";
@@ -290,7 +290,7 @@ function parseNodeClass(
   item: Class<Node>,
   slots: QuerySlots
 ): NodeSlot {
-  const slotName = item.name;
+  const slotName = `${item.name} (${randomString()})`;
 
   const existingSlot = slots.node[slotName];
 
@@ -534,7 +534,7 @@ function parseEdgeClass(
   item: Class<Edge>,
   slots: QuerySlots
 ): EdgeSlot {
-  const slotName = item.name;
+  const slotName = `${item.name} (${randomString()})`;
 
   const existingSlot = slots.edge[slotName];
 

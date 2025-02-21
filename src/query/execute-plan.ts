@@ -1,6 +1,12 @@
 import { getOppositeDirection, type Slot, type SlotName } from "./parse-input.ts";
-import type { Graph } from "../graph.ts";
-import type { EnsureConnectionStep, IterateIndexStep, QueryPlan, QueryPlanStep, SubqueryPlan, TraverseStep } from "./create-plan.ts";
+import type {
+  EnsureConnectionStep,
+  IterateIndexStep,
+  QueryPlan,
+  QueryPlanStep,
+  SubqueryPlan,
+  TraverseStep,
+} from "./create-plan.ts";
 import { Node } from "../node/node.ts";
 import { Edge, type EdgeDirection } from "../edge/edge.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
@@ -8,14 +14,14 @@ import { type Class, isClassThatExtends } from "../utils/class.ts";
 
 export type QueryMatch = Record<SlotName, Node | Edge>;
 
-export function executePlan(
+export function* executePlan(
   plan: QueryPlan
 ): Generator<QueryMatch> {
   const subqueryGeneratorFunctions = plan.subqueries.map((subquery) => {
     return () => executeSubqueryPlan(subquery)
   });
 
-  return permuteGeneratorFunctions(subqueryGeneratorFunctions)
+  yield* permuteGeneratorFunctions(subqueryGeneratorFunctions)
 }
 
 function* executeSubqueryPlan(
@@ -149,20 +155,26 @@ function* executeEnsureConnectionStep(
     throw new Error(`Items of identical types cannot be connected.`);
   }
 
-  if (relativeDirection === "from" || relativeDirection === "fromOrTo") {
+  if (relativeDirection === "from") {
     const isOk = edge.nodes.from === node;
 
     if (!isOk) {
       return;
     }
-  }
-
-  if (relativeDirection === "to" || relativeDirection === "fromOrTo") {
+  } else if (relativeDirection === "to") {
     const isOk = edge.nodes.to === node;
 
     if (!isOk) {
       return;
     }
+  } else if (relativeDirection === "fromOrTo") {
+    const isOk = edge.nodes.from === node || edge.nodes.to === node;
+
+    if (!isOk) {
+      return;
+    }
+  } else {
+    assertExhaustive(relativeDirection);
   }
 
   const [nextStep, ...remainingSteps] = nextSteps;

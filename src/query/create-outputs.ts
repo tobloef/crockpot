@@ -5,21 +5,24 @@ import type { Edge } from "../edge/edge.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
 import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput } from "./query.types.ts";
 
-export function createOutputs<
+export function* createOutputs<
   Input extends QueryInput
 >(
-  matches: Generator<QueryMatch>,
+  matchesGenerator: Generator<QueryMatch>,
   slots: QuerySlots
 ): Generator<QueryOutput<Input>> {
   const outputSlots = getOutputSlots(slots);
 
   switch (slots.format) {
     case "single":
-      return (createSingleOutputs(matches, outputSlots) as Generator<QueryOutput<Input>>);
+      yield* createSingleOutputs(matchesGenerator) as Generator<QueryOutput<Input>>;
+      break;
     case "array":
-      return (createArrayOutputs(matches, outputSlots) as Generator<QueryOutput<Input>>);
+      yield* createArrayOutputs(matchesGenerator, outputSlots) as Generator<QueryOutput<Input>>;
+      break;
     case "object":
-      return (createRecordOutputs(matches, outputSlots) as Generator<QueryOutput<Input>>);
+      yield* createRecordOutputs(matchesGenerator, outputSlots) as Generator<QueryOutput<Input>>;
+      break;
     default:
       assertExhaustive(slots.format);
   }
@@ -27,11 +30,10 @@ export function createOutputs<
 
 function* createSingleOutputs(
   matches: Generator<QueryMatch>,
-  outputSlots: Slot[]
 ): Generator<QueryOutput<QueryInputItem>> {
   for (const match of matches) {
-    const slotName = outputSlots[0]!.name;
-    yield match[slotName]! as QueryOutput<QueryInputItem>;
+    const output = Object.values(match)[0] as QueryOutput<QueryInputItem>;
+    yield output;
   }
 }
 
@@ -43,7 +45,9 @@ function* createArrayOutputs(
     const output = [];
 
     for (const slot of outputSlots) {
-      output.push(match[slot.name]!);
+      for (const key of slot.outputKeys) {
+        output[key as number] = match[slot.name]!;
+      }
     }
 
     yield output as QueryOutput<ArrayQueryInput>;
@@ -58,7 +62,9 @@ function* createRecordOutputs(
     const output: Record<string, Node | Edge> = {};
 
     for (const slot of outputSlots) {
-      output[slot.name] = match[slot.name]!;
+      for (const key of slot.outputKeys) {
+        output[key] = match[slot.name]!;
+      }
     }
 
     yield output as QueryOutput<ObjectQueryInput>;

@@ -85,8 +85,10 @@ function recurseSlotAndConnections(
   slots: QuerySlots,
   subqueryPlan: SubqueryPlan,
 ) {
-  const visitsForSlotA = new Set<SlotName>();
-  visits[slot.name] = visitsForSlotA;
+  let visitsForSlotA = visits[slot.name];
+  if (visitsForSlotA === undefined) {
+    visitsForSlotA = new Set<SlotName>();
+  }
 
   const connections = getConnections(slot);
 
