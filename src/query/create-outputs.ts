@@ -11,17 +11,15 @@ export function* createOutputs<
   matchesGenerator: Generator<QueryMatch>,
   slots: QuerySlots
 ): Generator<QueryOutput<Input>> {
-  const outputSlots = getOutputSlots(slots);
-
   switch (slots.format) {
     case "single":
-      yield* createSingleOutputs(matchesGenerator) as Generator<QueryOutput<Input>>;
+      yield* createSingleOutputs(matchesGenerator, slots) as Generator<QueryOutput<Input>>;
       break;
     case "array":
-      yield* createArrayOutputs(matchesGenerator, outputSlots) as Generator<QueryOutput<Input>>;
+      yield* createArrayOutputs(matchesGenerator, slots) as Generator<QueryOutput<Input>>;
       break;
     case "object":
-      yield* createRecordOutputs(matchesGenerator, outputSlots) as Generator<QueryOutput<Input>>;
+      yield* createRecordOutputs(matchesGenerator, slots) as Generator<QueryOutput<Input>>;
       break;
     default:
       assertExhaustive(slots.format);
@@ -30,17 +28,21 @@ export function* createOutputs<
 
 function* createSingleOutputs(
   matches: Generator<QueryMatch>,
+  slots: QuerySlots,
 ): Generator<QueryOutput<QueryInputItem>> {
+  const slot = getAllSlots(slots)[0]!;
   for (const match of matches) {
-    const output = Object.values(match)[0] as QueryOutput<QueryInputItem>;
+    const output = match[slot.name]!;
     yield output;
   }
 }
 
 function* createArrayOutputs(
   matches: Generator<QueryMatch>,
-  outputSlots: Slot[]
+  slots: QuerySlots,
 ): Generator<QueryOutput<ArrayQueryInput>> {
+  const outputSlots = getOutputSlots(slots);
+
   for (const match of matches) {
     const output = [];
 
@@ -56,8 +58,10 @@ function* createArrayOutputs(
 
 function* createRecordOutputs(
   matches: Generator<QueryMatch>,
-  outputSlots: Slot[]
+  slots: QuerySlots,
 ): Generator<QueryOutput<ObjectQueryInput>> {
+  const outputSlots = getOutputSlots(slots);
+
   for (const match of matches) {
     const output: Record<string, Node | Edge> = {};
 

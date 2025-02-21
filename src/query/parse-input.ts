@@ -733,10 +733,65 @@ export function getSlotByName(
 }
 
 function inferLeftoverDirections(slots: QuerySlots) {
-  // TODO: Go through all nodes and edges and see if we can infer any fromOrTo
-  //  direction if it has a matching from or to direction pair.
-  //  Actually, before doing this, check if we can just do whatever we already
-  //  do to infer the direction for examples like A.to(B).
+  for (const edgeSlot of Object.values(slots.edge)) {
+    if (edgeSlot.constraints.nodes === undefined) {
+      continue;
+    }
+
+    const { from, to, fromOrTo } = edgeSlot.constraints.nodes;
+
+    const hasFrom = from !== undefined;
+    const hasTo = to !== undefined;
+    const hasFromOrTo = fromOrTo !== undefined && fromOrTo.length > 0;
+
+    if (hasFrom && hasTo && hasFromOrTo) {
+      throw new Error(`Edge ${edgeSlot.name} cannot have both 'from', 'to', and 'fromOrTo' nodes defined.`);
+    }
+
+    if (hasFrom && hasFromOrTo) {
+      if (fromOrTo.length > 1) {
+        throw new Error(`Edge ${edgeSlot.name} cannot have more than one 'fromOrTo' node defined when 'from' is also defined.`);
+      }
+
+      const newTo = fromOrTo[0]!;
+
+      edgeSlot.constraints.nodes.to = newTo;
+      delete edgeSlot.constraints.nodes.fromOrTo;
+
+      const nodeSlot = slots.node[newTo]!;
+      const nodeFromOrTo = nodeSlot.constraints.edges!.fromOrTo!;
+      nodeFromOrTo.splice(nodeFromOrTo.indexOf(edgeSlot.name), 1);
+
+      if (nodeFromOrTo.length === 0) {
+        delete nodeSlot.constraints.edges!.fromOrTo;
+      }
+
+      nodeSlot.constraints.edges!.to ??= [];
+      nodeSlot.constraints.edges!.to.push(edgeSlot.name);
+    }
+
+    if (hasTo && hasFromOrTo) {
+      if (fromOrTo.length > 1) {
+        throw new Error(`Edge ${edgeSlot.name} cannot have more than one 'fromOrTo' node defined when 'to' is also defined.`);
+      }
+
+      const newFrom = fromOrTo[0]!;
+
+      edgeSlot.constraints.nodes.from = newFrom;
+      delete edgeSlot.constraints.nodes.fromOrTo;
+
+      const nodeSlot = slots.node[newFrom]!;
+      const nodeFromOrTo = nodeSlot.constraints.edges!.fromOrTo!;
+      nodeFromOrTo.splice(nodeFromOrTo.indexOf(edgeSlot.name), 1);
+
+      if (nodeFromOrTo.length === 0) {
+        delete nodeSlot.constraints.edges!.fromOrTo;
+      }
+
+      nodeSlot.constraints.edges!.from ??= [];
+      nodeSlot.constraints.edges!.from.push(edgeSlot.name);
+    }
+  }
 }
 
 export function getOppositeDirection(
