@@ -14,7 +14,7 @@ export function* query<
 ): Generator<QueryOutput<Input>> {
   const slots = parseInput(input);
   const plan = createPlan(slots, graph);
-  const matches = executePlan(plan, graph);
+  const matches = executePlan(plan);
   const rawOutputs = createOutputs<Input>(matches, slots);
   const deduplicatedOutput = deduplicateOutputs<Input>(rawOutputs);
 
