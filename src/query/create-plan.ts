@@ -1,4 +1,4 @@
-import { getAllConnectedSlotNames, getAllSlots, getSlotByName, type QuerySlots, type Slot } from "./parse-input.ts";
+import { getAllConnectedSlotNames, getAllSlots, getSlotByName, type QuerySlots, type Slot, type SlotName } from "./parse-input.ts";
 import type { Graph } from "../graph.ts";
 import { Edge, type EdgeDirection } from "../edge/edge.ts";
 import type { Node } from "../node/node.ts";
@@ -44,8 +44,7 @@ export type EnsureConnectionStep = {
 export type IterateIndexStep = {
   type: "iterate index",
   index: Iterable<Node | Edge>,
-  matchItem: string,
-  unvisitedSlot: Slot,
+  slotToVisit: Slot,
 };
 
 export function createPlan(
@@ -59,15 +58,145 @@ export function createPlan(
   const disjointSets = getDisjointSets(slots);
 
   for (const set of disjointSets) {
-    const startingPoint = getBestStartingPoint(set, graph);
+    const subqueryPlan: SubqueryPlan = {
+      steps: [],
+    };
+    plan.subqueries.push(subqueryPlan);
 
-    plan.subQueries.push({
-      slots: set,
-      startingPoint,
+    const visits: Record<SlotName, Set<SlotName>> = {};
+
+    const startingPoint = getStartingPoint(set, graph);
+
+    subqueryPlan.steps.push({
+      type: "iterate index",
+      index: graph.indices[startingPoint.index],
+      slotToVisit: startingPoint.slot,
     });
+
+    recurseSlotAndConnections(startingPoint.slot, visits, slots, subqueryPlan);
   }
 
   return plan;
+}
+
+function recurseSlotAndConnections(
+  slot: Slot,
+  visits: Record<SlotName, Set<SlotName>>,
+  slots: QuerySlots,
+  subqueryPlan: SubqueryPlan,
+) {
+  const visitsForSlotA = new Set<SlotName>();
+  visits[slot.name] = visitsForSlotA;
+
+  const connections = getConnections(slot);
+
+  for (const connection of connections) {
+    const visitedConnectionBetweenTheseTwo = visitsForSlotA.has(connection.b);
+
+    if (visitedConnectionBetweenTheseTwo) {
+      continue;
+    }
+
+    const slotA = getSlotByName(slots, connection.a)!;
+    const slotB = getSlotByName(slots, connection.b)!;
+
+    let visitsForSlotB = visits[connection.b];
+
+    if (visitsForSlotB === undefined) {
+      subqueryPlan.steps.push({
+        type: "traverse",
+        visitedSlot: slotA,
+        unvisitedSlot: slotB,
+        direction: connection.direction,
+      });
+
+      visitsForSlotB = new Set<SlotName>();
+      visits[connection.b] = visitsForSlotB;
+
+      visitsForSlotB.add(connection.a);
+      visitsForSlotA.add(connection.b);
+
+      recurseSlotAndConnections(slotB, visits, slots, subqueryPlan);
+    } else {
+      subqueryPlan.steps.push({
+        type: "ensure connection",
+        visitedSlot1: slotA,
+        visitedSlot2: slotB,
+        direction: connection.direction,
+      });
+
+      visitsForSlotB.add(connection.a);
+      visitsForSlotA.add(connection.b);
+    }
+  }
+}
+
+function getConnections(
+  slot: Slot,
+) {
+  const connections: Array<{
+    a: SlotName,
+    b: SlotName,
+    direction: EdgeDirection,
+  }> = [];
+
+  if (slot.type === "node") {
+    for (const fromEdge of slot.constraints.edges?.from ?? []) {
+      const direction: EdgeDirection = "from";
+      connections.push({
+        a: slot.name,
+        b: fromEdge,
+        direction,
+      });
+    }
+
+    for (const toEdge of slot.constraints.edges?.to ?? []) {
+      const direction: EdgeDirection = "to";
+      connections.push({
+        a: slot.name,
+        b: toEdge,
+        direction,
+      });
+    }
+
+    for (const fromOrToEdge of slot.constraints.edges?.fromOrTo ?? []) {
+      const direction: EdgeDirection = "fromOrTo";
+      connections.push({
+        a: slot.name,
+        b: fromOrToEdge,
+        direction,
+      });
+    }
+  } else if (slot.type === "edge") {
+    if (slot.constraints.nodes?.to !== undefined) {
+      const direction: EdgeDirection = "to";
+      connections.push({
+        a: slot.name,
+        b: slot.constraints.nodes.to,
+        direction,
+      });
+    }
+
+    if (slot.constraints.nodes?.from !== undefined) {
+      const direction: EdgeDirection = "from";
+      connections.push({
+        a: slot.name,
+        b: slot.constraints.nodes.from,
+        direction,
+      });
+    }
+
+    for (const fromOrToNode of slot.constraints.nodes?.fromOrTo ?? []) {
+      const direction: EdgeDirection = "fromOrTo";
+      connections.push({
+        a: slot.name,
+        b: fromOrToNode,
+        direction,
+      });
+    }
+  }
+
+  return connections;
 }
 
 function getDisjointSets(slots: QuerySlots): Set<Slot>[] {
@@ -102,7 +231,7 @@ function getDisjointSets(slots: QuerySlots): Set<Slot>[] {
   return disjointSets;
 }
 
-function getBestStartingPoint(slots: Set<Slot>, graph: Graph): StartingPoint {
+function getStartingPoint(slots: Set<Slot>, graph: Graph) {
   // TODO: This is a placeholder implementation.
   const firstSlot = Array.from(slots)[0];
 

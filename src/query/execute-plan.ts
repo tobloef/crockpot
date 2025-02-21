@@ -179,19 +179,19 @@ function* executeIterateIndexStep(
   nextSteps: QueryPlanStep[],
   match: QueryMatch,
 ): Generator<QueryMatch> {
-  const { unvisitedSlot, index, matchItem } = step;
+  const { slotToVisit, index } = step;
 
   const [nextStep, ...remainingSteps] = nextSteps;
 
-  for (const unvisitedItem of index) {
-    const isOk = checkIsolatedConstraints(unvisitedItem, unvisitedSlot);
+  for (const item of index) {
+    const isOk = checkIsolatedConstraints(item, slotToVisit);
 
     if (!isOk) {
       continue;
     }
 
     // Now it's been visited
-    match[matchItem] = unvisitedItem;
+    match[slotToVisit.name] = item;
 
     if (nextStep === undefined) {
       yield match;

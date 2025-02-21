@@ -19,10 +19,10 @@ export type QuerySlots = {
   format: QueryFormat,
   node: Record<SlotName, NodeSlot>;
   edge: Record<SlotName, EdgeSlot>;
-  unknown: Record<SlotName, UnknownSlot2>;
+  unknown: Record<SlotName, UnknownSlot>;
 };
 
-export type Slot = NodeSlot | EdgeSlot | UnknownSlot2;
+export type Slot = NodeSlot | EdgeSlot | UnknownSlot;
 
 export type NodeSlot = {
   type: "node",
@@ -56,7 +56,7 @@ export type EdgeSlot = {
   outputKeys: string[] | number[],
 };
 
-export type UnknownSlot2 = {
+export type UnknownSlot = {
   type: "unknown",
   name: SlotName,
   constraints: {},
