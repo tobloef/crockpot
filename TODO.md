@@ -1,11 +1,10 @@
 - Optimizations
   - Graph traversal
-    - `createPlan` and tests
-    - `executePlan` and tests
+    - Fix tests
+  - Benchmarks
   - Generators vs array functions vs item functions?
   - Find some worst-case scenarios based on implementation
   - Profile more
-- Refactors
 - Observers
 - Caching
 - Hierarchies
