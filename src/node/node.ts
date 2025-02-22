@@ -6,7 +6,7 @@ import { type Graph } from "../graph.ts";
 import { NamedNodeQueryItem, RelatedNodeQueryItem } from "./node-query-item.ts";
 
 export class Node {
-  #brand = 'Node' as const;
+  #brand = "Node" as const;
 
   static defaultGraph: Graph;
 
@@ -90,7 +90,7 @@ export class Node {
   >(
     input: Input
   ): AddedEdge<Input> {
-    if ('to' in input) {
+    if ("to" in input) {
       return this.graph.addEdge({
         from: this,
         to: input.to,
@@ -110,13 +110,13 @@ export class Node {
   }
 
   removeEdges(input?: RemoveEdgeInput): void {
-    if (input !== undefined && 'to' in input) {
+    if (input !== undefined && "to" in input) {
       this.graph.removeEdgesByNodes({
         from: this,
         to: input.to,
         type: input.type,
       });
-    } else if (input !== undefined && 'from' in input) {
+    } else if (input !== undefined && "from" in input) {
       this.graph.removeEdgesByNodes({
         from: input.from,
         to: this,

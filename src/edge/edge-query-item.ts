@@ -5,7 +5,7 @@ import type { Nodelike, ReferenceName, } from "../query/query.types.ts";
 export abstract class EdgeQueryItem<
   ClassType extends Class<Edge> = Class<Edge>,
 > {
-  #brand = 'EdgeQueryItem' as const;
+  #brand = "EdgeQueryItem" as const;
 
   class: ClassType;
 
@@ -20,7 +20,7 @@ export class NamedEdgeQueryItem<
   ClassType extends Class<Edge> = Class<Edge>,
   Name extends string = ReferenceName
 > extends EdgeQueryItem<ClassType> {
-  #brand = 'NamedEdgeQueryItem' as const;
+  #brand = "NamedEdgeQueryItem" as const;
 
   name: Name;
 
@@ -74,7 +74,7 @@ export class NamedEdgeQueryItem<
     ...items: FromOrToItems
   ) {
     if (items.length > 2) {
-      throw new Error(`The 'fromOrTo' parameter can only accept up to 2 items, but ${items.length} were given.`);
+      throw new Error(`The "fromOrTo" parameter can only accept up to 2 items, but ${items.length} were given.`);
     }
 
     return new NamedRelatedEdgeQueryItem<
@@ -97,7 +97,7 @@ export class RelatedEdgeQueryItem<
   FromItem extends Nodelike = Nodelike,
   FromOrToItems extends Nodelike[] = Nodelike[],
 > extends EdgeQueryItem<ClassType> {
-  #brand = 'RelatedEdgeQueryItem' as const;
+  #brand = "RelatedEdgeQueryItem" as const;
 
   toItem?: ToItem;
   fromItem?: FromItem;
@@ -175,7 +175,7 @@ export class NamedRelatedEdgeQueryItem<
   FromItem extends Nodelike = Nodelike,
   FromOrToItems extends Nodelike[] = Nodelike[],
 > extends EdgeQueryItem<ClassType> {
-  #brand = 'NamedRelatedEdgeQueryItem' as const;
+  #brand = "NamedRelatedEdgeQueryItem" as const;
 
   name: Name;
   toItem?: ToItem;

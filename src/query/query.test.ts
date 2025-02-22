@@ -1414,6 +1414,31 @@ describe("query", () => {
     ]);
   });
 
+  it("Can circularly reference nodes (smol)", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+
+    graph.addEdge({ from: node1, to: node2 });
+    graph.addEdge({ from: node2, to: node1 });
+
+    // Act
+    const arrayResult = graph.query([
+      Node.as("a").with(Edge.as("a-to-b").to("b")),
+      Node.as("b").with(Edge.as("b-to-a").to("a")),
+    ]).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Node ][]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node2, node1 ],
+      [ node1, node2 ],
+    ]);
+  });
+
   it("Can circularly reference nodes", () => {
     // Arrange
     const graph = new Graph();
@@ -1450,14 +1475,14 @@ describe("query", () => {
     typesEqual<typeof objectResult, { a: Node, b: Node, c: Node }[]>(true);
 
     deepStrictEqual(arrayResult, [
-      [ node1, node2, node3 ],
       [ node2, node3, node1 ],
       [ node3, node1, node2 ],
+      [ node1, node2, node3 ],
     ]);
     deepStrictEqual(objectResult, [
-      { a: node1, b: node2, c: node3 },
       { a: node2, b: node3, c: node1 },
       { a: node3, b: node1, c: node2 },
+      { a: node1, b: node2, c: node3 },
     ]);
   });
 

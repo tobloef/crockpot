@@ -89,6 +89,7 @@ function recurseSlotAndConnections(
   let visitsForSlotA = visits[slot.name];
   if (visitsForSlotA === undefined) {
     visitsForSlotA = new Set<SlotName>();
+    visits[slot.name] = visitsForSlotA;
   }
 
   const connections = getConnections(slot);

@@ -5,7 +5,7 @@ import type { Edgelike, Nodelike, ReferenceName, } from "../query/query.types.ts
 export class NodeQueryItem<
   ClassType extends Class<Node> = Class<Node>,
 > {
-  #brand = 'NodeQueryItem' as const;
+  #brand = "NodeQueryItem" as const;
 
   class: ClassType;
 
@@ -23,7 +23,7 @@ export class RelatedNodeQueryItem<
   FromItems extends Nodelike[] = Nodelike[],
   FromOrToItems extends Nodelike[] = Nodelike[],
 > extends NodeQueryItem<ClassType> {
-  #brand = 'RelatedNodeQueryItem' as const;
+  #brand = "RelatedNodeQueryItem" as const;
 
   withItems?: WithItems;
   toItems?: ToItems;
@@ -71,7 +71,7 @@ export class NamedNodeQueryItem<
   ClassType extends Class<Node> = Class<Node>,
   Name extends ReferenceName = ReferenceName
 > extends NodeQueryItem<ClassType> {
-  #brand = 'NamedNodeQueryItem' as const;
+  #brand = "NamedNodeQueryItem" as const;
 
   name: Name;
 
@@ -168,7 +168,7 @@ export class NamedRelatedNodeQueryItem<
   FromItems extends Nodelike[] = Nodelike[],
   FromOrToItems extends Nodelike[] = Nodelike[],
 > extends NodeQueryItem<ClassType> {
-  #brand = 'NamedRelatedNodeQueryItem' as const;
+  #brand = "NamedRelatedNodeQueryItem" as const;
 
   name: Name;
   withItems?: WithItems;
