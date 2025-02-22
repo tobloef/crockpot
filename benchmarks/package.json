@@ -5,7 +5,8 @@
     "@tobloef/crockpot-local": "file:../dist",
     "@tobloef/crockpot-v1.0.0": "git+https://git@github.com/tobloef/crockpot.git#v1.0.0",
     "@tobloef/crockpot-v1.1.0": "git+https://git@github.com/tobloef/crockpot.git#v1.1.0",
-    "@tobloef/crockpot-v1.2.0": "git+https://git@github.com/tobloef/crockpot.git#v1.2.0"
+    "@tobloef/crockpot-v1.2.0": "git+https://git@github.com/tobloef/crockpot.git#v1.2.0",
+    "@tobloef/crockpot-v1.3.0": "git+https://git@github.com/tobloef/crockpot.git#v1.3.0"
   },
   "scripts": {
     "benchmark": "node runner.ts"
