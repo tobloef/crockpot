@@ -29,11 +29,11 @@ const setupOutput = suite.setup({
 });
 
 function getHeapUsed() {
-  return (process.memoryUsage().heapUsed/1024/1024).toPrecision(2) + " MB";
+  return (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2) + " MB";
 }
-console.log("\nHeap used, pre-run, pre-gc:", getHeapUsed());
+console.log("\nHeap used pre-run pre-gc:", getHeapUsed());
 gc();
-console.log("Heap used, pre-run, post-gc:", getHeapUsed());
+console.log("Heap used pre-run post-gc:", getHeapUsed());
 
 console.log(`\nSetup complete, running suite ${iterations} times...`);
 
@@ -52,9 +52,9 @@ for (let i = 0; i < iterations; i++) {
   runTimes.push(duration);
 }
 
-console.log("\nHeap used, post-run, pre-gc:", getHeapUsed());
+console.log("\nHeap used post-run pre-gc:", getHeapUsed());
 gc();
-console.log("Heap used, post-run, post-gc:", getHeapUsed());
+console.log("Heap used post-run post-gc:", getHeapUsed());
 
 const numerically = (a: number, b: number) => a - b;
 
