@@ -1,7 +1,4 @@
 - Optimizations
-  - Implement algorithm for `getStartingPoint`
-    - Tests
-    - Benchmarks
   - Find some worst-case scenarios based on implementation
   - Profile more
 - Observers

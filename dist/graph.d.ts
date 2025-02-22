@@ -4,8 +4,6 @@ import type { ArrayQueryInput, ObjectQueryInput, QueryInputItem, QueryOutput, Qu
 import { type Class } from "./utils/class.ts";
 export declare class Graph {
     indices: {
-        allNodes: Set<Node>;
-        allEdges: Set<Edge>;
         nodesByEdge: Map<Edge, {
             from: Node;
             to: Node;

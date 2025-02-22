@@ -3,6 +3,7 @@ import type { Graph } from "../graph.ts";
 import { Edge, type EdgeDirection } from "../edge/edge.ts";
 import { Node } from "../node/node.ts";
 import { combineGenerators, iterableToGenerator } from "../utils/generators.ts";
+import { assertExhaustive } from "../utils/assert-exhaustive.ts";
 
 export type QueryPlan = {
   subqueries: SubqueryPlan[]
@@ -67,6 +68,10 @@ export function createPlan(
     const visits: Record<SlotName, Set<SlotName>> = {};
 
     const startingPoint = getStartingPoint(set, graph);
+
+    if (startingPoint === undefined) {
+      continue;
+    }
 
     subqueryPlan.steps.push({
       type: "iterate index",
@@ -235,33 +240,94 @@ function getDisjointSets(slots: QuerySlots): Set<Slot>[] {
   return disjointSets;
 }
 
-function getStartingPoint(slots: Set<Slot>, graph: Graph) {
-  // TODO: This is a placeholder implementation.
-  const firstSlot = Array.from(slots)[0];
+export type StartingPoint = {
+  slot: Slot,
+  index: Iterable<Node | Edge>,
+  size: number,
+};
 
-  if (firstSlot === undefined) {
-    throw new Error("Got empty set of slots.");
-  }
+export function getStartingPoint(
+  slots: Set<Slot>,
+  graph: Graph
+): StartingPoint | undefined {
+  const potentialStartingPoints: StartingPoint[] = [];
 
-  const allNodes = graph.indices.nodesByType.get(Node) ?? [];
-  const allEdges = graph.indices.edgesByType.get(Edge) ?? [];
-
-  let allOfTypeIndex: Iterable<Node | Edge>;
-
-  if (firstSlot.type === "node") {
-    allOfTypeIndex = allNodes;
-  } else if (firstSlot.type === "edge") {
-    allOfTypeIndex = allEdges;
-  } else {
-    allOfTypeIndex = combineGenerators<Node | Edge>(
-      iterableToGenerator(allNodes),
-      iterableToGenerator(allEdges),
+  for (const slot of slots) {
+    potentialStartingPoints.push(
+      getStartingPointForSlot(slot, graph)
     );
   }
 
-  return {
-    slot: firstSlot,
-    index: allOfTypeIndex,
-  };
+  const sortedStartingPoints = potentialStartingPoints.toSorted(
+    (a, b) => a.size - b.size
+  );
+
+  const smallestStartingPoint = sortedStartingPoints[0];
+
+  return smallestStartingPoint;
 }
+
+function getStartingPointForSlot(
+  slot: Slot,
+  graph: Graph
+): StartingPoint {
+  switch (slot.type) {
+    case "node": {
+      if (slot.constraints.instance !== undefined) {
+        return {
+          slot,
+          index: [slot.constraints.instance],
+          size: 1,
+        }
+      }
+
+      const index = graph.indices.nodesByType.get(
+        slot.constraints.class ?? Node
+      );
+
+      return {
+        slot,
+        index: index ?? [],
+        size: index?.size ?? 0,
+      };
+    }
+    case "edge": {
+      if (slot.constraints.instance !== undefined) {
+        return {
+          slot,
+          index: [slot.constraints.instance],
+          size: 1,
+        }
+      }
+
+      const index = graph.indices.edgesByType.get(
+        slot.constraints.class ?? Edge
+      );
+
+      return {
+        slot,
+        index: index ?? [],
+        size: index?.size ?? 0,
+      };
+    }
+    case "unknown": {
+      const allNodes = graph.indices.nodesByType.get(Node);
+      const allEdges = graph.indices.edgesByType.get(Edge);
+      const allItems = combineGenerators<Node | Edge>(
+        iterableToGenerator(allNodes ?? []),
+        iterableToGenerator(allEdges ?? []),
+      );
+
+      return {
+        slot,
+        index: allItems,
+        size: (allNodes?.size ?? 0) + (allEdges?.size ?? 0),
+      }
+    }
+    default: {
+      assertExhaustive(slot);
+    }
+  }
+}
+
 

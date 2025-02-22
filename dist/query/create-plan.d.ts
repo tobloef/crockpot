@@ -1,7 +1,7 @@
 import { type QuerySlots, type Slot } from "./parse-input.ts";
 import type { Graph } from "../graph.ts";
 import { Edge, type EdgeDirection } from "../edge/edge.ts";
-import type { Node } from "../node/node.ts";
+import { Node } from "../node/node.ts";
 export type QueryPlan = {
     subqueries: SubqueryPlan[];
 };
@@ -36,3 +36,9 @@ export type IterateIndexStep = {
     slotToVisit: Slot;
 };
 export declare function createPlan(slots: QuerySlots, graph: Graph): QueryPlan;
+export type StartingPoint = {
+    slot: Slot;
+    index: Iterable<Node | Edge>;
+    size: number;
+};
+export declare function getStartingPoint(slots: Set<Slot>, graph: Graph): StartingPoint | undefined;

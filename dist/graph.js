@@ -4,8 +4,6 @@ import { query } from "./query/query.js";
 import { getClassHierarchy } from "./utils/class.js";
 export class Graph {
     indices = {
-        allNodes: new Set(),
-        allEdges: new Set(),
         nodesByEdge: new Map(),
         edgesByNode: new Map(),
         nodesByType: new Map(),
@@ -15,10 +13,10 @@ export class Graph {
         return query(this, input);
     }
     addNode(node) {
-        if (this.indices.allNodes.has(node)) {
+        const allNodes = this.indices.nodesByType.get(Node);
+        if (allNodes?.has(node)) {
             return node;
         }
-        this.indices.allNodes.add(node);
         const types = getClassHierarchy(node.constructor);
         for (const type of types) {
             let nodesByType = this.indices.nodesByType.get(type);
@@ -53,7 +51,6 @@ export class Graph {
         return nodes.map((n) => this.addNode(n));
     }
     removeNode(node) {
-        this.indices.allNodes.delete(node);
         const edgesByNode = this.indices.edgesByNode.get(node);
         if (edgesByNode !== undefined) {
             for (const edge of edgesByNode.from) {
@@ -89,12 +86,12 @@ export class Graph {
         }
     }
     addEdge(input) {
+        const allEdges = this.indices.edgesByType.get(Edge);
         if (input.edge !== undefined &&
-            this.indices.allEdges.has(input.edge)) {
+            allEdges?.has(input.edge)) {
             return input.edge;
         }
         const edge = input.edge ?? new Edge();
-        this.indices.allEdges.add(edge);
         const types = getClassHierarchy(edge.constructor);
         for (const type of types) {
             let edgesByType = this.indices.edgesByType.get(type);
@@ -141,7 +138,6 @@ export class Graph {
         return edge;
     }
     removeEdge(edge) {
-        this.indices.allEdges.delete(edge);
         const nodesByEdge = this.indices.nodesByEdge.get(edge);
         if (nodesByEdge !== undefined) {
             this.indices.edgesByNode.get(nodesByEdge.from)?.from.delete(edge);

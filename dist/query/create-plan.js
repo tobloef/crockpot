@@ -1,6 +1,8 @@
 import { getAllConnectedSlotNames, getAllSlots, getSlotByName } from "./parse-input.js";
 import { Edge } from "../edge/edge.js";
+import { Node } from "../node/node.js";
 import { combineGenerators, iterableToGenerator } from "../utils/generators.js";
+import { assertExhaustive } from "../utils/assert-exhaustive.js";
 export function createPlan(slots, graph) {
     let plan = {
         subqueries: [],
@@ -13,6 +15,9 @@ export function createPlan(slots, graph) {
         plan.subqueries.push(subqueryPlan);
         const visits = {};
         const startingPoint = getStartingPoint(set, graph);
+        if (startingPoint === undefined) {
+            continue;
+        }
         subqueryPlan.steps.push({
             type: "iterate index",
             index: startingPoint.index,
@@ -143,25 +148,60 @@ function getDisjointSets(slots) {
     }
     return disjointSets;
 }
-function getStartingPoint(slots, graph) {
-    // TODO: This is a placeholder implementation.
-    const firstSlot = Array.from(slots)[0];
-    if (firstSlot === undefined) {
-        throw new Error("Got empty set of slots.");
+export function getStartingPoint(slots, graph) {
+    const potentialStartingPoints = [];
+    for (const slot of slots) {
+        potentialStartingPoints.push(getStartingPointForSlot(slot, graph));
     }
-    let allOfTypeIndex;
-    if (firstSlot.type === "node") {
-        allOfTypeIndex = graph.indices.allNodes;
+    const sortedStartingPoints = potentialStartingPoints.toSorted((a, b) => a.size - b.size);
+    const smallestStartingPoint = sortedStartingPoints[0];
+    return smallestStartingPoint;
+}
+function getStartingPointForSlot(slot, graph) {
+    switch (slot.type) {
+        case "node": {
+            if (slot.constraints.instance !== undefined) {
+                return {
+                    slot,
+                    index: [slot.constraints.instance],
+                    size: 1,
+                };
+            }
+            const index = graph.indices.nodesByType.get(slot.constraints.class ?? Node);
+            return {
+                slot,
+                index: index ?? [],
+                size: index?.size ?? 0,
+            };
+        }
+        case "edge": {
+            if (slot.constraints.instance !== undefined) {
+                return {
+                    slot,
+                    index: [slot.constraints.instance],
+                    size: 1,
+                };
+            }
+            const index = graph.indices.edgesByType.get(slot.constraints.class ?? Edge);
+            return {
+                slot,
+                index: index ?? [],
+                size: index?.size ?? 0,
+            };
+        }
+        case "unknown": {
+            const allNodes = graph.indices.nodesByType.get(Node);
+            const allEdges = graph.indices.edgesByType.get(Edge);
+            const allItems = combineGenerators(iterableToGenerator(allNodes ?? []), iterableToGenerator(allEdges ?? []));
+            return {
+                slot,
+                index: allItems,
+                size: (allNodes?.size ?? 0) + (allEdges?.size ?? 0),
+            };
+        }
+        default: {
+            assertExhaustive(slot);
+        }
     }
-    else if (firstSlot.type === "edge") {
-        allOfTypeIndex = graph.indices.allEdges;
-    }
-    else {
-        allOfTypeIndex = combineGenerators(iterableToGenerator(graph.indices.allNodes), iterableToGenerator(graph.indices.allEdges));
-    }
-    return {
-        slot: firstSlot,
-        index: allOfTypeIndex,
-    };
 }
 //# sourceMappingURL=create-plan.js.map
