@@ -2,7 +2,6 @@
   - Implement algorithm for `getStartingPoint`
     - Tests
     - Benchmarks
-  - Generators vs array functions vs item functions?
   - Find some worst-case scenarios based on implementation
   - Profile more
 - Observers
