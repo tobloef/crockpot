@@ -651,10 +651,6 @@ function setNodeConstraintsOnEdge(
   edgeSlot.constraints.nodes ??= {};
 
   if (parentDirection === "fromOrTo") {
-    if (edgeSlot.constraints.nodes.fromOrTo?.length === 2) {
-      throw new Error(`Edge "${edgeSlot.name}" cannot have more than two nodes defined.`);
-    }
-
     edgeSlot.constraints.nodes.fromOrTo ??= [];
     edgeSlot.constraints.nodes.fromOrTo.push(nodeSlot.name);
   } else {
@@ -745,12 +741,12 @@ function inferLeftoverDirections(slots: QuerySlots) {
     const hasFromOrTo = fromOrTo !== undefined && fromOrTo.length > 0;
 
     if (hasFrom && hasTo && hasFromOrTo) {
-      throw new Error(`Edge ${edgeSlot.name} cannot have both "from", "to", and "fromOrTo" nodes defined.`);
+      return;
     }
 
     if (hasFrom && hasFromOrTo) {
       if (fromOrTo.length > 1) {
-        throw new Error(`Edge "${edgeSlot.name}" cannot have more than one "fromOrTo" node defined when "from" is also defined.`);
+        return;
       }
 
       const newTo = fromOrTo[0]!;
@@ -772,7 +768,7 @@ function inferLeftoverDirections(slots: QuerySlots) {
 
     if (hasTo && hasFromOrTo) {
       if (fromOrTo.length > 1) {
-        throw new Error(`Edge "${edgeSlot.name}" cannot have more than one "fromOrTo" node defined when "to" is also defined.`);
+        return;
       }
 
       const newFrom = fromOrTo[0]!;
