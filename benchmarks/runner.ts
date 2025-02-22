@@ -32,7 +32,7 @@ function getHeapUsed() {
   return (process.memoryUsage().heapUsed/1024/1024).toPrecision(2) + " MB";
 }
 console.log("\nHeap used, pre-run, pre-gc:", getHeapUsed());
-global.gc();
+gc();
 console.log("Heap used, pre-run, post-gc:", getHeapUsed());
 
 console.log(`\nSetup complete, running suite ${iterations} times...`);
@@ -53,7 +53,7 @@ for (let i = 0; i < iterations; i++) {
 }
 
 console.log("\nHeap used, post-run, pre-gc:", getHeapUsed());
-global.gc();
+gc();
 console.log("Heap used, post-run, post-gc:", getHeapUsed());
 
 const numerically = (a: number, b: number) => a - b;
