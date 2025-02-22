@@ -6,8 +6,6 @@ import { type Class, getClassHierarchy } from "./utils/class.ts";
 
 export class Graph {
   indices = {
-    allNodes: new Set<Node>(),
-    allEdges: new Set<Edge>(),
     nodesByEdge: new Map<Edge, { from: Node, to: Node }>(),
     edgesByNode: new Map<Node, { from: Set<Edge>, to: Set<Edge> }>(),
     nodesByType: new Map<Class<Node>, Set<Node>>(),
@@ -33,11 +31,10 @@ export class Graph {
   }
 
   addNode<N extends Node>(node: N): N {
-    if (this.indices.allNodes.has(node)) {
+    const allNodes = this.indices.nodesByType.get(Node);
+    if (allNodes?.has(node)) {
       return node;
     }
-
-    this.indices.allNodes.add(node);
 
     const types = getClassHierarchy(node.constructor as Class<Node>);
 
@@ -85,8 +82,6 @@ export class Graph {
   }
 
   removeNode(node: Node): void {
-    this.indices.allNodes.delete(node);
-
     const edgesByNode = this.indices.edgesByNode.get(node);
     if (edgesByNode !== undefined) {
       for (const edge of edgesByNode.from) {
@@ -134,16 +129,16 @@ export class Graph {
   addEdge<E extends Edge>(
     input: AddEdgeInput<E>
   ): E {
+    const allEdges = this.indices.edgesByType.get(Edge);
+
     if (
       input.edge !== undefined &&
-      this.indices.allEdges.has(input.edge)
+      allEdges?.has(input.edge)
     ) {
       return input.edge;
     }
 
     const edge = input.edge ?? new Edge();
-
-    this.indices.allEdges.add(edge);
 
     const types = getClassHierarchy(edge.constructor as Class<Edge>);
 
@@ -203,9 +198,8 @@ export class Graph {
   }
 
   removeEdge(edge: Edge): void {
-    this.indices.allEdges.delete(edge);
-
     const nodesByEdge = this.indices.nodesByEdge.get(edge);
+
     if (nodesByEdge !== undefined) {
       this.indices.edgesByNode.get(nodesByEdge.from)?.from.delete(edge);
       this.indices.edgesByNode.get(nodesByEdge.to)?.to.delete(edge);

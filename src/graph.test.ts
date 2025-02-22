@@ -30,18 +30,6 @@ class ChildEdge extends TestEdge {}
 
 describe("Graph", () => {
   describe("addNode", () => {
-    it("Node is added to allNodes index", () => {
-      // Arrange
-      const graph = new Graph();
-      const nodeToAdd = new TestNode(1);
-
-      // Act
-      graph.addNode(nodeToAdd);
-
-      // Assert
-      ok(graph.indices.allNodes.has(nodeToAdd));
-    });
-
     it("Node is added to nodesByType index", () => {
       // Arrange
       const graph = new Graph();
@@ -89,7 +77,8 @@ describe("Graph", () => {
       graph.addNode(nodeToAdd);
 
       // Assert
-      strictEqual(graph.indices.allNodes.size, 1);
+      const allNodes = graph.indices.nodesByType.get(Node);
+      strictEqual(allNodes?.size, 1);
     });
 
     it("Sets the node's graph to the graph", () => {
@@ -207,8 +196,8 @@ describe("Graph", () => {
       graph.removeNode(node);
 
       // Assert
-      const hasNode = graph.indices.allNodes.has(node);
-      strictEqual(hasNode, false);
+      const allNodes = graph.indices.nodesByType.get(Node);
+      strictEqual(allNodes?.has(node), false);
     });
 
     it("Node is removed from the nodesByType index", () => {
@@ -341,7 +330,8 @@ describe("Graph", () => {
       });
 
       // Assert
-      ok(graph.indices.allEdges.has(edge));
+      const allEdges = graph.indices.edgesByType.get(Edge);
+      ok(allEdges?.has(edge));
     });
 
     it("Edge is added to edgesByType index", () => {
@@ -412,7 +402,8 @@ describe("Graph", () => {
       });
 
       // Assert
-      strictEqual(graph.indices.allEdges.size, 1);
+      const allEdges = graph.indices.edgesByType.get(Edge);
+      strictEqual(allEdges?.size, 1);
     });
 
     it("Edge's nodes are added to nodesByEdge index", () => {
@@ -514,8 +505,8 @@ describe("Graph", () => {
       graph.removeEdge(edge);
 
       // Assert
-      const hasEdge = graph.indices.allEdges.has(edge);
-      strictEqual(hasEdge, false);
+      const allEdges = graph.indices.edgesByType.get(Edge);
+      strictEqual(allEdges?.has(edge), false);
     });
 
     it("Edge is removed from the edgesByType index", () => {

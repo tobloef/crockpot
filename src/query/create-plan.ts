@@ -1,7 +1,7 @@
 import { getAllConnectedSlotNames, getAllSlots, getSlotByName, type QuerySlots, type Slot, type SlotName } from "./parse-input.ts";
 import type { Graph } from "../graph.ts";
 import { Edge, type EdgeDirection } from "../edge/edge.ts";
-import type { Node } from "../node/node.ts";
+import { Node } from "../node/node.ts";
 import { combineGenerators, iterableToGenerator } from "../utils/generators.ts";
 
 export type QueryPlan = {
@@ -243,16 +243,19 @@ function getStartingPoint(slots: Set<Slot>, graph: Graph) {
     throw new Error("Got empty set of slots.");
   }
 
+  const allNodes = graph.indices.nodesByType.get(Node) ?? [];
+  const allEdges = graph.indices.edgesByType.get(Edge) ?? [];
+
   let allOfTypeIndex: Iterable<Node | Edge>;
 
   if (firstSlot.type === "node") {
-    allOfTypeIndex = graph.indices.allNodes;
+    allOfTypeIndex = allNodes;
   } else if (firstSlot.type === "edge") {
-    allOfTypeIndex = graph.indices.allEdges;
+    allOfTypeIndex = allEdges;
   } else {
     allOfTypeIndex = combineGenerators<Node | Edge>(
-      iterableToGenerator(graph.indices.allNodes),
-      iterableToGenerator(graph.indices.allEdges),
+      iterableToGenerator(allNodes),
+      iterableToGenerator(allEdges),
     );
   }
 
