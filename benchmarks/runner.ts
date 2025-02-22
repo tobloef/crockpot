@@ -1,4 +1,5 @@
 import seedrandom from "seedrandom";
+import { waitForEnter } from "../src/utils/wait-for-newline.ts";
 
 import * as crockpot_1_0_0 from "@tobloef/crockpot-v1.0.0";
 import * as crockpot_1_1_0 from "@tobloef/crockpot-v1.1.0";
@@ -28,6 +29,7 @@ const setupOutput = suite.setup({
 });
 
 console.log(`\nSetup complete, running suite ${iterations} times...`);
+//await waitForEnter();
 
 let runTimes: number[] = [];
 

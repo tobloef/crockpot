@@ -1,6 +1,3 @@
-- Optimizations
-  - Find some worst-case scenarios based on implementation
-  - Profile more
 - Observers
 - Caching
 - Hierarchies
