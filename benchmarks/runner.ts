@@ -11,10 +11,13 @@ import * as suite_find_many_of_type from "./suites/query/find-many-of-type.ts";
 import * as suite_find_many_deep_query from "./suites/query/find-many-deep-query.ts";
 import * as suite_find_many_wide_query from "./suites/query/find-many-wide-query.ts";
 
-const crockpot = crockpot_local;
-const suite = suite_find_many_wide_query;
+////////////////////////////////////////////////
 
+const crockpot = crockpot_local;
+const suite = suite_spaceship;
 const iterations = 100;
+
+////////////////////////////////////////////////
 
 const rng = seedrandom("1234");
 
@@ -24,7 +27,6 @@ const setupOutput = suite.setup({
 });
 
 console.log(`\nSetup complete, running suite ${iterations} times...`);
-
 
 let runTimes: number[] = [];
 
