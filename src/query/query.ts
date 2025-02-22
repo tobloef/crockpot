@@ -13,15 +13,11 @@ export function* query<
   graph: Graph,
   input: Input,
 ): Generator<QueryOutput<Input>> {
-  // TODO: Remove superfluous array conversions
   const slots = parseInput(input);
   const plan = createPlan(slots, graph);
-  const matches = executePlan(plan).toArray();
-  const matchesGenerator = iterableToGenerator(matches);
-  const rawOutputs = createOutputs<Input>(matchesGenerator, slots).toArray();
-  const rawOutputsGenerator = iterableToGenerator(rawOutputs);
-  const deduplicatedOutput = deduplicateOutputs<Input>(rawOutputsGenerator).toArray();
-  const deduplicatedOutputGenerator = iterableToGenerator(deduplicatedOutput);
+  const matchesGenerator = executePlan(plan);
+  const rawOutputsGenerator = createOutputs<Input>(matchesGenerator, slots)
+  const deduplicatedOutputGenerator = deduplicateOutputs<Input>(rawOutputsGenerator);
 
   yield* deduplicatedOutputGenerator;
 }
