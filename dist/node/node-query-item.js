@@ -1,13 +1,13 @@
 import { Node } from "./node.js";
 export class NodeQueryItem {
-    #brand = 'NodeQueryItem';
+    #brand = "NodeQueryItem";
     class;
     constructor(params) {
         this.class = params.class;
     }
 }
 export class RelatedNodeQueryItem extends NodeQueryItem {
-    #brand = 'RelatedNodeQueryItem';
+    #brand = "RelatedNodeQueryItem";
     withItems;
     toItems;
     fromItems;
@@ -31,7 +31,7 @@ export class RelatedNodeQueryItem extends NodeQueryItem {
     }
 }
 export class NamedNodeQueryItem extends NodeQueryItem {
-    #brand = 'NamedNodeQueryItem';
+    #brand = "NamedNodeQueryItem";
     name;
     constructor(params) {
         super(params);
@@ -67,7 +67,7 @@ export class NamedNodeQueryItem extends NodeQueryItem {
     }
 }
 export class NamedRelatedNodeQueryItem extends NodeQueryItem {
-    #brand = 'NamedRelatedNodeQueryItem';
+    #brand = "NamedRelatedNodeQueryItem";
     name;
     withItems;
     toItems;

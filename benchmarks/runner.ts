@@ -22,10 +22,10 @@ const suites: Record<SuiteFile, PackageVersion[]> = {
     "@tobloef/crockpot-v1.0.0",
     "@tobloef/crockpot-v1.1.0"
   ],
-  /*"query/spaceship.ts": [
+  "query/spaceship.ts": [
     "@tobloef/crockpot-v1.0.0",
     "@tobloef/crockpot-v1.1.0"
-  ],*/
+  ],
 };
 
 const results: Record<SuiteFile, string> = {};

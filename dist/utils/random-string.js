@@ -2,10 +2,10 @@ const defaultAlphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs
 // Shamelessly stolen from nanoid
 // https://github.com/ai/nanoid/blob/main/non-secure/index.js
 export const randomString = (size = 12, alphabet = defaultAlphabet) => {
-    let id = '';
+    let result = "";
     for (let i = 0; i < size; i++) {
-        id += alphabet[Math.floor(Math.random() * alphabet.length)];
+        result += alphabet[Math.floor(Math.random() * alphabet.length)];
     }
-    return id;
+    return result;
 };
 //# sourceMappingURL=random-string.js.map

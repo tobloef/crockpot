@@ -3,6 +3,7 @@ import type { Node } from "../node/node.ts";
 import type { Edge } from "../edge/edge.ts";
 import { type NamedNodeQueryItem, NamedRelatedNodeQueryItem, NodeQueryItem, RelatedNodeQueryItem } from "../node/node-query-item.ts";
 import { EdgeQueryItem, type NamedEdgeQueryItem, type NamedRelatedEdgeQueryItem, type RelatedEdgeQueryItem } from "../edge/edge-query-item.ts";
+import type { IsNotUnion, TuplifyUnion } from "../utils/union.ts";
 export type QueryInput = (QueryInputItem | ArrayQueryInput | ObjectQueryInput);
 export type ArrayQueryInput = QueryInputItem[];
 export type ObjectQueryInput = {
@@ -30,11 +31,6 @@ type ExpandQueryItem<Type extends NodeOrEdgeClass, Name extends ReferenceName, W
 type ReferencedType<Type extends NodeOrEdgeClass, Name extends ReferenceName> = (true extends IsValidKey<Name> ? {
     [key in ReferenceName as Name]: Instance<Type>;
 } : {});
-type LastOf<T> = UnionToIntersection<T extends any ? () => T : never> extends () => (infer R) ? R : never;
-type TuplifyUnion<T, L = LastOf<T>, N = [T] extends [never] ? true : false> = true extends N ? [] : [...TuplifyUnion<Exclude<T, L>>, L];
-type ObjectValueTuple<T, KS extends any[] = TuplifyUnion<keyof T>, R extends any[] = []> = KS extends [infer K, ...infer KT] ? ObjectValueTuple<T, KT, [...R, T[K & keyof T]]> : R;
-type IsNotUnion<T> = IsUnion<T> extends true ? false : true;
-type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
-type UnionToIntersection<U> = (U extends any ? (x: U) => void : never) extends ((x: infer I) => void) ? I : never;
 type IsValidKey<Key> = (ReferenceName extends Key ? false : true) & IsNotUnion<Key>;
+type ObjectValueTuple<T, KS extends any[] = TuplifyUnion<keyof T>, R extends any[] = []> = KS extends [infer K, ...infer KT] ? ObjectValueTuple<T, KT, [...R, T[K & keyof T]]> : R;
 export {};

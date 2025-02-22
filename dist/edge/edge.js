@@ -2,7 +2,7 @@ import { randomString } from "../utils/random-string.js";
 import {} from "../graph.js";
 import { NamedEdgeQueryItem, RelatedEdgeQueryItem } from "./edge-query-item.js";
 export class Edge {
-    #brand = 'Edge';
+    #brand = "Edge";
     static defaultGraph;
     id = randomString();
     graph = Edge.defaultGraph;
