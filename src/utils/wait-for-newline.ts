@@ -1,6 +1,6 @@
-export function waitForEnter(printLog = true): Promise<void> {
-  if (printLog) {
-    console.log("Press Enter to continue...");
+export function waitForEnter(message?: string | null): Promise<void> {
+  if (message !== null) {
+    console.log(message ?? "Press Enter to continue...");
   }
 
   return new Promise<void>((resolve) => {

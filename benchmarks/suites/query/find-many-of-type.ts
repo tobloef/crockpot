@@ -1,26 +1,33 @@
-import { sleep } from "../../../src/utils/sleep.ts";
-import seedrandom from "seedrandom";
+export function setup({
+  crockpot,
+  rng,
+}: any) {
+  const NODES = 100_000;
 
-const importPath = process.argv[2]!;
-const iterations = Number.parseInt(process.argv[3] ?? "1");
-const seed = process.argv[4];
+  const { Graph, Node } = crockpot;
 
-const { Graph, Node } = await import(importPath);
+  class NodeToFind extends Node {}
 
-class NodeToFind extends Node {}
+  const graph = new Graph();
 
-const NODES = 100_000;
+  for (let i = 0; i < NODES - 1; i++) {
+    graph.addNode(new NodeToFind());
+  }
 
-const rng = seedrandom(seed);
-
-const graph = new Graph();
-
-for (let i = 0; i < NODES; i++) {
-  graph.addNode(new NodeToFind());
+  return { graph, NodeToFind };
 }
 
-for (let i = 0; i < iterations; i++) {
-  const result = graph.query(NodeToFind).toArray();
+export function run(props: ReturnType<typeof setup>) {
+  const { graph, NodeToFind } = props;
 
-  console.log(`Found ${result.length.toLocaleString()} nodes.`);
+  const results = graph.query(NodeToFind);
+
+  let checksum = 0;
+
+  for (const node of results) {
+    checksum += node.id.length;
+  }
+
+  return checksum;
 }
+

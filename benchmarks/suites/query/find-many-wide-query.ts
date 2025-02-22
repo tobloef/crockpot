@@ -1,36 +1,43 @@
-import { sleep } from "../../../src/utils/sleep.ts";
-import seedrandom from "seedrandom";
+export function setup({
+  crockpot,
+  rng,
+}: any) {
+  const PARENT_NODES = 200;
+  const CHILD_NODES = 20;
 
-const importPath = process.argv[2]!;
-const iterations = Number.parseInt(process.argv[3] ?? "1");
-const seed = process.argv[4];
+  const { Graph, Node } = crockpot;
 
-const { Graph, Node } = await import(importPath);
+  const graph = new Graph();
 
-const PARENT_NODES = 1;
-const CHILD_NODES = 4;
+  const nodeClassDefinitions = Array.from(
+    { length: CHILD_NODES },
+    () => class N extends Node {}
+  );
 
-const rng = seedrandom(seed);
-
-const graph = new Graph();
-
-const nodeClassDefinitions = Array.from(
-  { length: CHILD_NODES },
-  () => class N extends Node {}
-);
-
-for (let i = 0; i < PARENT_NODES; i++) {
-  const parentNode = graph.addNode(new Node());
-  for (let j = 0; j < CHILD_NODES; j++) {
-    const ChildNode = nodeClassDefinitions[j]!;
-    parentNode.addEdge({ to: new ChildNode() });
+  for (let i = 0; i < PARENT_NODES; i++) {
+    const parentNode = graph.addNode(new Node());
+    for (let j = 0; j < CHILD_NODES; j++) {
+      const ChildNode = nodeClassDefinitions[j]!;
+      parentNode.addEdge({ to: new ChildNode() });
+    }
   }
+
+  const queryItem = Node.to(...nodeClassDefinitions);
+
+  return { graph, queryItem };
 }
 
-for (let i = 0; i < iterations; i++) {
-  let result = graph.query(
-    Node.to(...nodeClassDefinitions)
-  ).toArray();
+export function run(props: ReturnType<typeof setup>) {
+  const { graph, queryItem } = props;
 
-  console.log(`Found ${result.length?.toLocaleString()} nodes.`);
+  const results = graph.query(queryItem);
+
+  let checksum = 0;
+
+  for (const node of results) {
+    checksum += node.id.length;
+  }
+
+  return checksum;
 }
+
