@@ -28,7 +28,15 @@ const setupOutput = suite.setup({
   rng,
 });
 
+function getHeapUsed() {
+  return (process.memoryUsage().heapUsed/1024/1024).toPrecision(2) + " MB";
+}
+console.log("\nHeap used, pre-run, pre-gc:", getHeapUsed());
+global.gc();
+console.log("Heap used, pre-run, post-gc:", getHeapUsed());
+
 console.log(`\nSetup complete, running suite ${iterations} times...`);
+
 //await waitForEnter();
 
 let runTimes: number[] = [];
@@ -44,9 +52,13 @@ for (let i = 0; i < iterations; i++) {
   runTimes.push(duration);
 }
 
+console.log("\nHeap used, post-run, pre-gc:", getHeapUsed());
+global.gc();
+console.log("Heap used, post-run, post-gc:", getHeapUsed());
+
 const numerically = (a: number, b: number) => a - b;
 
-console.log(`Median: ${runTimes.toSorted(numerically)[Math.floor(runTimes.length / 2)]!.toPrecision(3)}ms`);
+console.log(`\nMedian: ${runTimes.toSorted(numerically)[Math.floor(runTimes.length / 2)]!.toPrecision(3)}ms`);
 console.log(`Average: ${(runTimes.reduce((a, b) => a + b, 0) / runTimes.length).toPrecision(3)}ms`);
 console.log(`Minimum: ${runTimes.toSorted(numerically)[0]!.toPrecision(3)}ms`);
 console.log(`Maximum: ${runTimes.toSorted(numerically)[runTimes.length - 1]!.toPrecision(3)}ms`);
