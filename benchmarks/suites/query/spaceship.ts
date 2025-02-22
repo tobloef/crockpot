@@ -1,7 +1,19 @@
 import { sleep } from "../../../src/utils/sleep.ts";
+import seedrandom from "seedrandom";
 
 const importPath = process.argv[2]!;
+const iterations = Number.parseInt(process.argv[3] ?? "1");
+const seed = process.argv[4];
+
 const { Graph, Node, Edge } = await import(importPath);
+
+const OTHER_SPACESHIPS = 100;
+const OTHER_FACTIONS = 1;
+const OTHER_PLANETS = 10;
+const OTHER_ALLIANCES = 1;
+const OTHER_DOCKINGS = 5;
+const OTHER_RULES = 1;
+const OTHER_IS_INS = 100;
 
 class Spaceship extends Node {
   name: string;
@@ -17,6 +29,8 @@ class Docked extends Edge {}
 class IsIn extends Edge {}
 
 const graph = new Graph();
+
+const rng = seedrandom(seed);
 
 const empire = graph.addNode(new Faction());
 const rebels = graph.addNode(new Faction());
@@ -51,27 +65,61 @@ empire.addEdge({ edge: new Allied(), to: empire });
 rebels.addEdge({ edge: new Allied(), to: rebels });
 bountyHunters.addEdge({ edge: new Allied(), to: bountyHunters });
 
-// await sleep(100);
+const otherSpaceships = Array.from({ length: OTHER_SPACESHIPS }, (_, i) => {
+  return graph.addNode(new Spaceship(`Spaceship ${i}`));
+});
 
-// Finds spaceships docked to planets that are ruled by factions
-// that are allied with the faction of the spaceship.
-const result = graph.query(
-  Spaceship.with(
-    IsIn.to(
-      Faction.as("faction")
-    ),
-    Docked.to(
-      Planet.with(
-        RuledBy.to(
-          Faction.with(
-            Allied.to(
-              Faction.as("faction")
+const otherFactions = Array.from({ length: OTHER_FACTIONS }, (_, i) => {
+  return graph.addNode(new Faction());
+});
+
+const otherPlanets = Array.from({ length: OTHER_PLANETS }, (_, i) => {
+  return graph.addNode(new Planet());
+});
+
+const otherAlliances = Array.from({ length: OTHER_ALLIANCES }, (_, i) => {
+  const faction1 = otherFactions[Math.floor(rng() * OTHER_FACTIONS)];
+  const faction2 = otherFactions[Math.floor(rng() * OTHER_FACTIONS)];
+  return faction1.addEdge({ edge: new Allied(), to: faction2 });
+});
+
+const otherRules = Array.from({ length: OTHER_RULES }, (_, i) => {
+  const planet = otherPlanets[Math.floor(rng() * OTHER_PLANETS)];
+  const faction = otherFactions[Math.floor(rng() * OTHER_FACTIONS)];
+  return planet.addEdge({ edge: new RuledBy(), to: faction });
+});
+
+const otherDockings = Array.from({ length: OTHER_DOCKINGS }, (_, i) => {
+  const spaceship = otherSpaceships[Math.floor(rng() * OTHER_SPACESHIPS)];
+  const planet = otherPlanets[Math.floor(rng() * OTHER_PLANETS)];
+  return spaceship.addEdge({ edge: new Docked(), to: planet });
+});
+
+const otherIsIns = Array.from({ length: OTHER_IS_INS }, (_, i) => {
+  const spaceship = otherSpaceships[Math.floor(rng() * OTHER_SPACESHIPS)];
+  const faction = otherFactions[Math.floor(rng() * OTHER_FACTIONS)];
+  return spaceship.addEdge({ edge: new IsIn(), to: faction });
+});
+
+for (let i = 0; i < iterations; i++) {
+  // Finds spaceships docked to planets that are ruled by factions
+  // that are allied with the faction of the spaceship.
+  const result = graph.query(
+    Spaceship.with(
+      IsIn.to(
+        Faction.as("faction")
+      ),
+      Docked.to(
+        Planet.with(
+          RuledBy.to(
+            Faction.with(
+              Allied.to(
+                Faction.as("faction")
+              )
             )
           )
         )
       )
-    )
-  ),
-).toArray();
-
-console.log(`Found ${result.length?.toLocaleString()} spaceships.`);
+    ),
+  ).toArray();
+}

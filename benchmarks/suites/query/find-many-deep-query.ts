@@ -1,10 +1,16 @@
 import { sleep } from "../../../src/utils/sleep.ts";
+import seedrandom from "seedrandom";
 
 const importPath = process.argv[2]!;
+const iterations = Number.parseInt(process.argv[3] ?? "1");
+const seed = process.argv[4];
+
 const { Graph, Node } = await import(importPath);
 
 const PARENT_NODES = 1;
 const LAYERS = 4;
+
+const rng = seedrandom(seed);
 
 const graph = new Graph();
 
@@ -33,8 +39,8 @@ for (const NodeClass of nodeClassDefinitions.toReversed()) {
   }
 }
 
-// await sleep(100);
+for (let i = 0; i < iterations; i++) {
+  const result = graph.query(queryItem!).toArray();
 
-let result = graph.query(queryItem!).toArray();
-
-console.log(`Found ${result.length?.toLocaleString()} nodes.`);
+  console.log(`Found ${result.length?.toLocaleString()} nodes.`);
+}
