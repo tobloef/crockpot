@@ -1,6 +1,6 @@
-export function waitForEnter(printLog = true) {
-    if (printLog) {
-        console.log("Press Enter to continue...");
+export function waitForEnter(message) {
+    if (message !== null) {
+        console.log(message ?? "Press Enter to continue...");
     }
     return new Promise((resolve) => {
         process.stdin.setRawMode(true);
