@@ -4,5 +4,5 @@
 - Caching
 - Hierarchies
 - Boolean queries?
-- State machines?
-- Events?
+- State machine helpers?
+- Event helpers?
