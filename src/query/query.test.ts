@@ -1923,10 +1923,10 @@ describe("Spaceship example", () => {
     // Assert
     typesEqual<typeof singleResult, Spaceship[]>(true);
 
-    deepStrictEqual(singleResult, [ deathStar, bountyShip ]);
+    deepStrictEqual(singleResult, [ bountyShip, deathStar ]);
   });
 
-  it.skip("Succinct but vague version", () => {
+  it("Succinct but vague version", () => {
     // Arrange
     const graph = new Graph();
 
@@ -1945,6 +1945,6 @@ describe("Spaceship example", () => {
     // Assert
     typesEqual<typeof singleResult, Spaceship[]>(true);
 
-    deepStrictEqual(singleResult, [ deathStar, bountyShip ]);
+    deepStrictEqual(singleResult, [ bountyShip, deathStar ]);
   });
 });
