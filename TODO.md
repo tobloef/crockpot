@@ -1,6 +1,7 @@
 - Optimizations
   - Graph traversal
     - Fix tests
+    - Implement algorithm for `getStartingPoint`
   - Benchmarks
   - Generators vs array functions vs item functions?
   - Find some worst-case scenarios based on implementation
