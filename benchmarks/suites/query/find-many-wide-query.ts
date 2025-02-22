@@ -1,30 +1,43 @@
-import { sleep } from "../../../src/utils/sleep.ts";
+export function setup({
+  crockpot,
+  rng,
+}: any) {
+  const PARENT_NODES = 200;
+  const CHILD_NODES = 20;
 
-const importPath = process.argv[2]!;
-const { Graph, Node } = await import(importPath);
+  const { Graph, Node } = crockpot;
 
-const PARENT_NODES = 1;
-const CHILD_NODES = 4;
+  const graph = new Graph();
 
-const graph = new Graph();
+  const nodeClassDefinitions = Array.from(
+    { length: CHILD_NODES },
+    () => class N extends Node {}
+  );
 
-const nodeClassDefinitions = Array.from(
-  { length: CHILD_NODES },
-  () => class N extends Node {}
-);
-
-for (let i = 0; i < PARENT_NODES; i++) {
-  const parentNode = graph.addNode(new Node());
-  for (let j = 0; j < CHILD_NODES; j++) {
-    const ChildNode = nodeClassDefinitions[j]!;
-    parentNode.addEdge({ to: new ChildNode() });
+  for (let i = 0; i < PARENT_NODES; i++) {
+    const parentNode = graph.addNode(new Node());
+    for (let j = 0; j < CHILD_NODES; j++) {
+      const ChildNode = nodeClassDefinitions[j]!;
+      parentNode.addEdge({ to: new ChildNode() });
+    }
   }
+
+  const queryItem = Node.to(...nodeClassDefinitions);
+
+  return { graph, queryItem };
 }
 
-// await sleep(100);
+export function run(props: ReturnType<typeof setup>) {
+  const { graph, queryItem } = props;
 
-let result = graph.query(
-  Node.to(...nodeClassDefinitions)
-).toArray();
+  const results = graph.query(queryItem);
 
-console.log(`Found ${result.length?.toLocaleString()} nodes.`);
+  let checksum = 0;
+
+  for (const node of results) {
+    checksum += node.id.length;
+  }
+
+  return checksum;
+}
+

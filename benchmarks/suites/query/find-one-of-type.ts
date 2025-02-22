@@ -1,22 +1,39 @@
-import { sleep } from "../../../src/utils/sleep.ts";
+export function setup({
+  crockpot,
+  rng,
+}: any) {
+  const NODES = 1_000_000;
 
-const importPath = process.argv[2]!;
-const { Graph, Node } = await import(importPath);
+  const { Graph, Node } = crockpot;
 
-const NODES = 100_000;
+  class NodeToFind extends Node {}
 
-class NodeToFind extends Node {}
+  const graph = new Graph();
 
-const graph = new Graph();
+  for (let i = 0; i < NODES/2 - 1; i++) {
+    graph.addNode(new Node());
+  }
 
-for (let i = 0; i < NODES - 1; i++) {
-  graph.addNode(new Node());
+  graph.addNode(new NodeToFind());
+
+  for (let i = 0; i < NODES/2; i++) {
+    graph.addNode(new Node());
+  }
+
+  return { graph, NodeToFind };
 }
 
-graph.addNode(new NodeToFind());
+export function run(props: ReturnType<typeof setup>) {
+  const { graph, NodeToFind } = props;
 
-// await sleep(100);
+  const results = graph.query(NodeToFind);
 
-let result = graph.query(Node).toArray();
+  let checksum = 0;
 
-console.log(`Found ${result.length.toLocaleString()} nodes.`);
+  for (const node of results) {
+    checksum += node.id.length;
+  }
+
+  return checksum;
+}
+

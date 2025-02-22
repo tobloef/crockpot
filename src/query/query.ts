@@ -1,9 +1,11 @@
-import type { QueryInput, QueryOutput, QueryOutputItem, } from "./query.types.ts";
+import type { QueryInput, QueryOutput, } from "./query.types.ts";
 import type { Graph } from "../graph.ts";
-import { isSingleItem, parseInput } from "./parsing.ts";
-import { addToAlreadyFound, checkIfAlreadyFound, type FoundOutputs, permutationToOutput } from "./output.ts";
-import { checkConstraints } from "./constraints.ts";
-import { countGeneratorPermutations, countSetPermutations, createPoolGeneratorFunctions, createPoolSets, getPoolKeys, permuteGenerators, permuteSets } from "./pool.ts";
+import { parseInput } from "./parse-input.ts";
+import { createPlan } from "./create-plan.ts";
+import { executePlan } from "./execute-plan.ts";
+import { createOutputs } from "./create-outputs.ts";
+import { deduplicateOutputs } from "./deduplicate-outputs.ts";
+import { iterableToGenerator } from "../utils/generators.ts";
 
 export function* query<
   Input extends QueryInput
@@ -11,36 +13,12 @@ export function* query<
   graph: Graph,
   input: Input,
 ): Generator<QueryOutput<Input>> {
-  const pools = parseInput(input);
+  const slots = parseInput(input);
+  const plan = createPlan(slots, graph);
+  const matchesGenerator = executePlan(plan);
+  const rawOutputsGenerator = createOutputs<Input>(matchesGenerator, slots)
+  const deduplicatedOutputGenerator = deduplicateOutputs<Input>(rawOutputsGenerator);
 
-  const sets = createPoolSets(graph, pools);
-
-  const permutations = permuteSets(sets);
-
-  console.log(`Permutation count: ${countSetPermutations(sets).toLocaleString()}`);
-  console.log(`Pools:\n\t${getPoolKeys(pools).join("\n\t")}`);
-
-  const isOutputSingleItem = isSingleItem(input);
-
-  const foundOutputs: FoundOutputs = new Set<string>();
-
-  for (const permutation of permutations) {
-    const output = permutationToOutput(permutation, pools, input, isOutputSingleItem);
-
-    const wasAlreadyFound = checkIfAlreadyFound(output, foundOutputs, isOutputSingleItem);
-
-    if (wasAlreadyFound) {
-      continue;
-    }
-
-    const passesConstraints = checkConstraints(permutation, pools);
-
-    if (!passesConstraints) {
-      continue;
-    }
-
-    addToAlreadyFound(output, foundOutputs, isOutputSingleItem);
-
-    yield output;
-  }
+  yield* deduplicatedOutputGenerator;
 }
+

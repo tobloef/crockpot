@@ -5,27 +5,35 @@ import { exec } from "child_process";
 type PackageVersion = string;
 type SuiteFile = string;
 
+const ITERATIONS = 10;
+const SEED = "1234";
+
 const suites: Record<SuiteFile, PackageVersion[]> = {
   "query/find-one-of-type.ts": [
-    "@tobloef/crockpot-v1.0.0",
-    "@tobloef/crockpot-v1.1.0"
+    //"@tobloef/crockpot-v1.0.0",
+    "@tobloef/crockpot-v1.1.0",
+    "@tobloef/crockpot-local",
   ],
   "query/find-many-of-type.ts": [
-    "@tobloef/crockpot-v1.0.0",
-    "@tobloef/crockpot-v1.1.0"
+    //"@tobloef/crockpot-v1.0.0",
+    "@tobloef/crockpot-v1.1.0",
+    "@tobloef/crockpot-local",
   ],
   "query/find-many-deep-query.ts": [
-    "@tobloef/crockpot-v1.0.0",
-    "@tobloef/crockpot-v1.1.0"
+    //"@tobloef/crockpot-v1.0.0",
+    "@tobloef/crockpot-v1.1.0",
+    "@tobloef/crockpot-local",
   ],
   "query/find-many-wide-query.ts": [
-    "@tobloef/crockpot-v1.0.0",
-    "@tobloef/crockpot-v1.1.0"
+    //"@tobloef/crockpot-v1.0.0",
+    "@tobloef/crockpot-v1.1.0",
+    "@tobloef/crockpot-local",
   ],
-  /*"query/spaceship.ts": [
-    "@tobloef/crockpot-v1.0.0",
-    "@tobloef/crockpot-v1.1.0"
-  ],*/
+  "query/spaceship.ts": [
+    //"@tobloef/crockpot-v1.0.0",
+    "@tobloef/crockpot-v1.1.0",
+    "@tobloef/crockpot-local",
+  ],
 };
 
 const results: Record<SuiteFile, string> = {};
@@ -37,10 +45,14 @@ for (const [suiteFile, packageVersions] of Object.entries(suites)) {
   let command = `hyperfine`;
 
   for (const version of packageVersions) {
-    command += ` 'node ${suiteFilePath} ${version}'`;
+    command += ` 'node --disable-warning=ExperimentalWarning ${suiteFilePath} ${version} ${ITERATIONS} ${SEED}'`;
   }
 
-  console.log(`Running suite "${suiteName}" with command "${command}".`);
+  const RESET = "\x1b[0m";
+  const CYAN = "\x1b[36m";
+  const BRIGHT_CYAN = "\x1b[96m";
+
+  console.log(`${CYAN}Running suite "${BRIGHT_CYAN}${suiteName}${CYAN}" for versions ${packageVersions.map((v) => `"${BRIGHT_CYAN}${v}${CYAN}"`).join(", ")}.${RESET}`);
 
   await new Promise<void>((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {

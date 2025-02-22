@@ -3,7 +3,7 @@ import { randomString } from "../utils/random-string.js";
 import {} from "../graph.js";
 import { NamedNodeQueryItem, RelatedNodeQueryItem } from "./node-query-item.js";
 export class Node {
-    #brand = 'Node';
+    #brand = "Node";
     static defaultGraph;
     id = randomString();
     graph = Node.defaultGraph;
@@ -42,7 +42,7 @@ export class Node {
         });
     }
     addEdge(input) {
-        if ('to' in input) {
+        if ("to" in input) {
             return this.graph.addEdge({
                 from: this,
                 to: input.to,
@@ -61,14 +61,14 @@ export class Node {
         this.graph.removeEdge(edge);
     }
     removeEdges(input) {
-        if (input !== undefined && 'to' in input) {
+        if (input !== undefined && "to" in input) {
             this.graph.removeEdgesByNodes({
                 from: this,
                 to: input.to,
                 type: input.type,
             });
         }
-        else if (input !== undefined && 'from' in input) {
+        else if (input !== undefined && "from" in input) {
             this.graph.removeEdgesByNodes({
                 from: input.from,
                 to: this,

@@ -1,13 +1,13 @@
 import { Edge } from "./edge.js";
 export class EdgeQueryItem {
-    #brand = 'EdgeQueryItem';
+    #brand = "EdgeQueryItem";
     class;
     constructor(params) {
         this.class = params.class;
     }
 }
 export class NamedEdgeQueryItem extends EdgeQueryItem {
-    #brand = 'NamedEdgeQueryItem';
+    #brand = "NamedEdgeQueryItem";
     name;
     constructor(params) {
         super(params);
@@ -29,7 +29,7 @@ export class NamedEdgeQueryItem extends EdgeQueryItem {
     }
     fromOrTo(...items) {
         if (items.length > 2) {
-            throw new Error(`The 'fromOrTo' parameter can only accept up to 2 items, but ${items.length} were given.`);
+            throw new Error(`The "fromOrTo" parameter can only accept up to 2 items, but ${items.length} were given.`);
         }
         return new NamedRelatedEdgeQueryItem({
             class: this.class,
@@ -39,7 +39,7 @@ export class NamedEdgeQueryItem extends EdgeQueryItem {
     }
 }
 export class RelatedEdgeQueryItem extends EdgeQueryItem {
-    #brand = 'RelatedEdgeQueryItem';
+    #brand = "RelatedEdgeQueryItem";
     toItem;
     fromItem;
     fromOrToItems;
@@ -72,7 +72,7 @@ export class RelatedEdgeQueryItem extends EdgeQueryItem {
     }
 }
 export class NamedRelatedEdgeQueryItem extends EdgeQueryItem {
-    #brand = 'NamedRelatedEdgeQueryItem';
+    #brand = "NamedRelatedEdgeQueryItem";
     name;
     toItem;
     fromItem;

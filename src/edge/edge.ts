@@ -6,7 +6,7 @@ import { type Graph } from "../graph.ts";
 import { NamedEdgeQueryItem, RelatedEdgeQueryItem } from "./edge-query-item.ts";
 
 export class Edge {
-  #brand = 'Edge' as const;
+  #brand = "Edge" as const;
 
   static defaultGraph: Graph;
 

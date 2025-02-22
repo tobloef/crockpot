@@ -547,9 +547,9 @@ describe("query", () => {
     typesEqual<typeof arrayResult, [ Node ][]>(true);
     typesEqual<typeof objectResult, { Node: Node }[]>(true);
 
-    deepStrictEqual(singleResult, [ nodeA, nodeB ]);
-    deepStrictEqual(arrayResult, [ [ nodeA ], [ nodeB ] ]);
-    deepStrictEqual(objectResult, [ { Node: nodeA }, { Node: nodeB } ]);
+    deepStrictEqual(singleResult, [ nodeB, nodeA ]);
+    deepStrictEqual(arrayResult, [ [ nodeB ], [ nodeA ] ]);
+    deepStrictEqual(objectResult, [ { Node: nodeB }, { Node: nodeA } ]);
   });
 
   it("Finds nodes with implicit edge to them", () => {
@@ -622,9 +622,9 @@ describe("query", () => {
     typesEqual<typeof arrayResult, [ Node ][]>(true);
     typesEqual<typeof objectResult, { Node: Node }[]>(true);
 
-    deepStrictEqual(singleResult, [ nodeA, nodeB ]);
-    deepStrictEqual(arrayResult, [ [ nodeA ], [ nodeB ] ]);
-    deepStrictEqual(objectResult, [ { Node: nodeA }, { Node: nodeB } ]);
+    deepStrictEqual(singleResult, [ nodeB, nodeA ]);
+    deepStrictEqual(arrayResult, [ [ nodeB ], [ nodeA ] ]);
+    deepStrictEqual(objectResult, [ { Node: nodeB }, { Node: nodeA } ]);
   });
 
   it("Finds nodes with implicit edge to specific node type", () => {
@@ -725,9 +725,9 @@ describe("query", () => {
     typesEqual<typeof arrayResult, [ Node ][]>(true);
     typesEqual<typeof objectResult, { Node: Node }[]>(true);
 
-    deepStrictEqual(singleResult, [ node2, node4 ]);
-    deepStrictEqual(arrayResult, [ [ node2 ], [ node4 ] ]);
-    deepStrictEqual(objectResult, [ { Node: node2 }, { Node: node4 } ]);
+    deepStrictEqual(singleResult, [ node4, node2 ]);
+    deepStrictEqual(arrayResult, [ [ node4 ], [ node2 ] ]);
+    deepStrictEqual(objectResult, [ { Node: node4 }, { Node: node2 } ]);
   });
 
   it("Does not find self when querying for node with to or from edge to another node", () => {
@@ -1398,19 +1398,44 @@ describe("query", () => {
 
     deepStrictEqual(arrayResult, [
       [ node2, node2, node1 ],
-      [ node2, node3, node1 ],
       [ node3, node2, node1 ],
+      [ node2, node3, node1 ],
       [ node3, node3, node1 ],
       [ node5, node5, node4 ],
       [ node6, node6, node7 ],
     ]);
     deepStrictEqual(objectResult, [
       { a: node2, b: node2, ref: node1 },
-      { a: node2, b: node3, ref: node1 },
       { a: node3, b: node2, ref: node1 },
+      { a: node2, b: node3, ref: node1 },
       { a: node3, b: node3, ref: node1 },
       { a: node5, b: node5, ref: node4 },
       { a: node6, b: node6, ref: node7 },
+    ]);
+  });
+
+  it("Can circularly reference nodes (smol)", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+
+    graph.addEdge({ from: node1, to: node2 });
+    graph.addEdge({ from: node2, to: node1 });
+
+    // Act
+    const arrayResult = graph.query([
+      Node.as("a").with(Edge.as("a-to-b").to("b")),
+      Node.as("b").with(Edge.as("b-to-a").to("a")),
+    ]).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Node ][]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node2, node1 ],
+      [ node1, node2 ],
     ]);
   });
 
@@ -1450,14 +1475,14 @@ describe("query", () => {
     typesEqual<typeof objectResult, { a: Node, b: Node, c: Node }[]>(true);
 
     deepStrictEqual(arrayResult, [
-      [ node1, node2, node3 ],
       [ node2, node3, node1 ],
       [ node3, node1, node2 ],
+      [ node1, node2, node3 ],
     ]);
     deepStrictEqual(objectResult, [
-      { a: node1, b: node2, c: node3 },
       { a: node2, b: node3, c: node1 },
       { a: node3, b: node1, c: node2 },
+      { a: node1, b: node2, c: node3 },
     ]);
   });
 
@@ -1898,10 +1923,10 @@ describe("Spaceship example", () => {
     // Assert
     typesEqual<typeof singleResult, Spaceship[]>(true);
 
-    deepStrictEqual(singleResult, [ deathStar, bountyShip ]);
+    deepStrictEqual(singleResult, [ bountyShip, deathStar ]);
   });
 
-  it.skip("Succinct but vague version", () => {
+  it("Succinct but vague version", () => {
     // Arrange
     const graph = new Graph();
 
@@ -1920,6 +1945,6 @@ describe("Spaceship example", () => {
     // Assert
     typesEqual<typeof singleResult, Spaceship[]>(true);
 
-    deepStrictEqual(singleResult, [ deathStar, bountyShip ]);
+    deepStrictEqual(singleResult, [ bountyShip, deathStar ]);
   });
 });

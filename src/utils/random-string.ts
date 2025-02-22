@@ -7,10 +7,11 @@ export const randomString = (
   size = 12,
   alphabet = defaultAlphabet
 ) => {
-  let id = ''
+  let result = "";
+
   for (let i = 0; i < size; i++) {
-    id += alphabet[Math.floor(Math.random() * alphabet.length)];
+    result += alphabet[Math.floor(Math.random() * alphabet.length)];
   }
 
-  return id
+  return result;
 }
