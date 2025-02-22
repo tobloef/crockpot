@@ -1,4 +1,3 @@
-- Remove `allNodes` and `allEdges` indices.
 - Add graph options to do reference-based and structure-based query input plan caching, as well as ways to clear them.
 - Optimizations
   - Implement algorithm for `getStartingPoint`
