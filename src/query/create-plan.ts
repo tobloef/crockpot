@@ -2,6 +2,7 @@ import { getAllConnectedSlotNames, getAllSlots, getSlotByName, type QuerySlots, 
 import type { Graph } from "../graph.ts";
 import { Edge, type EdgeDirection } from "../edge/edge.ts";
 import type { Node } from "../node/node.ts";
+import { combineGenerators, iterableToGenerator } from "../utils/generators.ts";
 
 export type QueryPlan = {
   subqueries: SubqueryPlan[]
@@ -69,7 +70,7 @@ export function createPlan(
 
     subqueryPlan.steps.push({
       type: "iterate index",
-      index: graph.indices[startingPoint.index],
+      index: startingPoint.index,
       slotToVisit: startingPoint.slot,
     });
 
@@ -241,15 +242,17 @@ function getStartingPoint(slots: Set<Slot>, graph: Graph) {
     throw new Error("Got empty set of slots.");
   }
 
-  let allOfTypeIndex: keyof Graph["indices"];
+  let allOfTypeIndex: Iterable<Node | Edge>;
 
   if (firstSlot.type === "node") {
-    allOfTypeIndex = "allNodes";
+    allOfTypeIndex = graph.indices.allNodes;
   } else if (firstSlot.type === "edge") {
-    allOfTypeIndex = "allEdges";
+    allOfTypeIndex = graph.indices.allEdges;
   } else {
-    // Assuming that unknown-type slots are nodes.
-    allOfTypeIndex = "allNodes";
+    allOfTypeIndex = combineGenerators<Node | Edge>(
+      iterableToGenerator(graph.indices.allNodes),
+      iterableToGenerator(graph.indices.allEdges),
+    );
   }
 
   return {
@@ -257,3 +260,4 @@ function getStartingPoint(slots: Set<Slot>, graph: Graph) {
     index: allOfTypeIndex,
   };
 }
+

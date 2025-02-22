@@ -5,7 +5,7 @@ import { createPlan } from "./create-plan.ts";
 import { executePlan } from "./execute-plan.ts";
 import { createOutputs } from "./create-outputs.ts";
 import { deduplicateOutputs } from "./deduplicate-outputs.ts";
-import { arrayToGenerator } from "../utils/array-to-generator.ts";
+import { iterableToGenerator } from "../utils/generators.ts";
 
 export function* query<
   Input extends QueryInput
@@ -17,11 +17,11 @@ export function* query<
   const slots = parseInput(input);
   const plan = createPlan(slots, graph);
   const matches = executePlan(plan).toArray();
-  const matchesGenerator = arrayToGenerator(matches);
+  const matchesGenerator = iterableToGenerator(matches);
   const rawOutputs = createOutputs<Input>(matchesGenerator, slots).toArray();
-  const rawOutputsGenerator = arrayToGenerator(rawOutputs);
+  const rawOutputsGenerator = iterableToGenerator(rawOutputs);
   const deduplicatedOutput = deduplicateOutputs<Input>(rawOutputsGenerator).toArray();
-  const deduplicatedOutputGenerator = arrayToGenerator(deduplicatedOutput);
+  const deduplicatedOutputGenerator = iterableToGenerator(deduplicatedOutput);
 
   yield* deduplicatedOutputGenerator;
 }

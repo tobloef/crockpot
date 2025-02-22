@@ -39,25 +39,28 @@ function* executeSubqueryPlan(
 
   const match: QueryMatch = {};
 
-  yield* executeSteps(nextStep, remainingSteps, match);
+  const edgeLockedInDirections: Record<string, EdgeDirection> = {};
+
+  yield* executeSteps(nextStep, remainingSteps, match, edgeLockedInDirections);
 }
 
 function* executeSteps(
   step: QueryPlanStep,
   nextSteps: QueryPlanStep[],
   match: QueryMatch,
+  edgeLockedInDirections: Record<string, EdgeDirection>,
 ): Generator<QueryMatch> {
   switch (step.type) {
     case "traverse": {
-      yield* executeTraverseStep(step, nextSteps, match);
+      yield* executeTraverseStep(step, nextSteps, match, edgeLockedInDirections);
       break;
     }
     case "ensure connection": {
-      yield* executeEnsureConnectionStep(step, nextSteps, match);
+      yield* executeEnsureConnectionStep(step, nextSteps, match, edgeLockedInDirections);
       break;
     }
     case "iterate index": {
-      yield* executeIterateIndexStep(step, nextSteps, match);
+      yield* executeIterateIndexStep(step, nextSteps, match, edgeLockedInDirections);
       break;
     }
     default: {
@@ -70,8 +73,10 @@ function* executeTraverseStep(
   step: TraverseStep,
   nextSteps: QueryPlanStep[],
   match: QueryMatch,
+  edgeLockedInDirections: Record<string, EdgeDirection>,
 ): Generator<QueryMatch> {
-  const { visitedSlot, unvisitedSlot, direction } = step;
+  const { visitedSlot, unvisitedSlot } = step;
+  let { direction } = step;
 
   const visitedItem = match[visitedSlot.name];
 
@@ -82,22 +87,29 @@ function* executeTraverseStep(
   if (visitedItem instanceof Node) {
     if (direction === "from" || direction === "fromOrTo") {
       for (const fromEdge of visitedItem.edges.from) {
-        yield* traverseTo(fromEdge, unvisitedSlot, match, nextSteps);
+        edgeLockedInDirections[fromEdge.id] = "from";
+        yield* traverseTo(fromEdge, unvisitedSlot, match, nextSteps, edgeLockedInDirections);
       }
     }
 
     if (direction === "to" || direction === "fromOrTo") {
       for (const toEdge of visitedItem.edges.to) {
-        yield* traverseTo(toEdge, unvisitedSlot, match, nextSteps);
+        edgeLockedInDirections[toEdge.id] = "to";
+        yield* traverseTo(toEdge, unvisitedSlot, match, nextSteps, edgeLockedInDirections);
       }
     }
   } else if (visitedItem instanceof Edge) {
+    const edgeLockedInDirection = edgeLockedInDirections[visitedItem.id];
+    if (direction === "fromOrTo" && edgeLockedInDirection !== undefined) {
+      direction = getOppositeDirection(edgeLockedInDirection);
+    }
+
     if (direction === "from" || direction === "fromOrTo") {
-      yield* traverseTo(visitedItem.nodes.from, unvisitedSlot, match, nextSteps);
+      yield* traverseTo(visitedItem.nodes.from, unvisitedSlot, match, nextSteps, edgeLockedInDirections);
     }
 
     if (direction === "to" || direction === "fromOrTo") {
-      yield* traverseTo(visitedItem.nodes.to, unvisitedSlot, match, nextSteps);
+      yield* traverseTo(visitedItem.nodes.to, unvisitedSlot, match, nextSteps, edgeLockedInDirections);
     }
   } else {
     assertExhaustive(visitedItem);
@@ -109,6 +121,7 @@ function* traverseTo(
   unvisitedSlot: Slot,
   match: QueryMatch,
   nextSteps: QueryPlanStep[],
+  edgeLockedInDirections: Record<string, EdgeDirection>,
 ): Generator<QueryMatch> {
   if (unvisitedItem === undefined) {
     return;
@@ -128,7 +141,7 @@ function* traverseTo(
   if (nextStep === undefined) {
     yield match;
   } else {
-    yield* executeSteps(nextStep, remainingSteps, match);
+    yield* executeSteps(nextStep, remainingSteps, match, edgeLockedInDirections);
   }
 }
 
@@ -136,6 +149,7 @@ function* executeEnsureConnectionStep(
   step: EnsureConnectionStep,
   nextSteps: QueryPlanStep[],
   match: QueryMatch,
+  edgeLockedInDirections: Record<string, EdgeDirection>,
 ): Generator<QueryMatch> {
   const { visitedSlot1, visitedSlot2, direction } = step;
 
@@ -182,7 +196,7 @@ function* executeEnsureConnectionStep(
   if (nextStep === undefined) {
     yield match;
   } else {
-    yield* executeSteps(nextStep, remainingSteps, match);
+    yield* executeSteps(nextStep, remainingSteps, match, edgeLockedInDirections);
   }
 }
 
@@ -190,6 +204,7 @@ function* executeIterateIndexStep(
   step: IterateIndexStep,
   nextSteps: QueryPlanStep[],
   match: QueryMatch,
+  edgeLockedInDirections: Record<string, EdgeDirection>,
 ): Generator<QueryMatch> {
   const { slotToVisit, index } = step;
 
@@ -208,7 +223,7 @@ function* executeIterateIndexStep(
     if (nextStep === undefined) {
       yield match;
     } else {
-      yield* executeSteps(nextStep, remainingSteps, match);
+      yield* executeSteps(nextStep, remainingSteps, match, edgeLockedInDirections);
     }
   }
 }

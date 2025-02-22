@@ -547,9 +547,9 @@ describe("query", () => {
     typesEqual<typeof arrayResult, [ Node ][]>(true);
     typesEqual<typeof objectResult, { Node: Node }[]>(true);
 
-    deepStrictEqual(singleResult, [ nodeA, nodeB ]);
-    deepStrictEqual(arrayResult, [ [ nodeA ], [ nodeB ] ]);
-    deepStrictEqual(objectResult, [ { Node: nodeA }, { Node: nodeB } ]);
+    deepStrictEqual(singleResult, [ nodeB, nodeA ]);
+    deepStrictEqual(arrayResult, [ [ nodeB ], [ nodeA ] ]);
+    deepStrictEqual(objectResult, [ { Node: nodeB }, { Node: nodeA } ]);
   });
 
   it("Finds nodes with implicit edge to them", () => {
@@ -622,9 +622,9 @@ describe("query", () => {
     typesEqual<typeof arrayResult, [ Node ][]>(true);
     typesEqual<typeof objectResult, { Node: Node }[]>(true);
 
-    deepStrictEqual(singleResult, [ nodeA, nodeB ]);
-    deepStrictEqual(arrayResult, [ [ nodeA ], [ nodeB ] ]);
-    deepStrictEqual(objectResult, [ { Node: nodeA }, { Node: nodeB } ]);
+    deepStrictEqual(singleResult, [ nodeB, nodeA ]);
+    deepStrictEqual(arrayResult, [ [ nodeB ], [ nodeA ] ]);
+    deepStrictEqual(objectResult, [ { Node: nodeB }, { Node: nodeA } ]);
   });
 
   it("Finds nodes with implicit edge to specific node type", () => {
@@ -725,9 +725,9 @@ describe("query", () => {
     typesEqual<typeof arrayResult, [ Node ][]>(true);
     typesEqual<typeof objectResult, { Node: Node }[]>(true);
 
-    deepStrictEqual(singleResult, [ node2, node4 ]);
-    deepStrictEqual(arrayResult, [ [ node2 ], [ node4 ] ]);
-    deepStrictEqual(objectResult, [ { Node: node2 }, { Node: node4 } ]);
+    deepStrictEqual(singleResult, [ node4, node2 ]);
+    deepStrictEqual(arrayResult, [ [ node4 ], [ node2 ] ]);
+    deepStrictEqual(objectResult, [ { Node: node4 }, { Node: node2 } ]);
   });
 
   it("Does not find self when querying for node with to or from edge to another node", () => {
@@ -1398,16 +1398,16 @@ describe("query", () => {
 
     deepStrictEqual(arrayResult, [
       [ node2, node2, node1 ],
-      [ node2, node3, node1 ],
       [ node3, node2, node1 ],
+      [ node2, node3, node1 ],
       [ node3, node3, node1 ],
       [ node5, node5, node4 ],
       [ node6, node6, node7 ],
     ]);
     deepStrictEqual(objectResult, [
       { a: node2, b: node2, ref: node1 },
-      { a: node2, b: node3, ref: node1 },
       { a: node3, b: node2, ref: node1 },
+      { a: node2, b: node3, ref: node1 },
       { a: node3, b: node3, ref: node1 },
       { a: node5, b: node5, ref: node4 },
       { a: node6, b: node6, ref: node7 },
