@@ -12,8 +12,6 @@ import { Edge, type EdgeDirection } from "../edge/edge.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
 import { type Class, isClassThatExtends } from "../utils/class.ts";
 
-const BREAK = true;
-
 export type QueryMatch = Record<SlotName, Node | Edge>;
 
 export function* executePlan(

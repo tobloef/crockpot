@@ -3,7 +3,6 @@ import { Node } from "../node/node.js";
 import { Edge } from "../edge/edge.js";
 import { assertExhaustive } from "../utils/assert-exhaustive.js";
 import { isClassThatExtends } from "../utils/class.js";
-const BREAK = true;
 export function* executePlan(plan) {
     const subqueryGeneratorFunctions = plan.subqueries.map((subquery) => {
         return () => executeSubqueryPlan(subquery);
