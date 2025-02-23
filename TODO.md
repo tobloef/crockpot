@@ -1,4 +1,3 @@
-- Generate less garbage
 - Observers
 - Caching
 - Hierarchies
