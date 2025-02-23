@@ -1,5 +1,4 @@
 - Generate less garbage
-  - Get a good way to measure it first
 - Observers
 - Caching
 - Hierarchies
