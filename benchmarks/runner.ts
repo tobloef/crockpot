@@ -1,5 +1,7 @@
 import seedrandom from "seedrandom";
 import { waitForEnter } from "../src/utils/wait-for-newline.ts";
+import { sleep } from "../src/utils/sleep.ts";
+import { PerformanceObserver } from "node:perf_hooks";
 
 import * as crockpot_1_0_0 from "@tobloef/crockpot-v1.0.0";
 import * as crockpot_1_1_0 from "@tobloef/crockpot-v1.1.0";
@@ -12,6 +14,7 @@ import * as suite_find_one_of_type from "./suites/query/find-one-of-type.ts";
 import * as suite_find_many_of_type from "./suites/query/find-many-of-type.ts";
 import * as suite_find_many_deep_query from "./suites/query/find-many-deep-query.ts";
 import * as suite_find_many_wide_query from "./suites/query/find-many-wide-query.ts";
+import { debounce } from "../src/utils/debounce.ts";
 
 ////////////////////////////////////////////////
 
@@ -28,16 +31,23 @@ const setupOutput = suite.setup({
   rng,
 });
 
-function getHeapUsed() {
-  return (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2) + " MB";
-}
-console.log("\nHeap used pre-run pre-gc:", getHeapUsed());
-gc();
-console.log("Heap used pre-run post-gc:", getHeapUsed());
-
 console.log(`\nSetup complete, running suite ${iterations} times...`);
 
-//await waitForEnter();
+let totalGcTime = 0;
+
+const printGcTime = debounce(() => {
+  console.log(`Total GC time: ${totalGcTime.toFixed(2)}ms`);
+}, 1000);
+
+new PerformanceObserver((list) => {
+  for (const entry of list.getEntries()) {
+    if (entry.entryType === "gc") {
+      totalGcTime += entry.duration;
+    }
+  }
+
+  printGcTime();
+}).observe({ entryTypes: ['gc'] });
 
 let runTimes: number[] = [];
 
@@ -51,10 +61,6 @@ for (let i = 0; i < iterations; i++) {
 
   runTimes.push(duration);
 }
-
-console.log("\nHeap used post-run pre-gc:", getHeapUsed());
-gc();
-console.log("Heap used post-run post-gc:", getHeapUsed());
 
 const numerically = (a: number, b: number) => a - b;
 
