@@ -1,6 +1,6 @@
 {
   "name": "@tobloef/crockpot",
-  "description": "Slow but delicious ECS",
+  "description": "A slow but delicious Graph Component System (GCS) library for game development.",
   "version": "1.3.0",
   "main": "dist/index.js",
   "engines": {
