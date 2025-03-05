@@ -1,5 +1,5 @@
 import type { QueryInput, QueryOutput } from "./run-query.types.ts";
-import type { WithHash } from "./create-outputs.js";
+import { getOutputHash } from "./create-outputs.ts";
 
 export function* deduplicateOutputs<
   Input extends QueryInput
@@ -9,7 +9,7 @@ export function* deduplicateOutputs<
   const alreadyFoundOutputs = new Set<string>();
 
   for (const output of outputs) {
-    const hash = (output as WithHash).__hash;
+    const hash = getOutputHash(output)
 
     if (alreadyFoundOutputs.has(hash)) {
       continue;

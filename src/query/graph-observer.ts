@@ -1,9 +1,10 @@
 import type { QueryInput, QueryOutput, } from "./run-query.types.ts";
 import type { Graph } from "../graph.ts";
 import { isItemRelatedToSlots, parseInput, type QuerySlots } from "./parse-input.ts";
-import { runQuery } from "./run-query.js";
-import { Node } from "../node/node.js";
-import { Edge } from "../edge/edge.js";
+import { runQuery } from "./run-query.ts";
+import { Node } from "../node/node.ts";
+import { Edge } from "../edge/edge.ts";
+import { getOutputHash } from "./create-outputs.ts";
 
 export type GraphObserverOptions = {}
 
@@ -19,6 +20,8 @@ export class GraphObserver<
   #cache: Map<string, Output>;
   #addedResults: Output[] = [];
   #removedResults: Output[] = [];
+  #addedListeners: Set<(item: Output) => void> = new Set();
+  #removedListeners: Set<(item: Output) => void> = new Set();
 
   constructor(
     graph: Graph,
@@ -50,6 +53,14 @@ export class GraphObserver<
     this.#removedResults = [];
   }
 
+  onAdded(listener: (item: Output) => void) {
+    this.#addedListeners.add(listener);
+  }
+
+  onRemoved(listener: (item: Output) => void) {
+    this.#removedListeners.add(listener);
+  }
+
   notifyAdded(item: Node | Edge) {
     if (!isItemRelatedToSlots(item, this.#slots)) {
       return;
@@ -78,12 +89,18 @@ export class GraphObserver<
 
     for (const [hash, result] of newCache) {
       if (!this.#cache.has(hash)) {
+        for (const listener of this.#addedListeners) {
+          listener(result);
+        }
         this.#addedResults.push(result);
       }
     }
 
     for (const [hash, result] of this.#cache) {
       if (!newCache.has(hash)) {
+        for (const listener of this.#removedListeners) {
+          listener(result);
+        }
         this.#removedResults.push(result);
       }
     }
@@ -96,7 +113,8 @@ export class GraphObserver<
     const results = runQuery(this.graph, this.input as any);
 
     for (const output of results) {
-      cache.set(output.__hash, output);
+      const hash = getOutputHash(output);
+      cache.set(hash, output);
     }
 
     return cache;

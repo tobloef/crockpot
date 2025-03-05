@@ -1,9 +1,9 @@
 import type { QueryInput, QueryOutput, } from "./run-query.types.ts";
 import type { Graph } from "../graph.ts";
 import { isItemRelatedToSlots, parseInput, type QuerySlots } from "./parse-input.ts";
-import { runQuery, runQueryBySlots } from "./run-query.js";
-import { Node } from "../node/node.js";
-import { Edge } from "../edge/edge.js";
+import { runQueryBySlots } from "./run-query.ts";
+import { Node } from "../node/node.ts";
+import { Edge } from "../edge/edge.ts";
 
 export type GraphQueryOptions = {
   cache?: boolean;
@@ -70,7 +70,7 @@ export class GraphQuery<
   }
 
   #getNewCache(): Output[] {
-    const newCache = runQuery(this.graph, this.input as any).toArray();
+    const newCache = runQueryBySlots(this.graph, this.#slots).toArray();
 
     return newCache;
   }

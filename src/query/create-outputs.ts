@@ -32,8 +32,6 @@ function* createSingleOutputs(
   for (const match of matches) {
     const output = match[slot.name]! as QueryOutput<QueryInputItem>;
 
-    (output as WithHash).__hash = getOutputHash(output);
-
     yield output;
   }
 }
@@ -52,8 +50,6 @@ function* createArrayOutputs(
         (output[key as number] as any) = match[slot.name]!;
       }
     }
-
-    (output as unknown as WithHash).__hash = getOutputHash(output);
 
     yield output;
   }
@@ -74,8 +70,6 @@ function* createObjectOutputs(
       }
     }
 
-    (output as WithHash).__hash = getOutputHash(output);
-
     yield output;
   }
 }
@@ -92,20 +86,26 @@ function getOutputSlots(
   return slotsWithOutputKeys;
 }
 
+const outputHashCache = new WeakMap<QueryOutput<any>, string>();
+
 export function getOutputHash<
   Input extends QueryInput
 >(output: QueryOutput<Input>): string {
-  if (output.id !== undefined) {
-    return output.id;
+  if (outputHashCache.has(output)) {
+    return outputHashCache.get(output)!;
   }
 
-  const hash = Object.values(output)
-    .map((item) => (item as { id: string }).id)
-    .join();
+  let hash: any;
+
+  if (output.id !== undefined) {
+    hash = output.id;
+  } else {
+    hash = Object.values(output)
+      .map((item) => (item as { id: string }).id)
+      .join();
+  }
+
+  outputHashCache.set(output, hash);
 
   return hash;
-}
-
-export type WithHash = {
-  __hash: string;
 }

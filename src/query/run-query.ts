@@ -1,10 +1,10 @@
-import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem } from "./run-query.types.js";
-import type { Graph } from "../graph.js";
-import { parseInput, type QuerySlots } from "./parse-input.js";
-import { createPlan } from "./create-plan.js";
-import { executePlan } from "./execute-plan.js";
-import { createOutputs } from "./create-outputs.js";
-import { deduplicateOutputs } from "./deduplicate-outputs.js";
+import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem } from "./run-query.types.ts";
+import type { Graph } from "../graph.ts";
+import { parseInput, type QuerySlots } from "./parse-input.ts";
+import { createPlan } from "./create-plan.ts";
+import { executePlan } from "./execute-plan.ts";
+import { createOutputs } from "./create-outputs.ts";
+import { deduplicateOutputs } from "./deduplicate-outputs.ts";
 
 export function runQuery<Input extends QueryInputItem>(
   graph: Graph,

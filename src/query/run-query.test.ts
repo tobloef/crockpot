@@ -5,7 +5,7 @@ import { Node } from "../node/node.ts";
 import { Edge } from "../edge/edge.ts";
 import { typesEqual } from "../utils/type-assertion.ts";
 import { ReferenceMismatchError } from "./errors/reference-mismatch-error.ts";
-import { runQuery } from "./run-query.js";
+import { runQuery } from "./run-query.ts";
 
 class NodeA extends Node {}
 
