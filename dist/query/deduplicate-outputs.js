@@ -1,3 +1,4 @@
+import { getOutputHash } from "./create-outputs.js";
 export function* deduplicateOutputs(outputs) {
     const alreadyFoundOutputs = new Set();
     for (const output of outputs) {
@@ -8,14 +9,5 @@ export function* deduplicateOutputs(outputs) {
         alreadyFoundOutputs.add(hash);
         yield output;
     }
-}
-function getOutputHash(output) {
-    if (output.id !== undefined) {
-        return output.id;
-    }
-    const hash = Object.values(output)
-        .map((item) => item.id)
-        .join();
-    return hash;
 }
 //# sourceMappingURL=deduplicate-outputs.js.map

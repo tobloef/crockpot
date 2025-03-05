@@ -14,7 +14,7 @@ export function createPlan(slots, graph) {
         };
         plan.subqueries.push(subqueryPlan);
         const visits = {};
-        const startingPoint = getStartingPoint(set, graph);
+        const startingPoint = getBestStartingPoint(set, graph);
         if (startingPoint === undefined) {
             continue;
         }
@@ -148,7 +148,7 @@ function getDisjointSets(slots) {
     }
     return disjointSets;
 }
-export function getStartingPoint(slots, graph) {
+export function getBestStartingPoint(slots, graph) {
     const potentialStartingPoints = [];
     for (const slot of slots) {
         potentialStartingPoints.push(getStartingPointForSlot(slot, graph));

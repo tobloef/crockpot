@@ -1,7 +1,7 @@
 import { Node } from "../node/node.ts";
 import { type Class } from "../utils/class.ts";
 import { Edge, type EdgeDirection } from "../edge/edge.ts";
-import type { Edgelike, Nodelike, QueryInput, QueryInputItem, ReferenceName } from "./query.types.ts";
+import type { Edgelike, Nodelike, QueryInput, QueryInputItem, ReferenceName } from "./run-query.types.ts";
 export type SlotName = string;
 export declare const SLOT_TYPES: readonly ["node", "edge", "unknown"];
 export type SlotType = typeof SLOT_TYPES[number];
@@ -72,3 +72,4 @@ export declare function getAllSlots(slots: QuerySlots): Slot[];
 export declare function getAllConnectedSlotNames(slot: Slot): SlotName[];
 export declare function getSlotByName(slots: QuerySlots, name: SlotName): Slot | undefined;
 export declare function getOppositeDirection(direction: EdgeDirection): EdgeDirection;
+export declare function isItemRelatedToSlots(item: Nodelike | Edgelike, slots: QuerySlots): boolean;

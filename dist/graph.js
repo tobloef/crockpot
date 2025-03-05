@@ -1,7 +1,8 @@
 import { Edge } from "./edge/edge.js";
 import { Node } from "./node/node.js";
-import { query } from "./query/query.js";
 import { getClassHierarchy } from "./utils/class.js";
+import { GraphQuery } from "./query/graph-query.js";
+import { GraphObserver } from "./query/graph-observer.js";
 export class Graph {
     indices = {
         nodesByEdge: new Map(),
@@ -9,8 +10,15 @@ export class Graph {
         nodesByType: new Map(),
         edgesByType: new Map(),
     };
-    query(input) {
-        return query(this, input);
+    #itemAddedListeners = new Set();
+    #itemRemovedListeners = new Set();
+    query(input, options) {
+        const query = new GraphQuery(this, input, options);
+        return query;
+    }
+    observe(input, options) {
+        const observer = new GraphObserver(this, input, options);
+        return observer;
     }
     addNode(node) {
         const allNodes = this.indices.nodesByType.get(Node);
@@ -45,6 +53,9 @@ export class Graph {
             node.graph.removeNode(node);
             node.graph = this;
         }
+        for (const listener of this.#itemAddedListeners) {
+            listener(node);
+        }
         return node;
     }
     addNodes(nodes) {
@@ -67,6 +78,9 @@ export class Graph {
             if (nodesByType !== undefined) {
                 nodesByType.delete(node);
             }
+        }
+        for (const listener of this.#itemRemovedListeners) {
+            listener(node);
         }
     }
     removeNodes(nodes) {
@@ -135,6 +149,9 @@ export class Graph {
             edge.graph.removeEdge(edge);
             edge.graph = this;
         }
+        for (const listener of this.#itemAddedListeners) {
+            listener(edge);
+        }
         return edge;
     }
     removeEdge(edge) {
@@ -150,6 +167,9 @@ export class Graph {
             if (edgesByType !== undefined) {
                 edgesByType.delete(edge);
             }
+        }
+        for (const listener of this.#itemRemovedListeners) {
+            listener(edge);
         }
     }
     removeEdges(edges) {
@@ -206,6 +226,18 @@ export class Graph {
                 this.removeEdge(edge);
             }
         }
+    }
+    onItemAdded(listener) {
+        this.#itemAddedListeners.add(listener);
+        return () => {
+            this.#itemAddedListeners.delete(listener);
+        };
+    }
+    onItemRemoved(listener) {
+        this.#itemRemovedListeners.add(listener);
+        return () => {
+            this.#itemRemovedListeners.delete(listener);
+        };
     }
 }
 export const defaultGraph = new Graph();

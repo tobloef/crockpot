@@ -474,4 +474,38 @@ export function getOppositeDirection(direction) {
         case "fromOrTo": return "fromOrTo";
     }
 }
+export function isItemRelatedToSlots(item, slots) {
+    const allSlots = getAllSlots(slots);
+    const isNode = item instanceof Node;
+    const isEdge = item instanceof Edge;
+    const itemClass = item.constructor;
+    for (const slot of allSlots) {
+        if (slot.type === "unknown") {
+            return true;
+        }
+        if (slot.type === "node" && isNode) {
+            if (slot.constraints.instance === item) {
+                return true;
+            }
+            if (slot.constraints.class === undefined) {
+                return true;
+            }
+            if (isClassThatExtends(itemClass, slot.constraints.class)) {
+                return true;
+            }
+        }
+        if (slot.type === "edge" && isEdge) {
+            if (slot.constraints.instance === item) {
+                return true;
+            }
+            if (slot.constraints.class === undefined) {
+                return true;
+            }
+            if (isClassThatExtends(itemClass, slot.constraints.class)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 //# sourceMappingURL=parse-input.js.map

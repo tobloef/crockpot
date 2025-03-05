@@ -1,12 +1,12 @@
 import type { Class } from "../utils/class.ts";
-import type { Nodelike, ReferenceName } from "../query/query.types.ts";
+import type { Nodelike, ReferenceName } from "../query/run-query.types.ts";
 import type { Node } from "../node/node.ts";
 import { type Graph } from "../graph.ts";
 import { NamedEdgeQueryItem, RelatedEdgeQueryItem } from "./edge-query-item.ts";
 export declare class Edge {
     #private;
     static defaultGraph: Graph;
-    id: string;
+    readonly id: string;
     graph: Readonly<Graph>;
     get nodes(): EdgeNodes;
     static as<Type extends Class<Edge>, Name extends ReferenceName>(this: Type, name: Name): NamedEdgeQueryItem<Type, Name>;

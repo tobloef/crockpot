@@ -9,7 +9,7 @@ export function* createOutputs(matchesGenerator, slots) {
             yield* createArrayOutputs(matchesGenerator, slots);
             break;
         case "object":
-            yield* createRecordOutputs(matchesGenerator, slots);
+            yield* createObjectOutputs(matchesGenerator, slots);
             break;
         default:
             assertExhaustive(slots.format);
@@ -34,7 +34,7 @@ function* createArrayOutputs(matches, slots) {
         yield output;
     }
 }
-function* createRecordOutputs(matches, slots) {
+function* createObjectOutputs(matches, slots) {
     const outputSlots = getOutputSlots(slots);
     for (const match of matches) {
         const output = {};
@@ -52,5 +52,22 @@ function getOutputSlots(slots) {
     const slotsWithOutputKeys = allSlots
         .filter((slot) => slot.outputKeys.length > 0);
     return slotsWithOutputKeys;
+}
+const outputHashCache = new WeakMap();
+export function getOutputHash(output) {
+    if (outputHashCache.has(output)) {
+        return outputHashCache.get(output);
+    }
+    let hash;
+    if (output.id !== undefined) {
+        hash = output.id;
+    }
+    else {
+        hash = Object.values(output)
+            .map((item) => item.id)
+            .join();
+    }
+    outputHashCache.set(output, hash);
+    return hash;
 }
 //# sourceMappingURL=create-outputs.js.map

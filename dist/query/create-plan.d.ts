@@ -41,4 +41,4 @@ export type StartingPoint = {
     index: Iterable<Node | Edge>;
     size: number;
 };
-export declare function getStartingPoint(slots: Set<Slot>, graph: Graph): StartingPoint | undefined;
+export declare function getBestStartingPoint(slots: Set<Slot>, graph: Graph): StartingPoint | undefined;

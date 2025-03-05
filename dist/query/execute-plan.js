@@ -65,9 +65,11 @@ function* executeTraverseStep(step, nextSteps, match, edgeLockedInDirections) {
             direction = getOppositeDirection(edgeLockedInDirection);
         }
         if (direction === "from" || direction === "fromOrTo") {
+            edgeLockedInDirections[visitedItem.id] = "from";
             yield* traverseTo(visitedItem.nodes.from, unvisitedSlot, match, nextSteps, edgeLockedInDirections);
         }
         if (direction === "to" || direction === "fromOrTo") {
+            edgeLockedInDirections[visitedItem.id] = "to";
             yield* traverseTo(visitedItem.nodes.to, unvisitedSlot, match, nextSteps, edgeLockedInDirections);
         }
     }
@@ -97,40 +99,37 @@ function* executeEnsureConnectionStep(step, nextSteps, match, edgeLockedInDirect
     const { visitedSlot1, visitedSlot2, direction } = step;
     let node;
     let edge;
-    let relativeDirection;
     if (visitedSlot1.type === "node" && visitedSlot2.type === "edge") {
         node = match[visitedSlot1.name];
         edge = match[visitedSlot2.name];
-        relativeDirection = getOppositeDirection(direction);
     }
     else if (visitedSlot1.type === "edge" && visitedSlot2.type === "node") {
         edge = match[visitedSlot1.name];
         node = match[visitedSlot2.name];
-        relativeDirection = direction;
     }
     else {
         throw new Error(`Items of identical types cannot be connected.`);
     }
-    if (relativeDirection === "from") {
+    if (direction === "from") {
         const isOk = edge.nodes.from === node;
         if (!isOk) {
             return;
         }
     }
-    else if (relativeDirection === "to") {
+    else if (direction === "to") {
         const isOk = edge.nodes.to === node;
         if (!isOk) {
             return;
         }
     }
-    else if (relativeDirection === "fromOrTo") {
+    else if (direction === "fromOrTo") {
         const isOk = edge.nodes.from === node || edge.nodes.to === node;
         if (!isOk) {
             return;
         }
     }
     else {
-        assertExhaustive(relativeDirection);
+        assertExhaustive(direction);
     }
     const [nextStep, ...remainingSteps] = nextSteps;
     if (nextStep === undefined) {
