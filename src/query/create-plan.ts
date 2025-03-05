@@ -67,7 +67,7 @@ export function createPlan(
 
     const visits: Record<SlotName, Set<SlotName>> = {};
 
-    const startingPoint = getStartingPoint(set, graph);
+    const startingPoint = getBestStartingPoint(set, graph);
 
     if (startingPoint === undefined) {
       continue;
@@ -246,7 +246,7 @@ export type StartingPoint = {
   size: number,
 };
 
-export function getStartingPoint(
+export function getBestStartingPoint(
   slots: Set<Slot>,
   graph: Graph
 ): StartingPoint | undefined {

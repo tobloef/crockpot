@@ -43,17 +43,13 @@ export type Edgelike = (
 export type ReferenceName = string;
 
 export type QueryOutput<Input extends QueryInput> = (
-  Input extends []
-    ? never
-    : {} extends Input
-      ? never
-      : Input extends ArrayQueryInput
-        ? ArrayQueryOutput<Input, Input>
-        : Input extends ObjectQueryInput
-          ? ObjectQueryOutput<Input, Input>
-          : Input extends QueryInputItem
-            ? QueryOutputItem<Input, Input>
-            : never
+  Input extends ArrayQueryInput
+    ? (ArrayQueryOutput<Input, Input>)
+    : Input extends ObjectQueryInput
+      ? (ObjectQueryOutput<Input, Input>)
+      : Input extends QueryInputItem
+        ? (QueryOutputItem<Input, Input>)
+        : never
 );
 
 export type ArrayQueryOutput<

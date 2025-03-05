@@ -1,7 +1,7 @@
 import { Node } from "../node/node.ts";
 import { type Class, isClassThatExtends } from "../utils/class.ts";
 import { Edge, type EdgeDirection } from "../edge/edge.ts";
-import type { Edgelike, Nodelike, QueryInput, QueryInputItem, ReferenceName } from "./query.types.ts";
+import type { Edgelike, Nodelike, QueryInput, QueryInputItem, ReferenceName } from "./run-query.types.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
 import { NamedNodeQueryItem, NamedRelatedNodeQueryItem, NodeQueryItem, RelatedNodeQueryItem } from "../node/node-query-item.ts";
 import { EdgeQueryItem, NamedEdgeQueryItem, NamedRelatedEdgeQueryItem, RelatedEdgeQueryItem } from "../edge/edge-query-item.ts";
@@ -798,4 +798,52 @@ export function getOppositeDirection(
     case "to": return "from";
     case "fromOrTo": return "fromOrTo";
   }
+}
+
+export function isItemRelatedToSlots(
+  item: Nodelike | Edgelike,
+  slots: QuerySlots
+): boolean {
+  const allSlots = getAllSlots(slots);
+
+  const isNode = item instanceof Node;
+  const isEdge = item instanceof Edge;
+
+  const itemClass = item.constructor as Class<any>;
+
+  for (const slot of allSlots) {
+    if (slot.type === "unknown") {
+      return true;
+    }
+
+    if (slot.type === "node" && isNode) {
+      if (slot.constraints.instance === item) {
+        return true;
+      }
+
+      if (slot.constraints.class === undefined) {
+        return true;
+      }
+
+      if (isClassThatExtends(itemClass, slot.constraints.class)) {
+        return true;
+      }
+    }
+
+    if (slot.type === "edge" && isEdge) {
+      if (slot.constraints.instance === item) {
+        return true;
+      }
+
+      if (slot.constraints.class === undefined) {
+        return true;
+      }
+
+      if (isClassThatExtends(itemClass, slot.constraints.class)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
