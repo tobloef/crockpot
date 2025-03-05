@@ -1,5 +1,3 @@
-- Fix Circular reference test
-- Fix `[Node.with(Edge.fromOrTo(Node.as("other"))), "other"]` returning itself twice
 - Hierarchies
 - Boolean queries?
 - State machine helpers?

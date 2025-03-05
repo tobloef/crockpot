@@ -98,10 +98,12 @@ function* executeTraverseStep(
     }
 
     if (direction === "from" || direction === "fromOrTo") {
+      edgeLockedInDirections[visitedItem.id] = "from";
       yield* traverseTo(visitedItem.nodes.from, unvisitedSlot, match, nextSteps, edgeLockedInDirections);
     }
 
     if (direction === "to" || direction === "fromOrTo") {
+      edgeLockedInDirections[visitedItem.id] = "to";
       yield* traverseTo(visitedItem.nodes.to, unvisitedSlot, match, nextSteps, edgeLockedInDirections);
     }
   } else {

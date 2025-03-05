@@ -539,18 +539,22 @@ describe("runQuery", () => {
     });
 
     // Act
-    const singleResult = runQuery(graph, Node.with(Edge.fromOrTo(Node))).toArray();
-    const arrayResult = runQuery(graph, [ Node.with(Edge.fromOrTo(Node)) ]).toArray();
-    const objectResult = runQuery(graph, { Node: Node.with(Edge.fromOrTo(Node)) }).toArray();
+    const arrayResult = runQuery(graph, [
+      Node.with(Edge.fromOrTo(Node.as("other"))),
+      "other",
+    ]).toArray();
+
+    const objectResult = runQuery(graph, {
+      Node: Node.with(Edge.fromOrTo(Node.as("other"))),
+      other: "other",
+    } as const).toArray();
 
     // Assert
-    typesEqual<typeof singleResult, Node[]>(true);
-    typesEqual<typeof arrayResult, [ Node ][]>(true);
-    typesEqual<typeof objectResult, { Node: Node }[]>(true);
+    typesEqual<typeof arrayResult, [ Node, Node ][]>(true);
+    typesEqual<typeof objectResult, { Node: Node, other: Node }[]>(true);
 
-    deepStrictEqual(singleResult, [ nodeA, nodeB ]);
-    deepStrictEqual(arrayResult, [ [ nodeA ], [ nodeB ] ]);
-    deepStrictEqual(objectResult, [ { Node: nodeA }, { Node: nodeB } ]);
+    deepStrictEqual(arrayResult, [ [ nodeB, nodeA ], [ nodeA, nodeB ] ]);
+    deepStrictEqual(objectResult, [ { Node: nodeB, other: nodeA }, { Node: nodeA, other: nodeB } ]);
   });
 
   it("Finds nodes with implicit edge to them", () => {
