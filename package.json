@@ -1,7 +1,7 @@
 {
   "name": "@tobloef/crockpot",
   "description": "A slow but delicious Graph Component System (GCS) library for game development.",
-  "version": "1.4.1",
+  "version": "1.4.0",
   "main": "dist/index.js",
   "engines": {
     "node": ">=23.0.0"
