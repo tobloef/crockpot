@@ -1,6 +1,5 @@
-- Observers
-- Caching
 - Hierarchies
 - Boolean queries?
 - State machine helpers?
 - Event helpers?
+- Improve cache/observer performance with fixed-traversal based approach

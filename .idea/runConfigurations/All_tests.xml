@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="All tests" type="NodeJsTestRunner">
     <node-interpreter value="project" />
-    <node-options value="--experimental-strip-types" />
-    <working-dir value="$PROJECT_DIR$/../crockpot" />
+    <node-options value="--experimental-strip-types --experimental-test-module-mocks" />
+    <working-dir value="$PROJECT_DIR$" />
     <language value="JAVA_SCRIPT" />
     <typescript-loader value="MANUAL_SETUP_IN_NODE_OPTION" />
     <envs />
