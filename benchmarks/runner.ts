@@ -7,6 +7,7 @@ import * as crockpot_1_0_0 from "@tobloef/crockpot-v1.0.0";
 import * as crockpot_1_1_0 from "@tobloef/crockpot-v1.1.0";
 import * as crockpot_1_2_0 from "@tobloef/crockpot-v1.2.0";
 import * as crockpot_1_3_0 from "@tobloef/crockpot-v1.3.0";
+import * as crockpot_1_4_0 from "@tobloef/crockpot-v1.4.0";
 import * as crockpot_local from "@tobloef/crockpot-local";
 
 import * as suite_spaceship from "./suites/query/spaceship.ts";
