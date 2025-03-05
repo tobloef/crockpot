@@ -13,7 +13,8 @@ export class Graph {
     edgesByType: new Map<Class<Edge>, Set<Edge>>(),
   };
 
-  #notifiables = new Set<Notifiable>();
+  #itemAddedListeners = new Set<(item: Node | Edge) => void>();
+  #itemRemovedListeners = new Set<(item: Node | Edge) => void>();
 
   query<Input extends QueryInputItem>(
     input: Input,
@@ -137,8 +138,8 @@ export class Graph {
       node.graph = this;
     }
 
-    for (const query of this.#notifiables) {
-      query.notifyAdded(node);
+    for (const listener of this.#itemAddedListeners) {
+      listener(node);
     }
 
     return node;
@@ -172,8 +173,8 @@ export class Graph {
       }
     }
 
-    for (const query of this.#notifiables) {
-      query.notifyRemoved(node);
+    for (const listener of this.#itemRemovedListeners) {
+      listener(node);
     }
   }
 
@@ -265,8 +266,8 @@ export class Graph {
       edge.graph = this;
     }
 
-    for (const query of this.#notifiables) {
-      query.notifyAdded(edge);
+    for (const listener of this.#itemAddedListeners) {
+      listener(edge);
     }
 
     return edge as E;
@@ -291,8 +292,8 @@ export class Graph {
       }
     }
 
-    for (const query of this.#notifiables) {
-      query.notifyRemoved(edge);
+    for (const listener of this.#itemRemovedListeners) {
+      listener(edge);
     }
   }
 
@@ -362,14 +363,28 @@ export class Graph {
     }
   }
 
-  subscribeToNotifications(notifiable: Notifiable): void {
-    this.#notifiables.add(notifiable);
+  onItemAdded(
+    listener: (item: Node | Edge) => void
+  ): Unsubscribe {
+    this.#itemAddedListeners.add(listener);
+
+    return () => {
+      this.#itemAddedListeners.delete(listener);
+    };
   }
 
-  unsubscribeFromNotifications(notifiable: Notifiable): void {
-    this.#notifiables.delete(notifiable);
+  onItemRemoved(
+    listener: (item: Node | Edge) => void
+  ): Unsubscribe {
+    this.#itemRemovedListeners.add(listener);
+
+    return () => {
+      this.#itemRemovedListeners.delete(listener);
+    };
   }
 }
+
+export type Unsubscribe = () => void;
 
 export type AddEdgeInput<E extends Edge> = {
   to: Node;

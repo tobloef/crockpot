@@ -18,6 +18,8 @@ export class GraphQuery<
   readonly options: Readonly<GraphQueryOptions>;
 
   readonly #slots: QuerySlots;
+  readonly #unsubscribeItemAdded?: () => void;
+  readonly #unsubscribeItemRemoved?: () => void;
   #cache?: Output[];
 
   constructor(
@@ -32,7 +34,14 @@ export class GraphQuery<
 
     if (this.options.cache) {
       this.#cache = this.#getNewCache();
-      this.graph.subscribeToNotifications(this);
+
+      this.#unsubscribeItemAdded = this.graph.onItemAdded(
+        this.#handleItemAdded.bind(this)
+      );
+
+      this.#unsubscribeItemRemoved = this.graph.onItemRemoved(
+        this.#handleItemRemoved.bind(this)
+      );
     }
   }
 
@@ -44,7 +53,7 @@ export class GraphQuery<
     }
   }
 
-  notifyAdded(item: Node | Edge) {
+  #handleItemAdded(item: Node | Edge) {
     if (!isItemRelatedToSlots(item, this.#slots)) {
       return;
     }
@@ -52,7 +61,7 @@ export class GraphQuery<
     this.#updateQuery();
   }
 
-  notifyRemoved(item: Node | Edge) {
+  #handleItemRemoved(item: Node | Edge) {
     if (!isItemRelatedToSlots(item, this.#slots)) {
       return;
     }
@@ -62,7 +71,8 @@ export class GraphQuery<
 
   destroy() {
     this.#cache = undefined;
-    this.graph.unsubscribeFromNotifications(this);
+    this.#unsubscribeItemAdded?.();
+    this.#unsubscribeItemRemoved?.();
   }
 
   #updateQuery() {

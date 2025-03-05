@@ -80,7 +80,7 @@ describe("GraphQuery", () => {
 
     // Act
     [...graphQuery.run()];
-    graphQuery.notifyAdded(new Node());
+    graph.addNode(new Node());
     [...graphQuery.run()];
 
     // Assert
@@ -99,6 +99,10 @@ describe("GraphQuery", () => {
     const { Graph, Node, GraphQuery} = await import("../index.ts");
 
     const graph = new Graph();
+
+    const node = new Node();
+    graph.addNode(node);
+
     const graphQuery = new GraphQuery(
       graph,
       Node,
@@ -107,7 +111,7 @@ describe("GraphQuery", () => {
 
     // Act
     [...graphQuery.run()];
-    graphQuery.notifyRemoved(new Node());
+    graph.removeNode(node);
     [...graphQuery.run()];
 
     // Assert

@@ -16,12 +16,15 @@ export class GraphObserver<
   readonly input: Input;
   readonly options: GraphObserverOptions;
 
-  readonly #slots: QuerySlots;
   #cache: Map<string, Output>;
   #addedResults: Output[] = [];
   #removedResults: Output[] = [];
-  #addedListeners: Set<(item: Output) => void> = new Set();
-  #removedListeners: Set<(item: Output) => void> = new Set();
+
+  readonly #slots: QuerySlots;
+  readonly #additionListeners: Set<(item: Output) => void> = new Set();
+  readonly #removalListeners: Set<(item: Output) => void> = new Set();
+  readonly #unsubscribeItemAdded?: () => void;
+  readonly #unsubscribeItemRemoved?: () => void;
 
   constructor(
     graph: Graph,
@@ -34,7 +37,14 @@ export class GraphObserver<
     this.options = options;
 
     this.#cache = this.#getNewCache();
-    this.graph.subscribeToNotifications(this);
+
+    this.#unsubscribeItemAdded = this.graph.onItemAdded(
+      this.#handleItemAdded.bind(this)
+    );
+
+    this.#unsubscribeItemRemoved = this.graph.onItemRemoved(
+      this.#handleItemRemoved.bind(this)
+    );
   }
 
   *added(): Generator<Output> {
@@ -54,14 +64,14 @@ export class GraphObserver<
   }
 
   onAdded(listener: (item: Output) => void) {
-    this.#addedListeners.add(listener);
+    this.#additionListeners.add(listener);
   }
 
   onRemoved(listener: (item: Output) => void) {
-    this.#removedListeners.add(listener);
+    this.#removalListeners.add(listener);
   }
 
-  notifyAdded(item: Node | Edge) {
+  #handleItemAdded(item: Node | Edge) {
     if (!isItemRelatedToSlots(item, this.#slots)) {
       return;
     }
@@ -69,7 +79,7 @@ export class GraphObserver<
     this.#updateQuery();
   }
 
-  notifyRemoved(item: Node | Edge) {
+  #handleItemRemoved(item: Node | Edge) {
     if (!isItemRelatedToSlots(item, this.#slots)) {
       return;
     }
@@ -81,7 +91,8 @@ export class GraphObserver<
     this.#cache.clear();
     this.#addedResults = [];
     this.#removedResults = [];
-    this.graph.unsubscribeFromNotifications(this);
+    this.#unsubscribeItemAdded?.();
+    this.#unsubscribeItemRemoved?.();
   }
 
   #updateQuery() {
@@ -89,7 +100,7 @@ export class GraphObserver<
 
     for (const [hash, result] of newCache) {
       if (!this.#cache.has(hash)) {
-        for (const listener of this.#addedListeners) {
+        for (const listener of this.#additionListeners) {
           listener(result);
         }
         this.#addedResults.push(result);
@@ -98,7 +109,7 @@ export class GraphObserver<
 
     for (const [hash, result] of this.#cache) {
       if (!newCache.has(hash)) {
-        for (const listener of this.#removedListeners) {
+        for (const listener of this.#removalListeners) {
           listener(result);
         }
         this.#removedResults.push(result);
