@@ -1,5 +1,5 @@
 import type { Class } from "../utils/class.ts";
-import type { Nodelike, ReferenceName, } from "../query/query.types.ts";
+import type { Nodelike, ReferenceName, } from "../query/run-query.types.ts";
 import { randomString } from "../utils/random-string.ts";
 import type { Node } from "../node/node.ts";
 import { type Graph } from "../graph.ts";
@@ -10,7 +10,7 @@ export class Edge {
 
   static defaultGraph: Graph;
 
-  id: string = randomString();
+  readonly id: string = randomString();
   graph: Readonly<Graph> = Edge.defaultGraph;
 
   get nodes(): EdgeNodes {

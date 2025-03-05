@@ -1,8 +1,9 @@
 import { Edge } from "./edge/edge.ts";
 import { Node } from "./node/node.ts";
-import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem, } from "./query/query.types.ts";
-import { query } from "./query/query.ts";
+import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem, } from "./query/run-query.types.ts";
 import { type Class, getClassHierarchy } from "./utils/class.ts";
+import { GraphQuery, type GraphQueryOptions } from "./query/graph-query.js";
+import { GraphObserver, type GraphObserverOptions } from "./query/graph-observer.js";
 
 export class Graph {
   indices = {
@@ -12,11 +13,61 @@ export class Graph {
     edgesByType: new Map<Class<Edge>, Set<Edge>>(),
   };
 
-  query<Input extends QueryInputItem>(input: Input): Generator<QueryOutput<Input>>;
+  #notifiables = new Set<Notifiable>();
 
-  query<Input extends ArrayQueryInput>(input: [...Input]): Generator<QueryOutput<Input>>;
+  query<Input extends QueryInputItem>(
+    input: Input,
+    options?: GraphQueryOptions
+  ): GraphQuery<Input, QueryOutput<Input>>;
 
-  query<Input extends ObjectQueryInput>(input: Input): Generator<(
+  query<Input extends ArrayQueryInput>(
+    input: [...Input],
+    options?: GraphQueryOptions
+  ): GraphQuery<Input, QueryOutput<Input>>;
+
+  query<Input extends ObjectQueryInput>(
+    input: Input,
+    options?: GraphQueryOptions
+  ): GraphQuery<Input, (
+    // Type duplicated from ObjectQueryOutput to fix type hints.
+    // If ObjectQueryOutput or QueryOutput is used directly, it shows up as:
+    // Generator<ObjectQueryOutput<
+    //   { Transform: typeof Transform },
+    //   { Transform: typeof Transform }
+    // >, any, any>
+    { [K in keyof Input]: QueryOutputItem<Input[K], Input> }
+  )>;
+
+  query<Input extends QueryInput>(
+    input: Input,
+    options?: GraphQueryOptions
+  ): GraphQuery<Input, QueryOutput<Input>> {
+    const query = new GraphQuery<
+      Input,
+      QueryOutput<Input>
+    >(
+      this,
+      input,
+      options,
+    );
+
+    return query;
+  }
+
+  observe<Input extends QueryInputItem>(
+    input: Input,
+    options?: GraphObserverOptions
+  ): GraphObserver<Input, QueryOutput<Input>>;
+
+  observe<Input extends ArrayQueryInput>(
+    input: [...Input],
+    options?: GraphObserverOptions
+  ): GraphObserver<Input, QueryOutput<Input>>;
+
+  observe<Input extends ObjectQueryInput>(
+    input: Input,
+    options?: GraphObserverOptions
+  ): GraphObserver<Input, (
     // Type duplicated from ObjectQueryOutput to fix type hints.
     // If ObjectQueryOutput or QueryOutput is used directly, it shows up as:
     // Generator<ObjectQueryOutput<
@@ -26,8 +77,20 @@ export class Graph {
     { [K in keyof Input]: QueryOutputItem<Input[K], Input> }
     )>;
 
-  query<Input extends QueryInput>(input: Input): Generator<QueryOutput<Input>> {
-    return query(this, input);
+  observe<Input extends QueryInput>(
+    input: Input,
+    options?: GraphObserverOptions
+  ): GraphObserver<Input, QueryOutput<Input>> {
+    const observer = new GraphObserver<
+      Input,
+      QueryOutput<Input>
+    >(
+      this,
+      input,
+      options,
+    );
+
+    return observer;
   }
 
   addNode<N extends Node>(node: N): N {
@@ -74,6 +137,10 @@ export class Graph {
       node.graph = this;
     }
 
+    for (const query of this.#notifiables) {
+      query.notifyAdded(node);
+    }
+
     return node;
   }
 
@@ -103,6 +170,10 @@ export class Graph {
       if (nodesByType !== undefined) {
         nodesByType.delete(node);
       }
+    }
+
+    for (const query of this.#notifiables) {
+      query.notifyRemoved(node);
     }
   }
 
@@ -194,6 +265,10 @@ export class Graph {
       edge.graph = this;
     }
 
+    for (const query of this.#notifiables) {
+      query.notifyAdded(edge);
+    }
+
     return edge as E;
   }
 
@@ -214,6 +289,10 @@ export class Graph {
       if (edgesByType !== undefined) {
         edgesByType.delete(edge);
       }
+    }
+
+    for (const query of this.#notifiables) {
+      query.notifyRemoved(edge);
     }
   }
 
@@ -282,6 +361,14 @@ export class Graph {
       }
     }
   }
+
+  subscribeToNotifications(notifiable: Notifiable): void {
+    this.#notifiables.add(notifiable);
+  }
+
+  unsubscribeFromNotifications(notifiable: Notifiable): void {
+    this.#notifiables.delete(notifiable);
+  }
 }
 
 export type AddEdgeInput<E extends Edge> = {
@@ -299,3 +386,8 @@ export type RemoveEdgesInput = (
 export const defaultGraph = new Graph();
 Node.defaultGraph = defaultGraph;
 Edge.defaultGraph = defaultGraph;
+
+export type Notifiable = {
+  notifyAdded(item: Node | Edge): void;
+  notifyRemoved(item: Node | Edge): void;
+}

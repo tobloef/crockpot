@@ -1,9 +1,7 @@
 import type { QueryMatch } from "./execute-plan.ts";
 import { getAllSlots, type QuerySlots, type Slot } from "./parse-input.ts";
-import type { Node } from "../node/node.ts";
-import type { Edge } from "../edge/edge.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
-import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput } from "./query.types.ts";
+import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput } from "./run-query.types.ts";
 
 export function* createOutputs<
   Input extends QueryInput
@@ -19,7 +17,7 @@ export function* createOutputs<
       yield* createArrayOutputs(matchesGenerator, slots) as Generator<QueryOutput<Input>>;
       break;
     case "object":
-      yield* createRecordOutputs(matchesGenerator, slots) as Generator<QueryOutput<Input>>;
+      yield* createObjectOutputs(matchesGenerator, slots) as Generator<QueryOutput<Input>>;
       break;
     default:
       assertExhaustive(slots.format);
@@ -32,7 +30,10 @@ function* createSingleOutputs(
 ): Generator<QueryOutput<QueryInputItem>> {
   const slot = getAllSlots(slots)[0]!;
   for (const match of matches) {
-    const output = match[slot.name]!;
+    const output = match[slot.name]! as QueryOutput<QueryInputItem>;
+
+    (output as WithHash).__hash = getOutputHash(output);
+
     yield output;
   }
 }
@@ -44,26 +45,28 @@ function* createArrayOutputs(
   const outputSlots = getOutputSlots(slots);
 
   for (const match of matches) {
-    const output = [];
+    const output: QueryOutput<ArrayQueryInput> = [];
 
     for (const slot of outputSlots) {
       for (const key of slot.outputKeys) {
-        output[key as number] = match[slot.name]!;
+        (output[key as number] as any) = match[slot.name]!;
       }
     }
 
-    yield output as QueryOutput<ArrayQueryInput>;
+    (output as unknown as WithHash).__hash = getOutputHash(output);
+
+    yield output;
   }
 }
 
-function* createRecordOutputs(
+function* createObjectOutputs(
   matches: Generator<QueryMatch>,
   slots: QuerySlots,
 ): Generator<QueryOutput<ObjectQueryInput>> {
   const outputSlots = getOutputSlots(slots);
 
   for (const match of matches) {
-    const output: Record<string, Node | Edge> = {};
+    const output: QueryOutput<ObjectQueryInput> = {};
 
     for (const slot of outputSlots) {
       for (const key of slot.outputKeys) {
@@ -71,7 +74,9 @@ function* createRecordOutputs(
       }
     }
 
-    yield output as QueryOutput<ObjectQueryInput>;
+    (output as WithHash).__hash = getOutputHash(output);
+
+    yield output;
   }
 }
 
@@ -85,4 +90,22 @@ function getOutputSlots(
     .filter((slot) => slot.outputKeys.length > 0);
 
   return slotsWithOutputKeys;
+}
+
+export function getOutputHash<
+  Input extends QueryInput
+>(output: QueryOutput<Input>): string {
+  if (output.id !== undefined) {
+    return output.id;
+  }
+
+  const hash = Object.values(output)
+    .map((item) => (item as { id: string }).id)
+    .join();
+
+  return hash;
+}
+
+export type WithHash = {
+  __hash: string;
 }
