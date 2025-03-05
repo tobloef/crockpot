@@ -548,9 +548,9 @@ describe("runQuery", () => {
     typesEqual<typeof arrayResult, [ Node ][]>(true);
     typesEqual<typeof objectResult, { Node: Node }[]>(true);
 
-    deepStrictEqual(singleResult, [ nodeB, nodeA ]);
-    deepStrictEqual(arrayResult, [ [ nodeB ], [ nodeA ] ]);
-    deepStrictEqual(objectResult, [ { Node: nodeB }, { Node: nodeA } ]);
+    deepStrictEqual(singleResult, [ nodeA, nodeB ]);
+    deepStrictEqual(arrayResult, [ [ nodeA ], [ nodeB ] ]);
+    deepStrictEqual(objectResult, [ { Node: nodeA }, { Node: nodeB } ]);
   });
 
   it("Finds nodes with implicit edge to them", () => {
@@ -623,9 +623,9 @@ describe("runQuery", () => {
     typesEqual<typeof arrayResult, [ Node ][]>(true);
     typesEqual<typeof objectResult, { Node: Node }[]>(true);
 
-    deepStrictEqual(singleResult, [ nodeB, nodeA ]);
-    deepStrictEqual(arrayResult, [ [ nodeB ], [ nodeA ] ]);
-    deepStrictEqual(objectResult, [ { Node: nodeB }, { Node: nodeA } ]);
+    deepStrictEqual(singleResult, [ nodeA, nodeB ]);
+    deepStrictEqual(arrayResult, [ [ nodeA ], [ nodeB ] ]);
+    deepStrictEqual(objectResult, [ { Node: nodeA }, { Node: nodeB } ]);
   });
 
   it("Finds nodes with implicit edge to specific node type", () => {
@@ -1399,16 +1399,16 @@ describe("runQuery", () => {
 
     deepStrictEqual(arrayResult, [
       [ node2, node2, node1 ],
-      [ node3, node2, node1 ],
       [ node2, node3, node1 ],
+      [ node3, node2, node1 ],
       [ node3, node3, node1 ],
       [ node5, node5, node4 ],
       [ node6, node6, node7 ],
     ]);
     deepStrictEqual(objectResult, [
       { a: node2, b: node2, ref: node1 },
-      { a: node3, b: node2, ref: node1 },
       { a: node2, b: node3, ref: node1 },
+      { a: node3, b: node2, ref: node1 },
       { a: node3, b: node3, ref: node1 },
       { a: node5, b: node5, ref: node4 },
       { a: node6, b: node6, ref: node7 },

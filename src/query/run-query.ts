@@ -46,10 +46,24 @@ export function* runQueryBySlots<
   graph: Graph,
   slots: QuerySlots,
 ): Generator<QueryOutput<Input>> {
-  const plan = createPlan(slots, graph);
-  const matchesGenerator = executePlan(plan);
-  const rawOutputsGenerator = createOutputs<Input>(matchesGenerator, slots);
-  const deduplicatedOutputGenerator = deduplicateOutputs<Input>(rawOutputsGenerator);
+  // TODO: Remove .toArray and .toGenerator usage
 
-  yield* deduplicatedOutputGenerator;
+  const plan = createPlan(slots, graph);
+  const matchesGenerator = executePlan(plan).toArray();
+  const rawOutputsGenerator = createOutputs<Input>(matchesGenerator.toGenerator(), slots).toArray();
+  const deduplicatedOutputGenerator = deduplicateOutputs<Input>(rawOutputsGenerator.toGenerator()).toArray();
+
+  yield* deduplicatedOutputGenerator.toGenerator();
 }
+
+declare global {
+  interface Array<T> {
+    toGenerator(): Generator<T, void, unknown>;
+  }
+}
+
+Array.prototype.toGenerator = function* <T>(): Generator<T, void, unknown> {
+  for (const item of this) {
+    yield item;
+  }
+};
