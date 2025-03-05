@@ -1,4 +1,4 @@
 - Hierarchies
-- Boolean queries?
-- State machine helpers?
-- Event helpers?
+- Boolean queries
+- State machine helpers
+- Event helpers
