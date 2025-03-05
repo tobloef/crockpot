@@ -148,40 +148,37 @@ function* executeEnsureConnectionStep(
 
   let node: Node;
   let edge: Edge;
-  let relativeDirection: EdgeDirection;
 
   if (visitedSlot1.type === "node" && visitedSlot2.type === "edge") {
     node = match[visitedSlot1.name] as Node;
     edge = match[visitedSlot2.name] as Edge;
-    relativeDirection = getOppositeDirection(direction);
   } else if (visitedSlot1.type === "edge" && visitedSlot2.type === "node") {
     edge = match[visitedSlot1.name] as Edge;
     node = match[visitedSlot2.name] as Node;
-    relativeDirection = direction;
   } else {
     throw new Error(`Items of identical types cannot be connected.`);
   }
 
-  if (relativeDirection === "from") {
+  if (direction === "from") {
     const isOk = edge.nodes.from === node;
 
     if (!isOk) {
       return;
     }
-  } else if (relativeDirection === "to") {
+  } else if (direction === "to") {
     const isOk = edge.nodes.to === node;
 
     if (!isOk) {
       return;
     }
-  } else if (relativeDirection === "fromOrTo") {
+  } else if (direction === "fromOrTo") {
     const isOk = edge.nodes.from === node || edge.nodes.to === node;
 
     if (!isOk) {
       return;
     }
   } else {
-    assertExhaustive(relativeDirection);
+    assertExhaustive(direction);
   }
 
   const [nextStep, ...remainingSteps] = nextSteps;

@@ -1476,14 +1476,14 @@ describe("runQuery", () => {
     typesEqual<typeof objectResult, { a: Node, b: Node, c: Node }[]>(true);
 
     deepStrictEqual(arrayResult, [
-      [ node2, node3, node1 ],
       [ node3, node1, node2 ],
       [ node1, node2, node3 ],
+      [ node2, node3, node1 ],
     ]);
     deepStrictEqual(objectResult, [
-      { a: node2, b: node3, c: node1 },
       { a: node3, b: node1, c: node2 },
       { a: node1, b: node2, c: node3 },
+      { a: node2, b: node3, c: node1 },
     ]);
   });
 
