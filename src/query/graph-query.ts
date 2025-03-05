@@ -58,6 +58,9 @@ export class GraphQuery<
       return;
     }
 
+    // When this needs to be optimized, take a look the fix-in-place approach
+    // outlined on page two of your medium-sized yellow notebook.
+
     this.#updateQuery();
   }
 
@@ -65,6 +68,9 @@ export class GraphQuery<
     if (!isItemRelatedToSlots(item, this.#slots)) {
       return;
     }
+
+    // When this needs to be optimized, take a look the fix-in-place approach
+    // outlined on page two of your medium-sized yellow notebook.
 
     this.#updateQuery();
   }
