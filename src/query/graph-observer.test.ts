@@ -187,4 +187,54 @@ describe("GraphObserver", () => {
     deepStrictEqual(added, [node1]);
     deepStrictEqual(removed, [node1]);
   });
+
+  it("Less specific nodes are not counted", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = new Node();
+
+    const input = NodeA;
+
+    const observer = new GraphObserver(
+      graph,
+      input,
+    );
+
+    // Act
+    graph.addNode(node1);
+    graph.removeNode(node1);
+
+    const added = observer.added().toArray();
+    const removed = observer.removed().toArray();
+
+    // Assert
+    deepStrictEqual(added, []);
+    deepStrictEqual(removed, []);
+  });
+
+  it("More specific nodes are counted", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = new NodeA();
+
+    const input = Node;
+
+    const observer = new GraphObserver(
+      graph,
+      input,
+    );
+
+    // Act
+    graph.addNode(node1);
+    graph.removeNode(node1);
+
+    const added = observer.added().toArray();
+    const removed = observer.removed().toArray();
+
+    // Assert
+    deepStrictEqual(added, [node1]);
+    deepStrictEqual(removed, [node1]);
+  });
 });
