@@ -1,4 +1,5 @@
 import { Edge } from "../edge/edge.js";
+import { isClassThatExtends } from "../utils/class.js";
 import { randomString } from "../utils/random-string.js";
 import {} from "../graph.js";
 import { NamedNodeQueryItem, RelatedNodeQueryItem } from "./node-query-item.js";
@@ -84,6 +85,38 @@ export class Node {
     }
     remove() {
         this.graph.removeNode(this);
+    }
+    getOneRelated(type, direction = "fromOrTo") {
+        if (direction === "fromOrTo") {
+            return this.getOneRelated(type, "from") ?? this.getOneRelated(type, "to");
+        }
+        const oppositeDirection = direction === "from" ? "to" : "from";
+        for (const edge of this.edges[direction].values()) {
+            const otherNode = edge.nodes[oppositeDirection];
+            if (otherNode === undefined) {
+                continue;
+            }
+            if (isClassThatExtends(otherNode.constructor, type)) {
+                return otherNode;
+            }
+        }
+    }
+    *getAllRelated(type, direction = "fromOrTo") {
+        if (direction === "fromOrTo") {
+            yield* this.getAllRelated(type, "from");
+            yield* this.getAllRelated(type, "to");
+            return;
+        }
+        const oppositeDirection = direction === "from" ? "to" : "from";
+        for (const edge of this.edges[direction].values()) {
+            const otherNode = edge.nodes[oppositeDirection];
+            if (otherNode === undefined) {
+                continue;
+            }
+            if (isClassThatExtends(otherNode.constructor, type)) {
+                yield otherNode;
+            }
+        }
     }
     #createEmptyEdges() {
         return {

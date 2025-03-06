@@ -1,5 +1,5 @@
-import { Edge } from "../edge/edge.ts";
-import type { Class } from "../utils/class.ts";
+import { Edge, type EdgeDirection } from "../edge/edge.ts";
+import { type Class, type Instance } from "../utils/class.ts";
 import type { Edgelike, Nodelike, ReferenceName } from "../query/run-query.types.ts";
 import { type Graph } from "../graph.ts";
 import { NamedNodeQueryItem, RelatedNodeQueryItem } from "./node-query-item.ts";
@@ -18,6 +18,8 @@ export declare class Node {
     removeEdge(edge: Edge): void;
     removeEdges(input?: RemoveEdgeInput): void;
     remove(): void;
+    getOneRelated<Type extends Class<Node>>(type: Type, direction?: EdgeDirection): Instance<Type> | undefined;
+    getAllRelated<Type extends Class<Node>>(type: Type, direction?: EdgeDirection): Iterable<Instance<Type>>;
 }
 export type AddEdgeInput = ({
     to: Node;

@@ -46,12 +46,16 @@ export class GraphObserver {
         if (!isItemRelatedToSlots(item, this.#slots)) {
             return;
         }
+        // When this needs to be optimized, take a look the fix-in-place approach
+        // outlined on page two of your medium-sized yellow notebook.
         this.#updateQuery();
     }
     #handleItemRemoved(item) {
         if (!isItemRelatedToSlots(item, this.#slots)) {
             return;
         }
+        // When this needs to be optimized, take a look the fix-in-place approach
+        // outlined on page two of your medium-sized yellow notebook.
         this.#updateQuery();
     }
     destroy() {
