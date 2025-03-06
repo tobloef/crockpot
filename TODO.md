@@ -1,4 +1,4 @@
-- Boolean queries
 - State machine helpers
 - Event helpers
+- Boolean queries
 - Some day I want to experiment with code-generation for direct access. It seems so much faster. Could go crazy with some more cache-friendly indices.
