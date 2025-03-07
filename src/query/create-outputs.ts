@@ -2,6 +2,7 @@ import type { QueryMatch } from "./execute-plan.ts";
 import { getAllSlots, type QuerySlots, type Slot } from "./parse-input.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
 import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput } from "./run-query.types.ts";
+import { cache } from "../utils/cache.ts";
 
 export function* createOutputs<
   Input extends QueryInput
@@ -86,26 +87,17 @@ function getOutputSlots(
   return slotsWithOutputKeys;
 }
 
-const outputHashCache = new WeakMap<QueryOutput<any>, string>();
 
-export function getOutputHash<
+export const getOutputHash = cache(_getOutputHash);
+
+function _getOutputHash<
   Input extends QueryInput
 >(output: QueryOutput<Input>): string {
-  if (outputHashCache.has(output)) {
-    return outputHashCache.get(output)!;
-  }
-
-  let hash: any;
-
   if (output.id !== undefined) {
-    hash = output.id;
+    return output.id;
   } else {
-    hash = Object.values(output)
+    return Object.values(output)
       .map((item) => (item as { id: string }).id)
       .join();
   }
-
-  outputHashCache.set(output, hash);
-
-  return hash;
 }
