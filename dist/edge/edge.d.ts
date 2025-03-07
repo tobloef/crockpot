@@ -13,6 +13,7 @@ export declare class Edge {
     static to<Type extends Class<Edge>, ToItem extends Nodelike>(this: Type, item: ToItem): RelatedEdgeQueryItem<Type, ToItem, Nodelike, Nodelike[]>;
     static from<Type extends Class<Edge>, FromItem extends Nodelike>(this: Type, item: FromItem): RelatedEdgeQueryItem<Type, Nodelike, FromItem, Nodelike[]>;
     static fromOrTo<Type extends Class<Edge>, FromOrToItems extends Nodelike[]>(this: Type, ...items: FromOrToItems): RelatedEdgeQueryItem<Type, Nodelike, Nodelike, FromOrToItems>;
+    replaceNode(direction: "to" | "from", node: Node): void;
     remove(): void;
 }
 export type EdgeNodes = Readonly<{
