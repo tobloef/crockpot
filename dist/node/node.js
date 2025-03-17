@@ -86,36 +86,57 @@ export class Node {
     remove() {
         this.graph.removeNode(this);
     }
-    getOneRelated(type, direction = "fromOrTo") {
-        if (direction === "fromOrTo") {
-            return this.getOneRelated(type, "from") ?? this.getOneRelated(type, "to");
+    getOneRelated(input) {
+        const { nodeType, direction, edgeType } = input ?? {};
+        if (direction === undefined || direction === "fromOrTo") {
+            return (this.getOneRelated({ nodeType, edgeType, direction: "from" }) ??
+                this.getOneRelated({ nodeType, edgeType, direction: "to" }));
         }
         const oppositeDirection = direction === "from" ? "to" : "from";
         for (const edge of this.edges[direction].values()) {
+            if (edgeType !== undefined &&
+                !isClassThatExtends(edge.constructor, edgeType)) {
+                continue;
+            }
             const otherNode = edge.nodes[oppositeDirection];
             if (otherNode === undefined) {
                 continue;
             }
-            if (isClassThatExtends(otherNode.constructor, type)) {
-                return otherNode;
+            if (nodeType !== undefined &&
+                !isClassThatExtends(otherNode.constructor, nodeType)) {
+                continue;
             }
+            return {
+                node: otherNode,
+                edge: edge,
+            };
         }
     }
-    *getAllRelated(type, direction = "fromOrTo") {
-        if (direction === "fromOrTo") {
-            yield* this.getAllRelated(type, "from");
-            yield* this.getAllRelated(type, "to");
+    *getAllRelated(input) {
+        const { nodeType, direction, edgeType } = input ?? {};
+        if (direction === undefined || direction === "fromOrTo") {
+            yield* this.getAllRelated({ nodeType, edgeType, direction: "from" });
+            yield* this.getAllRelated({ nodeType, edgeType, direction: "to" });
             return;
         }
         const oppositeDirection = direction === "from" ? "to" : "from";
         for (const edge of this.edges[direction].values()) {
+            if (edgeType !== undefined &&
+                !isClassThatExtends(edge.constructor, edgeType)) {
+                continue;
+            }
             const otherNode = edge.nodes[oppositeDirection];
             if (otherNode === undefined) {
                 continue;
             }
-            if (isClassThatExtends(otherNode.constructor, type)) {
-                yield otherNode;
+            if (nodeType !== undefined &&
+                !isClassThatExtends(otherNode.constructor, nodeType)) {
+                continue;
             }
+            yield {
+                node: otherNode,
+                edge: edge,
+            };
         }
     }
     #createEmptyEdges() {

@@ -34,6 +34,23 @@ export class Edge {
             class: this,
         });
     }
+    replaceNode(direction, node) {
+        this.graph.removeEdge(this);
+        if (direction === "to") {
+            this.graph.addEdge({
+                to: node,
+                from: this.nodes["from"],
+                edge: this,
+            });
+        }
+        else {
+            this.graph.addEdge({
+                to: this.nodes["to"],
+                from: node,
+                edge: this,
+            });
+        }
+    }
     remove() {
         this.graph.removeEdge(this);
     }

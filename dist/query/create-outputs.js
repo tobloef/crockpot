@@ -1,5 +1,6 @@
 import { getAllSlots } from "./parse-input.js";
 import { assertExhaustive } from "../utils/assert-exhaustive.js";
+import { cache } from "../utils/cache.js";
 export function* createOutputs(matchesGenerator, slots) {
     switch (slots.format) {
         case "single":
@@ -53,21 +54,15 @@ function getOutputSlots(slots) {
         .filter((slot) => slot.outputKeys.length > 0);
     return slotsWithOutputKeys;
 }
-const outputHashCache = new WeakMap();
-export function getOutputHash(output) {
-    if (outputHashCache.has(output)) {
-        return outputHashCache.get(output);
-    }
-    let hash;
+export const getOutputHash = cache(_getOutputHash);
+function _getOutputHash(output) {
     if (output.id !== undefined) {
-        hash = output.id;
+        return output.id;
     }
     else {
-        hash = Object.values(output)
+        return Object.values(output)
             .map((item) => item.id)
             .join();
     }
-    outputHashCache.set(output, hash);
-    return hash;
 }
 //# sourceMappingURL=create-outputs.js.map
