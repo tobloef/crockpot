@@ -23,9 +23,9 @@ export declare class Graph {
     query<Input extends ObjectQueryInput>(input: Input, options?: GraphQueryOptions): GraphQuery<({
         [K in keyof Input]: QueryOutputItem<Input[K], Input>;
     })>;
-    observe<Input extends QueryInputItem>(input: Input, options?: GraphObserverOptions): GraphObserver<Input, QueryOutput<Input>>;
-    observe<Input extends ArrayQueryInput>(input: [...Input], options?: GraphObserverOptions): GraphObserver<Input, QueryOutput<Input>>;
-    observe<Input extends ObjectQueryInput>(input: Input, options?: GraphObserverOptions): GraphObserver<Input, ({
+    observe<Input extends QueryInputItem>(input: Input, options?: GraphObserverOptions): GraphObserver<QueryOutput<Input>>;
+    observe<Input extends ArrayQueryInput>(input: [...Input], options?: GraphObserverOptions): GraphObserver<QueryOutput<Input>>;
+    observe<Input extends ObjectQueryInput>(input: Input, options?: GraphObserverOptions): GraphObserver<({
         [K in keyof Input]: QueryOutputItem<Input[K], Input>;
     })>;
     addNode<N extends Node>(node: N): N;

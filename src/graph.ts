@@ -57,17 +57,17 @@ export class Graph {
   observe<Input extends QueryInputItem>(
     input: Input,
     options?: GraphObserverOptions
-  ): GraphObserver<Input, QueryOutput<Input>>;
+  ): GraphObserver<QueryOutput<Input>>;
 
   observe<Input extends ArrayQueryInput>(
     input: [...Input],
     options?: GraphObserverOptions
-  ): GraphObserver<Input, QueryOutput<Input>>;
+  ): GraphObserver<QueryOutput<Input>>;
 
   observe<Input extends ObjectQueryInput>(
     input: Input,
     options?: GraphObserverOptions
-  ): GraphObserver<Input, (
+  ): GraphObserver<(
     // Type duplicated from ObjectQueryOutput to fix type hints.
     // If ObjectQueryOutput or QueryOutput is used directly, it shows up as:
     // Generator<ObjectQueryOutput<
@@ -80,9 +80,8 @@ export class Graph {
   observe<Input extends QueryInput>(
     input: Input,
     options?: GraphObserverOptions
-  ): GraphObserver<Input, QueryOutput<Input>> {
+  ): GraphObserver<QueryOutput<Input>> {
     const observer = new GraphObserver<
-      Input,
       QueryOutput<Input>
     >(
       this,
