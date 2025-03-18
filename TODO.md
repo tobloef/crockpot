@@ -1,3 +1,4 @@
+- Support `readonly` array inputs
 - Boolean queries
   - optional
   - not
