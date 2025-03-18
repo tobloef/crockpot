@@ -19,17 +19,17 @@ export class Graph {
   query<Input extends QueryInputItem>(
     input: Input,
     options?: GraphQueryOptions
-  ): GraphQuery<Input, QueryOutput<Input>>;
+  ): GraphQuery<QueryOutput<Input>>;
 
   query<Input extends ArrayQueryInput>(
     input: [...Input],
     options?: GraphQueryOptions
-  ): GraphQuery<Input, QueryOutput<Input>>;
+  ): GraphQuery<QueryOutput<Input>>;
 
   query<Input extends ObjectQueryInput>(
     input: Input,
     options?: GraphQueryOptions
-  ): GraphQuery<Input, (
+  ): GraphQuery<(
     // Type duplicated from ObjectQueryOutput to fix type hints.
     // If ObjectQueryOutput or QueryOutput is used directly, it shows up as:
     // Generator<ObjectQueryOutput<
@@ -42,9 +42,8 @@ export class Graph {
   query<Input extends QueryInput>(
     input: Input,
     options?: GraphQueryOptions
-  ): GraphQuery<Input, QueryOutput<Input>> {
+  ): GraphQuery<QueryOutput<Input>> {
     const query = new GraphQuery<
-      Input,
       QueryOutput<Input>
     >(
       this,

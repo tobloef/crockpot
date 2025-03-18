@@ -18,9 +18,9 @@ export declare class Graph {
         nodesByType: Map<Class<Node>, Set<Node>>;
         edgesByType: Map<Class<Edge>, Set<Edge>>;
     };
-    query<Input extends QueryInputItem>(input: Input, options?: GraphQueryOptions): GraphQuery<Input, QueryOutput<Input>>;
-    query<Input extends ArrayQueryInput>(input: [...Input], options?: GraphQueryOptions): GraphQuery<Input, QueryOutput<Input>>;
-    query<Input extends ObjectQueryInput>(input: Input, options?: GraphQueryOptions): GraphQuery<Input, ({
+    query<Input extends QueryInputItem>(input: Input, options?: GraphQueryOptions): GraphQuery<QueryOutput<Input>>;
+    query<Input extends ArrayQueryInput>(input: [...Input], options?: GraphQueryOptions): GraphQuery<QueryOutput<Input>>;
+    query<Input extends ObjectQueryInput>(input: Input, options?: GraphQueryOptions): GraphQuery<({
         [K in keyof Input]: QueryOutputItem<Input[K], Input>;
     })>;
     observe<Input extends QueryInputItem>(input: Input, options?: GraphObserverOptions): GraphObserver<Input, QueryOutput<Input>>;
