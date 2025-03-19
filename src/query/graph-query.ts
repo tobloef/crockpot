@@ -10,11 +10,10 @@ export type GraphQueryOptions = {
 }
 
 export class GraphQuery<
-  Input extends QueryInput,
   Output extends QueryOutput<any>
 > {
   readonly graph: Graph;
-  readonly input: Input;
+  readonly input: QueryInput;
   readonly options: Readonly<GraphQueryOptions>;
 
   readonly #slots: QuerySlots;
@@ -24,7 +23,7 @@ export class GraphQuery<
 
   constructor(
     graph: Graph,
-    input: Input,
+    input: QueryInput,
     options: GraphQueryOptions = {}
   ) {
     this.graph = graph;

@@ -18,8 +18,22 @@ export declare class Node {
     removeEdge(edge: Edge): void;
     removeEdges(input?: RemoveEdgeInput): void;
     remove(): void;
-    getOneRelated<Type extends Class<Node>>(type: Type, direction?: EdgeDirection): Instance<Type> | undefined;
-    getAllRelated<Type extends Class<Node>>(type: Type, direction?: EdgeDirection): Iterable<Instance<Type>>;
+    getOneRelated<NodeType extends Class<Node> = Class<Node>, EdgeType extends Class<Edge> = Class<Edge>>(input?: {
+        nodeType?: NodeType;
+        direction?: EdgeDirection;
+        edgeType?: EdgeType;
+    }): {
+        node: Instance<NodeType>;
+        edge: Instance<EdgeType>;
+    } | undefined;
+    getAllRelated<NodeType extends Class<Node> = Class<Node>, EdgeType extends Class<Edge> = Class<Edge>>(input?: {
+        nodeType?: NodeType;
+        direction?: EdgeDirection;
+        edgeType?: EdgeType;
+    }): Iterable<{
+        node: Instance<NodeType>;
+        edge: Instance<EdgeType>;
+    }>;
 }
 export type AddEdgeInput = ({
     to: Node;

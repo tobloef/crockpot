@@ -150,53 +150,106 @@ export class Node {
     this.graph.removeNode(this);
   }
 
-  getOneRelated<Type extends Class<Node>>(
-    type: Type,
-    direction: EdgeDirection = "fromOrTo"
-  ): Instance<Type> | undefined {
+  getOneRelated<
+    NodeType extends Class<Node> = Class<Node>,
+    EdgeType extends Class<Edge> = Class<Edge>
+  >(
+    input?: {
+      nodeType?: NodeType,
+      direction?: EdgeDirection,
+      edgeType?: EdgeType,
+    }
+  ): {
+    node: Instance<NodeType>,
+    edge: Instance<EdgeType>,
+  } | undefined {
+    const { nodeType, direction, edgeType } = input ?? {};
 
-    if (direction === "fromOrTo") {
-      return this.getOneRelated(type, "from") ?? this.getOneRelated(type, "to");
+    if (direction === undefined || direction === "fromOrTo") {
+      return (
+        this.getOneRelated({ nodeType, edgeType, direction: "from" }) ??
+        this.getOneRelated({ nodeType, edgeType, direction: "to" })
+      );
     }
 
     const oppositeDirection = direction === "from" ? "to" : "from";
 
     for (const edge of this.edges[direction].values()) {
+      if (
+        edgeType !== undefined &&
+        !isClassThatExtends(edge.constructor as Class<Edge>, edgeType)
+      ) {
+        continue;
+      }
+
       const otherNode = edge.nodes[oppositeDirection];
 
       if (otherNode === undefined) {
         continue;
       }
 
-      if (isClassThatExtends(otherNode.constructor as Class<Node>, type)) {
-        return otherNode as Instance<Type>;
+      if (
+        nodeType !== undefined &&
+        !isClassThatExtends(otherNode.constructor as Class<Node>, nodeType)
+      ) {
+        continue;
+      }
+
+      return {
+        node: otherNode as Instance<NodeType>,
+        edge: edge as Instance<EdgeType>,
       }
     }
   }
 
-  *getAllRelated<Type extends Class<Node>>(
-    type: Type,
-    direction: EdgeDirection = "fromOrTo"
-  ): Iterable<Instance<Type>> {
+  *getAllRelated<
+    NodeType extends Class<Node> = Class<Node>,
+    EdgeType extends Class<Edge> = Class<Edge>
+  >(
+    input?: {
+      nodeType?: NodeType,
+      direction?: EdgeDirection,
+      edgeType?: EdgeType,
+    }
+  ): Iterable<{
+    node: Instance<NodeType>,
+    edge: Instance<EdgeType>,
+  }> {
+    const { nodeType, direction, edgeType } = input ?? {};
 
-    if (direction === "fromOrTo") {
-      yield* this.getAllRelated(type, "from");
-      yield* this.getAllRelated(type, "to");
+    if (direction === undefined || direction === "fromOrTo") {
+      yield* this.getAllRelated({ nodeType, edgeType, direction: "from" });
+      yield* this.getAllRelated({ nodeType, edgeType, direction: "to" });
       return;
     }
 
     const oppositeDirection = direction === "from" ? "to" : "from";
 
     for (const edge of this.edges[direction].values()) {
+      if (
+        edgeType !== undefined &&
+        !isClassThatExtends(edge.constructor as Class<Edge>, edgeType)
+      ) {
+        continue;
+      }
+
       const otherNode = edge.nodes[oppositeDirection];
 
       if (otherNode === undefined) {
         continue;
       }
 
-      if (isClassThatExtends(otherNode.constructor as Class<Node>, type)) {
-        yield otherNode as Instance<Type>;
+      if (
+        nodeType !== undefined &&
+        !isClassThatExtends(otherNode.constructor as Class<Node>, nodeType)
+      ) {
+        continue;
       }
+
+      yield {
+        node: otherNode as Instance<NodeType>,
+        edge: edge as Instance<EdgeType>,
+      };
     }
   }
 

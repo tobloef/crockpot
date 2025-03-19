@@ -9,11 +9,10 @@ import { getOutputHash } from "./create-outputs.ts";
 export type GraphObserverOptions = {}
 
 export class GraphObserver<
-  Input extends QueryInput,
   Output extends QueryOutput<any>
 > {
   readonly graph: Graph;
-  readonly input: Input;
+  readonly input: QueryInput;
   readonly options: GraphObserverOptions;
 
   #cache: Map<string, Output>;
@@ -28,7 +27,7 @@ export class GraphObserver<
 
   constructor(
     graph: Graph,
-    input: Input,
+    input: QueryInput,
     options: GraphObserverOptions = {}
   ) {
     this.graph = graph;
@@ -126,7 +125,7 @@ export class GraphObserver<
   }
 
   #getNewCache(): Map<string, Output> {
-    const cache = new Map<string, QueryOutput<Input>>();
+    const cache = new Map<string, Output>();
     const results = runQuery(this.graph, this.input as any);
 
     for (const output of results) {

@@ -19,17 +19,17 @@ export class Graph {
   query<Input extends QueryInputItem>(
     input: Input,
     options?: GraphQueryOptions
-  ): GraphQuery<Input, QueryOutput<Input>>;
+  ): GraphQuery<QueryOutput<Input>>;
 
   query<Input extends ArrayQueryInput>(
     input: [...Input],
     options?: GraphQueryOptions
-  ): GraphQuery<Input, QueryOutput<Input>>;
+  ): GraphQuery<QueryOutput<Input>>;
 
   query<Input extends ObjectQueryInput>(
     input: Input,
     options?: GraphQueryOptions
-  ): GraphQuery<Input, (
+  ): GraphQuery<(
     // Type duplicated from ObjectQueryOutput to fix type hints.
     // If ObjectQueryOutput or QueryOutput is used directly, it shows up as:
     // Generator<ObjectQueryOutput<
@@ -42,9 +42,8 @@ export class Graph {
   query<Input extends QueryInput>(
     input: Input,
     options?: GraphQueryOptions
-  ): GraphQuery<Input, QueryOutput<Input>> {
+  ): GraphQuery<QueryOutput<Input>> {
     const query = new GraphQuery<
-      Input,
       QueryOutput<Input>
     >(
       this,
@@ -58,17 +57,17 @@ export class Graph {
   observe<Input extends QueryInputItem>(
     input: Input,
     options?: GraphObserverOptions
-  ): GraphObserver<Input, QueryOutput<Input>>;
+  ): GraphObserver<QueryOutput<Input>>;
 
   observe<Input extends ArrayQueryInput>(
     input: [...Input],
     options?: GraphObserverOptions
-  ): GraphObserver<Input, QueryOutput<Input>>;
+  ): GraphObserver<QueryOutput<Input>>;
 
   observe<Input extends ObjectQueryInput>(
     input: Input,
     options?: GraphObserverOptions
-  ): GraphObserver<Input, (
+  ): GraphObserver<(
     // Type duplicated from ObjectQueryOutput to fix type hints.
     // If ObjectQueryOutput or QueryOutput is used directly, it shows up as:
     // Generator<ObjectQueryOutput<
@@ -81,9 +80,8 @@ export class Graph {
   observe<Input extends QueryInput>(
     input: Input,
     options?: GraphObserverOptions
-  ): GraphObserver<Input, QueryOutput<Input>> {
+  ): GraphObserver<QueryOutput<Input>> {
     const observer = new GraphObserver<
-      Input,
       QueryOutput<Input>
     >(
       this,
@@ -150,6 +148,10 @@ export class Graph {
   }
 
   removeNode(node: Node): void {
+    if (!this.indices.nodesByType.get(Node)?.has(node)) {
+      return;
+    }
+
     const edgesByNode = this.indices.edgesByNode.get(node);
     if (edgesByNode !== undefined) {
       for (const edge of edgesByNode.from) {
@@ -274,6 +276,10 @@ export class Graph {
   }
 
   removeEdge(edge: Edge): void {
+    if (!this.indices.edgesByType.get(Edge)?.has(edge)) {
+      return;
+    }
+
     const nodesByEdge = this.indices.nodesByEdge.get(edge);
 
     if (nodesByEdge !== undefined) {
