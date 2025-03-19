@@ -2,7 +2,7 @@ import { Edge } from "../edge/edge.js";
 import { isClassThatExtends } from "../utils/class.js";
 import { randomString } from "../utils/random-string.js";
 import {} from "../graph.js";
-import { NamedNodeQueryItem, RelatedNodeQueryItem } from "./node-query-item.js";
+import { NamedNodeQueryItem, NodeQueryItem, RelatedNodeQueryItem, } from "./node-query-item.js";
 export class Node {
     #brand = "Node";
     static defaultGraph;
@@ -11,6 +11,12 @@ export class Node {
     get edges() {
         return (this.graph.indices.edgesByNode.get(this) ??
             this.#createEmptyEdges());
+    }
+    static excluding(...excludedClassTypes) {
+        return new NodeQueryItem({
+            class: this,
+            excludedClassTypes,
+        });
     }
     static as(name) {
         return new NamedNodeQueryItem({

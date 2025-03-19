@@ -186,6 +186,15 @@ function parseNodeQueryItem(item, slots) {
     };
     slots.node[slotName] = nodeSlot;
     nodeSlot.constraints.class = pickMostSpecificClass(item.class, existingNodeSlot?.constraints.class);
+    if (existingNodeSlot?.constraints.excludedClassTypes !== undefined) {
+        nodeSlot.constraints.excludedClassTypes = new Set(existingNodeSlot.constraints.excludedClassTypes);
+    }
+    if (item.excludedClassTypes !== undefined) {
+        nodeSlot.constraints.excludedClassTypes ??= new Set();
+        for (const excludedClass of item.excludedClassTypes) {
+            nodeSlot.constraints.excludedClassTypes.add(excludedClass);
+        }
+    }
     if (existingUnknownSlot !== undefined) {
         nodeSlot.outputKeys.push(...existingUnknownSlot.outputKeys);
         delete slots.unknown[slotName];
@@ -336,6 +345,15 @@ function parseEdgeQueryItem(item, slots) {
     };
     slots.edge[slotName] = edgeSlot;
     edgeSlot.constraints.class = pickMostSpecificClass(item.class, existingEdgeSlot?.constraints.class);
+    if (existingEdgeSlot?.constraints.excludedClassTypes !== undefined) {
+        edgeSlot.constraints.excludedClassTypes = new Set(existingEdgeSlot.constraints.excludedClassTypes);
+    }
+    if (item.excludedClassTypes !== undefined) {
+        edgeSlot.constraints.excludedClassTypes ??= new Set();
+        for (const excludedClass of item.excludedClassTypes) {
+            edgeSlot.constraints.excludedClassTypes.add(excludedClass);
+        }
+    }
     if (existingUnknownSlot !== undefined) {
         edgeSlot.outputKeys.push(...existingUnknownSlot.outputKeys);
         delete slots.unknown[slotName];

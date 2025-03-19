@@ -1,12 +1,15 @@
 import type { Class } from "../utils/class.ts";
 import { Edge } from "./edge.ts";
 import type { Nodelike, ReferenceName } from "../query/run-query.types.ts";
-export declare abstract class EdgeQueryItem<ClassType extends Class<Edge> = Class<Edge>> {
+export declare class EdgeQueryItem<ClassType extends Class<Edge> = Class<Edge>> {
     #private;
     class: ClassType;
+    excludedClassTypes?: Class<Edge>[];
     constructor(params: {
         class: ClassType;
+        excludedClassTypes?: Class<Edge>[];
     });
+    excluding(...excludedClassTypes: Class<Edge>[]): EdgeQueryItem<ClassType>;
 }
 export declare class NamedEdgeQueryItem<ClassType extends Class<Edge> = Class<Edge>, Name extends string = ReferenceName> extends EdgeQueryItem<ClassType> {
     #private;
@@ -14,6 +17,7 @@ export declare class NamedEdgeQueryItem<ClassType extends Class<Edge> = Class<Ed
     constructor(params: {
         class: ClassType;
         name: Name;
+        excludedClassTypes?: Class<Edge>[];
     });
     to<ToItem extends Nodelike>(item: ToItem): NamedRelatedEdgeQueryItem<ClassType, Name, ToItem, Nodelike, Nodelike[]>;
     from<FromItem extends Nodelike>(item: FromItem): NamedRelatedEdgeQueryItem<ClassType, Name, Nodelike, FromItem, Nodelike[]>;
@@ -29,6 +33,7 @@ export declare class RelatedEdgeQueryItem<ClassType extends Class<Edge> = Class<
         toItem?: ToItem;
         fromItem?: FromItem;
         fromOrToItems?: FromOrToItems;
+        excludedClassTypes?: Class<Edge>[];
     });
     as<Name extends ReferenceName>(name: Name): NamedRelatedEdgeQueryItem<ClassType, Name, ToItem, FromItem, FromOrToItems>;
     to<ToItem extends Nodelike>(item: ToItem): RelatedEdgeQueryItem<ClassType, ToItem, FromItem, FromOrToItems>;
@@ -46,6 +51,7 @@ export declare class NamedRelatedEdgeQueryItem<ClassType extends Class<Edge> = C
         toItem?: ToItem;
         fromItem?: FromItem;
         fromOrToItems?: FromOrToItems;
+        excludedClassTypes?: Class<Edge>[];
     });
     to<ToItem extends Nodelike>(item: ToItem): NamedRelatedEdgeQueryItem<ClassType, Name, ToItem, FromItem, FromOrToItems>;
     from<FromItem extends Nodelike>(item: FromItem): NamedRelatedEdgeQueryItem<ClassType, Name, ToItem, FromItem, FromOrToItems>;

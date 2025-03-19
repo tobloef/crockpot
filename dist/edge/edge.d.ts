@@ -2,13 +2,14 @@ import type { Class } from "../utils/class.ts";
 import type { Nodelike, ReferenceName } from "../query/run-query.types.ts";
 import type { Node } from "../node/node.ts";
 import { type Graph } from "../graph.ts";
-import { NamedEdgeQueryItem, RelatedEdgeQueryItem } from "./edge-query-item.ts";
+import { EdgeQueryItem, NamedEdgeQueryItem, RelatedEdgeQueryItem } from "./edge-query-item.ts";
 export declare class Edge {
     #private;
     static defaultGraph: Graph;
     readonly id: string;
     graph: Readonly<Graph>;
     get nodes(): EdgeNodes;
+    static excluding<Type extends Class<Edge>>(this: Type, ...excludedClassTypes: Class<Edge>[]): EdgeQueryItem<Type>;
     static as<Type extends Class<Edge>, Name extends ReferenceName>(this: Type, name: Name): NamedEdgeQueryItem<Type, Name>;
     static to<Type extends Class<Edge>, ToItem extends Nodelike>(this: Type, item: ToItem): RelatedEdgeQueryItem<Type, ToItem, Nodelike, Nodelike[]>;
     static from<Type extends Class<Edge>, FromItem extends Nodelike>(this: Type, item: FromItem): RelatedEdgeQueryItem<Type, Nodelike, FromItem, Nodelike[]>;

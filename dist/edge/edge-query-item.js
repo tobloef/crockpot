@@ -2,8 +2,16 @@ import { Edge } from "./edge.js";
 export class EdgeQueryItem {
     #brand = "EdgeQueryItem";
     class;
+    excludedClassTypes;
     constructor(params) {
         this.class = params.class;
+        this.excludedClassTypes = params.excludedClassTypes;
+    }
+    excluding(...excludedClassTypes) {
+        return new EdgeQueryItem({
+            class: this.class,
+            excludedClassTypes,
+        });
     }
 }
 export class NamedEdgeQueryItem extends EdgeQueryItem {
@@ -18,6 +26,7 @@ export class NamedEdgeQueryItem extends EdgeQueryItem {
             class: this.class,
             name: this.name,
             toItem: item,
+            excludedClassTypes: this.excludedClassTypes,
         });
     }
     from(item) {
@@ -25,6 +34,7 @@ export class NamedEdgeQueryItem extends EdgeQueryItem {
             class: this.class,
             name: this.name,
             fromItem: item,
+            excludedClassTypes: this.excludedClassTypes,
         });
     }
     fromOrTo(...items) {
@@ -35,6 +45,7 @@ export class NamedEdgeQueryItem extends EdgeQueryItem {
             class: this.class,
             name: this.name,
             fromOrToItems: items,
+            excludedClassTypes: this.excludedClassTypes,
         });
     }
 }
@@ -56,18 +67,21 @@ export class RelatedEdgeQueryItem extends EdgeQueryItem {
             toItem: this.toItem,
             fromItem: this.fromItem,
             fromOrToItems: this.fromOrToItems,
+            excludedClassTypes: this.excludedClassTypes,
         });
     }
     to(item) {
         return new RelatedEdgeQueryItem({
             class: this.class,
             toItem: item,
+            excludedClassTypes: this.excludedClassTypes,
         });
     }
     from(item) {
         return new RelatedEdgeQueryItem({
             class: this.class,
             fromItem: item,
+            excludedClassTypes: this.excludedClassTypes,
         });
     }
 }
@@ -89,6 +103,7 @@ export class NamedRelatedEdgeQueryItem extends EdgeQueryItem {
             class: this.class,
             name: this.name,
             toItem: item,
+            excludedClassTypes: this.excludedClassTypes,
         });
     }
     from(item) {
@@ -96,6 +111,7 @@ export class NamedRelatedEdgeQueryItem extends EdgeQueryItem {
             class: this.class,
             name: this.name,
             fromItem: item,
+            excludedClassTypes: this.excludedClassTypes,
         });
     }
 }

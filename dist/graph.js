@@ -65,7 +65,6 @@ export class Graph {
         if (!this.indices.nodesByType.get(Node)?.has(node)) {
             return;
         }
-
         const edgesByNode = this.indices.edgesByNode.get(node);
         if (edgesByNode !== undefined) {
             for (const edge of edgesByNode.from) {
@@ -162,7 +161,6 @@ export class Graph {
         if (!this.indices.edgesByType.get(Edge)?.has(edge)) {
             return;
         }
-
         const nodesByEdge = this.indices.nodesByEdge.get(edge);
         if (nodesByEdge !== undefined) {
             this.indices.edgesByNode.get(nodesByEdge.from)?.from.delete(edge);

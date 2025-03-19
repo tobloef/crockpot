@@ -2,8 +2,16 @@ import { Node } from "./node.js";
 export class NodeQueryItem {
     #brand = "NodeQueryItem";
     class;
+    excludedClassTypes;
     constructor(params) {
         this.class = params.class;
+        this.excludedClassTypes = params.excludedClassTypes;
+    }
+    excluding(...excludedClassTypes) {
+        return new NodeQueryItem({
+            class: this.class,
+            excludedClassTypes,
+        });
     }
 }
 export class RelatedNodeQueryItem extends NodeQueryItem {
@@ -27,6 +35,7 @@ export class RelatedNodeQueryItem extends NodeQueryItem {
             withItems: this.withItems,
             fromItems: this.fromItems,
             fromOrToItems: this.fromOrToItems,
+            excludedClassTypes: this.excludedClassTypes,
         });
     }
 }
@@ -42,6 +51,7 @@ export class NamedNodeQueryItem extends NodeQueryItem {
             class: this.class,
             name: this.name,
             withItems: items,
+            excludedClassTypes: this.excludedClassTypes,
         });
     }
     to(...items) {
@@ -49,6 +59,7 @@ export class NamedNodeQueryItem extends NodeQueryItem {
             class: this.class,
             name: this.name,
             toItems: items,
+            excludedClassTypes: this.excludedClassTypes,
         });
     }
     from(...items) {
@@ -56,6 +67,7 @@ export class NamedNodeQueryItem extends NodeQueryItem {
             class: this.class,
             name: this.name,
             fromItems: items,
+            excludedClassTypes: this.excludedClassTypes,
         });
     }
     fromOrTo(...items) {
@@ -63,6 +75,7 @@ export class NamedNodeQueryItem extends NodeQueryItem {
             class: this.class,
             name: this.name,
             fromOrToItems: items,
+            excludedClassTypes: this.excludedClassTypes,
         });
     }
 }
