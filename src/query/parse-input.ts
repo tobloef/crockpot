@@ -30,6 +30,7 @@ export type NodeSlot = {
   constraints: {
     instance?: Node,
     class?: Class<Node>,
+    excludedClassTypes?: Set<Class<Node>>,
     edges?: {
       // "from", as in "edge is going from this node".
       from?: SlotName[],
@@ -46,6 +47,7 @@ export type EdgeSlot = {
   constraints: {
     instance?: Edge,
     class?: Class<Edge>,
+    excludedClassTypes?: Set<Class<Edge>>,
     nodes?: {
       // "from", as in "edge is going from this node".
       from?: SlotName,
@@ -350,6 +352,19 @@ function parseNodeQueryItem(
     existingNodeSlot?.constraints.class,
   );
 
+  if (existingNodeSlot?.constraints.excludedClassTypes !== undefined) {
+    nodeSlot.constraints.excludedClassTypes = new Set(
+      existingNodeSlot.constraints.excludedClassTypes
+    );
+  }
+
+  if (item.excludedClassTypes !== undefined) {
+    nodeSlot.constraints.excludedClassTypes ??= new Set();
+    for (const excludedClass of item.excludedClassTypes) {
+      nodeSlot.constraints.excludedClassTypes.add(excludedClass);
+    }
+  }
+
   if (existingUnknownSlot !== undefined) {
     (nodeSlot.outputKeys as number[]).push(
       ...existingUnknownSlot.outputKeys as number[]
@@ -593,6 +608,19 @@ function parseEdgeQueryItem(
     item.class,
     existingEdgeSlot?.constraints.class,
   );
+
+  if (existingEdgeSlot?.constraints.excludedClassTypes !== undefined) {
+    edgeSlot.constraints.excludedClassTypes = new Set(
+      existingEdgeSlot.constraints.excludedClassTypes
+    );
+  }
+
+  if (item.excludedClassTypes !== undefined) {
+    edgeSlot.constraints.excludedClassTypes ??= new Set();
+    for (const excludedClass of item.excludedClassTypes) {
+      edgeSlot.constraints.excludedClassTypes.add(excludedClass);
+    }
+  }
 
   if (existingUnknownSlot !== undefined) {
     (edgeSlot.outputKeys as number[]).push(

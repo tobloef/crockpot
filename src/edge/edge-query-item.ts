@@ -2,17 +2,29 @@ import type { Class } from "../utils/class.ts";
 import { Edge } from "./edge.ts";
 import type { Nodelike, ReferenceName, } from "../query/run-query.types.ts";
 
-export abstract class EdgeQueryItem<
+export class EdgeQueryItem<
   ClassType extends Class<Edge> = Class<Edge>,
 > {
   #brand = "EdgeQueryItem" as const;
 
   class: ClassType;
+  excludedClassTypes?: Class<Edge>[];
 
   constructor(params: {
     class: ClassType,
+    excludedClassTypes?: Class<Edge>[],
   }) {
     this.class = params.class;
+    this.excludedClassTypes = params.excludedClassTypes;
+  }
+
+  excluding(
+    ...excludedClassTypes: Class<Edge>[]
+  ) {
+    return new EdgeQueryItem<ClassType>({
+      class: this.class,
+      excludedClassTypes,
+    });
   }
 }
 
@@ -27,6 +39,7 @@ export class NamedEdgeQueryItem<
   constructor(params: {
     class: ClassType,
     name: Name,
+    excludedClassTypes?: Class<Edge>[],
   }) {
     super(params);
     this.name = params.name;
@@ -47,6 +60,7 @@ export class NamedEdgeQueryItem<
       class: this.class,
       name: this.name,
       toItem: item,
+      excludedClassTypes: this.excludedClassTypes,
     });
   }
 
@@ -65,6 +79,7 @@ export class NamedEdgeQueryItem<
       class: this.class,
       name: this.name,
       fromItem: item,
+      excludedClassTypes: this.excludedClassTypes,
     });
   }
 
@@ -87,6 +102,7 @@ export class NamedEdgeQueryItem<
       class: this.class,
       name: this.name,
       fromOrToItems: items,
+      excludedClassTypes: this.excludedClassTypes,
     });
   }
 }
@@ -108,6 +124,7 @@ export class RelatedEdgeQueryItem<
     toItem?: ToItem,
     fromItem?: FromItem,
     fromOrToItems?: FromOrToItems,
+    excludedClassTypes?: Class<Edge>[],
   }) {
     super(params);
     this.toItem = params.toItem;
@@ -132,6 +149,7 @@ export class RelatedEdgeQueryItem<
       toItem: this.toItem,
       fromItem: this.fromItem,
       fromOrToItems: this.fromOrToItems,
+      excludedClassTypes: this.excludedClassTypes,
     });
   }
 
@@ -148,6 +166,7 @@ export class RelatedEdgeQueryItem<
     >({
       class: this.class,
       toItem: item,
+      excludedClassTypes: this.excludedClassTypes,
     });
   }
 
@@ -164,6 +183,7 @@ export class RelatedEdgeQueryItem<
     >({
       class: this.class,
       fromItem: item,
+      excludedClassTypes: this.excludedClassTypes,
     });
   }
 }
@@ -188,6 +208,7 @@ export class NamedRelatedEdgeQueryItem<
     toItem?: ToItem,
     fromItem?: FromItem,
     fromOrToItems?: FromOrToItems,
+    excludedClassTypes?: Class<Edge>[],
   }) {
     super(params);
     this.name = params.name;
@@ -211,6 +232,7 @@ export class NamedRelatedEdgeQueryItem<
       class: this.class,
       name: this.name,
       toItem: item,
+      excludedClassTypes: this.excludedClassTypes,
     });
   }
 
@@ -229,6 +251,7 @@ export class NamedRelatedEdgeQueryItem<
       class: this.class,
       name: this.name,
       fromItem: item,
+      excludedClassTypes: this.excludedClassTypes,
     });
   }
 }

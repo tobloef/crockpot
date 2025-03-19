@@ -25,6 +25,7 @@ export type QueryInputItem = (
 export type Nodelike = (
   | Class<Node>
   | Node
+  | NodeQueryItem<any>
   | NamedNodeQueryItem<any, any>
   | RelatedNodeQueryItem<any, any, any, any, any>
   | NamedRelatedNodeQueryItem<any, any, any, any, any, any>
@@ -34,6 +35,7 @@ export type Nodelike = (
 export type Edgelike = (
   | Class<Edge>
   | Edge
+  | EdgeQueryItem<any>
   | NamedEdgeQueryItem<any, any>
   | RelatedEdgeQueryItem<any, any, any, any>
   | NamedRelatedEdgeQueryItem<any, any, any, any, any>

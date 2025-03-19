@@ -245,6 +245,14 @@ function checkIsolatedConstraints(
     ) {
       return false;
     }
+
+    if (
+      slot.constraints.excludedClassTypes?.values().some((excludedClass) => (
+        isClassThatExtends(item.constructor as Class<Node>, excludedClass)
+      ))
+    ) {
+      return false;
+    }
   }
 
   if (slot.type === "edge") {
@@ -265,6 +273,14 @@ function checkIsolatedConstraints(
         item.constructor as Class<Edge>,
         slot.constraints.class
       )
+    ) {
+      return false;
+    }
+
+    if (
+      slot.constraints.excludedClassTypes?.values().some((excludedClass) => (
+        isClassThatExtends(item.constructor as Class<Edge>, excludedClass)
+      ))
     ) {
       return false;
     }
