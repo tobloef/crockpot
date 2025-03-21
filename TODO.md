@@ -1,3 +1,4 @@
+- Make direction more intuitive for getOneRelated.
 - Boolean queries
   - Without
   - Optional
