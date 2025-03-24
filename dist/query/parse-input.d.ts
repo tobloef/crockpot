@@ -19,6 +19,7 @@ export type NodeSlot = {
     constraints: {
         instance?: Node;
         class?: Class<Node>;
+        excludedClassTypes?: Set<Class<Node>>;
         edges?: {
             from?: SlotName[];
             to?: SlotName[];
@@ -33,6 +34,7 @@ export type EdgeSlot = {
     constraints: {
         instance?: Edge;
         class?: Class<Edge>;
+        excludedClassTypes?: Set<Class<Edge>>;
         nodes?: {
             from?: SlotName;
             to?: SlotName;

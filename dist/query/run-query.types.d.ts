@@ -10,8 +10,8 @@ export type ObjectQueryInput = {
     [key: string]: QueryInputItem;
 };
 export type QueryInputItem = (Nodelike | Edgelike);
-export type Nodelike = (Class<Node> | Node | NamedNodeQueryItem<any, any> | RelatedNodeQueryItem<any, any, any, any, any> | NamedRelatedNodeQueryItem<any, any, any, any, any, any> | ReferenceName);
-export type Edgelike = (Class<Edge> | Edge | NamedEdgeQueryItem<any, any> | RelatedEdgeQueryItem<any, any, any, any> | NamedRelatedEdgeQueryItem<any, any, any, any, any> | ReferenceName);
+export type Nodelike = (Class<Node> | Node | NodeQueryItem<any> | NamedNodeQueryItem<any, any> | RelatedNodeQueryItem<any, any, any, any, any> | NamedRelatedNodeQueryItem<any, any, any, any, any, any> | ReferenceName);
+export type Edgelike = (Class<Edge> | Edge | EdgeQueryItem<any> | NamedEdgeQueryItem<any, any> | RelatedEdgeQueryItem<any, any, any, any> | NamedRelatedEdgeQueryItem<any, any, any, any, any> | ReferenceName);
 export type ReferenceName = string;
 export type QueryOutput<Input extends QueryInput> = (Input extends ArrayQueryInput ? (ArrayQueryOutput<Input, Input>) : Input extends ObjectQueryInput ? (ObjectQueryOutput<Input, Input>) : Input extends QueryInputItem ? (QueryOutputItem<Input, Input>) : never);
 export type ArrayQueryOutput<Items extends ArrayQueryInput, FullInput extends QueryInput> = (Items extends [infer First, ...infer Rest] ? First extends QueryInputItem ? Rest extends QueryInputItem[] ? [

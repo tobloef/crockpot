@@ -3,7 +3,11 @@ import { type Class, type Instance, isClassThatExtends } from "../utils/class.ts
 import type { Edgelike, Nodelike, ReferenceName, } from "../query/run-query.types.ts";
 import { randomString } from "../utils/random-string.ts";
 import { type Graph } from "../graph.ts";
-import { NamedNodeQueryItem, RelatedNodeQueryItem } from "./node-query-item.ts";
+import {
+  NamedNodeQueryItem,
+  NodeQueryItem,
+  RelatedNodeQueryItem,
+} from "./node-query-item.ts";
 
 export class Node {
   #brand = "Node" as const;
@@ -18,6 +22,18 @@ export class Node {
       this.graph.indices.edgesByNode.get(this) ??
       this.#createEmptyEdges()
     );
+  }
+
+  static excluding<
+    Type extends Class<Node>,
+  >(
+    this: Type,
+    ...excludedClassTypes: Class<Node>[]
+  ) {
+    return new NodeQueryItem<Type>({
+      class: this,
+      excludedClassTypes,
+    });
   }
 
   static as<

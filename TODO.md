@@ -1,5 +1,5 @@
+- Make direction more intuitive for getOneRelated.
 - Boolean queries
-  - optional
-  - not
-  - oneOf
+  - Without
+  - Optional
 - Some day I want to experiment with code-generation for direct access. It seems so much faster. Could go crazy with some more cache-friendly indices.

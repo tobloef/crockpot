@@ -8,11 +8,23 @@ export class NodeQueryItem<
   #brand = "NodeQueryItem" as const;
 
   class: ClassType;
+  excludedClassTypes?: Class<Node>[];
 
   constructor(params: {
     class: ClassType,
+    excludedClassTypes?: Class<Node>[],
   }) {
     this.class = params.class;
+    this.excludedClassTypes = params.excludedClassTypes;
+  }
+
+  excluding(
+    ...excludedClassTypes: Class<Node>[]
+  ) {
+    return new NodeQueryItem<ClassType>({
+      class: this.class,
+      excludedClassTypes,
+    });
   }
 }
 
@@ -36,6 +48,7 @@ export class RelatedNodeQueryItem<
     toItems?: ToItems,
     fromItems?: FromItems,
     fromOrToItems?: FromOrToItems,
+    excludedClassTypes?: Class<Node>[],
   }) {
     super(params);
     this.withItems = params.withItems;
@@ -63,6 +76,7 @@ export class RelatedNodeQueryItem<
       withItems: this.withItems,
       fromItems: this.fromItems,
       fromOrToItems: this.fromOrToItems,
+      excludedClassTypes: this.excludedClassTypes,
     });
   }
 }
@@ -78,6 +92,7 @@ export class NamedNodeQueryItem<
   constructor(params: {
     class: ClassType,
     name: Name,
+    excludedClassTypes?: Class<Node>[],
   }) {
     super(params);
     this.name = params.name;
@@ -99,6 +114,7 @@ export class NamedNodeQueryItem<
       class: this.class,
       name: this.name,
       withItems: items,
+      excludedClassTypes: this.excludedClassTypes,
     });
   }
 
@@ -118,6 +134,7 @@ export class NamedNodeQueryItem<
       class: this.class,
       name: this.name,
       toItems: items,
+      excludedClassTypes: this.excludedClassTypes,
     });
   }
 
@@ -137,6 +154,7 @@ export class NamedNodeQueryItem<
       class: this.class,
       name: this.name,
       fromItems: items,
+      excludedClassTypes: this.excludedClassTypes,
     });
   }
 
@@ -156,6 +174,7 @@ export class NamedNodeQueryItem<
       class: this.class,
       name: this.name,
       fromOrToItems: items,
+      excludedClassTypes: this.excludedClassTypes,
     });
   }
 }
@@ -183,6 +202,7 @@ export class NamedRelatedNodeQueryItem<
     toItems?: ToItems,
     fromItems?: FromItems,
     fromOrToItems?: FromOrToItems,
+    excludedClassTypes?: Class<Node>[],
   }) {
     super(params);
     this.name = params.name;

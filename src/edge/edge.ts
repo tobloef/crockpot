@@ -3,7 +3,11 @@ import type { Nodelike, ReferenceName, } from "../query/run-query.types.ts";
 import { randomString } from "../utils/random-string.ts";
 import type { Node } from "../node/node.ts";
 import { type Graph } from "../graph.ts";
-import { NamedEdgeQueryItem, RelatedEdgeQueryItem } from "./edge-query-item.ts";
+import {
+  EdgeQueryItem,
+  NamedEdgeQueryItem,
+  RelatedEdgeQueryItem,
+} from "./edge-query-item.ts";
 
 export class Edge {
   #brand = "Edge" as const;
@@ -18,6 +22,18 @@ export class Edge {
       this.graph.indices.nodesByEdge.get(this) ??
       this.#createEmptyNodes()
     );
+  }
+
+  static excluding<
+    Type extends Class<Edge>,
+  >(
+    this: Type,
+    ...excludedClassTypes: Class<Edge>[]
+  ) {
+    return new EdgeQueryItem<Type>({
+      class: this,
+      excludedClassTypes,
+    });
   }
 
   static as<

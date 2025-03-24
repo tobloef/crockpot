@@ -1,6 +1,6 @@
 import { randomString } from "../utils/random-string.js";
 import {} from "../graph.js";
-import { NamedEdgeQueryItem, RelatedEdgeQueryItem } from "./edge-query-item.js";
+import { EdgeQueryItem, NamedEdgeQueryItem, RelatedEdgeQueryItem, } from "./edge-query-item.js";
 export class Edge {
     #brand = "Edge";
     static defaultGraph;
@@ -9,6 +9,12 @@ export class Edge {
     get nodes() {
         return (this.graph.indices.nodesByEdge.get(this) ??
             this.#createEmptyNodes());
+    }
+    static excluding(...excludedClassTypes) {
+        return new EdgeQueryItem({
+            class: this,
+            excludedClassTypes,
+        });
     }
     static as(name) {
         return new NamedEdgeQueryItem({
