@@ -4,6 +4,7 @@ import type { Edgelike, Nodelike, ReferenceName, } from "../query/run-query.type
 import { randomString } from "../utils/random-string.ts";
 import { type Graph } from "../graph.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
+import { DEFAULT_OPTIONALITY_KEY } from "../query/optional.js";
 
 export class Node {
   #brand = "Node" as const;
@@ -32,10 +33,31 @@ export class Node {
       Edgelike[],
       Nodelike[],
       Nodelike[],
-      Nodelike[]
+      Nodelike[],
+      boolean
     >({
       class: this,
       excludedClassTypes,
+    });
+  }
+
+  static optional<
+    Type extends Class<Node>,
+  >(
+    this: Type,
+    optionalityGroup: string = DEFAULT_OPTIONALITY_KEY,
+  ) {
+    return new NodeQueryItem<
+      Type,
+      ReferenceName,
+      Edgelike[],
+      Nodelike[],
+      Nodelike[],
+      Nodelike[],
+      true
+    >({
+      class: this,
+      optionalityKey: optionalityGroup,
     });
   }
 
@@ -52,7 +74,8 @@ export class Node {
       Edgelike[],
       Nodelike[],
       Nodelike[],
-      Nodelike[]
+      Nodelike[],
+      boolean
     >({
       class: this,
       name,
@@ -72,7 +95,8 @@ export class Node {
       WithItems,
       Nodelike[],
       Nodelike[],
-      Nodelike[]
+      Nodelike[],
+      boolean
     >({
       withItems: items,
       class: this,
@@ -92,7 +116,8 @@ export class Node {
       Edgelike[],
       ToItems,
       Nodelike[],
-      Nodelike[]
+      Nodelike[],
+      boolean
     >({
       toItems: items,
       class: this,
@@ -112,7 +137,8 @@ export class Node {
       Edgelike[],
       Nodelike[],
       FromItems,
-      Nodelike[]
+      Nodelike[],
+      boolean
     >({
       fromItems: items,
       class: this,
@@ -132,7 +158,8 @@ export class Node {
       Edgelike[],
       Nodelike[],
       Nodelike[],
-      FromOrToItems
+      FromOrToItems,
+      boolean
     >({
       fromOrToItems: items,
       class: this,

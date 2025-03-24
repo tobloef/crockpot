@@ -119,23 +119,25 @@ type ReferencedTypeFromArray<
           infer WithItems,
           infer ToItems,
           infer FromItems,
-          infer FromOrToItems
+          infer FromOrToItems,
+          infer IsOptional
         >
         ? (
           & ExpandQueryItem<ClassType, Name, WithItems, ToItems, FromItems, FromOrToItems>
           & ReferencedTypeFromArray<Rest, never>
-        )
+        ) | (IsOptional extends true ? undefined : never)
         : First extends EdgeQueryItem<
           infer ClassType,
           infer Name,
           infer ToItem,
           infer FromItem,
-          infer FromOrToItems
+          infer FromOrToItems,
+          infer IsOptional
         >
           ? (
             & ExpandQueryItem<ClassType, Name, [], [ToItem], [FromItem], FromOrToItems>
             & ReferencedTypeFromArray<Rest, never>
-          )
+          ) | (IsOptional extends true ? undefined : never)
           : First extends ReferenceName
             ? [FallbackType] extends [never]
               ? ReferencedTypeFromArray<Rest, never>

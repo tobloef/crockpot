@@ -32,7 +32,14 @@ export class Edge {
 		this: Type,
 		...excludedClassTypes: Class<Edge>[]
 	) {
-		return new EdgeQueryItem<Type>({
+		return new EdgeQueryItem<
+			Type,
+			ReferenceName,
+			Nodelike,
+			Nodelike,
+			Nodelike[],
+			boolean
+		>({
 			class: this,
 			excludedClassTypes,
 		});
@@ -45,7 +52,14 @@ export class Edge {
 		this: Type,
 		optionalityGroup: string = DEFAULT_OPTIONALITY_KEY,
 	) {
-		return new EdgeQueryItem<Type>({
+		return new EdgeQueryItem<
+			Type,
+			ReferenceName,
+			Nodelike,
+			Nodelike,
+			Nodelike[],
+			true
+		>({
 			class: this,
 			optionalityKey: optionalityGroup,
 		});
@@ -61,7 +75,11 @@ export class Edge {
 	) {
 		return new EdgeQueryItem<
 			Type,
-			Name
+			Name,
+			Nodelike,
+			Nodelike,
+			Nodelike[],
+			boolean
 		>({
 			class: this,
 			name,
@@ -81,7 +99,8 @@ export class Edge {
 			ReferenceName,
 			ToItem,
 			Nodelike,
-			Nodelike[]
+			Nodelike[],
+			boolean
 		>({
 			toItem: item,
 			class: this,
@@ -101,7 +120,8 @@ export class Edge {
 			ReferenceName,
 			Nodelike,
 			FromItem,
-			Nodelike[]
+			Nodelike[],
+			boolean
 		>({
 			fromItem: item,
 			class: this,
@@ -121,7 +141,8 @@ export class Edge {
 			ReferenceName,
 			Nodelike,
 			Nodelike,
-			FromOrToItems
+			FromOrToItems,
+			boolean
 		>({
 			fromOrToItems: items,
 			class: this,

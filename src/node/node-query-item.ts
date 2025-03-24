@@ -9,7 +9,8 @@ export class NodeQueryItem<
   WithItems extends Edgelike[] = Edgelike[],
   ToItems extends Nodelike[] = Nodelike[],
   FromItems extends Nodelike[] = Nodelike[],
-  FromOrToItems extends Nodelike[] = Nodelike[]
+  FromOrToItems extends Nodelike[] = Nodelike[],
+  IsOptional extends boolean = false,
 > {
   #brand = "NodeQueryItem" as const;
 
@@ -62,7 +63,8 @@ export class NodeQueryItem<
       WithItems,
       ToItems,
       FromItems,
-      FromOrToItems
+      FromOrToItems,
+      IsOptional
     >({
       ...this,
       name,
@@ -78,7 +80,8 @@ export class NodeQueryItem<
       WithItems,
       ToItems,
       FromItems,
-      FromOrToItems
+      FromOrToItems,
+      true
     >({
       ...this,
       optionalityKey: optionalityGroup,
@@ -96,7 +99,8 @@ export class NodeQueryItem<
       WithItems,
       ToItems,
       FromItems,
-      FromOrToItems
+      FromOrToItems,
+      IsOptional
     >({
       ...this,
       withItems: items,
@@ -114,7 +118,8 @@ export class NodeQueryItem<
       WithItems,
       ToItems,
       FromItems,
-      FromOrToItems
+      FromOrToItems,
+      IsOptional
     >({
       ...this,
       toItems: items,
@@ -132,7 +137,8 @@ export class NodeQueryItem<
       WithItems,
       ToItems,
       FromItems,
-      FromOrToItems
+      FromOrToItems,
+      IsOptional
     >({
       ...this,
       fromItems: items,
@@ -150,7 +156,8 @@ export class NodeQueryItem<
       WithItems,
       ToItems,
       FromItems,
-      FromOrToItems
+      FromOrToItems,
+      IsOptional
     >({
       ...this,
       fromOrToItems: items,
