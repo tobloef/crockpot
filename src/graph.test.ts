@@ -1,11 +1,11 @@
 import {
-	describe,
-	it,
+  describe,
+  it,
 } from "node:test";
 import {
-	deepStrictEqual,
-	ok,
-	strictEqual,
+  deepStrictEqual,
+  ok,
+  strictEqual,
 } from "node:assert";
 import { Graph } from "./graph.ts";
 import { Node } from "./node/node.ts";

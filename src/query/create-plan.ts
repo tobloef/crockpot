@@ -1,20 +1,20 @@
 import {
-	getAllConnectedSlotNames,
-	getAllSlots,
-	getSlotByName,
-	type QuerySlots,
-	type Slot,
-	type SlotName,
+  getAllConnectedSlotNames,
+  getAllSlots,
+  getSlotByName,
+  type QuerySlots,
+  type Slot,
+  type SlotName,
 } from "./parse-input.ts";
 import type { Graph } from "../graph.ts";
 import {
-	Edge,
-	type EdgeDirection,
+  Edge,
+  type EdgeDirection,
 } from "../edge/edge.ts";
 import { Node } from "../node/node.ts";
 import {
-	combineGenerators,
-	iterableToGenerator,
+  combineGenerators,
+  iterableToGenerator,
 } from "../utils/generators.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
 

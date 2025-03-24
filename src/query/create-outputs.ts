@@ -1,16 +1,16 @@
 import type { QueryMatch } from "./execute-plan.ts";
 import {
-	getAllSlots,
-	type QuerySlots,
-	type Slot,
+  getAllSlots,
+  type QuerySlots,
+  type Slot,
 } from "./parse-input.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
 import type {
-	ArrayQueryInput,
-	ObjectQueryInput,
-	QueryInput,
-	QueryInputItem,
-	QueryOutput,
+  ArrayQueryInput,
+  ObjectQueryInput,
+  QueryInput,
+  QueryInputItem,
+  QueryOutput,
 } from "./run-query.types.ts";
 import { cache } from "../utils/cache.ts";
 

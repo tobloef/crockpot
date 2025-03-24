@@ -1,6 +1,6 @@
 import type {
-	QueryInput,
-	QueryOutput,
+  QueryInput,
+  QueryOutput,
 } from "./run-query.types.ts";
 import { getOutputHash } from "./create-outputs.ts";
 

@@ -1,8 +1,8 @@
 import {
-	afterEach,
-	describe,
-	it,
-	mock,
+  afterEach,
+  describe,
+  it,
+  mock,
 } from "node:test";
 import { strictEqual } from "node:assert";
 

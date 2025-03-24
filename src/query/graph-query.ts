@@ -1,12 +1,12 @@
 import type {
-	QueryInput,
-	QueryOutput,
+  QueryInput,
+  QueryOutput,
 } from "./run-query.types.ts";
 import type { Graph } from "../graph.ts";
 import {
-	isItemRelatedToSlots,
-	parseInput,
-	type QuerySlots,
+  isItemRelatedToSlots,
+  parseInput,
+  type QuerySlots,
 } from "./parse-input.ts";
 import { runQueryBySlots } from "./run-query.ts";
 import { Node } from "../node/node.ts";
