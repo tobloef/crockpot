@@ -4,9 +4,9 @@ import { Edge, type EdgeDirection } from "../edge/edge.ts";
 import type { Edgelike, Nodelike, QueryInput, QueryInputItem, ReferenceName } from "./run-query.types.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
 import { NamedNodeQueryItem, NamedRelatedNodeQueryItem, NodeQueryItem, RelatedNodeQueryItem } from "../node/node-query-item.ts";
-import { EdgeQueryItem, NamedEdgeQueryItem, NamedRelatedEdgeQueryItem, RelatedEdgeQueryItem } from "../edge/edge-query-item.ts";
 import { ReferenceMismatchError } from "./errors/reference-mismatch-error.ts";
 import { randomString } from "../utils/random-string.ts";
+import { EdgeQueryItem } from "../edge/edge-query-item.ts";
 
 export type SlotName = string;
 
@@ -500,9 +500,10 @@ function inferParentDirection(
   item: Edgelike,
   parentNode: { direction: EdgeDirection }
 ): EdgeDirection {
-  const hasRelations = (
-    item instanceof RelatedEdgeQueryItem ||
-    item instanceof NamedRelatedEdgeQueryItem
+  const hasRelations = typeof item === "object" && (
+    ("toItem" in item && item.toItem !== undefined) ||
+    ("fromItem" in item && item.fromItem !== undefined) ||
+    ("fromOrToItems" in item && item.fromOrToItems !== undefined)
   );
 
   if (!hasRelations) {
@@ -572,17 +573,17 @@ function parseEdgeQueryItem(
   slots: QuerySlots
 ): EdgeSlot {
   const hasName = (
-    item instanceof NamedEdgeQueryItem ||
-    item instanceof NamedRelatedEdgeQueryItem
+    "name" in item && item.name !== undefined
   );
 
   const hasRelations = (
-    item instanceof RelatedEdgeQueryItem ||
-    item instanceof NamedRelatedEdgeQueryItem
+    ("toItem" in item && item.toItem !== undefined) ||
+    ("fromItem" in item && item.fromItem !== undefined) ||
+    ("fromOrToItems" in item && item.fromOrToItems !== undefined)
   );
 
   const slotName = hasName
-    ? item.name
+    ? item.name!
     : `edge-query (${randomString()})`;
 
   const existingEdgeSlot = slots.edge[slotName];

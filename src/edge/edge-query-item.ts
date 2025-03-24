@@ -1,23 +1,39 @@
 import type { Class } from "../utils/class.ts";
 import { Edge } from "./edge.ts";
 import type { Nodelike, ReferenceName, } from "../query/run-query.types.ts";
-import { DEFAULT_OPTIONALITY_KEY } from "../query/optional.js";
+import { DEFAULT_OPTIONALITY_KEY } from "../query/optional.ts";
 
 export class EdgeQueryItem<
   ClassType extends Class<Edge> = Class<Edge>,
+  Name extends string = ReferenceName,
+  ToItem extends Nodelike = Nodelike,
+  FromItem extends Nodelike = Nodelike,
+  FromOrToItems extends Nodelike[] = Nodelike[],
 > {
   #brand = "EdgeQueryItem" as const;
 
   class: ClassType;
+  name?: Name;
+  toItem?: ToItem;
+  fromItem?: FromItem;
+  fromOrToItems?: FromOrToItems;
   excludedClassTypes?: Class<Edge>[];
   optionalityKey?: string;
 
   constructor(params: {
     class: ClassType,
+    name?: Name,
+    toItem?: ToItem,
+    fromItem?: FromItem,
+    fromOrToItems?: FromOrToItems,
     excludedClassTypes?: Class<Edge>[],
     optionalityKey?: string,
   }) {
     this.class = params.class;
+    this.name = params.name;
+    this.toItem = params.toItem;
+    this.fromItem = params.fromItem;
+    this.fromOrToItems = params.fromOrToItems;
     this.excludedClassTypes = params.excludedClassTypes;
     this.optionalityKey = params.optionalityKey;
   }
@@ -25,51 +41,60 @@ export class EdgeQueryItem<
   excluding(
     ...excludedClassTypes: Class<Edge>[]
   ) {
-    return new EdgeQueryItem<ClassType>({
-      class: this.class,
+    return new EdgeQueryItem<
+      ClassType,
+      Name,
+      ToItem,
+      FromItem,
+      FromOrToItems
+    >({
+      ...this,
       excludedClassTypes,
+    });
+  }
+
+  as<
+    Name extends ReferenceName
+  >(
+    name: Name,
+  ) {
+    return new EdgeQueryItem<
+      ClassType,
+      Name,
+      ToItem,
+      FromItem,
+      FromOrToItems
+    >({
+      ...this,
+      name,
     });
   }
 
   optional(
     optionalityGroup: string = DEFAULT_OPTIONALITY_KEY,
   ) {
-    return new EdgeQueryItem<ClassType>({
-      class: this.class,
-      excludedClassTypes: this.excludedClassTypes,
+    return new EdgeQueryItem<
+      ClassType,
+      Name,
+      ToItem,
+      FromItem,
+      FromOrToItems
+    >({
+      ...this,
       optionalityKey: optionalityGroup,
     });
   }
-}
-
-export class NamedEdgeQueryItem<
-  ClassType extends Class<Edge> = Class<Edge>,
-  Name extends string = ReferenceName
-> extends EdgeQueryItem<ClassType> {
-  #brand = "NamedEdgeQueryItem" as const;
-
-  name: Name;
-
-  constructor(params: {
-    class: ClassType,
-    name: Name,
-    excludedClassTypes?: Class<Edge>[],
-  }) {
-    super(params);
-    this.name = params.name;
-  }
-
   to<
     ToItem extends Nodelike
   >(
     item: ToItem
   ) {
-    return new NamedRelatedEdgeQueryItem<
+    return new EdgeQueryItem<
       ClassType,
       Name,
       ToItem,
-      Nodelike,
-      Nodelike[]
+      FromItem,
+      FromOrToItems
     >({
       ...this,
       toItem: item,
@@ -81,12 +106,12 @@ export class NamedEdgeQueryItem<
   >(
     item: FromItem
   ) {
-    return new NamedRelatedEdgeQueryItem<
+    return new EdgeQueryItem<
       ClassType,
       Name,
-      Nodelike,
+      ToItem,
       FromItem,
-      Nodelike[]
+      FromOrToItems
     >({
       ...this,
       fromItem: item,
@@ -102,154 +127,15 @@ export class NamedEdgeQueryItem<
       throw new Error(`The "fromOrTo" parameter can only accept up to 2 items, but ${items.length} were given.`);
     }
 
-    return new NamedRelatedEdgeQueryItem<
+    return new EdgeQueryItem<
       ClassType,
       Name,
-      Nodelike,
-      Nodelike,
+      ToItem,
+      FromItem,
       FromOrToItems
     >({
       ...this,
       fromOrToItems: items,
-    });
-  }
-}
-
-export class RelatedEdgeQueryItem<
-  ClassType extends Class<Edge> = Class<Edge>,
-  ToItem extends Nodelike = Nodelike,
-  FromItem extends Nodelike = Nodelike,
-  FromOrToItems extends Nodelike[] = Nodelike[],
-> extends EdgeQueryItem<ClassType> {
-  #brand = "RelatedEdgeQueryItem" as const;
-
-  toItem?: ToItem;
-  fromItem?: FromItem;
-  fromOrToItems?: FromOrToItems;
-
-  constructor(params: {
-    class: ClassType,
-    toItem?: ToItem,
-    fromItem?: FromItem,
-    fromOrToItems?: FromOrToItems,
-    excludedClassTypes?: Class<Edge>[],
-  }) {
-    super(params);
-    this.toItem = params.toItem;
-    this.fromItem = params.fromItem;
-    this.fromOrToItems = params.fromOrToItems;
-  }
-
-  as<
-    Name extends ReferenceName
-  >(
-    name: Name,
-  ) {
-    return new NamedRelatedEdgeQueryItem<
-      ClassType,
-      Name,
-      ToItem,
-      FromItem,
-      FromOrToItems
-    >({
-      ...this,
-      name,
-    });
-  }
-
-  to<
-    ToItem extends Nodelike
-  >(
-    item: ToItem
-  ) {
-    return new RelatedEdgeQueryItem<
-      ClassType,
-      ToItem,
-      FromItem,
-      FromOrToItems
-    >({
-      ...this,
-      toItem: item,
-    });
-  }
-
-  from<
-    FromItem extends Nodelike
-  >(
-    item: FromItem
-  ) {
-    return new RelatedEdgeQueryItem<
-      ClassType,
-      ToItem,
-      FromItem,
-      FromOrToItems
-    >({
-      ...this,
-      fromItem: item,
-    });
-  }
-}
-
-export class NamedRelatedEdgeQueryItem<
-  ClassType extends Class<Edge> = Class<Edge>,
-  Name extends string = ReferenceName,
-  ToItem extends Nodelike = Nodelike,
-  FromItem extends Nodelike = Nodelike,
-  FromOrToItems extends Nodelike[] = Nodelike[],
-> extends EdgeQueryItem<ClassType> {
-  #brand = "NamedRelatedEdgeQueryItem" as const;
-
-  name: Name;
-  toItem?: ToItem;
-  fromItem?: FromItem;
-  fromOrToItems?: FromOrToItems;
-
-  constructor(params: {
-    class: ClassType,
-    name: Name,
-    toItem?: ToItem,
-    fromItem?: FromItem,
-    fromOrToItems?: FromOrToItems,
-    excludedClassTypes?: Class<Edge>[],
-  }) {
-    super(params);
-    this.name = params.name;
-    this.toItem = params.toItem;
-    this.fromItem = params.fromItem;
-    this.fromOrToItems = params.fromOrToItems;
-  }
-
-  to<
-    ToItem extends Nodelike
-  >(
-    item: ToItem
-  ) {
-    return new NamedRelatedEdgeQueryItem<
-      ClassType,
-      Name,
-      ToItem,
-      FromItem,
-      FromOrToItems
-    >({
-      ...this,
-      toItem: item,
-    });
-  }
-
-  from<
-    FromItem extends Nodelike
-  >(
-    item: FromItem
-  ) {
-    return new NamedRelatedEdgeQueryItem<
-      ClassType,
-      Name,
-      ToItem,
-      FromItem,
-      FromOrToItems
-    >({
-      ...this,
-      fromItem: item,
     });
   }
 }

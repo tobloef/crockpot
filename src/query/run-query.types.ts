@@ -2,8 +2,8 @@ import type { Class, Instance } from "../utils/class.ts";
 import type { Node } from "../node/node.ts";
 import type { Edge } from "../edge/edge.ts";
 import { type NamedNodeQueryItem, NamedRelatedNodeQueryItem, NodeQueryItem, RelatedNodeQueryItem } from "../node/node-query-item.ts";
-import { EdgeQueryItem, type NamedEdgeQueryItem, type NamedRelatedEdgeQueryItem, type RelatedEdgeQueryItem } from "../edge/edge-query-item.ts";
 import type { IsNotUnion, TuplifyUnion } from "../utils/union.ts";
+import type { EdgeQueryItem } from "../edge/edge-query-item.ts";
 
 export type QueryInput = (
   | QueryInputItem
@@ -36,9 +36,6 @@ export type Edgelike = (
   | Class<Edge>
   | Edge
   | EdgeQueryItem<any>
-  | NamedEdgeQueryItem<any, any>
-  | RelatedEdgeQueryItem<any, any, any, any>
-  | NamedRelatedEdgeQueryItem<any, any, any, any, any>
   | ReferenceName
 );
 
@@ -149,34 +146,17 @@ type ReferencedTypeFromArray<
                 & ReferencedTypeFromArray<Rest, never>
                 )
               : never
-        : First extends EdgeQueryItem
-          ? First extends NamedRelatedEdgeQueryItem<
-            infer ClassType,
-            infer Name,
-            infer ToItem,
-            infer FromItem,
-            infer FromOrToItems
-          >
-            ? (
-              & ExpandQueryItem<ClassType, Name, [], [ToItem], [FromItem], FromOrToItems>
-              & ReferencedTypeFromArray<Rest, never>
-            )
-            : First extends RelatedEdgeQueryItem<
-              infer ClassType,
-              infer ToItem,
-              infer FromItem,
-              infer FromOrToItems
-            >
-              ? (
-                & ExpandQueryItem<ClassType, ReferenceName, [], [ToItem], [FromItem], FromOrToItems>
-                & ReferencedTypeFromArray<Rest, never>
-              )
-              : First extends NamedEdgeQueryItem<infer ClassType, infer Name>
-                ? (
-                  & ReferencedType<ClassType, Name>
-                  & ReferencedTypeFromArray<Rest, never>
-                )
-                : never
+        : First extends EdgeQueryItem<
+          infer ClassType,
+          infer Name,
+          infer ToItem,
+          infer FromItem,
+          infer FromOrToItems
+        >
+          ? (
+            & ExpandQueryItem<ClassType, Name, [], [ToItem], [FromItem], FromOrToItems>
+            & ReferencedTypeFromArray<Rest, never>
+          )
           : First extends ReferenceName
             ? [FallbackType] extends [never]
               ? ReferencedTypeFromArray<Rest, never>
