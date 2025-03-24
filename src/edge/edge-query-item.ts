@@ -1,6 +1,7 @@
 import type { Class } from "../utils/class.ts";
 import { Edge } from "./edge.ts";
 import type { Nodelike, ReferenceName, } from "../query/run-query.types.ts";
+import { DEFAULT_OPTIONALITY_KEY } from "../query/optional.js";
 
 export class EdgeQueryItem<
   ClassType extends Class<Edge> = Class<Edge>,
@@ -9,13 +10,16 @@ export class EdgeQueryItem<
 
   class: ClassType;
   excludedClassTypes?: Class<Edge>[];
+  optionalityKey?: string;
 
   constructor(params: {
     class: ClassType,
     excludedClassTypes?: Class<Edge>[],
+    optionalityKey?: string,
   }) {
     this.class = params.class;
     this.excludedClassTypes = params.excludedClassTypes;
+    this.optionalityKey = params.optionalityKey;
   }
 
   excluding(
@@ -24,6 +28,16 @@ export class EdgeQueryItem<
     return new EdgeQueryItem<ClassType>({
       class: this.class,
       excludedClassTypes,
+    });
+  }
+
+  optional(
+    optionalityGroup: string = DEFAULT_OPTIONALITY_KEY,
+  ) {
+    return new EdgeQueryItem<ClassType>({
+      class: this.class,
+      excludedClassTypes: this.excludedClassTypes,
+      optionalityKey: optionalityGroup,
     });
   }
 }
@@ -57,10 +71,8 @@ export class NamedEdgeQueryItem<
       Nodelike,
       Nodelike[]
     >({
-      class: this.class,
-      name: this.name,
+      ...this,
       toItem: item,
-      excludedClassTypes: this.excludedClassTypes,
     });
   }
 
@@ -76,10 +88,8 @@ export class NamedEdgeQueryItem<
       FromItem,
       Nodelike[]
     >({
-      class: this.class,
-      name: this.name,
+      ...this,
       fromItem: item,
-      excludedClassTypes: this.excludedClassTypes,
     });
   }
 
@@ -99,10 +109,8 @@ export class NamedEdgeQueryItem<
       Nodelike,
       FromOrToItems
     >({
-      class: this.class,
-      name: this.name,
+      ...this,
       fromOrToItems: items,
-      excludedClassTypes: this.excludedClassTypes,
     });
   }
 }
@@ -144,12 +152,8 @@ export class RelatedEdgeQueryItem<
       FromItem,
       FromOrToItems
     >({
-      class: this.class,
+      ...this,
       name,
-      toItem: this.toItem,
-      fromItem: this.fromItem,
-      fromOrToItems: this.fromOrToItems,
-      excludedClassTypes: this.excludedClassTypes,
     });
   }
 
@@ -164,11 +168,8 @@ export class RelatedEdgeQueryItem<
       FromItem,
       FromOrToItems
     >({
-      class: this.class,
-      fromItem: this.fromItem,
-      fromOrToItems: this.fromOrToItems,
+      ...this,
       toItem: item,
-      excludedClassTypes: this.excludedClassTypes,
     });
   }
 
@@ -183,11 +184,8 @@ export class RelatedEdgeQueryItem<
       FromItem,
       FromOrToItems
     >({
-      class: this.class,
+      ...this,
       fromItem: item,
-      toItem: this.toItem,
-      fromOrToItems: this.fromOrToItems,
-      excludedClassTypes: this.excludedClassTypes,
     });
   }
 }
@@ -233,12 +231,8 @@ export class NamedRelatedEdgeQueryItem<
       FromItem,
       FromOrToItems
     >({
-      class: this.class,
-      name: this.name,
+      ...this,
       toItem: item,
-      fromItem: this.fromItem,
-      fromOrToItems: this.fromOrToItems,
-      excludedClassTypes: this.excludedClassTypes,
     });
   }
 
@@ -254,12 +248,8 @@ export class NamedRelatedEdgeQueryItem<
       FromItem,
       FromOrToItems
     >({
-      class: this.class,
-      name: this.name,
+      ...this,
       fromItem: item,
-      toItem: this.toItem,
-      fromOrToItems: this.fromOrToItems,
-      excludedClassTypes: this.excludedClassTypes,
     });
   }
 }

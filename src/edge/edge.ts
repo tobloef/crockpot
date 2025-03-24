@@ -8,6 +8,7 @@ import {
   NamedEdgeQueryItem,
   RelatedEdgeQueryItem,
 } from "./edge-query-item.ts";
+import { DEFAULT_OPTIONALITY_KEY } from "../query/optional.js";
 
 export class Edge {
   #brand = "Edge" as const;
@@ -33,6 +34,18 @@ export class Edge {
     return new EdgeQueryItem<Type>({
       class: this,
       excludedClassTypes,
+    });
+  }
+
+  static optional<
+    Type extends Class<Edge>,
+  >(
+    this: Type,
+    optionalityGroup: string = DEFAULT_OPTIONALITY_KEY,
+  ) {
+    return new EdgeQueryItem<Type>({
+      class: this,
+      optionalityKey: optionalityGroup,
     });
   }
 

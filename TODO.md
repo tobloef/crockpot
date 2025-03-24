@@ -1,4 +1,5 @@
 - Make direction more intuitive for getOneRelated.
+- Collapse sub-query items into just one class again?
 - Boolean queries
   - Without
   - Optional

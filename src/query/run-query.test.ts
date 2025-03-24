@@ -1933,7 +1933,41 @@ describe("runQuery", () => {
     deepStrictEqual(objectResult, [ { n1: node1, edge: edge1 } ]);
   });
 
+  it("Finds nodes and optionally an edge to another node", () => {
+    // Arrange
+    const graph = new Graph();
 
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+
+    const edge1 = graph.addEdge({ from: node1, to: node2 });
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      Node.as("n1"),
+      Edge.optional().from("n1").to("n2"),
+    ]).toArray();
+    const objectResult = runQuery(graph, {
+      n1: Node.as("n1"),
+      edge: Edge.optional().from("n1").to("n2"),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Edge | undefined ][]>(true);
+    typesEqual<typeof objectResult, { n1: Node, edge: Edge | undefined }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node1, edge1 ],
+      [ node2, undefined ],
+      [ node3, undefined],
+    ]);
+    deepStrictEqual(objectResult, [
+      { n1: node1, edge: edge1 },
+      { n1: node2, edge: undefined },
+      { n1: node3, edge: undefined },
+    ]);
+  });
 
   describe("Spaceship example", () => {
     // Finds spaceships docked to planets that are ruled by factions
