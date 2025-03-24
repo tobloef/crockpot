@@ -165,6 +165,8 @@ export class RelatedEdgeQueryItem<
       FromOrToItems
     >({
       class: this.class,
+      fromItem: this.fromItem,
+      fromOrToItems: this.fromOrToItems,
       toItem: item,
       excludedClassTypes: this.excludedClassTypes,
     });
@@ -183,6 +185,8 @@ export class RelatedEdgeQueryItem<
     >({
       class: this.class,
       fromItem: item,
+      toItem: this.toItem,
+      fromOrToItems: this.fromOrToItems,
       excludedClassTypes: this.excludedClassTypes,
     });
   }
@@ -232,6 +236,8 @@ export class NamedRelatedEdgeQueryItem<
       class: this.class,
       name: this.name,
       toItem: item,
+      fromItem: this.fromItem,
+      fromOrToItems: this.fromOrToItems,
       excludedClassTypes: this.excludedClassTypes,
     });
   }
@@ -251,6 +257,8 @@ export class NamedRelatedEdgeQueryItem<
       class: this.class,
       name: this.name,
       fromItem: item,
+      toItem: this.toItem,
+      fromOrToItems: this.fromOrToItems,
       excludedClassTypes: this.excludedClassTypes,
     });
   }

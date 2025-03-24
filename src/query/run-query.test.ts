@@ -1905,6 +1905,36 @@ describe("runQuery", () => {
     deepStrictEqual(objectResult, [ { edge: edge1 }, { edge: edge4 } ]);
   });
 
+  it("Finds nodes and an edge", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+
+    const edge1 = graph.addEdge({ from: node1, to: node2 });
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      Node.as("n1"),
+      Edge.from("n1").to("n2"),
+    ]).toArray();
+    const objectResult = runQuery(graph, {
+      n1: Node.as("n1"),
+      edge: Edge.from("n1").to("n2"),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Edge ][]>(true);
+    typesEqual<typeof objectResult, { n1: Node, edge: Edge }[]>(true);
+
+    deepStrictEqual(arrayResult, [ [ node1, edge1 ] ]);
+    deepStrictEqual(objectResult, [ { n1: node1, edge: edge1 } ]);
+  });
+
+
+
   describe("Spaceship example", () => {
     // Finds spaceships docked to planets that are ruled by factions
     // that are allied with the faction of the spaceship.
