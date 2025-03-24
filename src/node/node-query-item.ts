@@ -1,7 +1,7 @@
 import type { Class } from "../utils/class.ts";
 import { Node } from "./node.ts";
 import type { Edgelike, Nodelike, ReferenceName, } from "../query/run-query.types.ts";
-import { DEFAULT_OPTIONALITY_KEY } from "../query/optional.js";
+import { DEFAULT_OPTIONALITY_KEY } from "../query/optional.ts";
 
 export class NodeQueryItem<
   ClassType extends Class<Node> = Class<Node>,
