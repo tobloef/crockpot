@@ -1,5 +1,11 @@
-import { describe, it } from "node:test";
-import { deepStrictEqual, throws } from "node:assert";
+import {
+  describe,
+  it,
+} from "node:test";
+import {
+  deepStrictEqual,
+  throws,
+} from "node:assert";
 import { Graph } from "../graph.ts";
 import { Node } from "../node/node.ts";
 import { Edge } from "../edge/edge.ts";
@@ -1946,7 +1952,7 @@ describe("runQuery", () => {
     // Act
     const arrayResult = runQuery(graph, [
       Node.as("n1"),
-      Edge.optional().from("n1").to("n2"),
+      Edge.optional().from("n1").to("n2").as("edge")
     ]).toArray();
     const objectResult = runQuery(graph, {
       n1: Node.as("n1"),

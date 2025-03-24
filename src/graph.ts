@@ -1,9 +1,25 @@
 import { Edge } from "./edge/edge.ts";
 import { Node } from "./node/node.ts";
-import type { ArrayQueryInput, ObjectQueryInput, QueryInput, QueryInputItem, QueryOutput, QueryOutputItem, } from "./query/run-query.types.ts";
-import { type Class, getClassHierarchy } from "./utils/class.ts";
-import { GraphQuery, type GraphQueryOptions } from "./query/graph-query.ts";
-import { GraphObserver, type GraphObserverOptions } from "./query/graph-observer.ts";
+import type {
+  ArrayQueryInput,
+  ObjectQueryInput,
+  QueryInput,
+  QueryInputItem,
+  QueryOutput,
+  QueryOutputItem,
+} from "./query/run-query.types.ts";
+import {
+  type Class,
+  getClassHierarchy,
+} from "./utils/class.ts";
+import {
+  GraphQuery,
+  type GraphQueryOptions,
+} from "./query/graph-query.ts";
+import {
+  GraphObserver,
+  type GraphObserverOptions,
+} from "./query/graph-observer.ts";
 
 export class Graph {
   indices = {

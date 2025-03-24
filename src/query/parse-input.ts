@@ -1,7 +1,19 @@
 import { Node } from "../node/node.ts";
-import { type Class, isClassThatExtends } from "../utils/class.ts";
-import { Edge, type EdgeDirection } from "../edge/edge.ts";
-import type { Edgelike, Nodelike, QueryInput, QueryInputItem, ReferenceName } from "./run-query.types.ts";
+import {
+  type Class,
+  isClassThatExtends,
+} from "../utils/class.ts";
+import {
+  Edge,
+  type EdgeDirection,
+} from "../edge/edge.ts";
+import type {
+  Edgelike,
+  Nodelike,
+  QueryInput,
+  QueryInputItem,
+  ReferenceName,
+} from "./run-query.types.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
 import { NodeQueryItem } from "../node/node-query-item.ts";
 import { ReferenceMismatchError } from "./errors/reference-mismatch-error.ts";

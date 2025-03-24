@@ -1,7 +1,18 @@
-import { describe, it, } from "node:test";
+import {
+	describe,
+	it,
+} from "node:test";
 
-import { type Class, getClassHierarchy, type Instance, isClassThatExtends, } from "./class.ts";
-import { deepStrictEqual, ok } from "node:assert";
+import {
+	type Class,
+	getClassHierarchy,
+	type Instance,
+	isClassThatExtends,
+} from "./class.ts";
+import {
+	deepStrictEqual,
+	ok,
+} from "node:assert";
 
 describe("Class", () => {
   it("Defines a class, not an instance", () => {

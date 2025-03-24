@@ -1,6 +1,9 @@
 import type { Class } from "../utils/class.ts";
 import { Edge } from "./edge.ts";
-import type { Nodelike, ReferenceName, } from "../query/run-query.types.ts";
+import type {
+  Nodelike,
+  ReferenceName,
+} from "../query/run-query.types.ts";
 import { DEFAULT_OPTIONALITY_KEY } from "../query/optional.ts";
 
 export class EdgeQueryItem<

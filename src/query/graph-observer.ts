@@ -1,6 +1,13 @@
-import type { QueryInput, QueryOutput, } from "./run-query.types.ts";
+import type {
+	QueryInput,
+	QueryOutput,
+} from "./run-query.types.ts";
 import type { Graph } from "../graph.ts";
-import { isItemRelatedToSlots, parseInput, type QuerySlots } from "./parse-input.ts";
+import {
+	isItemRelatedToSlots,
+	parseInput,
+	type QuerySlots,
+} from "./parse-input.ts";
 import { runQuery } from "./run-query.ts";
 import { Node } from "../node/node.ts";
 import { Edge } from "../edge/edge.ts";

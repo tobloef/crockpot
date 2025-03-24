@@ -1,6 +1,17 @@
-import { describe, it, mock } from "node:test";
-import { deepStrictEqual, strictEqual } from "node:assert";
-import { GraphObserver, Node, Graph } from "../index.ts";
+import {
+	describe,
+	it,
+	mock,
+} from "node:test";
+import {
+	deepStrictEqual,
+	strictEqual,
+} from "node:assert";
+import {
+	Graph,
+	GraphObserver,
+	Node,
+} from "../index.ts";
 
 class NodeA extends Node {}
 

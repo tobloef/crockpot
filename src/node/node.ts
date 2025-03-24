@@ -1,6 +1,17 @@
-import { Edge, type EdgeDirection } from "../edge/edge.ts";
-import { type Class, type Instance, isClassThatExtends } from "../utils/class.ts";
-import type { Edgelike, Nodelike, ReferenceName, } from "../query/run-query.types.ts";
+import {
+  Edge,
+  type EdgeDirection,
+} from "../edge/edge.ts";
+import {
+  type Class,
+  type Instance,
+  isClassThatExtends,
+} from "../utils/class.ts";
+import type {
+  Edgelike,
+  Nodelike,
+  ReferenceName,
+} from "../query/run-query.types.ts";
 import { randomString } from "../utils/random-string.ts";
 import { type Graph } from "../graph.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
