@@ -9,7 +9,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rimraf ./dist && tsc --project tsconfig.json",
-    "test": "node --experimental-strip-types --test src/**/*.test.ts",
+    "test": "node --experimental-strip-types --experimental-test-module-mocks --test src/**/*.test.ts",
     "coverage": "npm run coverage:run && npm run coverage:open",
     "coverage:run": "c8 --reporter=html node --experimental-strip-types --test src/**/*.test.ts --experimental-test-coverage",
     "coverage:open": "open-cli coverage/index.html",
