@@ -84,6 +84,7 @@ export class EdgeQueryItem<
       optionalityKey: optionalityGroup,
     });
   }
+
   to<
     ToItem extends Nodelike
   >(

@@ -3,7 +3,7 @@ import { type Class, isClassThatExtends } from "../utils/class.ts";
 import { Edge, type EdgeDirection } from "../edge/edge.ts";
 import type { Edgelike, Nodelike, QueryInput, QueryInputItem, ReferenceName } from "./run-query.types.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
-import { NamedNodeQueryItem, NamedRelatedNodeQueryItem, NodeQueryItem, RelatedNodeQueryItem } from "../node/node-query-item.ts";
+import { NodeQueryItem } from "../node/node-query-item.ts";
 import { ReferenceMismatchError } from "./errors/reference-mismatch-error.ts";
 import { randomString } from "../utils/random-string.ts";
 import { EdgeQueryItem } from "../edge/edge-query-item.ts";
@@ -315,17 +315,18 @@ function parseNodeQueryItem(
   slots: QuerySlots
 ): NodeSlot {
   const hasName = (
-    item instanceof NamedNodeQueryItem ||
-    item instanceof NamedRelatedNodeQueryItem
+    "name" in item && item.name !== undefined
   );
 
   const hasRelations = (
-    item instanceof RelatedNodeQueryItem ||
-    item instanceof NamedRelatedNodeQueryItem
+    ("withItems" in item && item.withItems !== undefined) ||
+    ("toItems" in item && item.toItems !== undefined) ||
+    ("fromItems" in item && item.fromItems !== undefined) ||
+    ("fromOrToItems" in item && item.fromOrToItems !== undefined)
   );
 
   const slotName = hasName
-    ? item.name
+    ? item.name!
     : `node-query (${randomString()})`;
 
   const existingNodeSlot = slots.node[slotName];

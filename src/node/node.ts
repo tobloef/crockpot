@@ -3,11 +3,7 @@ import { type Class, type Instance, isClassThatExtends } from "../utils/class.ts
 import type { Edgelike, Nodelike, ReferenceName, } from "../query/run-query.types.ts";
 import { randomString } from "../utils/random-string.ts";
 import { type Graph } from "../graph.ts";
-import {
-  NamedNodeQueryItem,
-  NodeQueryItem,
-  RelatedNodeQueryItem,
-} from "./node-query-item.ts";
+import { NodeQueryItem } from "./node-query-item.ts";
 
 export class Node {
   #brand = "Node" as const;
@@ -30,7 +26,14 @@ export class Node {
     this: Type,
     ...excludedClassTypes: Class<Node>[]
   ) {
-    return new NodeQueryItem<Type>({
+    return new NodeQueryItem<
+      Type,
+      ReferenceName,
+      Edgelike[],
+      Nodelike[],
+      Nodelike[],
+      Nodelike[]
+    >({
       class: this,
       excludedClassTypes,
     });
@@ -43,7 +46,14 @@ export class Node {
     this: Type,
     name: Name,
   ) {
-    return new NamedNodeQueryItem<Type, Name>({
+    return new NodeQueryItem<
+      Type,
+      Name,
+      Edgelike[],
+      Nodelike[],
+      Nodelike[],
+      Nodelike[]
+    >({
       class: this,
       name,
     });
@@ -56,7 +66,14 @@ export class Node {
     this: Type,
     ...items: WithItems
   ) {
-    return new RelatedNodeQueryItem<Type, WithItems, [], [], []>({
+    return new NodeQueryItem<
+      Type,
+      ReferenceName,
+      WithItems,
+      Nodelike[],
+      Nodelike[],
+      Nodelike[]
+    >({
       withItems: items,
       class: this,
     });
@@ -69,7 +86,14 @@ export class Node {
     this: Type,
     ...items: ToItems
   ) {
-    return new RelatedNodeQueryItem<Type, [], ToItems, [], []>({
+    return new NodeQueryItem<
+      Type,
+      ReferenceName,
+      Edgelike[],
+      ToItems,
+      Nodelike[],
+      Nodelike[]
+    >({
       toItems: items,
       class: this,
     });
@@ -82,7 +106,14 @@ export class Node {
     this: Type,
     ...items: FromItems
   ) {
-    return new RelatedNodeQueryItem<Type, [], [], FromItems, []>({
+    return new NodeQueryItem<
+      Type,
+      ReferenceName,
+      Edgelike[],
+      Nodelike[],
+      FromItems,
+      Nodelike[]
+    >({
       fromItems: items,
       class: this,
     });
@@ -95,7 +126,14 @@ export class Node {
     this: Type,
     ...items: FromOrToItems
   ) {
-    return new RelatedNodeQueryItem<Type, [], [], [], FromOrToItems>({
+    return new NodeQueryItem<
+      Type,
+      ReferenceName,
+      Edgelike[],
+      Nodelike[],
+      Nodelike[],
+      FromOrToItems
+    >({
       fromOrToItems: items,
       class: this,
     });
