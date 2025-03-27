@@ -1,6 +1,5 @@
 - Make direction more intuitive for getOneRelated.
-- Collapse sub-query items into just one class again?
 - Boolean queries
-  - Without
   - Optional
-- Some day I want to experiment with code-generation for direct access. It seems so much faster. Could go crazy with some more cache-friendly indices.
+  - Without
+- Refactor and optimize observers (see pg. 29 and 30 in yellow notebook)
