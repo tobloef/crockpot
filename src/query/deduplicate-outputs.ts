@@ -1,5 +1,9 @@
-import type { QueryInput, QueryOutput } from "./run-query.types.ts";
+import type {
+  QueryInput,
+  QueryOutput,
+} from "./run-query.types.ts";
 import { getOutputHash } from "./create-outputs.ts";
+
 
 export function* deduplicateOutputs<
   Input extends QueryInput

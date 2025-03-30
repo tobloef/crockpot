@@ -1,47 +1,59 @@
 import type { Class } from "../utils/class.ts";
 import { Node } from "./node.ts";
-import type { Edgelike, Nodelike, ReferenceName, } from "../query/run-query.types.ts";
+import type {
+  Edgelike,
+  Nodelike,
+  ReferenceName,
+} from "../query/run-query.types.ts";
+import { DEFAULT_OPTIONALITY_KEY } from "../query/optional.ts";
 
 export class NodeQueryItem<
   ClassType extends Class<Node> = Class<Node>,
-> {
-  #brand = "NodeQueryItem" as const;
-
-  class: ClassType;
-
-  constructor(params: {
-    class: ClassType,
-  }) {
-    this.class = params.class;
-  }
-}
-
-export class RelatedNodeQueryItem<
-  ClassType extends Class<Node> = Class<Node>,
+  Name extends ReferenceName = ReferenceName,
   WithItems extends Edgelike[] = Edgelike[],
   ToItems extends Nodelike[] = Nodelike[],
   FromItems extends Nodelike[] = Nodelike[],
   FromOrToItems extends Nodelike[] = Nodelike[],
-> extends NodeQueryItem<ClassType> {
-  #brand = "RelatedNodeQueryItem" as const;
+  IsOptional extends boolean = false,
+> {
+  #brand = "NodeQueryItem" as const;
 
+  class: ClassType;
+  name?: Name;
   withItems?: WithItems;
   toItems?: ToItems;
   fromItems?: FromItems;
   fromOrToItems?: FromOrToItems;
+  excludedClassTypes?: Class<Node>[];
+  optionalityKey?: string;
 
   constructor(params: {
     class: ClassType,
+    name?: Name,
     withItems?: WithItems,
     toItems?: ToItems,
     fromItems?: FromItems,
     fromOrToItems?: FromOrToItems,
+    excludedClassTypes?: Class<Node>[],
+    optionalityKey?: string,
   }) {
-    super(params);
+    this.class = params.class;
+    this.name = params.name;
     this.withItems = params.withItems;
     this.toItems = params.toItems;
     this.fromItems = params.fromItems;
     this.fromOrToItems = params.fromOrToItems;
+    this.excludedClassTypes = params.excludedClassTypes;
+    this.optionalityKey = params.optionalityKey;
+  }
+
+  excluding(
+    ...excludedClassTypes: Class<Node>[]
+  ) {
+    return new NodeQueryItem<ClassType>({
+      ...this,
+      excludedClassTypes,
+    });
   }
 
   as<
@@ -49,38 +61,35 @@ export class RelatedNodeQueryItem<
   >(
     name: Name,
   ) {
-    return new NamedRelatedNodeQueryItem<
+    return new NodeQueryItem<
       ClassType,
       Name,
       WithItems,
       ToItems,
       FromItems,
-      FromOrToItems
+      FromOrToItems,
+      IsOptional
     >({
-      class: this.class,
+      ...this,
       name,
-      toItems: this.toItems,
-      withItems: this.withItems,
-      fromItems: this.fromItems,
-      fromOrToItems: this.fromOrToItems,
     });
   }
-}
 
-export class NamedNodeQueryItem<
-  ClassType extends Class<Node> = Class<Node>,
-  Name extends ReferenceName = ReferenceName
-> extends NodeQueryItem<ClassType> {
-  #brand = "NamedNodeQueryItem" as const;
-
-  name: Name;
-
-  constructor(params: {
-    class: ClassType,
-    name: Name,
-  }) {
-    super(params);
-    this.name = params.name;
+  optional(
+    optionalityGroup: string = DEFAULT_OPTIONALITY_KEY,
+  ) {
+    return new NodeQueryItem<
+      ClassType,
+      Name,
+      WithItems,
+      ToItems,
+      FromItems,
+      FromOrToItems,
+      true
+    >({
+      ...this,
+      optionalityKey: optionalityGroup,
+    });
   }
 
   with<
@@ -88,16 +97,16 @@ export class NamedNodeQueryItem<
   >(
     ...items: WithItems
   ) {
-    return new NamedRelatedNodeQueryItem<
+    return new NodeQueryItem<
       ClassType,
       Name,
       WithItems,
-      [],
-      [],
-      []
+      ToItems,
+      FromItems,
+      FromOrToItems,
+      IsOptional
     >({
-      class: this.class,
-      name: this.name,
+      ...this,
       withItems: items,
     });
   }
@@ -107,16 +116,16 @@ export class NamedNodeQueryItem<
   >(
     ...items: ToItems
   ) {
-    return new NamedRelatedNodeQueryItem<
+    return new NodeQueryItem<
       ClassType,
       Name,
-      [],
+      WithItems,
       ToItems,
-      [],
-      []
+      FromItems,
+      FromOrToItems,
+      IsOptional
     >({
-      class: this.class,
-      name: this.name,
+      ...this,
       toItems: items,
     });
   }
@@ -126,16 +135,16 @@ export class NamedNodeQueryItem<
   >(
     ...items: FromItems
   ) {
-    return new NamedRelatedNodeQueryItem<
+    return new NodeQueryItem<
       ClassType,
       Name,
-      [],
-      [],
+      WithItems,
+      ToItems,
       FromItems,
-      []
+      FromOrToItems,
+      IsOptional
     >({
-      class: this.class,
-      name: this.name,
+      ...this,
       fromItems: items,
     });
   }
@@ -145,50 +154,17 @@ export class NamedNodeQueryItem<
   >(
     ...items: FromOrToItems
   ) {
-    return new NamedRelatedNodeQueryItem<
+    return new NodeQueryItem<
       ClassType,
       Name,
-      [],
-      [],
-      [],
-      FromOrToItems
+      WithItems,
+      ToItems,
+      FromItems,
+      FromOrToItems,
+      IsOptional
     >({
-      class: this.class,
-      name: this.name,
+      ...this,
       fromOrToItems: items,
     });
-  }
-}
-
-export class NamedRelatedNodeQueryItem<
-  ClassType extends Class<Node> = Class<Node>,
-  Name extends ReferenceName = ReferenceName,
-  WithItems extends Edgelike[] = Edgelike[],
-  ToItems extends Nodelike[] = Nodelike[],
-  FromItems extends Nodelike[] = Nodelike[],
-  FromOrToItems extends Nodelike[] = Nodelike[],
-> extends NodeQueryItem<ClassType> {
-  #brand = "NamedRelatedNodeQueryItem" as const;
-
-  name: Name;
-  withItems?: WithItems;
-  toItems?: ToItems;
-  fromItems?: FromItems;
-  fromOrToItems?: FromOrToItems;
-
-  constructor(params: {
-    class: ClassType,
-    name: Name,
-    withItems?: WithItems,
-    toItems?: ToItems,
-    fromItems?: FromItems,
-    fromOrToItems?: FromOrToItems,
-  }) {
-    super(params);
-    this.name = params.name;
-    this.withItems = params.withItems;
-    this.toItems = params.toItems;
-    this.fromItems = params.fromItems;
-    this.fromOrToItems = params.fromOrToItems;
   }
 }

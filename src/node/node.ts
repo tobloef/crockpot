@@ -1,9 +1,21 @@
-import { Edge, type EdgeDirection } from "../edge/edge.ts";
-import { type Class, type Instance, isClassThatExtends } from "../utils/class.ts";
-import type { Edgelike, Nodelike, ReferenceName, } from "../query/run-query.types.ts";
+import {
+  Edge,
+  type EdgeDirection,
+} from "../edge/edge.ts";
+import {
+  type Class,
+  type Instance,
+  isClassThatExtends,
+} from "../utils/class.ts";
+import type {
+  Edgelike,
+  Nodelike,
+  ReferenceName,
+} from "../query/run-query.types.ts";
 import { randomString } from "../utils/random-string.ts";
 import { type Graph } from "../graph.ts";
-import { NamedNodeQueryItem, RelatedNodeQueryItem } from "./node-query-item.ts";
+import { NodeQueryItem } from "./node-query-item.ts";
+import { DEFAULT_OPTIONALITY_KEY } from "../query/optional.js";
 
 export class Node {
   #brand = "Node" as const;
@@ -20,6 +32,46 @@ export class Node {
     );
   }
 
+  static excluding<
+    Type extends Class<Node>,
+  >(
+    this: Type,
+    ...excludedClassTypes: Class<Node>[]
+  ) {
+    return new NodeQueryItem<
+      Type,
+      ReferenceName,
+      Edgelike[],
+      Nodelike[],
+      Nodelike[],
+      Nodelike[],
+      boolean
+    >({
+      class: this,
+      excludedClassTypes,
+    });
+  }
+
+  static optional<
+    Type extends Class<Node>,
+  >(
+    this: Type,
+    optionalityGroup: string = DEFAULT_OPTIONALITY_KEY,
+  ) {
+    return new NodeQueryItem<
+      Type,
+      ReferenceName,
+      Edgelike[],
+      Nodelike[],
+      Nodelike[],
+      Nodelike[],
+      true
+    >({
+      class: this,
+      optionalityKey: optionalityGroup,
+    });
+  }
+
   static as<
     Type extends Class<Node>,
     Name extends ReferenceName,
@@ -27,7 +79,15 @@ export class Node {
     this: Type,
     name: Name,
   ) {
-    return new NamedNodeQueryItem<Type, Name>({
+    return new NodeQueryItem<
+      Type,
+      Name,
+      Edgelike[],
+      Nodelike[],
+      Nodelike[],
+      Nodelike[],
+      boolean
+    >({
       class: this,
       name,
     });
@@ -40,7 +100,15 @@ export class Node {
     this: Type,
     ...items: WithItems
   ) {
-    return new RelatedNodeQueryItem<Type, WithItems, [], [], []>({
+    return new NodeQueryItem<
+      Type,
+      ReferenceName,
+      WithItems,
+      Nodelike[],
+      Nodelike[],
+      Nodelike[],
+      boolean
+    >({
       withItems: items,
       class: this,
     });
@@ -53,7 +121,15 @@ export class Node {
     this: Type,
     ...items: ToItems
   ) {
-    return new RelatedNodeQueryItem<Type, [], ToItems, [], []>({
+    return new NodeQueryItem<
+      Type,
+      ReferenceName,
+      Edgelike[],
+      ToItems,
+      Nodelike[],
+      Nodelike[],
+      boolean
+    >({
       toItems: items,
       class: this,
     });
@@ -66,7 +142,15 @@ export class Node {
     this: Type,
     ...items: FromItems
   ) {
-    return new RelatedNodeQueryItem<Type, [], [], FromItems, []>({
+    return new NodeQueryItem<
+      Type,
+      ReferenceName,
+      Edgelike[],
+      Nodelike[],
+      FromItems,
+      Nodelike[],
+      boolean
+    >({
       fromItems: items,
       class: this,
     });
@@ -79,7 +163,15 @@ export class Node {
     this: Type,
     ...items: FromOrToItems
   ) {
-    return new RelatedNodeQueryItem<Type, [], [], [], FromOrToItems>({
+    return new NodeQueryItem<
+      Type,
+      ReferenceName,
+      Edgelike[],
+      Nodelike[],
+      Nodelike[],
+      FromOrToItems,
+      boolean
+    >({
       fromOrToItems: items,
       class: this,
     });

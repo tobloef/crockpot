@@ -3,12 +3,12 @@ import type { Graph } from "../graph.ts";
 export type GraphQueryOptions = {
     cache?: boolean;
 };
-export declare class GraphQuery<Input extends QueryInput, Output extends QueryOutput<any>> {
+export declare class GraphQuery<Output extends QueryOutput<any>> {
     #private;
     readonly graph: Graph;
-    readonly input: Input;
+    readonly input: QueryInput;
     readonly options: Readonly<GraphQueryOptions>;
-    constructor(graph: Graph, input: Input, options?: GraphQueryOptions);
+    constructor(graph: Graph, input: QueryInput, options?: GraphQueryOptions);
     run(): Iterable<Output>;
     destroy(): void;
 }

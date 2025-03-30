@@ -1,6 +1,6 @@
+- Make direction more intuitive for getOneRelated.
 - Support `readonly` array inputs
 - Boolean queries
-  - optional
-  - not
-  - oneOf
-- Some day I want to experiment with code-generation for direct access. It seems so much faster. Could go crazy with some more cache-friendly indices.
+  - Optional
+  - Without
+- Refactor and optimize observers (see pg. 29 and 30 in yellow notebook)

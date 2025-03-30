@@ -1,6 +1,13 @@
-import type { QueryInput, QueryOutput, } from "./run-query.types.ts";
+import type {
+  QueryInput,
+  QueryOutput,
+} from "./run-query.types.ts";
 import type { Graph } from "../graph.ts";
-import { isItemRelatedToSlots, parseInput, type QuerySlots } from "./parse-input.ts";
+import {
+  isItemRelatedToSlots,
+  parseInput,
+  type QuerySlots,
+} from "./parse-input.ts";
 import { runQueryBySlots } from "./run-query.ts";
 import { Node } from "../node/node.ts";
 import { Edge } from "../edge/edge.ts";
@@ -10,11 +17,10 @@ export type GraphQueryOptions = {
 }
 
 export class GraphQuery<
-  Input extends QueryInput,
   Output extends QueryOutput<any>
 > {
   readonly graph: Graph;
-  readonly input: Input;
+  readonly input: QueryInput;
   readonly options: Readonly<GraphQueryOptions>;
 
   readonly #slots: QuerySlots;
@@ -24,7 +30,7 @@ export class GraphQuery<
 
   constructor(
     graph: Graph,
-    input: Input,
+    input: QueryInput,
     options: GraphQueryOptions = {}
   ) {
     this.graph = graph;

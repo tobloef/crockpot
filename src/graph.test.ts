@@ -1,5 +1,12 @@
-import { describe, it } from "node:test";
-import { deepStrictEqual, ok, strictEqual } from "node:assert";
+import {
+  describe,
+  it,
+} from "node:test";
+import {
+  deepStrictEqual,
+  ok,
+  strictEqual,
+} from "node:assert";
 import { Graph } from "./graph.ts";
 import { Node } from "./node/node.ts";
 import { Edge } from "./edge/edge.ts";

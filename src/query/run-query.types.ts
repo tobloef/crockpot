@@ -1,9 +1,15 @@
-import type { Class, Instance } from "../utils/class.ts";
+import type {
+  Class,
+  Instance,
+} from "../utils/class.ts";
 import type { Node } from "../node/node.ts";
 import type { Edge } from "../edge/edge.ts";
-import { type NamedNodeQueryItem, NamedRelatedNodeQueryItem, NodeQueryItem, RelatedNodeQueryItem } from "../node/node-query-item.ts";
-import { EdgeQueryItem, type NamedEdgeQueryItem, type NamedRelatedEdgeQueryItem, type RelatedEdgeQueryItem } from "../edge/edge-query-item.ts";
-import type { IsNotUnion, TuplifyUnion } from "../utils/union.ts";
+import { NodeQueryItem } from "../node/node-query-item.ts";
+import type {
+  IsNotUnion,
+  TuplifyUnion,
+} from "../utils/union.ts";
+import type { EdgeQueryItem } from "../edge/edge-query-item.ts";
 
 export type QueryInput = (
   | QueryInputItem
@@ -25,18 +31,14 @@ export type QueryInputItem = (
 export type Nodelike = (
   | Class<Node>
   | Node
-  | NamedNodeQueryItem<any, any>
-  | RelatedNodeQueryItem<any, any, any, any, any>
-  | NamedRelatedNodeQueryItem<any, any, any, any, any, any>
+  | NodeQueryItem<any>
   | ReferenceName
 );
 
 export type Edgelike = (
   | Class<Edge>
   | Edge
-  | NamedEdgeQueryItem<any, any>
-  | RelatedEdgeQueryItem<any, any, any, any>
-  | NamedRelatedEdgeQueryItem<any, any, any, any, any>
+  | EdgeQueryItem<any>
   | ReferenceName
 );
 
@@ -83,8 +85,23 @@ export type QueryOutputItem<
   Item extends Class<Edge> ? Instance<Item> :
   Item extends Node ? Item :
   Item extends Edge ? Item :
-  Item extends NodeQueryItem<infer Type> ? Instance<Type> :
-  Item extends EdgeQueryItem<infer Type> ? Instance<Type> :
+  Item extends NodeQueryItem<
+      infer Type,
+      infer Name,
+      infer WithItems,
+      infer ToItems,
+      infer FromItems,
+      infer FromOrToItems,
+      infer IsOptional
+    > ? Instance<Type> | ([IsOptional] extends [true] ? undefined : never) :
+  Item extends EdgeQueryItem<
+      infer Type,
+      infer Name,
+      infer ToItem,
+      infer FromItem,
+      infer FromOrToItems,
+      infer IsOptional
+    > ? Instance<Type> | ([IsOptional] extends [true] ? undefined : never) :
   Item extends ReferenceName ? InferTypeByReferenceName<Item, FullInput> :
   unknown
 );
@@ -117,64 +134,31 @@ type ReferencedTypeFromArray<
 > = (
   Items extends [infer First, ...infer Rest]
     ? Rest extends QueryInputItem[]
-      ? First extends NodeQueryItem
-        ? First extends NamedRelatedNodeQueryItem<
+      ? First extends NodeQueryItem<
           infer ClassType,
           infer Name,
           infer WithItems,
           infer ToItems,
           infer FromItems,
-          infer FromOrToItems
+          infer FromOrToItems,
+          infer IsOptional
+        >
+        ? (
+          & ExpandQueryItem<ClassType, Name, WithItems, ToItems, FromItems, FromOrToItems, IsOptional>
+          & ReferencedTypeFromArray<Rest, never>
+        )
+        : First extends EdgeQueryItem<
+          infer ClassType,
+          infer Name,
+          infer ToItem,
+          infer FromItem,
+          infer FromOrToItems,
+          infer IsOptional
         >
           ? (
-              & ExpandQueryItem<ClassType, Name, WithItems, ToItems, FromItems, FromOrToItems>
-              & ReferencedTypeFromArray<Rest, never>
-            )
-          : First extends RelatedNodeQueryItem<
-              infer ClassType,
-              infer WithItems,
-              infer ToItems,
-              infer FromItems,
-              infer FromOrToItems
-            >
-            ? (
-              & ExpandQueryItem<ClassType, ReferenceName, WithItems, ToItems, FromItems, FromOrToItems>
-              & ReferencedTypeFromArray<Rest, never>
-            )
-            : First extends NamedNodeQueryItem<infer ClassType, infer Name>
-              ? (
-                & ReferencedType<ClassType, Name>
-                & ReferencedTypeFromArray<Rest, never>
-                )
-              : never
-        : First extends EdgeQueryItem
-          ? First extends NamedRelatedEdgeQueryItem<
-            infer ClassType,
-            infer Name,
-            infer ToItem,
-            infer FromItem,
-            infer FromOrToItems
-          >
-            ? (
-              & ExpandQueryItem<ClassType, Name, [], [ToItem], [FromItem], FromOrToItems>
-              & ReferencedTypeFromArray<Rest, never>
-            )
-            : First extends RelatedEdgeQueryItem<
-              infer ClassType,
-              infer ToItem,
-              infer FromItem,
-              infer FromOrToItems
-            >
-              ? (
-                & ExpandQueryItem<ClassType, ReferenceName, [], [ToItem], [FromItem], FromOrToItems>
-                & ReferencedTypeFromArray<Rest, never>
-              )
-              : First extends NamedEdgeQueryItem<infer ClassType, infer Name>
-                ? (
-                  & ReferencedType<ClassType, Name>
-                  & ReferencedTypeFromArray<Rest, never>
-                )
-                : never
+            & ExpandQueryItem<ClassType, Name, [], [ToItem], [FromItem], FromOrToItems, IsOptional>
+            & ReferencedTypeFromArray<Rest, never>
+          )
           : First extends ReferenceName
             ? [FallbackType] extends [never]
               ? ReferencedTypeFromArray<Rest, never>
@@ -193,10 +177,11 @@ type ExpandQueryItem<
   WithItems extends QueryInputItem[],
   ToItems extends QueryInputItem[],
   FromItems extends QueryInputItem[],
-  FromOrToItems extends QueryInputItem[]
+  FromOrToItems extends QueryInputItem[],
+  IsOptional extends boolean
 > = (
   (
-    & ReferencedType<Type, Name>
+    & ReferencedType<Type, Name, IsOptional>
     & ReferencedTypeFromArray<WithItems, Class<Edge>>
     & ReferencedTypeFromArray<ToItems, Class<Node>>
     & ReferencedTypeFromArray<FromItems, Class<Node>>
@@ -206,10 +191,16 @@ type ExpandQueryItem<
 
 type ReferencedType<
   Type extends NodeOrEdgeClass,
-  Name extends ReferenceName
+  Name extends ReferenceName,
+  IsOptional extends boolean = false
 > = (
   true extends IsValidKey<Name>
-    ? { [key in ReferenceName as Name]: Instance<Type> }
+    ? {
+    [key in ReferenceName as Name]: (
+      | Instance<Type>
+      | ([IsOptional] extends [true] ? undefined : never)
+    )
+  }
     : {}
 );
 

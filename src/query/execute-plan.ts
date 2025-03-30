@@ -1,9 +1,26 @@
-import { getOppositeDirection, type Slot, type SlotName } from "./parse-input.ts";
-import type { EnsureConnectionStep, IterateIndexStep, QueryPlan, QueryPlanStep, SubqueryPlan, TraverseStep, } from "./create-plan.ts";
+import {
+  getOppositeDirection,
+  type Slot,
+  type SlotName,
+} from "./parse-input.ts";
+import type {
+  EnsureConnectionStep,
+  IterateIndexStep,
+  QueryPlan,
+  QueryPlanStep,
+  SubqueryPlan,
+  TraverseStep,
+} from "./create-plan.ts";
 import { Node } from "../node/node.ts";
-import { Edge, type EdgeDirection } from "../edge/edge.ts";
+import {
+  Edge,
+  type EdgeDirection,
+} from "../edge/edge.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
-import { type Class, isClassThatExtends } from "../utils/class.ts";
+import {
+  type Class,
+  isClassThatExtends,
+} from "../utils/class.ts";
 
 export type QueryMatch = Record<SlotName, Node | Edge>;
 
@@ -245,6 +262,14 @@ function checkIsolatedConstraints(
     ) {
       return false;
     }
+
+    if (
+      slot.constraints.excludedClassTypes?.values().some((excludedClass) => (
+        isClassThatExtends(item.constructor as Class<Node>, excludedClass)
+      ))
+    ) {
+      return false;
+    }
   }
 
   if (slot.type === "edge") {
@@ -265,6 +290,14 @@ function checkIsolatedConstraints(
         item.constructor as Class<Edge>,
         slot.constraints.class
       )
+    ) {
+      return false;
+    }
+
+    if (
+      slot.constraints.excludedClassTypes?.values().some((excludedClass) => (
+        isClassThatExtends(item.constructor as Class<Edge>, excludedClass)
+      ))
     ) {
       return false;
     }

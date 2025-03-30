@@ -1,5 +1,11 @@
-import { describe, it } from "node:test";
-import { deepStrictEqual, throws } from "node:assert";
+import {
+  describe,
+  it,
+} from "node:test";
+import {
+  deepStrictEqual,
+  throws,
+} from "node:assert";
 import { Graph } from "../graph.ts";
 import { Node } from "../node/node.ts";
 import { Edge } from "../edge/edge.ts";
@@ -1544,7 +1550,7 @@ describe("runQuery", () => {
     graph.addEdge({ from: node4, to: node6 });
 
     // Act
-    const singleResult = runQuery(graph, 
+    const singleResult = runQuery(graph,
       Node.to(NodeA, NodeB)
     ).toArray();
     const arrayResult = runQuery(graph, [
@@ -1581,7 +1587,7 @@ describe("runQuery", () => {
     graph.addEdge({ from: node6, to: node4 });
 
     // Act
-    const singleResult = runQuery(graph, 
+    const singleResult = runQuery(graph,
       Node.from(NodeA, NodeB)
     ).toArray();
     const arrayResult = runQuery(graph, [
@@ -1618,7 +1624,7 @@ describe("runQuery", () => {
     graph.addEdge({ from: node6, to: node4 });
 
     // Act
-    const singleResult = runQuery(graph, 
+    const singleResult = runQuery(graph,
       Node.fromOrTo(NodeA, NodeB),
     ).toArray();
     const arrayResult = runQuery(graph, [
@@ -1655,7 +1661,7 @@ describe("runQuery", () => {
     graph.addEdge({ from: node4, to: node6 });
 
     // Act
-    const singleResult = runQuery(graph, 
+    const singleResult = runQuery(graph,
       Node.with(EdgeA, EdgeB),
     ).toArray();
     const arrayResult = runQuery(graph, [
@@ -1847,6 +1853,162 @@ describe("runQuery", () => {
     typesEqual<typeof singleResult, Node[]>(true);
     typesEqual<typeof arrayResult, [ Node ][]>(true);
     typesEqual<typeof objectResult, { node: Node }[]>(true);
+
+    deepStrictEqual(singleResult, [ node1, node2 ]);
+    deepStrictEqual(arrayResult, [ [ node1 ], [ node2 ] ]);
+    deepStrictEqual(objectResult, [ { node: node1 }, { node: node2 } ]);
+  });
+
+  it("Excludes nodes of a specified type", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new NodeA());
+    const node3 = graph.addNode(new ChildOfNodeA());
+    const node4 = graph.addNode(new NodeB(1));
+
+    // Act
+    const singleResult = runQuery(graph, Node.excluding(NodeA)).toArray();
+    const arrayResult = runQuery(graph, [ Node.excluding(NodeA) ]).toArray();
+    const objectResult = runQuery(graph, { node: Node.excluding(NodeA) }).toArray();
+
+    // Assert
+    typesEqual<typeof singleResult, Node[]>(true);
+    typesEqual<typeof arrayResult, [ Node ][]>(true);
+    typesEqual<typeof objectResult, { node: Node }[]>(true);
+
+    deepStrictEqual(singleResult, [ node1, node4 ]);
+    deepStrictEqual(arrayResult, [ [ node1 ], [ node4 ] ]);
+    deepStrictEqual(objectResult, [ { node: node1 }, { node: node4 } ]);
+  });
+
+  it("Excludes edges of a specified type", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+
+    const edge1 = graph.addEdge({ from: node1, to: node2 });
+    const edge2 = graph.addEdge({ from: node1, to: node2, edge: new EdgeA() });
+    const edge3 = graph.addEdge({ from: node1, to: node2, edge: new ChildOfEdgeA() });
+    const edge4 = graph.addEdge({ from: node1, to: node2, edge: new EdgeB(1) });
+
+
+    // Act
+    const singleResult = runQuery(graph, Edge.excluding(EdgeA)).toArray();
+    const arrayResult = runQuery(graph, [ Edge.excluding(EdgeA) ]).toArray();
+    const objectResult = runQuery(graph, { edge: Edge.excluding(EdgeA) }).toArray();
+
+    // Assert
+    typesEqual<typeof singleResult, Edge[]>(true);
+    typesEqual<typeof arrayResult, [ Edge ][]>(true);
+    typesEqual<typeof objectResult, { edge: Edge }[]>(true);
+
+    deepStrictEqual(singleResult, [ edge1, edge4 ]);
+    deepStrictEqual(arrayResult, [ [ edge1 ], [ edge4 ] ]);
+    deepStrictEqual(objectResult, [ { edge: edge1 }, { edge: edge4 } ]);
+  });
+
+  it("Finds nodes and an edge", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+
+    const edge1 = graph.addEdge({ from: node1, to: node2 });
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      Node.as("n1"),
+      Edge.from("n1").to("n2"),
+    ]).toArray();
+    const objectResult = runQuery(graph, {
+      n1: Node.as("n1"),
+      edge: Edge.from("n1").to("n2"),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Edge ][]>(true);
+    typesEqual<typeof objectResult, { n1: Node, edge: Edge }[]>(true);
+
+    deepStrictEqual(arrayResult, [ [ node1, edge1 ] ]);
+    deepStrictEqual(objectResult, [ { n1: node1, edge: edge1 } ]);
+  });
+
+  it("Finds nodes and optionally an edge to another node", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+
+    const edge1 = graph.addEdge({ from: node1, to: node2 });
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      Node.as("n1"),
+      Edge.optional().from("n1").to("n2").as("edge")
+    ]).toArray();
+    const objectResult = runQuery(graph, {
+      n: Node.as("n1"),
+      e: Edge.optional().from("n1").to("n2"),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Edge | undefined ][]>(true);
+    typesEqual<typeof objectResult, { n: Node, e: Edge | undefined }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node1, edge1 ],
+      [ node2, undefined ],
+      [ node3, undefined],
+    ]);
+    deepStrictEqual(objectResult, [
+      { n: node1, e: edge1 },
+      { n: node2, e: undefined },
+      { n: node3, e: undefined },
+    ]);
+  });
+
+  it("Finds nodes and optionally an edge to another node", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+
+    const edge1 = graph.addEdge({ from: node1, to: node2 });
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      Node.as("n1").with(Edge.optional().from("n1").to("n2").as("e")),
+      "e"
+    ]).toArray();
+    const objectResult = runQuery(graph, {
+      n: Node.as("n1").with(Edge.optional().from("n1").to("n2").as("e")),
+      e: "e",
+    } as const).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Edge | undefined ][]>(true);
+    typesEqual<typeof objectResult, { n: Node, e: Edge | undefined }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node1, edge1 ],
+      [ node2, undefined ],
+      [ node3, undefined],
+    ]);
+    deepStrictEqual(objectResult, [
+      { n: node1, e: edge1 },
+      { n: node2, e: undefined },
+      { n: node3, e: undefined },
+    ]);
   });
 
   describe("Spaceship example", () => {
@@ -1905,7 +2067,7 @@ describe("runQuery", () => {
       const { deathStar, bountyShip } = setupSpaceships(graph);
 
       // Act
-      const singleResult = runQuery(graph, 
+      const singleResult = runQuery(graph,
         Spaceship.with(
           IsIn.to(
             Faction.as("faction")
@@ -1937,7 +2099,7 @@ describe("runQuery", () => {
       const { deathStar, bountyShip } = setupSpaceships(graph);
 
       // Act
-      const singleResult = runQuery(graph, 
+      const singleResult = runQuery(graph,
         Spaceship.to(
           Faction.as("faction"),
           Planet.to(

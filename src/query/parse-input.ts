@@ -1,12 +1,24 @@
 import { Node } from "../node/node.ts";
-import { type Class, isClassThatExtends } from "../utils/class.ts";
-import { Edge, type EdgeDirection } from "../edge/edge.ts";
-import type { Edgelike, Nodelike, QueryInput, QueryInputItem, ReferenceName } from "./run-query.types.ts";
+import {
+  type Class,
+  isClassThatExtends,
+} from "../utils/class.ts";
+import {
+  Edge,
+  type EdgeDirection,
+} from "../edge/edge.ts";
+import type {
+  Edgelike,
+  Nodelike,
+  QueryInput,
+  QueryInputItem,
+  ReferenceName,
+} from "./run-query.types.ts";
 import { assertExhaustive } from "../utils/assert-exhaustive.ts";
-import { NamedNodeQueryItem, NamedRelatedNodeQueryItem, NodeQueryItem, RelatedNodeQueryItem } from "../node/node-query-item.ts";
-import { EdgeQueryItem, NamedEdgeQueryItem, NamedRelatedEdgeQueryItem, RelatedEdgeQueryItem } from "../edge/edge-query-item.ts";
+import { NodeQueryItem } from "../node/node-query-item.ts";
 import { ReferenceMismatchError } from "./errors/reference-mismatch-error.ts";
 import { randomString } from "../utils/random-string.ts";
+import { EdgeQueryItem } from "../edge/edge-query-item.ts";
 
 export type SlotName = string;
 
@@ -30,6 +42,7 @@ export type NodeSlot = {
   constraints: {
     instance?: Node,
     class?: Class<Node>,
+    excludedClassTypes?: Set<Class<Node>>,
     edges?: {
       // "from", as in "edge is going from this node".
       from?: SlotName[],
@@ -46,6 +59,7 @@ export type EdgeSlot = {
   constraints: {
     instance?: Edge,
     class?: Class<Edge>,
+    excludedClassTypes?: Set<Class<Edge>>,
     nodes?: {
       // "from", as in "edge is going from this node".
       from?: SlotName,
@@ -313,17 +327,18 @@ function parseNodeQueryItem(
   slots: QuerySlots
 ): NodeSlot {
   const hasName = (
-    item instanceof NamedNodeQueryItem ||
-    item instanceof NamedRelatedNodeQueryItem
+    "name" in item && item.name !== undefined
   );
 
   const hasRelations = (
-    item instanceof RelatedNodeQueryItem ||
-    item instanceof NamedRelatedNodeQueryItem
+    ("withItems" in item && item.withItems !== undefined) ||
+    ("toItems" in item && item.toItems !== undefined) ||
+    ("fromItems" in item && item.fromItems !== undefined) ||
+    ("fromOrToItems" in item && item.fromOrToItems !== undefined)
   );
 
   const slotName = hasName
-    ? item.name
+    ? item.name!
     : `node-query (${randomString()})`;
 
   const existingNodeSlot = slots.node[slotName];
@@ -349,6 +364,19 @@ function parseNodeQueryItem(
     item.class,
     existingNodeSlot?.constraints.class,
   );
+
+  if (existingNodeSlot?.constraints.excludedClassTypes !== undefined) {
+    nodeSlot.constraints.excludedClassTypes = new Set(
+      existingNodeSlot.constraints.excludedClassTypes
+    );
+  }
+
+  if (item.excludedClassTypes !== undefined) {
+    nodeSlot.constraints.excludedClassTypes ??= new Set();
+    for (const excludedClass of item.excludedClassTypes) {
+      nodeSlot.constraints.excludedClassTypes.add(excludedClass);
+    }
+  }
 
   if (existingUnknownSlot !== undefined) {
     (nodeSlot.outputKeys as number[]).push(
@@ -485,9 +513,10 @@ function inferParentDirection(
   item: Edgelike,
   parentNode: { direction: EdgeDirection }
 ): EdgeDirection {
-  const hasRelations = (
-    item instanceof RelatedEdgeQueryItem ||
-    item instanceof NamedRelatedEdgeQueryItem
+  const hasRelations = typeof item === "object" && (
+    ("toItem" in item && item.toItem !== undefined) ||
+    ("fromItem" in item && item.fromItem !== undefined) ||
+    ("fromOrToItems" in item && item.fromOrToItems !== undefined)
   );
 
   if (!hasRelations) {
@@ -557,17 +586,17 @@ function parseEdgeQueryItem(
   slots: QuerySlots
 ): EdgeSlot {
   const hasName = (
-    item instanceof NamedEdgeQueryItem ||
-    item instanceof NamedRelatedEdgeQueryItem
+    "name" in item && item.name !== undefined
   );
 
   const hasRelations = (
-    item instanceof RelatedEdgeQueryItem ||
-    item instanceof NamedRelatedEdgeQueryItem
+    ("toItem" in item && item.toItem !== undefined) ||
+    ("fromItem" in item && item.fromItem !== undefined) ||
+    ("fromOrToItems" in item && item.fromOrToItems !== undefined)
   );
 
   const slotName = hasName
-    ? item.name
+    ? item.name!
     : `edge-query (${randomString()})`;
 
   const existingEdgeSlot = slots.edge[slotName];
@@ -593,6 +622,19 @@ function parseEdgeQueryItem(
     item.class,
     existingEdgeSlot?.constraints.class,
   );
+
+  if (existingEdgeSlot?.constraints.excludedClassTypes !== undefined) {
+    edgeSlot.constraints.excludedClassTypes = new Set(
+      existingEdgeSlot.constraints.excludedClassTypes
+    );
+  }
+
+  if (item.excludedClassTypes !== undefined) {
+    edgeSlot.constraints.excludedClassTypes ??= new Set();
+    for (const excludedClass of item.excludedClassTypes) {
+      edgeSlot.constraints.excludedClassTypes.add(excludedClass);
+    }
+  }
 
   if (existingUnknownSlot !== undefined) {
     (edgeSlot.outputKeys as number[]).push(

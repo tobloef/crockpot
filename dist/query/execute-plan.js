@@ -170,6 +170,9 @@ function checkIsolatedConstraints(item, slot) {
             !isClassThatExtends(item.constructor, slot.constraints.class)) {
             return false;
         }
+        if (slot.constraints.excludedClassTypes?.values().some((excludedClass) => (isClassThatExtends(item.constructor, excludedClass)))) {
+            return false;
+        }
     }
     if (slot.type === "edge") {
         if (!(item instanceof Edge)) {
@@ -181,6 +184,9 @@ function checkIsolatedConstraints(item, slot) {
         }
         if (slot.constraints.class !== undefined &&
             !isClassThatExtends(item.constructor, slot.constraints.class)) {
+            return false;
+        }
+        if (slot.constraints.excludedClassTypes?.values().some((excludedClass) => (isClassThatExtends(item.constructor, excludedClass)))) {
             return false;
         }
     }
