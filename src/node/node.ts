@@ -32,7 +32,7 @@ export class Node {
     );
   }
 
-  static excluding<
+  static except<
     Type extends Class<Node>,
   >(
     this: Type,

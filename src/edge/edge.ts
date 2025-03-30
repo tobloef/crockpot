@@ -26,7 +26,7 @@ export class Edge {
 	}
 
 
-	static excluding<
+	static except<
 		Type extends Class<Edge>,
 	>(
 		this: Type,

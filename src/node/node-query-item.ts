@@ -47,7 +47,7 @@ export class NodeQueryItem<
     this.optionalityKey = params.optionalityKey;
   }
 
-  excluding(
+  except(
     ...excludedClassTypes: Class<Node>[]
   ) {
     return new NodeQueryItem<ClassType>({

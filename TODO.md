@@ -1,5 +1,4 @@
-- Make direction more intuitive for getOneRelated.
-- Support `readonly` array inputs
+- Make directions more intuitive
 - Boolean queries
   - Optional
   - Without

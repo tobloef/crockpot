@@ -42,7 +42,7 @@ export class EdgeQueryItem<
     this.optionalityKey = params.optionalityKey;
   }
 
-  excluding(
+  except(
     ...excludedClassTypes: Class<Edge>[]
   ) {
     return new EdgeQueryItem<

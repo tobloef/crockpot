@@ -1869,9 +1869,9 @@ describe("runQuery", () => {
     const node4 = graph.addNode(new NodeB(1));
 
     // Act
-    const singleResult = runQuery(graph, Node.excluding(NodeA)).toArray();
-    const arrayResult = runQuery(graph, [ Node.excluding(NodeA) ]).toArray();
-    const objectResult = runQuery(graph, { node: Node.excluding(NodeA) }).toArray();
+    const singleResult = runQuery(graph, Node.except(NodeA)).toArray();
+    const arrayResult = runQuery(graph, [ Node.except(NodeA) ]).toArray();
+    const objectResult = runQuery(graph, { node: Node.except(NodeA) }).toArray();
 
     // Assert
     typesEqual<typeof singleResult, Node[]>(true);
@@ -1897,9 +1897,9 @@ describe("runQuery", () => {
 
 
     // Act
-    const singleResult = runQuery(graph, Edge.excluding(EdgeA)).toArray();
-    const arrayResult = runQuery(graph, [ Edge.excluding(EdgeA) ]).toArray();
-    const objectResult = runQuery(graph, { edge: Edge.excluding(EdgeA) }).toArray();
+    const singleResult = runQuery(graph, Edge.except(EdgeA)).toArray();
+    const arrayResult = runQuery(graph, [ Edge.except(EdgeA) ]).toArray();
+    const objectResult = runQuery(graph, { edge: Edge.except(EdgeA) }).toArray();
 
     // Assert
     typesEqual<typeof singleResult, Edge[]>(true);
