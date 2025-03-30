@@ -29,8 +29,7 @@ export class Graph {
     edgesByType: new Map<Class<Edge>, Set<Edge>>(),
   };
 
-  #itemAddedListeners = new Set<(item: Node | Edge) => void>();
-  #itemRemovedListeners = new Set<(item: Node | Edge) => void>();
+  #itemChangedListeners = new Set<(changelist: Changelist) => void>();
 
   query<Input extends QueryInputItem>(
     input: Input,
@@ -109,10 +108,37 @@ export class Graph {
   }
 
   addNode<N extends Node>(node: N): N {
+    const changes = this.#newChangelist();
+
+    this.#addNode(node, changes);
+
+    this.#notifyChanges(changes);
+
+    return node;
+  }
+
+  addNodes<Nodes extends Node[]>(nodes: Nodes): Nodes {
+    const changes = this.#newChangelist();
+
+    for (const node of nodes) {
+      this.#addNode(node, changes);
+    }
+
+    this.#notifyChanges(changes);
+
+    return nodes;
+  }
+
+  #addNode<N extends Node>(
+    node: N,
+    changes: Changelist,
+  ): N {
     const allNodes = this.indices.nodesByType.get(Node);
     if (allNodes?.has(node)) {
       return node;
     }
+
+    changes.added.add(node);
 
     const types = getClassHierarchy(node.constructor as Class<Node>);
 
@@ -135,7 +161,10 @@ export class Graph {
           throw new Error(`Edge ${edge.id} is missing from/to nodes.`);
         }
 
-        this.addEdge({ edge, from: edge.nodes.from, to: edge.nodes.to });
+        this.#addEdge(
+          { edge, from: edge.nodes.from, to: edge.nodes.to },
+          changes,
+        );
       }
 
       for (const edge of node.edges.to) {
@@ -143,39 +172,75 @@ export class Graph {
           throw new Error(`Edge ${edge.id} is missing from/to nodes.`);
         }
 
-        this.addEdge({ edge, from: edge.nodes.from, to: edge.nodes.to });
+        this.#addEdge(
+          { edge, from: edge.nodes.from, to: edge.nodes.to },
+          changes,
+        );
       }
     }
 
     if (node.graph !== this) {
-      node.graph.removeNode(node);
+      node.graph.#removeNode(node, changes);
       node.graph = this;
-    }
-
-    for (const listener of this.#itemAddedListeners) {
-      listener(node);
     }
 
     return node;
   }
 
-  addNodes<Nodes extends Node[]>(nodes: Nodes): Nodes {
-    return nodes.map((n) => this.addNode(n)) as Nodes;
+  removeNode(node: Node): void {
+    const changes = this.#newChangelist();
+
+    this.#removeNode(node, changes);
+
+    this.#notifyChanges(changes);
   }
 
-  removeNode(node: Node): void {
+  removeNodes(nodes: Node[]): void {
+    const changes = this.#newChangelist();
+
+    for (const node of nodes) {
+      this.#removeNode(node, changes);
+    }
+
+    this.#notifyChanges(changes);
+  }
+
+  removeNodesByType(type: Class<Node>): void {
+    const changes = this.#newChangelist();
+
+    for (const [indexType, nodes] of this.indices.nodesByType.entries()) {
+      const classHierarchy = getClassHierarchy(indexType);
+
+      if (!classHierarchy.includes(type)) {
+        continue;
+      }
+
+      for (const node of nodes) {
+        this.#removeNode(node, changes);
+      }
+    }
+
+    this.#notifyChanges(changes);
+  }
+
+  #removeNode(
+    node: Node,
+    changes: Changelist,
+  ): void {
     if (!this.indices.nodesByType.get(Node)?.has(node)) {
       return;
     }
 
+    changes.removed.add(node);
+
     const edgesByNode = this.indices.edgesByNode.get(node);
     if (edgesByNode !== undefined) {
       for (const edge of edgesByNode.from) {
-        this.removeEdge(edge);
+        this.#removeEdge(edge, changes);
       }
 
       for (const edge of edgesByNode.to) {
-        this.removeEdge(edge);
+        this.#removeEdge(edge, changes);
       }
 
       this.indices.edgesByNode.delete(node);
@@ -190,34 +255,23 @@ export class Graph {
         nodesByType.delete(node);
       }
     }
-
-    for (const listener of this.#itemRemovedListeners) {
-      listener(node);
-    }
-  }
-
-  removeNodes(nodes: Node[]): void {
-    for (const node of nodes) {
-      this.removeNode(node);
-    }
-  }
-
-  removeNodesByType(type: Class<Node>): void {
-    for (const [indexType, nodes] of this.indices.nodesByType.entries()) {
-      const classHierarchy = getClassHierarchy(indexType);
-
-      if (!classHierarchy.includes(type)) {
-        continue;
-      }
-
-      for (const node of nodes) {
-        this.removeNode(node);
-      }
-    }
   }
 
   addEdge<E extends Edge>(
     input: AddEdgeInput<E>
+  ): E {
+    const changes = this.#newChangelist();
+
+    const edge = this.#addEdge(input, changes);
+
+    this.#notifyChanges(changes);
+
+    return edge;
+  }
+
+  #addEdge<E extends Edge>(
+    input: AddEdgeInput<E>,
+    changes: Changelist,
   ): E {
     const allEdges = this.indices.edgesByType.get(Edge);
 
@@ -229,6 +283,8 @@ export class Graph {
     }
 
     const edge = input.edge ?? new Edge();
+
+    changes.added.add(edge);
 
     const types = getClassHierarchy(edge.constructor as Class<Edge>);
 
@@ -276,53 +332,33 @@ export class Graph {
     edgesByFromNode.from.add(edge);
     edgesByToNode.to.add(edge);
 
-    this.addNode(input.from);
-    this.addNode(input.to);
+    this.#addNode(input.from, changes);
+    this.#addNode(input.to, changes);
 
     if (edge.graph !== this) {
-      edge.graph.removeEdge(edge);
+      edge.graph.#removeEdge(edge, changes);
       edge.graph = this;
-    }
-
-    for (const listener of this.#itemAddedListeners) {
-      listener(edge);
     }
 
     return edge as E;
   }
 
   removeEdge(edge: Edge): void {
-    if (!this.indices.edgesByType.get(Edge)?.has(edge)) {
-      return;
-    }
+    const changes = this.#newChangelist();
 
-    const nodesByEdge = this.indices.nodesByEdge.get(edge);
+    this.#removeEdge(edge, changes);
 
-    if (nodesByEdge !== undefined) {
-      this.indices.edgesByNode.get(nodesByEdge.from)?.from.delete(edge);
-      this.indices.edgesByNode.get(nodesByEdge.to)?.to.delete(edge);
-      this.indices.nodesByEdge.delete(edge);
-    }
-
-    const types = getClassHierarchy(edge.constructor as Class<Edge>);
-
-    for (const type of types) {
-      const edgesByType = this.indices.edgesByType.get(type);
-
-      if (edgesByType !== undefined) {
-        edgesByType.delete(edge);
-      }
-    }
-
-    for (const listener of this.#itemRemovedListeners) {
-      listener(edge);
-    }
+    this.#notifyChanges(changes);
   }
 
   removeEdges(edges: Edge[]): void {
+    const changes = this.#newChangelist();
+
     for (const edge of edges) {
-      this.removeEdge(edge);
+      this.#removeEdge(edge, changes);
     }
+
+    this.#notifyChanges(changes);
   }
 
   removeEdgesByNodes(input: RemoveEdgesInput): void {
@@ -366,12 +402,18 @@ export class Graph {
       edgesArray = edgesArray.filter((edge) => edge instanceof type);
     }
 
+    const changes = this.#newChangelist();
+
     for (const edge of edgesArray) {
-      this.removeEdge(edge);
+      this.#removeEdge(edge, changes);
     }
+
+    this.#notifyChanges(changes);
   }
 
   removeEdgesByType(type: Class<Edge>): void {
+    const changes = this.#newChangelist();
+
     for (const [indexType, edges] of this.indices.edgesByType.entries()) {
       const classHierarchy = getClassHierarchy(indexType);
 
@@ -380,28 +422,62 @@ export class Graph {
       }
 
       for (const edge of edges) {
-        this.removeEdge(edge);
+        this.#removeEdge(edge, changes);
+      }
+    }
+
+    this.#notifyChanges(changes);
+  }
+
+  #removeEdge(
+    edge: Edge,
+    changes: Changelist,
+  ): void {
+    if (!this.indices.edgesByType.get(Edge)?.has(edge)) {
+      return;
+    }
+
+    changes.removed.add(edge);
+
+    const nodesByEdge = this.indices.nodesByEdge.get(edge);
+
+    if (nodesByEdge !== undefined) {
+      this.indices.edgesByNode.get(nodesByEdge.from)?.from.delete(edge);
+      this.indices.edgesByNode.get(nodesByEdge.to)?.to.delete(edge);
+      this.indices.nodesByEdge.delete(edge);
+    }
+
+    const types = getClassHierarchy(edge.constructor as Class<Edge>);
+
+    for (const type of types) {
+      const edgesByType = this.indices.edgesByType.get(type);
+
+      if (edgesByType !== undefined) {
+        edgesByType.delete(edge);
       }
     }
   }
 
-  onItemAdded(
-    listener: (item: Node | Edge) => void
+  onItemsChanged(
+    listener: (changelist: Changelist) => void
   ): Unsubscribe {
-    this.#itemAddedListeners.add(listener);
+    this.#itemChangedListeners.add(listener);
 
     return () => {
-      this.#itemAddedListeners.delete(listener);
+      this.#itemChangedListeners.delete(listener);
     };
   }
 
-  onItemRemoved(
-    listener: (item: Node | Edge) => void
-  ): Unsubscribe {
-    this.#itemRemovedListeners.add(listener);
+  #notifyChanges(changes: Changelist): void {
+    for (const listener of this.#itemChangedListeners) {
+      listener(changes);
+    }
+  }
 
-    return () => {
-      this.#itemRemovedListeners.delete(listener);
+  #newChangelist(): Changelist {
+    return {
+      added: new Set<Node | Edge>(),
+      removed: new Set<Node | Edge>(),
     };
   }
 }
@@ -428,3 +504,8 @@ export type Notifiable = {
   notifyAdded(item: Node | Edge): void;
   notifyRemoved(item: Node | Edge): void;
 }
+
+export type Changelist = {
+  added: Set<Node | Edge>;
+  removed: Set<Node | Edge>;
+};

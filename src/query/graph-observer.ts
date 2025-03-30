@@ -2,7 +2,7 @@ import type {
   QueryInput,
   QueryOutput,
 } from "./run-query.types.ts";
-import type { Graph } from "../graph.ts";
+import type { Changelist, Graph } from "../graph.ts";
 import {
   isItemRelatedToSlots,
   parseInput,
@@ -29,8 +29,7 @@ export class GraphObserver<
   readonly #slots: QuerySlots;
   readonly #additionListeners: Set<(item: Output) => void> = new Set();
   readonly #removalListeners: Set<(item: Output) => void> = new Set();
-  readonly #unsubscribeItemAdded?: () => void;
-  readonly #unsubscribeItemRemoved?: () => void;
+  readonly #unsubscribeItemsChanged?: () => void;
 
   constructor(
     graph: Graph,
@@ -44,12 +43,8 @@ export class GraphObserver<
 
     this.#cache = this.#getNewCache();
 
-    this.#unsubscribeItemAdded = this.graph.onItemAdded(
-      this.#handleItemAdded.bind(this)
-    );
-
-    this.#unsubscribeItemRemoved = this.graph.onItemRemoved(
-      this.#handleItemRemoved.bind(this)
+    this.#unsubscribeItemsChanged = this.graph.onItemsChanged(
+      this.#handleItemsChanged.bind(this)
     );
   }
 
@@ -77,34 +72,28 @@ export class GraphObserver<
     this.#removalListeners.add(listener);
   }
 
-  #handleItemAdded(item: Node | Edge) {
-    if (!isItemRelatedToSlots(item, this.#slots)) {
-      return;
+  #handleItemsChanged(changes: Changelist) {
+    const allItems = [...changes.added, ...changes.removed];
+
+    let shouldUpdate = false;
+
+    for (const item of allItems) {
+      if (isItemRelatedToSlots(item, this.#slots)) {
+        shouldUpdate = true;
+        break;
+      }
     }
 
-    // When this needs to be optimized, take a look the fix-in-place approach
-    // outlined on page two of your medium-sized yellow notebook.
-
-    this.#updateQuery();
-  }
-
-  #handleItemRemoved(item: Node | Edge) {
-    if (!isItemRelatedToSlots(item, this.#slots)) {
-      return;
+    if (shouldUpdate) {
+      this.#updateQuery();
     }
-
-    // When this needs to be optimized, take a look the fix-in-place approach
-    // outlined on page two of your medium-sized yellow notebook.
-
-    this.#updateQuery();
   }
 
   destroy() {
     this.#cache.clear();
     this.#addedResults = [];
     this.#removedResults = [];
-    this.#unsubscribeItemAdded?.();
-    this.#unsubscribeItemRemoved?.();
+    this.#unsubscribeItemsChanged?.();
   }
 
   #updateQuery() {

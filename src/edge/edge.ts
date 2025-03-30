@@ -15,7 +15,7 @@ export class Edge {
 	static defaultGraph: Graph;
 
 	readonly id: string = randomString();
-	graph: Readonly<Graph> = Edge.defaultGraph;
+	graph: Graph = Edge.defaultGraph;
 
 
 	get nodes(): EdgeNodes {

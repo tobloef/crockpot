@@ -15,7 +15,7 @@ import type {
 import { randomString } from "../utils/random-string.ts";
 import { type Graph } from "../graph.ts";
 import { NodeQueryItem } from "./node-query-item.ts";
-import { DEFAULT_OPTIONALITY_KEY } from "../query/optional.js";
+import { DEFAULT_OPTIONALITY_KEY } from "../query/optional.ts";
 
 export class Node {
   #brand = "Node" as const;
