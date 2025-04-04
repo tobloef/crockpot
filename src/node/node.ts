@@ -151,32 +151,21 @@ export class Node {
   }
 
 
-  /**
-   * Get one related node and edge.
-   * @param {Object} [input]
-   * @param {Class<Node>} [input.nodeType] - The type of the related node.
-   * @param {Class<Edge>} [input.edgeType] - The type of the edge between the nodes.
-   * @param {EdgeDirection} [input.direction] - The direction of the edge. Whether it's going "to" the related node or coming "from" it.
-   */
   getOneRelated<
     NodeType extends Class<Node> = Class<Node>,
     EdgeType extends Class<Edge> = Class<Edge>
   >(
-    input?: {
-      nodeType?: NodeType,
-      direction?: EdgeDirection,
-      edgeType?: EdgeType,
-    }
+    edgeType: EdgeType,
+    direction: EdgeDirection,
+    nodeType: NodeType,
   ): {
     node: Instance<NodeType>,
     edge: Instance<EdgeType>,
   } | undefined {
-    const { nodeType, direction, edgeType } = input ?? {};
-
-    if (direction === undefined || direction === "fromOrTo") {
+    if (direction === "fromOrTo") {
       return (
-        this.getOneRelated({ nodeType, edgeType, direction: "from" }) ??
-        this.getOneRelated({ nodeType, edgeType, direction: "to" })
+        this.getOneRelated(edgeType, "to", nodeType) ??
+        this.getOneRelated(edgeType, "from", nodeType)
       );
     }
 
@@ -184,7 +173,7 @@ export class Node {
 
     for (const edge of this.edges[oppositeDirection].values()) {
       if (
-        edgeType !== undefined &&
+        edgeType !== (Edge as Class<Edge>) &&
         !isClassThatExtends(edge.constructor as Class<Edge>, edgeType)
       ) {
         continue;
@@ -197,7 +186,7 @@ export class Node {
       }
 
       if (
-        nodeType !== undefined &&
+        nodeType !== (Node as Class<Node>) &&
         !isClassThatExtends(otherNode.constructor as Class<Node>, nodeType)
       ) {
         continue;
@@ -210,31 +199,20 @@ export class Node {
     }
   }
 
-  /**
-   * Get multiple related nodes and edges.
-   * @param {Object} [input]
-   * @param {Class<Node>} [input.nodeType] - The type of the related nodes.
-   * @param {Class<Edge>} [input.edgeType] - The type of the edges between the nodes.
-   * @param {EdgeDirection} [input.direction] - The direction of the edges. Whether it's going "to" the related nodes or coming "from" them.
-   */
   *getAllRelated<
     NodeType extends Class<Node> = Class<Node>,
     EdgeType extends Class<Edge> = Class<Edge>
   >(
-    input?: {
-      nodeType?: NodeType,
-      direction?: EdgeDirection,
-      edgeType?: EdgeType,
-    }
+    edgeType: EdgeType,
+    direction: EdgeDirection,
+    nodeType: NodeType,
   ): Iterable<{
     node: Instance<NodeType>,
     edge: Instance<EdgeType>,
   }> {
-    const { nodeType, direction, edgeType } = input ?? {};
-
-    if (direction === undefined || direction === "fromOrTo") {
-      yield* this.getAllRelated({ nodeType, edgeType, direction: "from" });
-      yield* this.getAllRelated({ nodeType, edgeType, direction: "to" });
+    if (direction === "fromOrTo") {
+      yield* this.getAllRelated(edgeType, "from", nodeType);
+      yield* this.getAllRelated(edgeType, "to", nodeType);
       return;
     }
 
@@ -242,7 +220,7 @@ export class Node {
 
     for (const edge of this.edges[oppositeDirection].values()) {
       if (
-        edgeType !== undefined &&
+        edgeType !== (Edge as Class<Edge>) &&
         !isClassThatExtends(edge.constructor as Class<Edge>, edgeType)
       ) {
         continue;
@@ -255,7 +233,7 @@ export class Node {
       }
 
       if (
-        nodeType !== undefined &&
+        nodeType !== (Node as Class<Node>) &&
         !isClassThatExtends(otherNode.constructor as Class<Node>, nodeType)
       ) {
         continue;

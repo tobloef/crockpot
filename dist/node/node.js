@@ -92,22 +92,14 @@ export class Node {
     remove() {
         this.graph.removeNode(this);
     }
-    /**
-     * Get one related node and edge.
-     * @param {Object} [input]
-     * @param {Class<Node>} [input.nodeType] - The type of the related node.
-     * @param {Class<Edge>} [input.edgeType] - The type of the edge between the nodes.
-     * @param {EdgeDirection} [input.direction] - The direction of the edge. Whether it's going "to" the related node or coming "from" it.
-     */
-    getOneRelated(input) {
-        const { nodeType, direction, edgeType } = input ?? {};
-        if (direction === undefined || direction === "fromOrTo") {
-            return (this.getOneRelated({ nodeType, edgeType, direction: "from" }) ??
-                this.getOneRelated({ nodeType, edgeType, direction: "to" }));
+    getOneRelated(edgeType, direction, nodeType) {
+        if (direction === "fromOrTo") {
+            return (this.getOneRelated(edgeType, "to", nodeType) ??
+                this.getOneRelated(edgeType, "from", nodeType));
         }
         const oppositeDirection = direction === "from" ? "to" : "from";
         for (const edge of this.edges[oppositeDirection].values()) {
-            if (edgeType !== undefined &&
+            if (edgeType !== Edge &&
                 !isClassThatExtends(edge.constructor, edgeType)) {
                 continue;
             }
@@ -115,7 +107,7 @@ export class Node {
             if (otherNode === undefined) {
                 continue;
             }
-            if (nodeType !== undefined &&
+            if (nodeType !== Node &&
                 !isClassThatExtends(otherNode.constructor, nodeType)) {
                 continue;
             }
@@ -125,23 +117,15 @@ export class Node {
             };
         }
     }
-    /**
-     * Get multiple related nodes and edges.
-     * @param {Object} [input]
-     * @param {Class<Node>} [input.nodeType] - The type of the related nodes.
-     * @param {Class<Edge>} [input.edgeType] - The type of the edges between the nodes.
-     * @param {EdgeDirection} [input.direction] - The direction of the edges. Whether it's going "to" the related nodes or coming "from" them.
-     */
-    *getAllRelated(input) {
-        const { nodeType, direction, edgeType } = input ?? {};
-        if (direction === undefined || direction === "fromOrTo") {
-            yield* this.getAllRelated({ nodeType, edgeType, direction: "from" });
-            yield* this.getAllRelated({ nodeType, edgeType, direction: "to" });
+    *getAllRelated(edgeType, direction, nodeType) {
+        if (direction === "fromOrTo") {
+            yield* this.getAllRelated(edgeType, "from", nodeType);
+            yield* this.getAllRelated(edgeType, "to", nodeType);
             return;
         }
         const oppositeDirection = direction === "from" ? "to" : "from";
         for (const edge of this.edges[oppositeDirection].values()) {
-            if (edgeType !== undefined &&
+            if (edgeType !== Edge &&
                 !isClassThatExtends(edge.constructor, edgeType)) {
                 continue;
             }
@@ -149,7 +133,7 @@ export class Node {
             if (otherNode === undefined) {
                 continue;
             }
-            if (nodeType !== undefined &&
+            if (nodeType !== Node &&
                 !isClassThatExtends(otherNode.constructor, nodeType)) {
                 continue;
             }

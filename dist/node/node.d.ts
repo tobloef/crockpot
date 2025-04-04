@@ -19,33 +19,11 @@ export declare class Node {
     removeEdge(edge: Edge): void;
     removeEdges(input?: RemoveEdgeInput): void;
     remove(): void;
-    /**
-     * Get one related node and edge.
-     * @param {Object} [input]
-     * @param {Class<Node>} [input.nodeType] - The type of the related node.
-     * @param {Class<Edge>} [input.edgeType] - The type of the edge between the nodes.
-     * @param {EdgeDirection} [input.direction] - The direction of the edge. Whether it's going "to" the related node or coming "from" it.
-     */
-    getOneRelated<NodeType extends Class<Node> = Class<Node>, EdgeType extends Class<Edge> = Class<Edge>>(input?: {
-        nodeType?: NodeType;
-        direction?: EdgeDirection;
-        edgeType?: EdgeType;
-    }): {
+    getOneRelated<NodeType extends Class<Node> = Class<Node>, EdgeType extends Class<Edge> = Class<Edge>>(edgeType: EdgeType, direction: EdgeDirection, nodeType: NodeType): {
         node: Instance<NodeType>;
         edge: Instance<EdgeType>;
     } | undefined;
-    /**
-     * Get multiple related nodes and edges.
-     * @param {Object} [input]
-     * @param {Class<Node>} [input.nodeType] - The type of the related nodes.
-     * @param {Class<Edge>} [input.edgeType] - The type of the edges between the nodes.
-     * @param {EdgeDirection} [input.direction] - The direction of the edges. Whether it's going "to" the related nodes or coming "from" them.
-     */
-    getAllRelated<NodeType extends Class<Node> = Class<Node>, EdgeType extends Class<Edge> = Class<Edge>>(input?: {
-        nodeType?: NodeType;
-        direction?: EdgeDirection;
-        edgeType?: EdgeType;
-    }): Iterable<{
+    getAllRelated<NodeType extends Class<Node> = Class<Node>, EdgeType extends Class<Edge> = Class<Edge>>(edgeType: EdgeType, direction: EdgeDirection, nodeType: NodeType): Iterable<{
         node: Instance<NodeType>;
         edge: Instance<EdgeType>;
     }>;
