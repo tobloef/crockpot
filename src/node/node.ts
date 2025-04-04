@@ -150,6 +150,14 @@ export class Node {
     this.graph.removeNode(this);
   }
 
+
+  /**
+   * Get one related node and edge.
+   * @param {Object} [input]
+   * @param {Class<Node>} [input.nodeType] - The type of the related node.
+   * @param {Class<Edge>} [input.edgeType] - The type of the edge between the nodes.
+   * @param {EdgeDirection} [input.direction] - The direction of the edge. Whether it's going "to" the related node or coming "from" it.
+   */
   getOneRelated<
     NodeType extends Class<Node> = Class<Node>,
     EdgeType extends Class<Edge> = Class<Edge>
@@ -174,7 +182,7 @@ export class Node {
 
     const oppositeDirection = direction === "from" ? "to" : "from";
 
-    for (const edge of this.edges[direction].values()) {
+    for (const edge of this.edges[oppositeDirection].values()) {
       if (
         edgeType !== undefined &&
         !isClassThatExtends(edge.constructor as Class<Edge>, edgeType)
@@ -182,7 +190,7 @@ export class Node {
         continue;
       }
 
-      const otherNode = edge.nodes[oppositeDirection];
+      const otherNode = edge.nodes[direction];
 
       if (otherNode === undefined) {
         continue;
@@ -202,6 +210,13 @@ export class Node {
     }
   }
 
+  /**
+   * Get multiple related nodes and edges.
+   * @param {Object} [input]
+   * @param {Class<Node>} [input.nodeType] - The type of the related nodes.
+   * @param {Class<Edge>} [input.edgeType] - The type of the edges between the nodes.
+   * @param {EdgeDirection} [input.direction] - The direction of the edges. Whether it's going "to" the related nodes or coming "from" them.
+   */
   *getAllRelated<
     NodeType extends Class<Node> = Class<Node>,
     EdgeType extends Class<Edge> = Class<Edge>
@@ -225,7 +240,7 @@ export class Node {
 
     const oppositeDirection = direction === "from" ? "to" : "from";
 
-    for (const edge of this.edges[direction].values()) {
+    for (const edge of this.edges[oppositeDirection].values()) {
       if (
         edgeType !== undefined &&
         !isClassThatExtends(edge.constructor as Class<Edge>, edgeType)
@@ -233,7 +248,7 @@ export class Node {
         continue;
       }
 
-      const otherNode = edge.nodes[oppositeDirection];
+      const otherNode = edge.nodes[direction];
 
       if (otherNode === undefined) {
         continue;
