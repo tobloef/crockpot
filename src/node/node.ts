@@ -161,7 +161,10 @@ export class Node {
   ): {
     node: Instance<NodeType>,
     edge: Instance<EdgeType>,
-  } | undefined {
+  } | {
+    node: undefined,
+    edge: undefined
+  } {
     if (direction === "fromOrTo") {
       return (
         this.getOneRelated(edgeType, "to", nodeType) ??
@@ -197,6 +200,11 @@ export class Node {
         edge: edge as Instance<EdgeType>,
       }
     }
+
+    return {
+      node: undefined,
+      edge: undefined,
+    };
   }
 
   *getAllRelated<

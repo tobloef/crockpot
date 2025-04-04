@@ -22,7 +22,10 @@ export declare class Node {
     getOneRelated<NodeType extends Class<Node> = Class<Node>, EdgeType extends Class<Edge> = Class<Edge>>(edgeType: EdgeType, direction: EdgeDirection, nodeType: NodeType): {
         node: Instance<NodeType>;
         edge: Instance<EdgeType>;
-    } | undefined;
+    } | {
+        node: undefined;
+        edge: undefined;
+    };
     getAllRelated<NodeType extends Class<Node> = Class<Node>, EdgeType extends Class<Edge> = Class<Edge>>(edgeType: EdgeType, direction: EdgeDirection, nodeType: NodeType): Iterable<{
         node: Instance<NodeType>;
         edge: Instance<EdgeType>;

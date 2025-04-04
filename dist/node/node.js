@@ -116,6 +116,10 @@ export class Node {
                 edge: edge,
             };
         }
+        return {
+            node: undefined,
+            edge: undefined,
+        };
     }
     *getAllRelated(edgeType, direction, nodeType) {
         if (direction === "fromOrTo") {
