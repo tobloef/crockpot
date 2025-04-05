@@ -69,7 +69,7 @@ export type EdgeSlot = {
     }
   },
   outputKeys: string[] | number[],
-  optionalityGroups: Set<string> | null,
+  optionalityKeys: Set<string> | null,
 };
 
 export type UnknownSlot = {
@@ -78,6 +78,18 @@ export type UnknownSlot = {
   constraints: {},
   outputKeys: string[] | number[],
 };
+
+type NodelikeParent = {
+  slot: EdgeSlot,
+  direction: EdgeDirection,
+  optionalityContext: string | null,
+};
+
+type EdgelikeParent = {
+  slot: NodeSlot,
+  direction: EdgeDirection,
+  optionalityContext: string | null,
+}
 
 export function parseInput(
   input: QueryInput
@@ -205,10 +217,7 @@ export function getOppositeSlotType(
 export function parseReferenceName(
   item: ReferenceName,
   slots: QuerySlots,
-  parent?: {
-    slot: Slot,
-    direction: EdgeDirection,
-  }
+  parent?: NodelikeParent | EdgelikeParent,
 ): Slot {
   const slotName = item;
 
@@ -235,11 +244,16 @@ export function parseReferenceName(
     );
   }
 
+  const parentOptionalityContext = parent?.optionalityContext ?? null;
+
   const newSlot: Slot = existing?.slot ?? {
     name: slotName,
     type: newType,
     constraints: {},
     outputKeys: [],
+    optionalityKeys: parentOptionalityContext !== null
+      ? new Set([parentOptionalityContext])
+      : null,
   };
 
   if (existing !== undefined) {
@@ -254,21 +268,18 @@ export function parseReferenceName(
 export function parseNodelike(
   item: Nodelike,
   slots: QuerySlots,
-  parent?: {
-    slot: EdgeSlot,
-    direction: EdgeDirection,
-  }
+  parent?: NodelikeParent,
 ): NodeSlot {
   let nodeSlot: NodeSlot;
 
   if (typeof item === "string") {
     nodeSlot = parseReferenceName(item, slots, parent) as NodeSlot;
   } else if (item instanceof Node) {
-    nodeSlot = parseNodeInstance(item, slots);
+    nodeSlot = parseNodeInstance(item, slots, parent);
   } else if (item instanceof NodeQueryItem) {
-    nodeSlot = parseNodeQueryItem(item, slots);
+    nodeSlot = parseNodeQueryItem(item, slots, parent);
   } else {
-    nodeSlot = parseNodeClass(item, slots);
+    nodeSlot = parseNodeClass(item, slots, parent);
   }
 
   if (parent !== undefined) {
@@ -282,20 +293,30 @@ export function parseNodelike(
 
 function parseNodeInstance(
   item: Node,
-  slots: QuerySlots
+  slots: QuerySlots,
+  parent?: NodelikeParent,
 ): NodeSlot {
   const slotName = item.id;
 
   const existingSlot = slots.node[slotName];
 
-  const nodeSlot: NodeSlot = existingSlot ?? {
+  if (existingSlot !== undefined) {
+    return existingSlot;
+  }
+
+  const parentOptionalityContext = parent?.optionalityContext ?? null;
+
+  const nodeSlot: NodeSlot = {
     name: slotName,
     type: "node",
     constraints: {
       instance: item,
     },
     outputKeys: [],
-  };
+    optionalityKeys: parentOptionalityContext !== null
+      ? new Set([parentOptionalityContext])
+      : null,
+  }
 
   slots.node[slotName] = nodeSlot;
 
@@ -304,19 +325,29 @@ function parseNodeInstance(
 
 function parseNodeClass(
   item: Class<Node>,
-  slots: QuerySlots
+  slots: QuerySlots,
+  parent?: NodelikeParent,
 ): NodeSlot {
   const slotName = `${item.name} (${randomString()})`;
 
   const existingSlot = slots.node[slotName];
 
-  const nodeSlot: NodeSlot = existingSlot ?? {
+  if (existingSlot !== undefined) {
+    return existingSlot;
+  }
+
+  const parentOptionalityContext = parent?.optionalityContext ?? null;
+
+  const nodeSlot: NodeSlot = {
     name: slotName,
     type: "node",
     constraints: {
       class: item,
     },
     outputKeys: [],
+    optionalityKeys: parentOptionalityContext !== null
+      ? new Set([parentOptionalityContext])
+      : null,
   };
 
   slots.node[slotName] = nodeSlot;
@@ -326,7 +357,8 @@ function parseNodeClass(
 
 function parseNodeQueryItem(
   item: NodeQueryItem,
-  slots: QuerySlots
+  slots: QuerySlots,
+  parent?: NodelikeParent,
 ): NodeSlot {
   const hasName = (
     "name" in item && item.name !== undefined
@@ -353,6 +385,10 @@ function parseNodeQueryItem(
     );
   }
 
+  const parentOptionalityContext = parent?.optionalityContext ?? null;
+  const newOptionalityContext = item.optionalityKey ?? parentOptionalityContext;
+
+
   let nodeSlot: NodeSlot;
 
   if (existingNodeSlot !== undefined) {
@@ -371,7 +407,30 @@ function parseNodeQueryItem(
         nodeSlot.constraints.excludedClassTypes.add(excludedClass);
       }
     }
+
+    if (nodeSlot.optionalityKeys !== null) {
+      if (parentOptionalityContext !== null) {
+        nodeSlot.optionalityKeys.add(parentOptionalityContext);
+      }
+
+      if (item.optionalityKey !== undefined) {
+        nodeSlot.optionalityKeys.add(item.optionalityKey);
+      }
+    }
   } else {
+    let optionalityKeys: Set<string> | null;
+    if (item.optionalityKey !== undefined) {
+      optionalityKeys = new Set([item.optionalityKey]);
+
+      if (parentOptionalityContext !== null) {
+        optionalityKeys.add(parentOptionalityContext);
+      }
+    } else if (parentOptionalityContext !== null) {
+      optionalityKeys = new Set([parentOptionalityContext]);
+    } else {
+      optionalityKeys = null;
+    }
+
     nodeSlot = {
       name: slotName,
       type: "node",
@@ -379,10 +438,9 @@ function parseNodeQueryItem(
         class: item.class,
       },
       outputKeys: [],
-      optionalityKeys: item.optionalityKey !== undefined
-      ? new Set([item.optionalityKey])
-      : null,
+      optionalityKeys,
     };
+
     slots.node[slotName] = nodeSlot;
 
     if (existingUnknownSlot !== undefined) {
@@ -402,7 +460,11 @@ function parseNodeQueryItem(
     parseEdgelike(
       withItem,
       slots,
-      { slot: nodeSlot, direction: "fromOrTo" }
+      {
+        slot: nodeSlot,
+        direction: "fromOrTo",
+        optionalityContext: newOptionalityContext,
+      }
     );
   }
 
@@ -418,6 +480,9 @@ function parseNodeQueryItem(
         }
       },
       outputKeys: [],
+      optionalityKeys: newOptionalityContext !== null
+        ? new Set([newOptionalityContext])
+        : null,
     };
 
     slots.edge[edgeSlotName] = edgeSlot;
@@ -427,7 +492,11 @@ function parseNodeQueryItem(
     parseNodelike(
       toItem,
       slots,
-      { slot: edgeSlot, direction: "to" }
+      {
+        slot: edgeSlot,
+        direction: "to",
+        optionalityContext: newOptionalityContext,
+      }
     );
   }
 
@@ -443,6 +512,9 @@ function parseNodeQueryItem(
         }
       },
       outputKeys: [],
+      optionalityKeys: newOptionalityContext !== null
+        ? new Set([newOptionalityContext])
+        : null,
     };
 
     slots.edge[edgeSlotName] = edgeSlot;
@@ -452,7 +524,11 @@ function parseNodeQueryItem(
     parseNodelike(
       fromItem,
       slots,
-      { slot: edgeSlot, direction: "from" }
+      {
+        slot: edgeSlot,
+        direction: "from",
+        optionalityContext: newOptionalityContext,
+      }
     );
   }
 
@@ -468,6 +544,9 @@ function parseNodeQueryItem(
         }
       },
       outputKeys: [],
+      optionalityKeys: newOptionalityContext !== null
+        ? new Set([newOptionalityContext])
+        : null,
     };
 
     slots.edge[edgeSlotName] = edgeSlot;
@@ -477,7 +556,11 @@ function parseNodeQueryItem(
     parseNodelike(
       fromOrToItem,
       slots,
-      { slot: edgeSlot, direction: "fromOrTo" }
+      {
+        slot: edgeSlot,
+        direction: "fromOrTo",
+        optionalityContext: newOptionalityContext,
+      }
     );
   }
 
@@ -487,21 +570,18 @@ function parseNodeQueryItem(
 export function parseEdgelike(
   item: Edgelike,
   slots: QuerySlots,
-  parent?: {
-    slot: NodeSlot,
-    direction: EdgeDirection,
-  }
+  parent?: EdgelikeParent,
 ): EdgeSlot {
   let edgeSlot: EdgeSlot;
 
   if (typeof item === "string") {
     edgeSlot = parseReferenceName(item, slots, parent) as EdgeSlot;
   } else if (item instanceof Edge) {
-    edgeSlot = parseEdgeInstance(item, slots);
+    edgeSlot = parseEdgeInstance(item, slots, parent);
   } else if (item instanceof EdgeQueryItem) {
-    edgeSlot = parseEdgeQueryItem(item, slots);
+    edgeSlot = parseEdgeQueryItem(item, slots, parent);
   } else {
-    edgeSlot = parseEdgeClass(item, slots);
+    edgeSlot = parseEdgeClass(item, slots, parent);
   }
 
   if (parent !== undefined) {
@@ -547,19 +627,29 @@ function inferParentDirection(
 
 function parseEdgeInstance(
   item: Edge,
-  slots: QuerySlots
+  slots: QuerySlots,
+  parent?: EdgelikeParent,
 ): EdgeSlot {
   const slotName = item.id;
 
   const existingSlot = slots.edge[slotName];
 
-  const edgeSlot: EdgeSlot = existingSlot ?? {
+  if (existingSlot !== undefined) {
+    return existingSlot;
+  }
+
+  const parentOptionalityContext = parent?.optionalityContext ?? null;
+
+  const edgeSlot: EdgeSlot = {
     name: slotName,
     type: "edge",
     constraints: {
       instance: item,
     },
     outputKeys: [],
+    optionalityKeys: parentOptionalityContext !== null
+      ? new Set([parentOptionalityContext])
+      : null,
   };
 
   slots.edge[slotName] = edgeSlot;
@@ -569,19 +659,29 @@ function parseEdgeInstance(
 
 function parseEdgeClass(
   item: Class<Edge>,
-  slots: QuerySlots
+  slots: QuerySlots,
+  parent?: EdgelikeParent,
 ): EdgeSlot {
   const slotName = `${item.name} (${randomString()})`;
 
   const existingSlot = slots.edge[slotName];
 
-  const edgeSlot: EdgeSlot = existingSlot ?? {
+  if (existingSlot !== undefined) {
+    return existingSlot;
+  }
+
+  const parentOptionalityContext = parent?.optionalityContext ?? null;
+
+  const edgeSlot: EdgeSlot = {
     name: slotName,
     type: "edge",
     constraints: {
       class: item,
     },
     outputKeys: [],
+    optionalityKeys: parentOptionalityContext !== null
+      ? new Set([parentOptionalityContext])
+      : null,
   };
 
   slots.edge[slotName] = edgeSlot;
@@ -591,7 +691,8 @@ function parseEdgeClass(
 
 function parseEdgeQueryItem(
   item: EdgeQueryItem,
-  slots: QuerySlots
+  slots: QuerySlots,
+  parent?: EdgelikeParent,
 ): EdgeSlot {
   const hasName = (
     "name" in item && item.name !== undefined
@@ -617,6 +718,9 @@ function parseEdgeQueryItem(
     );
   }
 
+  const parentOptionalityContext = parent?.optionalityContext ?? null;
+  const newOptionalityContext = item.optionalityKey ?? parentOptionalityContext;
+
   let edgeSlot: EdgeSlot;
 
   if (existingEdgeSlot !== undefined) {
@@ -635,7 +739,30 @@ function parseEdgeQueryItem(
         edgeSlot.constraints.excludedClassTypes.add(excludedClass);
       }
     }
+
+    if (edgeSlot.optionalityKeys !== null) {
+      if (parentOptionalityContext !== null) {
+        edgeSlot.optionalityKeys.add(parentOptionalityContext);
+      }
+
+      if (item.optionalityKey !== undefined) {
+        edgeSlot.optionalityKeys.add(item.optionalityKey);
+      }
+    }
   } else {
+    let optionalityKeys: Set<string> | null;
+    if (item.optionalityKey !== undefined) {
+      optionalityKeys = new Set([item.optionalityKey]);
+
+      if (parentOptionalityContext !== null) {
+        optionalityKeys.add(parentOptionalityContext);
+      }
+    } else if (parentOptionalityContext !== null) {
+      optionalityKeys = new Set([parentOptionalityContext]);
+    } else {
+      optionalityKeys = null;
+    }
+
     edgeSlot = {
       name: slotName,
       type: "edge",
@@ -643,6 +770,7 @@ function parseEdgeQueryItem(
         class: item.class,
       },
       outputKeys: [],
+      optionalityKeys,
     };
 
     slots.edge[slotName] = edgeSlot;
@@ -664,7 +792,11 @@ function parseEdgeQueryItem(
     parseNodelike(
       item.fromItem,
       slots,
-      { slot: edgeSlot, direction: "from" }
+      {
+        slot: edgeSlot,
+        direction: "from",
+        optionalityContext: newOptionalityContext,
+      }
     );
   }
 
@@ -672,7 +804,11 @@ function parseEdgeQueryItem(
     parseNodelike(
       item.toItem,
       slots,
-      { slot: edgeSlot, direction: "to" }
+      {
+        slot: edgeSlot,
+        direction: "to",
+        optionalityContext: newOptionalityContext,
+      }
     );
   }
 
@@ -680,7 +816,11 @@ function parseEdgeQueryItem(
     parseNodelike(
       fromOrToItems,
       slots,
-      { slot: edgeSlot, direction: "fromOrTo" }
+      {
+        slot: edgeSlot,
+        direction: "fromOrTo",
+        optionalityContext: newOptionalityContext,
+      }
     );
   }
 
