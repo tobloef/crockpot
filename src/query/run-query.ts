@@ -48,6 +48,14 @@ export function* runQuery<
 ): Generator<QueryOutput<Input>> {
   const slots = parseInput(input);
 
+  if (slotsHaveNoItems(slots)) {
+    throw new Error("Cannot query with empty input.");
+  }
+
+  if (slotsAreAllOptional(slots)) {
+    throw new Error("Cannot query with only optional items.");
+  }
+
   yield* runQueryBySlots(graph, slots);
 }
 
@@ -63,4 +71,20 @@ export function* runQueryBySlots<
   const deduplicatedOutputGenerator = deduplicateOutputs<Input>(rawOutputsGenerator);
 
   yield* deduplicatedOutputGenerator;
+}
+
+function slotsHaveNoItems(slots: QuerySlots): boolean {
+  return (
+    Object.keys(slots.node).length === 0 &&
+    Object.keys(slots.edge).length === 0 &&
+    Object.keys(slots.unknown).length === 0
+  )
+}
+
+function slotsAreAllOptional(slots: QuerySlots): boolean {
+  return (
+    Object.values(slots.node).every((s) => s.optionalityKeys !== null) &&
+    Object.values(slots.edge).every((s) => s.optionalityKeys !== null) &&
+    Object.values(slots.unknown).every((s) => s.optionalityKeys !== null)
+  )
 }
