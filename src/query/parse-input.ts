@@ -351,39 +351,42 @@ function parseNodeQueryItem(
     );
   }
 
-  const nodeSlot: NodeSlot = existingNodeSlot ?? {
-    name: slotName,
-    type: "node",
-    constraints: {},
-    outputKeys: [],
-  };
+  let nodeSlot: NodeSlot;
 
-  slots.node[slotName] = nodeSlot;
+  if (existingNodeSlot !== undefined) {
+    nodeSlot = existingNodeSlot;
 
-  nodeSlot.constraints.class = pickMostSpecificClass(
-    item.class,
-    existingNodeSlot?.constraints.class,
-  );
-
-  if (existingNodeSlot?.constraints.excludedClassTypes !== undefined) {
-    nodeSlot.constraints.excludedClassTypes = new Set(
-      existingNodeSlot.constraints.excludedClassTypes
-    );
-  }
-
-  if (item.excludedClassTypes !== undefined) {
-    nodeSlot.constraints.excludedClassTypes ??= new Set();
-    for (const excludedClass of item.excludedClassTypes) {
-      nodeSlot.constraints.excludedClassTypes.add(excludedClass);
+    if (item.class !== undefined) {
+      nodeSlot.constraints.class = pickMostSpecificClass(
+        item.class,
+        existingNodeSlot.constraints.class,
+      );
     }
-  }
 
-  if (existingUnknownSlot !== undefined) {
-    (nodeSlot.outputKeys as number[]).push(
-      ...existingUnknownSlot.outputKeys as number[]
-    );
+    if (item.excludedClassTypes !== undefined) {
+      nodeSlot.constraints.excludedClassTypes ??= new Set();
+      for (const excludedClass of item.excludedClassTypes) {
+        nodeSlot.constraints.excludedClassTypes.add(excludedClass);
+      }
+    }
+  } else {
+    nodeSlot = {
+      name: slotName,
+      type: "node",
+      constraints: {
+        class: item.class,
+      },
+      outputKeys: [],
+    };
+    slots.node[slotName] = nodeSlot;
 
-    delete slots.unknown[slotName];
+    if (existingUnknownSlot !== undefined) {
+      (nodeSlot.outputKeys as number[]).push(
+        ...existingUnknownSlot.outputKeys as (number[])
+      );
+
+      delete slots.unknown[slotName];
+    }
   }
 
   if (!hasRelations) {
@@ -609,39 +612,43 @@ function parseEdgeQueryItem(
     );
   }
 
-  const edgeSlot: EdgeSlot = existingEdgeSlot ?? {
-    name: slotName,
-    type: "edge",
-    constraints: {},
-    outputKeys: [],
-  };
+  let edgeSlot: EdgeSlot;
 
-  slots.edge[slotName] = edgeSlot;
+  if (existingEdgeSlot !== undefined) {
+    edgeSlot = existingEdgeSlot;
 
-  edgeSlot.constraints.class = pickMostSpecificClass(
-    item.class,
-    existingEdgeSlot?.constraints.class,
-  );
-
-  if (existingEdgeSlot?.constraints.excludedClassTypes !== undefined) {
-    edgeSlot.constraints.excludedClassTypes = new Set(
-      existingEdgeSlot.constraints.excludedClassTypes
-    );
-  }
-
-  if (item.excludedClassTypes !== undefined) {
-    edgeSlot.constraints.excludedClassTypes ??= new Set();
-    for (const excludedClass of item.excludedClassTypes) {
-      edgeSlot.constraints.excludedClassTypes.add(excludedClass);
+    if (item.class !== undefined) {
+      edgeSlot.constraints.class = pickMostSpecificClass(
+        item.class,
+        existingEdgeSlot.constraints.class,
+      );
     }
-  }
 
-  if (existingUnknownSlot !== undefined) {
-    (edgeSlot.outputKeys as number[]).push(
-      ...existingUnknownSlot.outputKeys as number[]
-    );
+    if (item.excludedClassTypes !== undefined) {
+      edgeSlot.constraints.excludedClassTypes ??= new Set();
+      for (const excludedClass of item.excludedClassTypes) {
+        edgeSlot.constraints.excludedClassTypes.add(excludedClass);
+      }
+    }
+  } else {
+    edgeSlot = {
+      name: slotName,
+      type: "edge",
+      constraints: {
+        class: item.class,
+      },
+      outputKeys: [],
+    };
 
-    delete slots.unknown[slotName];
+    slots.edge[slotName] = edgeSlot;
+
+    if (existingUnknownSlot !== undefined) {
+      (edgeSlot.outputKeys as number[]).push(
+        ...existingUnknownSlot.outputKeys as number[]
+      );
+
+      delete slots.unknown[slotName];
+    }
   }
 
   if (!hasRelations) {
