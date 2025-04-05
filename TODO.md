@@ -1,5 +1,3 @@
-- Make directions more intuitive
 - Boolean queries
   - Optional
   - Without
-- Refactor and optimize observers (see pg. 29 and 30 in yellow notebook)

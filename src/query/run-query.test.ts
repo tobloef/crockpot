@@ -23,6 +23,8 @@ class NodeB extends Node {
   }
 }
 
+class NodeC extends Node {}
+
 class ChildOfNodeA extends NodeA {}
 
 class EdgeA extends Edge {}
@@ -2240,6 +2242,107 @@ describe("runQuery", () => {
 
     deepStrictEqual(arrayResult, []);
     deepStrictEqual(objectResult, []);
+  });
+
+  it("Node edges can be implicitly optional", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new NodeA());
+    const node2 = graph.addNode(new NodeB(1));
+    const node3 = graph.addNode(new NodeA());
+
+    const edge1 = graph.addEdge({ from: node1, to: node2 });
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      NodeA.as("a"),
+      NodeB.from(Node.as("a").optional()),
+    ]);
+    const objectResult = runQuery(graph, {
+      a: NodeA.as("a"),
+      b: NodeB.from(Node.as("a").optional()),
+    });
+
+    // Assert
+    typesEqual<typeof arrayResult, [ NodeA, NodeB | undefined ][]>(true);
+    typesEqual<typeof objectResult, { a: NodeA, b: NodeB | undefined }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node1, node2 ],
+      [ node3, undefined ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { a: node1, b: node2 },
+      { a: node3, b: undefined },
+    ]);
+  });
+
+  it("Same slot can be part of multiple optionality groups", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const nodeC1 = graph.addNode(new NodeC());
+    const nodeC2 = graph.addNode(new NodeC());
+    const nodeC3 = graph.addNode(new NodeC());
+    const nodeC4 = graph.addNode(new NodeC());
+    const nodeC5 = graph.addNode(new NodeC());
+
+    const nodeA1 = graph.addNode(new NodeA());
+    const nodeA2 = graph.addNode(new NodeA());
+    const nodeA3 = graph.addNode(new NodeA());
+
+    const nodeB1 = graph.addNode(new NodeB(2));
+    const nodeB2 = graph.addNode(new NodeB(4));
+    const nodeB3 = graph.addNode(new NodeB(5));
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+    const node4 = graph.addNode(new Node());
+
+    const edge1 = graph.addEdge({ from: nodeA1, to: node1 });
+    const edge2 = graph.addEdge({ from: node1, to: nodeC1 });
+
+    const edge3 = graph.addEdge({ from: nodeB1, to: node2 });
+    const edge4 = graph.addEdge({ from: node2, to: nodeC2 });
+
+    const edge5 = graph.addEdge({ from: nodeA2, to: node3 });
+    const edge6 = graph.addEdge({ from: nodeB2, to: node3 });
+    const edge7 = graph.addEdge({ from: node3, to: nodeC3 });
+
+    const edge8 = graph.addEdge({ from: node4, to: nodeC4 });
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      NodeA.as("n1").optional("1").to(Node.as("n3").to("n4")),
+      NodeB.as("n2").optional("2").to(Node.as("n3").to("n4")),
+      NodeC.as("n4"),
+    ]).toArray();
+    const objectResult = runQuery(graph, {
+      n1: NodeA.as("n1").optional("1").to(Node.as("n3").to("n4")),
+      n2: NodeB.as("n2").optional("2").to(Node.as("n3").to("n4")),
+      n3: NodeC.as("n4"),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ NodeA | undefined, NodeB | undefined, NodeC | undefined ][]>(true);
+    typesEqual<typeof objectResult, { n1: NodeA | undefined, n2: NodeB | undefined, n3: NodeC | undefined }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ nodeA1, undefined, nodeC1 ],
+      [ undefined, nodeB1, nodeC2 ],
+      [ nodeA2, nodeB2, nodeC3 ],
+      [ undefined, undefined, nodeC4 ],
+      [ undefined, undefined, nodeC5 ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { n1: nodeA1, n2: undefined, n3: nodeC1 },
+      { n1: undefined, n2: nodeB1, n3: nodeC2 },
+      { n1: nodeA2, n2: nodeB2, n3: nodeC3 },
+      { n1: undefined, n2: undefined, n3: nodeC4 },
+      { n1: undefined, n2: undefined, n3: nodeC5 },
+    ]);
   });
 
   describe("Spaceship example", () => {
