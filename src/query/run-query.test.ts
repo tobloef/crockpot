@@ -1941,7 +1941,7 @@ describe("runQuery", () => {
     deepStrictEqual(objectResult, [ { n1: node1, edge: edge1 } ]);
   });
 
-  it("Finds nodes and optionally an edge to another node (A)", () => {
+  it("Finds nodes and optionally an edge to another node", () => {
     // Arrange
     const graph = new Graph();
 
@@ -1977,7 +1977,7 @@ describe("runQuery", () => {
     ]);
   });
 
-  it("Finds nodes and optionally an edge to another node (B)", () => {
+  it("Implicit references in output are still optional", () => {
     // Arrange
     const graph = new Graph();
 
@@ -2010,6 +2010,38 @@ describe("runQuery", () => {
       { n: node1, e: edge1 },
       { n: node2, e: undefined },
       { n: node3, e: undefined },
+    ]);
+  });
+
+  it("Explicit references in output are not optional", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+
+    const edge1 = graph.addEdge({ from: node1, to: node2 });
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      Node.as("n1").with(Edge.optional().from("n1").to("n2").as("e")),
+      Edge.as("e"),
+    ]).toArray();
+    const objectResult = runQuery(graph, {
+      n: Node.as("n1").with(Edge.optional().from("n1").to("n2").as("e")),
+      e: Edge.as("e"),
+    } as const).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node, Edge ][]>(true);
+    typesEqual<typeof objectResult, { n: Node, e: Edge }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node1, edge1 ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { n: node1, e: edge1 },
     ]);
   });
 
@@ -2160,19 +2192,19 @@ describe("runQuery", () => {
     const node9 = graph.addNode(new Node());
 
     const edge1 = graph.addEdge({ from: node1, to: node2 });
-    const edge2 = graph.addEdge({ from: node2, to: node3 });
+    const edge2 = graph.addEdge({ from: node3, to: node1 });
     const edge3 = graph.addEdge({ from: node4, to: node5 });
 
     // Act
     const arrayResult = runQuery(graph, [
       NodeA.as("a"),
       Node.optional("1").as("b").with(Edge.from("a")),
-      Node.optional("2").as("c").with(Edge.from("a")),
+      Node.optional("2").as("c").with(Edge.to("a")),
     ]).toArray();
     const objectResult = runQuery(graph, {
       a: NodeA.as("a"),
       b: Node.optional("1").as("b").with(Edge.from("a")),
-      c: Node.optional("2").as("c").with(Edge.from("a")),
+      c: Node.optional("2").as("c").with(Edge.to("a")),
     }).toArray();
 
     // Assert
@@ -2180,12 +2212,12 @@ describe("runQuery", () => {
     typesEqual<typeof objectResult, { a: NodeA, b: Node | undefined, c: Node | undefined }[]>(true);
 
     deepStrictEqual(arrayResult, [
-      [ node1, node2, undefined ],
+      [ node1, node2, node3 ],
       [ node4, node5, undefined ],
       [ node7, undefined, undefined ],
     ]);
     deepStrictEqual(objectResult, [
-      { a: node1, b: node2, c: undefined },
+      { a: node1, b: node2, c: node3 },
       { a: node4, b: node5, c: undefined },
       { a: node7, b: undefined, c: undefined },
     ]);
@@ -2242,40 +2274,6 @@ describe("runQuery", () => {
 
     deepStrictEqual(arrayResult, []);
     deepStrictEqual(objectResult, []);
-  });
-
-  it("Node edges can be implicitly optional", () => {
-    // Arrange
-    const graph = new Graph();
-
-    const node1 = graph.addNode(new NodeA());
-    const node2 = graph.addNode(new NodeB(1));
-    const node3 = graph.addNode(new NodeA());
-
-    const edge1 = graph.addEdge({ from: node1, to: node2 });
-
-    // Act
-    const arrayResult = runQuery(graph, [
-      NodeA.as("a"),
-      NodeB.from(Node.as("a").optional()),
-    ]).toArray();
-    const objectResult = runQuery(graph, {
-      a: NodeA.as("a"),
-      b: NodeB.from(Node.as("a").optional()),
-    }).toArray();
-
-    // Assert
-    typesEqual<typeof arrayResult, [ NodeA, NodeB ][]>(true);
-    typesEqual<typeof objectResult, { a: NodeA, b: NodeB }[]>(true);
-
-    deepStrictEqual(arrayResult, [
-      [ node1, node2 ],
-      [ node3, node2 ],
-    ]);
-    deepStrictEqual(objectResult, [
-      { a: node1, b: node2 },
-      { a: node3, b: node2 },
-    ]);
   });
 
   it("Same slot can be part of multiple optionality groups", () => {

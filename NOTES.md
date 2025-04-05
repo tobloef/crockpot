@@ -63,3 +63,5 @@ profile () {
   * Keep in mind that this can already be worked around today, by having the query return the items you want to work with (`[Node.to(Node.as("x")), "x"]`).
 
 * Slots could just be small indices instead of random strings. Then, for named slots, you have some kind of mapping in the context.
+
+* I almost always use `.with()` (check back in to see if this still holds true), so maybe the API can be made nicer if you assume this. 
