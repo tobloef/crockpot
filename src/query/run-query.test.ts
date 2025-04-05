@@ -1939,7 +1939,7 @@ describe("runQuery", () => {
     deepStrictEqual(objectResult, [ { n1: node1, edge: edge1 } ]);
   });
 
-  it("Finds nodes and optionally an edge to another node", () => {
+  it("Finds nodes and optionally an edge to another node (A)", () => {
     // Arrange
     const graph = new Graph();
 
@@ -1975,7 +1975,7 @@ describe("runQuery", () => {
     ]);
   });
 
-  it("Finds nodes and optionally an edge to another node", () => {
+  it("Finds nodes and optionally an edge to another node (B)", () => {
     // Arrange
     const graph = new Graph();
 
@@ -2009,6 +2009,237 @@ describe("runQuery", () => {
       { n: node2, e: undefined },
       { n: node3, e: undefined },
     ]);
+  });
+
+  it("Finds node and optionally another related node (verbose)", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new NodeA());
+    const node2 = graph.addNode(new NodeA());
+    const node3 = graph.addNode(new Node());
+
+    const edge1 = graph.addEdge({ from: node2, to: node3 });
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      NodeA.as("n1"),
+      Node.optional().as("n2").with(Edge.optional().from("n1")),
+    ]).toArray();
+    const objectResult = runQuery(graph, {
+      n1: NodeA.as("n1"),
+      n2: Node.optional().as("n2").with(Edge.optional().from("n1")),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ NodeA, Node | undefined ][]>(true);
+    typesEqual<typeof objectResult, { n1: NodeA, n2: Node | undefined }[]>(true);
+
+    deepStrictEqual(arrayResult, [ [ node1, undefined ], [ node2, node3 ] ]);
+    deepStrictEqual(objectResult, [ { n1: node1, n2: undefined }, { n1: node2, n2: node3 } ]);
+  });
+
+  it("Finds node and optionally another related node (shorthand)", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new NodeA());
+    const node2 = graph.addNode(new NodeA());
+    const node3 = graph.addNode(new Node());
+
+    const edge1 = graph.addEdge({ from: node2, to: node3 });
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      NodeA.as("n1"),
+      Node.optional().as("n2").with(Edge.from("n1")),
+    ]).toArray();
+    const objectResult = runQuery(graph, {
+      n1: NodeA.as("n1"),
+      n2: Node.optional().as("n2").with(Edge.from("n1")),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ NodeA, Node | undefined ][]>(true);
+    typesEqual<typeof objectResult, { n1: NodeA, n2: Node | undefined }[]>(true);
+
+    deepStrictEqual(arrayResult, [ [ node1, undefined ], [ node2, node3 ] ]);
+    deepStrictEqual(objectResult, [ { n1: node1, n2: undefined }, { n1: node2, n2: node3 } ]);
+  });
+
+  it("Finds nodes and an optional edge between them", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new NodeA());
+    const node2 = graph.addNode(new NodeA());
+    const node3 = graph.addNode(new NodeB(123));
+
+    const edge1 = graph.addEdge({ from: node1, to: node3 });
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      NodeA.as("n1"),
+      NodeB.as("n2"),
+      Edge.optional().from("n1").to("n2"),
+    ]).toArray();
+    const objectResult = runQuery(graph, {
+      n1: NodeA.as("n1"),
+      n2: NodeB.as("n2"),
+      edge: Edge.optional().from("n1").to("n2"),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ NodeA, NodeB, Edge | undefined ][]>(true);
+    typesEqual<typeof objectResult, { n1: NodeA, n2: NodeB, edge: Edge | undefined }[]>(true);
+
+    deepStrictEqual(arrayResult, [ [ node1, node3, edge1 ], [ node2, node3, undefined ] ]);
+    deepStrictEqual(objectResult, [ { n1: node1, n2: node3, edge: edge1 }, { n1: node2, n2: node3, edge: undefined } ]);
+  });
+
+  it("Optionally finds nodes in same optionality groups", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new NodeA());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+    const node4 = graph.addNode(new NodeA());
+    const node5 = graph.addNode(new Node());
+    const node6 = graph.addNode(new Node());
+    const node7 = graph.addNode(new NodeA());
+    const node8 = graph.addNode(new Node());
+    const node9 = graph.addNode(new Node());
+
+    const edge1 = graph.addEdge({ from: node1, to: node2 });
+    const edge2 = graph.addEdge({ from: node1, to: node3 });
+    const edge3 = graph.addEdge({ from: node4, to: node5 });
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      NodeA.as("a"),
+      Node.optional().as("b").with(Edge.from("a")),
+      Node.optional().as("c").with(Edge.from("a")),
+    ]).toArray();
+    const objectResult = runQuery(graph, {
+      a: NodeA.as("a"),
+      b: Node.optional().as("b").with(Edge.from("a")),
+      c: Node.optional().as("c").with(Edge.from("a")),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ NodeA, Node | undefined, Node | undefined ][]>(true);
+    typesEqual<typeof objectResult, { a: NodeA, b: Node | undefined, c: Node | undefined }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node1, node2, node3 ],
+      [ node4, undefined, undefined ],
+      [ node7, undefined, undefined ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { a: node1, b: node2, c: node3 },
+      { a: node4, b: undefined, c: undefined },
+      { a: node7, b: undefined, c: undefined },
+    ]);
+  });
+
+  it("Optionally finds nodes in different optionality groups", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new NodeA());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
+    const node4 = graph.addNode(new NodeA());
+    const node5 = graph.addNode(new Node());
+    const node6 = graph.addNode(new Node());
+    const node7 = graph.addNode(new NodeA());
+    const node8 = graph.addNode(new Node());
+    const node9 = graph.addNode(new Node());
+
+    const edge1 = graph.addEdge({ from: node1, to: node2 });
+    const edge2 = graph.addEdge({ from: node2, to: node3 });
+    const edge3 = graph.addEdge({ from: node4, to: node5 });
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      NodeA.as("a"),
+      Node.optional("1").as("b").with(Edge.from("a")),
+      Node.optional("2").as("c").with(Edge.from("a")),
+    ]).toArray();
+    const objectResult = runQuery(graph, {
+      a: NodeA.as("a"),
+      b: Node.optional("1").as("b").with(Edge.from("a")),
+      c: Node.optional("2").as("c").with(Edge.from("a")),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ NodeA, Node | undefined, Node | undefined ][]>(true);
+    typesEqual<typeof objectResult, { a: NodeA, b: Node | undefined, c: Node | undefined }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node1, node2, undefined ],
+      [ node4, node5, undefined ],
+      [ node7, undefined, undefined ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { a: node1, b: node2, c: undefined },
+      { a: node4, b: node5, c: undefined },
+      { a: node7, b: undefined, c: undefined },
+    ]);
+  });
+
+  it("Returns normal results when everything is optional and there are matches", () => {
+    // Arrange
+    const graph = new Graph();
+
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      Node.optional(),
+      Node.optional(),
+    ]).toArray();
+    const objectResult = runQuery(graph, {
+      a: Node.optional(),
+      b: Node.optional(),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node | undefined, Node | undefined ][]>(true);
+    typesEqual<typeof objectResult, { a: Node | undefined, b: Node | undefined }[]>(true);
+
+    deepStrictEqual(arrayResult, [
+      [ node1, node2 ],
+      [ node2, node1 ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { a: node1, b: node2 },
+      { a: node2, b: node1 },
+    ]);
+  });
+
+  it("Returns no results when everything is optional and there are no matches", () => {
+    // Arrange
+    const graph = new Graph();
+
+    // Act
+    const arrayResult = runQuery(graph, [
+      Node.optional(),
+      Node.optional(),
+    ]).toArray();
+    const objectResult = runQuery(graph, {
+      a: Node.optional(),
+      b: Node.optional(),
+    }).toArray();
+
+    // Assert
+    typesEqual<typeof arrayResult, [ Node | undefined, Node | undefined ][]>(true);
+    typesEqual<typeof objectResult, { a: Node | undefined, b: Node | undefined }[]>(true);
+
+    deepStrictEqual(arrayResult, []);
+    deepStrictEqual(objectResult, []);
   });
 
   describe("Spaceship example", () => {
