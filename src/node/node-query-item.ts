@@ -24,7 +24,7 @@ export class NodeQueryItem<
   toItems?: ToItems;
   fromItems?: FromItems;
   fromOrToItems?: FromOrToItems;
-  excludedClassTypes?: Class<Node>[];
+  excludedClassTypes?: Set<Class<Node>>;
   optionalityKey?: string;
 
   constructor(params: {
@@ -34,7 +34,7 @@ export class NodeQueryItem<
     toItems?: ToItems,
     fromItems?: FromItems,
     fromOrToItems?: FromOrToItems,
-    excludedClassTypes?: Class<Node>[],
+    excludedClassTypes?: Set<Class<Node>>,
     optionalityKey?: string,
   }) {
     this.class = params.class;
@@ -52,7 +52,7 @@ export class NodeQueryItem<
   ) {
     return new NodeQueryItem<ClassType>({
       ...this,
-      excludedClassTypes,
+      excludedClassTypes: new Set(excludedClassTypes),
     });
   }
 

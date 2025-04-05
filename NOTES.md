@@ -61,3 +61,5 @@ profile () {
 
 * After you have queried, you still need to check for the existence of the edges when working with the fetched node. This is natural in with the class-based approach, as we cannot guarantee that the reference has not been changed after the query was run. But in a data-oriented approach, the returned result would not have references and would just contain the data directly. You might want to make the distinction between `where` and `with` in such a case, to not fetch data you just want to filter on.
   * Keep in mind that this can already be worked around today, by having the query return the items you want to work with (`[Node.to(Node.as("x")), "x"]`).
+
+* Slots could just be small indices instead of random strings. Then, for named slots, you have some kind of mapping in the context.

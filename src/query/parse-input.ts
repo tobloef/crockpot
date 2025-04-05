@@ -436,6 +436,7 @@ function parseNodeQueryItem(
       type: "node",
       constraints: {
         class: item.class,
+        excludedClassTypes: item.excludedClassTypes,
       },
       outputKeys: [],
       optionalityKeys,
@@ -768,6 +769,7 @@ function parseEdgeQueryItem(
       type: "edge",
       constraints: {
         class: item.class,
+        excludedClassTypes: item.excludedClassTypes,
       },
       outputKeys: [],
       optionalityKeys,

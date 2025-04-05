@@ -48,7 +48,7 @@ export class Node {
       boolean
     >({
       class: this,
-      excludedClassTypes,
+      excludedClassTypes: new Set(excludedClassTypes),
     });
   }
 

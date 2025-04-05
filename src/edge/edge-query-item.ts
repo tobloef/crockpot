@@ -21,7 +21,7 @@ export class EdgeQueryItem<
   toItem?: ToItem;
   fromItem?: FromItem;
   fromOrToItems?: FromOrToItems;
-  excludedClassTypes?: Class<Edge>[];
+  excludedClassTypes?: Set<Class<Edge>>;
   optionalityKey?: string;
 
   constructor(params: {
@@ -30,7 +30,7 @@ export class EdgeQueryItem<
     toItem?: ToItem,
     fromItem?: FromItem,
     fromOrToItems?: FromOrToItems,
-    excludedClassTypes?: Class<Edge>[],
+    excludedClassTypes?: Set<Class<Edge>>,
     optionalityKey?: string,
   }) {
     this.class = params.class;
@@ -54,7 +54,7 @@ export class EdgeQueryItem<
       IsOptional
     >({
       ...this,
-      excludedClassTypes,
+      excludedClassTypes: new Set(excludedClassTypes),
     });
   }
 

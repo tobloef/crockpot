@@ -41,7 +41,7 @@ export class Edge {
 			boolean
 		>({
 			class: this,
-			excludedClassTypes,
+			excludedClassTypes: new Set(excludedClassTypes),
 		});
 	}
 
