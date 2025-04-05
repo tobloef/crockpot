@@ -51,6 +51,7 @@ export type NodeSlot = {
     },
   },
   outputKeys: string[] | number[],
+  optionalityKeys: Set<string> | null,
 };
 
 export type EdgeSlot = {
@@ -68,6 +69,7 @@ export type EdgeSlot = {
     }
   },
   outputKeys: string[] | number[],
+  optionalityGroups: Set<string> | null,
 };
 
 export type UnknownSlot = {
@@ -377,6 +379,9 @@ function parseNodeQueryItem(
         class: item.class,
       },
       outputKeys: [],
+      optionalityKeys: item.optionalityKey !== undefined
+      ? new Set([item.optionalityKey])
+      : null,
     };
     slots.node[slotName] = nodeSlot;
 
