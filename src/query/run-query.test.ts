@@ -2258,23 +2258,23 @@ describe("runQuery", () => {
     const arrayResult = runQuery(graph, [
       NodeA.as("a"),
       NodeB.from(Node.as("a").optional()),
-    ]);
+    ]).toArray();
     const objectResult = runQuery(graph, {
       a: NodeA.as("a"),
       b: NodeB.from(Node.as("a").optional()),
-    });
+    }).toArray();
 
     // Assert
-    typesEqual<typeof arrayResult, [ NodeA, NodeB | undefined ][]>(true);
-    typesEqual<typeof objectResult, { a: NodeA, b: NodeB | undefined }[]>(true);
+    typesEqual<typeof arrayResult, [ NodeA, NodeB ][]>(true);
+    typesEqual<typeof objectResult, { a: NodeA, b: NodeB }[]>(true);
 
     deepStrictEqual(arrayResult, [
       [ node1, node2 ],
-      [ node3, undefined ],
+      [ node3, node2 ],
     ]);
     deepStrictEqual(objectResult, [
       { a: node1, b: node2 },
-      { a: node3, b: undefined },
+      { a: node3, b: node2 },
     ]);
   });
 
@@ -2326,8 +2326,8 @@ describe("runQuery", () => {
     }).toArray();
 
     // Assert
-    typesEqual<typeof arrayResult, [ NodeA | undefined, NodeB | undefined, NodeC | undefined ][]>(true);
-    typesEqual<typeof objectResult, { n1: NodeA | undefined, n2: NodeB | undefined, n3: NodeC | undefined }[]>(true);
+    typesEqual<typeof arrayResult, [ NodeA | undefined, NodeB | undefined, NodeC ][]>(true);
+    typesEqual<typeof objectResult, { n1: NodeA | undefined, n2: NodeB | undefined, n3: NodeC }[]>(true);
 
     deepStrictEqual(arrayResult, [
       [ nodeA1, undefined, nodeC1 ],
