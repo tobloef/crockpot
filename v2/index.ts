@@ -71,7 +71,7 @@ query()
 	.match(
 		GlobalTransform("global")
 			.with(IsGlobalOf, to, LocalTransform("local"))
-			.optionally.with(IsParentOf, from, LocalTransform)
+			.maybe.with(IsParentOf, from, LocalTransform)
 			.with(IsGlobalOf, from, GlobalTransform("parentGlobal"))
 	)
 	.return("local", "global", "parentGlobal");
@@ -121,6 +121,15 @@ query()
 	)
 	.return("local", "global", "parentGlobal");
 
+query()
+	.match(
+		GlobalTransform.as("global")
+			.with(IsGlobalOf, to, LocalTransform.as("local"))
+			.withOptional(IsParentOf, from, LocalTransform)
+			.with(IsGlobalOf, from, GlobalTransform.as("parentGlobal"))
+	)
+	.return("local", "global", "parentGlobal");
+
 // Velocity example
 
 query()
@@ -150,8 +159,8 @@ query()
 query()
 	.match(
 		Node.toAll(
-			Position("pos"),
-			Velocity("vel"),
+			Position.as("pos"),
+			Velocity.as("vel"),
 		)
 	).return("pos", "vel");
 
@@ -163,3 +172,25 @@ query()
 		)
 	).return("pos", "vel");
 `;
+
+/*
+Takeaways:
+
+ I don't like the `.maybe.foo()` syntax. Just use `.maybeFoo()`.
+
+ Similarly, the `Node("name")` syntax also has poor discoverability.
+
+ The `.with(edge, direction, node)` syntax is really nice, actually.
+
+ I like `.withOptional()` more than `.maybeWith()`, it reads nicer together with the `.with()`.
+
+ Just keep it simple and use `.withAll()` instead of overloading `.with()`.
+
+ I don't know what to think of having multiple match/optional terms yet.
+ On the one hand, it is a little easier to reason about. You can just kinda declare
+ "I have this thing, this thing and this thing, and they are related in these ways",
+ without having to think much about the order.
+ On the other hand, it creates the potential for creating disjoint queries.
+ You would have to check at parse-time if that was the case, and reject the query if so.
+ Assuming that you don't want to deal with disjoint query parts of course.
+ */
