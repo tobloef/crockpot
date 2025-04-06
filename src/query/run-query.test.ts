@@ -2105,30 +2105,44 @@ describe("runQuery", () => {
     // Arrange
     const graph = new Graph();
 
-    const node1 = graph.addNode(new NodeA());
-    const node2 = graph.addNode(new NodeA());
-    const node3 = graph.addNode(new NodeB(123));
+    const node1 = graph.addNode(new Node());
+    const node2 = graph.addNode(new Node());
+    const node3 = graph.addNode(new Node());
 
     const edge1 = graph.addEdge({ from: node1, to: node3 });
 
     // Act
     const arrayResult = runQuery(graph, [
-      NodeA.as("n1"),
-      NodeB.as("n2"),
+      Node.as("n1"),
+      Node.as("n2"),
       Edge.optional().from("n1").to("n2"),
     ]).toArray();
     const objectResult = runQuery(graph, {
-      n1: NodeA.as("n1"),
-      n2: NodeB.as("n2"),
+      n1: Node.as("n1"),
+      n2: Node.as("n2"),
       edge: Edge.optional().from("n1").to("n2"),
     }).toArray();
 
     // Assert
-    typesEqual<typeof arrayResult, [ NodeA, NodeB, Edge | undefined ][]>(true);
-    typesEqual<typeof objectResult, { n1: NodeA, n2: NodeB, edge: Edge | undefined }[]>(true);
+    typesEqual<typeof arrayResult, [ Node, Node, Edge | undefined ][]>(true);
+    typesEqual<typeof objectResult, { n1: Node, n2: Node, edge: Edge | undefined }[]>(true);
 
-    deepStrictEqual(arrayResult, [ [ node1, node3, edge1 ], [ node2, node3, undefined ] ]);
-    deepStrictEqual(objectResult, [ { n1: node1, n2: node3, edge: edge1 }, { n1: node2, n2: node3, edge: undefined } ]);
+    deepStrictEqual(arrayResult, [
+      [ node1, node2, undefined ],
+      [ node1, node3, edge1 ],
+      [ node2, node1, undefined ],
+      [ node2, node3, undefined ],
+      [ node3, node1, undefined ],
+      [ node3, node2, undefined ],
+    ]);
+    deepStrictEqual(objectResult, [
+      { n1: node1, n2: node2, edge: undefined },
+      { n1: node1, n2: node3, edge: edge1 },
+      { n1: node2, n2: node1, edge: undefined },
+      { n1: node2, n2: node3, edge: undefined },
+      { n1: node3, n2: node1, edge: undefined },
+      { n1: node3, n2: node2, edge: undefined },
+    ]);
   });
 
   it("Optionally finds nodes in same optionality groups", () => {
