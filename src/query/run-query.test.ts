@@ -2399,17 +2399,18 @@ describe("runQuery", () => {
       const { deathStar, bountyShip } = setupSpaceships(graph);
 
       // Act
-      const singleResult = runQuery(graph,
-        Spaceship.with(
-          IsIn.to(
-            Faction.as("faction")
-          ),
+      const singleResult2 = runQuery(graph,
+        Spaceship.as("ship").with(
           Docked.to(
             Planet.with(
               RuledBy.to(
                 Faction.with(
                   Allied.to(
-                    Faction.as("faction")
+                    Faction.with(
+                      IsIn.from(
+                        "ship"
+                      )
+                    )
                   )
                 )
               )
@@ -2419,9 +2420,9 @@ describe("runQuery", () => {
       ).toArray();
 
       // Assert
-      typesEqual<typeof singleResult, Spaceship[]>(true);
+      typesEqual<typeof singleResult2, Spaceship[]>(true);
 
-      deepStrictEqual(singleResult, [ bountyShip, deathStar ]);
+      deepStrictEqual(singleResult2, [ deathStar, bountyShip ]);
     });
 
     it("Short but vague version", () => {
