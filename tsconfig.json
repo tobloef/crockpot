@@ -18,9 +18,11 @@
   "exclude": [
     "node_modules",
     "**/*.d.ts",
-    "src/**/*.test.ts"
+    "src/**/*.test.ts",
+    "v2/**/*.test.ts"
   ],
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "v2/**/*.ts"
   ]
 }
