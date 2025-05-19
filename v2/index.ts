@@ -1,23 +1,23 @@
 // noinspection JSUnresolvedReference
 // language=JavaScript
 `
-// Spaceship example
+	// Spaceship example
 
-query()
-	.match(
-		Spaceship("ship")
-			.with(Docked)
-			.to(Planet)
-			.with(RuledBy)
-			.to(Faction)
-			.with(Allied)
-			.to(Faction)
-			.with(IsIn)
-			.from("ship")
-	)
-	.return("ship");
+	query()
+		.match(
+			Spaceship("ship")
+				.with(Docked)
+				.to(Planet)
+				.with(RuledBy)
+				.to(Faction)
+				.with(Allied)
+				.to(Faction)
+				.with(IsIn)
+				.from("ship")
+		)
+		.return("ship");
 
-query()
+	query()
 		.match(Spaceship("ship"))
 		.with(Docked)
 		.to(Planet)
@@ -29,148 +29,148 @@ query()
 		.from("ship")
 		.return("ship");
 
-query()
-	.match(
-		Spaceship("ship"),
-		has(Docked),
-		to(Planet),
-		has(RuledBy),
-		to(Faction),
-		has(Allied),
-		to(Faction),
-		has(IsIn),
-		from("ship"),
-	)
-	.return("ship");
+	query()
+		.match(
+			Spaceship("ship"),
+			has(Docked),
+			to(Planet),
+			has(RuledBy),
+			to(Faction),
+			has(Allied),
+			to(Faction),
+			has(IsIn),
+			from("ship"),
+		)
+		.return("ship");
 
-query()
-	.match(
-		Spaceship("ship")
-			.with(Docked, to, Planet)
-			.with(RuledBy, to, Faction)
-			.with(Allied, to, Faction)
-			.with(IsIn, from, "ship")
-	)
-	.return("ship");
+	query()
+		.match(
+			Spaceship("ship")
+				.with(Docked, to, Planet)
+				.with(RuledBy, to, Faction)
+				.with(Allied, to, Faction)
+				.with(IsIn, from, "ship")
+		)
+		.return("ship");
 
-// Global transforms example
+	// Global transforms example
 
-query()
-	.match(
-		GlobalTransform("global")
-			.with(IsGlobalOf)
-			.to(LocalTransform("local"))
-			.maybe.with(IsParentOf)
-			.from(LocalTransform)
-			.with(IsGlobalOf)
-			.from(GlobalTransform("parentGlobal"))
-	)
-	.return("local", "global", "parentGlobal");
+	query()
+		.match(
+			GlobalTransform("global")
+				.with(IsGlobalOf)
+				.to(LocalTransform("local"))
+				.maybe.with(IsParentOf)
+				.from(LocalTransform)
+				.with(IsGlobalOf)
+				.from(GlobalTransform("parentGlobal"))
+		)
+		.return("local", "global", "parentGlobal");
 
-query()
-	.match(
-		GlobalTransform("global")
-			.with(IsGlobalOf, to, LocalTransform("local"))
-			.maybe.with(IsParentOf, from, LocalTransform)
-			.with(IsGlobalOf, from, GlobalTransform("parentGlobal"))
-	)
-	.return("local", "global", "parentGlobal");
+	query()
+		.match(
+			GlobalTransform("global")
+				.with(IsGlobalOf, to, LocalTransform("local"))
+				.maybe.with(IsParentOf, from, LocalTransform)
+				.with(IsGlobalOf, from, GlobalTransform("parentGlobal"))
+		)
+		.return("local", "global", "parentGlobal");
 
-query()
-	.match(
-		LocalTransform("local"),
-		GlobalTransform("global")
-			.with(IsGlobalOf, to, "local"),
-		optional(
+	query()
+		.match(
+			LocalTransform("local"),
+			GlobalTransform("global")
+				.with(IsGlobalOf, to, "local"),
+			optional(
+				GlobalTransform("parentGlobal")
+					.with(IsGlobalOf, to, LocalTransform)
+					.with(IsParentOf, to, "local")
+			)
+		)
+		.return("local", "global", "parentGlobal");
+
+	query()
+		.match(
+			LocalTransform("local"),
+			GlobalTransform("global").with(IsGlobalOf, to, "local"),
+			optional(
+				LocalTransform("parentLocal").with(IsParentOf, to, "local"),
+				GlobalTransform("parentGlobal").with(IsGlobalOf, to, "parentLocal"),
+			),
+		)
+		.return("local", "global", "parentGlobal");
+
+	query()
+		.match(
+			LocalTransform("local"),
+			GlobalTransform("global").with(IsGlobalOf, to, "local"),
+			optional(LocalTransform("parentLocal").with(IsParentOf, to, "local")),
+			optional(GlobalTransform("parentGlobal").with(IsGlobalOf, to, "parentLocal")),
+		)
+		.return("local", "global", "parentGlobal");
+
+	query()
+		.match(
+			LocalTransform("local")
+				.with(IsGlobalOf, from, GlobalTransform("global"))
+		)
+		.optional(
 			GlobalTransform("parentGlobal")
 				.with(IsGlobalOf, to, LocalTransform)
 				.with(IsParentOf, to, "local")
 		)
-	)
-	.return("local", "global", "parentGlobal");
+		.return("local", "global", "parentGlobal");
 
-query()
-	.match(
-		LocalTransform("local"),
-		GlobalTransform("global").with(IsGlobalOf, to, "local"),
-		optional(
-			LocalTransform("parentLocal").with(IsParentOf, to, "local"),
-			GlobalTransform("parentGlobal").with(IsGlobalOf, to, "parentLocal"),
-		),
-	)
-	.return("local", "global", "parentGlobal");
-
-query()
-	.match(
-		LocalTransform("local"),
-		GlobalTransform("global").with(IsGlobalOf, to, "local"),
-		optional(LocalTransform("parentLocal").with(IsParentOf, to, "local")),
-		optional(GlobalTransform("parentGlobal").with(IsGlobalOf, to, "parentLocal")),
-	)
-	.return("local", "global", "parentGlobal");
-
-query()
-	.match(
-		LocalTransform("local")
-			.with(IsGlobalOf, from, GlobalTransform("global"))
-	)
-	.optional(
-		GlobalTransform("parentGlobal")
-			.with(IsGlobalOf, to, LocalTransform)
-			.with(IsParentOf, to, "local")
-	)
-	.return("local", "global", "parentGlobal");
-
-query()
-	.match(
-		GlobalTransform.as("global")
-			.with(IsGlobalOf, to, LocalTransform.as("local"))
-			.withOptional(IsParentOf, from, LocalTransform)
-			.with(IsGlobalOf, from, GlobalTransform.as("parentGlobal"))
-	)
-	.return("local", "global", "parentGlobal");
-
-// Velocity example
-
-query()
-	.match(
-		Node.withAll(
-			Edge.to(Position("pos")),
-			Edge.to(Velocity("vel")),
+	query()
+		.match(
+			GlobalTransform.as("global")
+				.with(IsGlobalOf, to, LocalTransform.as("local"))
+				.withOptional(IsParentOf, from, LocalTransform)
+				.with(IsGlobalOf, from, GlobalTransform.as("parentGlobal"))
 		)
-	).return("pos", "vel");
+		.return("local", "global", "parentGlobal");
 
-query()
-	.match(
-		Node.withAll(
-			[Edge, to, Position("pos")],
-			[Edge, to, Velocity("vel")],
-		)
-	).return("pos", "vel");
+	// Velocity example
 
-query()
-	.match(
-		Node.with(
-			[Edge, to, Position("pos")],
-			[Edge, to, Velocity("vel")],
-		)
-	).return("pos", "vel");
+	query()
+		.match(
+			Node.withAll(
+				Edge.to(Position("pos")),
+				Edge.to(Velocity("vel")),
+			)
+		).return("pos", "vel");
 
-query()
-	.match(
-		Node.toAll(
-			Position.as("pos"),
-			Velocity.as("vel"),
-		)
-	).return("pos", "vel");
+	query()
+		.match(
+			Node.withAll(
+				[ Edge, to, Position("pos") ],
+				[ Edge, to, Velocity("vel") ],
+			)
+		).return("pos", "vel");
 
-query()
-	.match(
-		Node.to(
-			Position("pos"),
-			Velocity("vel"),
-		)
-	).return("pos", "vel");
+	query()
+		.match(
+			Node.with(
+				[ Edge, to, Position("pos") ],
+				[ Edge, to, Velocity("vel") ],
+			)
+		).return("pos", "vel");
+
+	query()
+		.match(
+			Node.toAll(
+				Position.as("pos"),
+				Velocity.as("vel"),
+			)
+		).return("pos", "vel");
+
+	query()
+		.match(
+			Node.to(
+				Position("pos"),
+				Velocity("vel"),
+			)
+		).return("pos", "vel");
 `;
 
 /*
@@ -194,3 +194,25 @@ Takeaways:
  You would have to check at parse-time if that was the case, and reject the query if so.
  Assuming that you don't want to deal with disjoint query parts of course.
  */
+
+graph
+	.match(
+		Spaceship.as("ship")
+			.with(Docked).to(Planet.as("planet"))
+			.with(RuledBy).from(Faction.as("faction"))
+			.withAll(
+				Allied.as("allied").to(Faction.as("faction")),
+				IsIn.as("isIn"),
+			),
+	);
+
+graph
+	.match(
+		Spaceship.as("ship")
+			.with(Docked.to(Planet.as("planet")))
+			.with(RuledBy.from(Faction.as("faction")))
+			.withAll(
+				Allied.as("allied").to(Faction.as("faction")),
+				IsIn.as("isIn"),
+			),
+	);
