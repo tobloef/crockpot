@@ -70,7 +70,7 @@ profile () {
 
 
 
-```typescript
+```js
 graph
 	.query(
 		Node("n"),
@@ -107,14 +107,14 @@ graph
 	.return("local", "global", "parentGlobal");
 ```
 
-```typescript
+```js
 graph
 	.query(
 		Node.as("n"),
 		Position.as("pos"),
 		Velocity.as("vel"),
-		Edge.as("n", "pos"),
-		Edge.as("n", "vel"),
+		Edge.from("n").to("pos"),
+		Edge.from("n").to("vel"),
 	)
 	.return("pos", "vel");
 
@@ -124,9 +124,9 @@ graph
 		Planet.as("planet"),
 		Faction.as("ship owners"),
 		Faction.as("planet rulers"),
-		OwnedBy.as("ship", "ship owners"),
-		RuledBy.as("planet", "planet rulers"),
-		Allied.as("planet rulers", "ship owners"),
+		OwnedBy.from("ship").to("ship owners"),
+		RuledBy.from("planet").to("planet rulers"),
+		Allied.from("planet ruler").to("ship owners"),
 	)
 	.return("ship");
 
@@ -134,48 +134,11 @@ graph
 	.query(
 		LocalTransform.as("local"),
 		GlobalTransform.as("global"),
-		IsGlobalOf.as("global", "local"),
+		IsGlobalOf.from("global").to("local"),
 		optional(
 			GlobalTransform.as("parentGlobal"),
 			LocalTransform.as("parentLocal"),
-			IsParentOf.as("parentLocal", "local"),
-		)
-	)
-	.return("local", "global", "parentGlobal");
-```
-
-```typescript
-graph
-	.query(
-		Node.as("n"),
-		Position.as("pos"),
-		Velocity.as("vel"),
-		Edge.as("n", "pos"),
-		Edge.as("n", "vel"),
-	)
-	.return("pos", "vel");
-
-graph
-	.query(
-		Spaceship.as("ship"),
-		Planet.as("planet"),
-		Faction.as("ship owners"),
-		Faction.as("planet rulers"),
-		OwnedBy.as("ship", "ship owners"),
-		RuledBy.as("planet", "planet rulers"),
-		Allied.as("planet rulers", "ship owners"),
-	)
-	.return("ship");
-
-graph
-	.query(
-		LocalTransform.as("local"),
-		GlobalTransform.as("global"),
-		IsGlobalOf.as("global", "local"),
-		optional(
-			GlobalTransform.as("parentGlobal"),
-			LocalTransform.as("parentLocal"),
-			IsParentOf.as("parentLocal", "local"),
+			IsParentOf.from("parentLocal").to("local"),
 		)
 	)
 	.return("local", "global", "parentGlobal");

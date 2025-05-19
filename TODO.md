@@ -1,4 +1,5 @@
 - Boolean queries
+  - All (useful for grouping, even though it's default)
   - AnyOf
   - Optional
   - Without
