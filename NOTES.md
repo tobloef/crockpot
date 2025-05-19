@@ -65,3 +65,118 @@ profile () {
 * Slots could just be small indices instead of random strings. Then, for named slots, you have some kind of mapping in the context.
 
 * I almost always use `.with()` (check back in to see if this still holds true), so maybe the API can be made nicer if you assume this. 
+
+## Sketchpads
+
+
+
+```typescript
+graph
+	.query(
+		Node("n"),
+		Position("pos"),
+		Velocity("vel"),
+		Edge("n", "pos"),
+		Edge("n", "vel"),
+	)
+	.return("pos", "vel");
+
+graph
+	.query(
+		Spaceship("ship"),
+		Planet("planet"),
+		Faction("ship owners"),
+		Faction("planet rulers"),
+		OwnedBy("ship", "ship owners"),
+		RuledBy("planet", "planet rulers"),
+		Allied("planet rulers", "ship owners"),
+	)
+	.return("ship");
+
+graph
+	.query(
+		LocalTransform("local"),
+		GlobalTransform("global"),
+		IsGlobalOf("global", "local"),
+		optional(
+			GlobalTransform("parentGlobal"),
+			LocalTransform("parentLocal"),
+			IsParentOf("parentLocal", "local"),
+		)
+	)
+	.return("local", "global", "parentGlobal");
+```
+
+```typescript
+graph
+	.query(
+		Node.as("n"),
+		Position.as("pos"),
+		Velocity.as("vel"),
+		Edge.as("n", "pos"),
+		Edge.as("n", "vel"),
+	)
+	.return("pos", "vel");
+
+graph
+	.query(
+		Spaceship.as("ship"),
+		Planet.as("planet"),
+		Faction.as("ship owners"),
+		Faction.as("planet rulers"),
+		OwnedBy.as("ship", "ship owners"),
+		RuledBy.as("planet", "planet rulers"),
+		Allied.as("planet rulers", "ship owners"),
+	)
+	.return("ship");
+
+graph
+	.query(
+		LocalTransform.as("local"),
+		GlobalTransform.as("global"),
+		IsGlobalOf.as("global", "local"),
+		optional(
+			GlobalTransform.as("parentGlobal"),
+			LocalTransform.as("parentLocal"),
+			IsParentOf.as("parentLocal", "local"),
+		)
+	)
+	.return("local", "global", "parentGlobal");
+```
+
+```typescript
+graph
+	.query(
+		Node.as("n"),
+		Position.as("pos"),
+		Velocity.as("vel"),
+		Edge.as("n", "pos"),
+		Edge.as("n", "vel"),
+	)
+	.return("pos", "vel");
+
+graph
+	.query(
+		Spaceship.as("ship"),
+		Planet.as("planet"),
+		Faction.as("ship owners"),
+		Faction.as("planet rulers"),
+		OwnedBy.as("ship", "ship owners"),
+		RuledBy.as("planet", "planet rulers"),
+		Allied.as("planet rulers", "ship owners"),
+	)
+	.return("ship");
+
+graph
+	.query(
+		LocalTransform.as("local"),
+		GlobalTransform.as("global"),
+		IsGlobalOf.as("global", "local"),
+		optional(
+			GlobalTransform.as("parentGlobal"),
+			LocalTransform.as("parentLocal"),
+			IsParentOf.as("parentLocal", "local"),
+		)
+	)
+	.return("local", "global", "parentGlobal");
+```

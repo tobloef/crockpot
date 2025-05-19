@@ -1,3 +1,4 @@
 - Boolean queries
+  - AnyOf
   - Optional
   - Without
