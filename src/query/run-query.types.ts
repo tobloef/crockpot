@@ -10,6 +10,7 @@ import type {
   TuplifyUnion,
 } from "../utils/union.ts";
 import type { EdgeQueryItem } from "../edge/edge-query-item.ts";
+import type { Prettify } from "../utils/prettify.ts";
 
 export type QueryInput = (
   | QueryInputItem
@@ -73,9 +74,9 @@ export type ArrayQueryOutput<
 export type ObjectQueryOutput<
   O extends ObjectQueryInput,
   FullInput extends QueryInput
-> = (
+> = Prettify<(
   { [K in keyof O]: QueryOutputItem<O[K], FullInput> }
-);
+)>;
 
 export type QueryOutputItem<
   Item extends QueryInputItem,

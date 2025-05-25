@@ -16,7 +16,6 @@ import { executePlan } from "./execute-plan.ts";
 import { createOutputs } from "./create-outputs.ts";
 import { deduplicateOutputs } from "./deduplicate-outputs.ts";
 
-
 export function runQuery<Input extends QueryInputItem>(
   graph: Graph,
   input: Input
@@ -30,15 +29,7 @@ export function runQuery<Input extends ArrayQueryInput>(
 export function runQuery<Input extends ObjectQueryInput>(
   graph: Graph,
   input: Input
-): Generator<(
-  // Type duplicated from ObjectQueryOutput to fix type hints.
-  // If ObjectQueryOutput or QueryOutput is used directly, it shows up as:
-  // Generator<ObjectQueryOutput<
-  //   { Transform: typeof Transform },
-  //   { Transform: typeof Transform }
-  // >, any, any>
-  { [K in keyof Input]: QueryOutputItem<Input[K], Input> }
-)>;
+): Generator<QueryOutput<Input>>;
 
 export function* runQuery<
   Input extends QueryInput

@@ -44,15 +44,7 @@ export class Graph {
   query<Input extends ObjectQueryInput>(
     input: Input,
     options?: GraphQueryOptions
-  ): GraphQuery<(
-    // Type duplicated from ObjectQueryOutput to fix type hints.
-    // If ObjectQueryOutput or QueryOutput is used directly, it shows up as:
-    // Generator<ObjectQueryOutput<
-    //   { Transform: typeof Transform },
-    //   { Transform: typeof Transform }
-    // >, any, any>
-    { [K in keyof Input]: QueryOutputItem<Input[K], Input> }
-  )>;
+  ): GraphQuery<QueryOutput<Input>>;
 
   query<Input extends QueryInput>(
     input: Input,
@@ -82,15 +74,7 @@ export class Graph {
   observe<Input extends ObjectQueryInput>(
     input: Input,
     options?: GraphObserverOptions
-  ): GraphObserver<(
-    // Type duplicated from ObjectQueryOutput to fix type hints.
-    // If ObjectQueryOutput or QueryOutput is used directly, it shows up as:
-    // Generator<ObjectQueryOutput<
-    //   { Transform: typeof Transform },
-    //   { Transform: typeof Transform }
-    // >, any, any>
-    { [K in keyof Input]: QueryOutputItem<Input[K], Input> }
-    )>;
+  ): GraphObserver<QueryOutput<Input>>;
 
   observe<Input extends QueryInput>(
     input: Input,
