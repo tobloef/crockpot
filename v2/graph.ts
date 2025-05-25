@@ -1,4 +1,6 @@
-import type { QueryInput } from "./query-input.ts";
+import type {
+  QueryInput,
+} from "./query-input.ts";
 import type { QueryOutput } from "./query-output.ts";
 import { NotImplementedError } from "../src/utils/errors/not-implemented-error.ts";
 

@@ -3,9 +3,9 @@ import type { OmitNever } from "./omit-never.ts";
 
 export type QueryInput<
   BaseInput extends QueryInput<BaseInput, OptionalInputs, WithoutInputs, AnyOfInputs>,
-  OptionalInputs extends Array<QueryInput<BaseInput, OptionalInputs, WithoutInputs, AnyOfInputs>>,
-  WithoutInputs extends Array<QueryInput<BaseInput, OptionalInputs, WithoutInputs, AnyOfInputs>>,
-  AnyOfInputs extends Array<Array<QueryInput<BaseInput, OptionalInputs, WithoutInputs, AnyOfInputs>>>
+  OptionalInputs extends QueryInput<BaseInput, OptionalInputs, WithoutInputs, AnyOfInputs>[],
+  WithoutInputs extends QueryInput<BaseInput, OptionalInputs, WithoutInputs, AnyOfInputs>[],
+  AnyOfInputs extends QueryInput<BaseInput, OptionalInputs, WithoutInputs, AnyOfInputs>[][]
 > = {
   [Key: string]: (
     | InputItem<(

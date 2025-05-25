@@ -173,37 +173,6 @@ const spaceshipExampleWithAnyOf2 = graph
   )
   .run();
 
-const simple = graph
-  .query({
-    boop: GraphNode,
-    beep: GraphNode,
-    ship: {
-      boop: GraphNode,
-      beep: GraphNode,
-    },
-    planet: {
-      boop: GraphNode,
-      beep: GraphNode,
-    },
-  })
-  .anyOf(
-    {
-      one: {
-        foo: GraphNode,
-        alliance: [ "boop", AlliesWith, "boop" ],
-        bar: [ "boop", GraphEdge, "boop" ]
-      }
-    },
-    {
-      two: {
-        foo: GraphNode,
-        alliance: [ "boop", AlliesWith, "boop" ],
-        bar: [ "boop", GraphEdge, "boop" ]
-      }
-    },
-  )
-  .run();
-
 ////////////////////////////////////////////////////////////////////////////////
 
 class LocalTransform extends GraphNode { }
