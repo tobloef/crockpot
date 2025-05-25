@@ -13,10 +13,10 @@ export class Graph {
 }
 
 export class Query<
-  BaseInput extends QueryInput<BaseInput, OptionalInputs, WithoutInputs, AnyOfInputs>,
-  OptionalInputs extends Array<QueryInput<BaseInput, OptionalInputs, WithoutInputs, AnyOfInputs>>,
-  WithoutInputs extends Array<QueryInput<BaseInput, OptionalInputs, WithoutInputs, AnyOfInputs>>,
-  AnyOfInputs extends Array<Array<QueryInput<BaseInput, OptionalInputs, WithoutInputs, AnyOfInputs>>>
+  BaseInput extends QueryInput<any, any, any, any>,
+  OptionalInputs extends Array<QueryInput<any, any, any, any>>,
+  WithoutInputs extends Array<QueryInput<any, any, any, any>>,
+  AnyOfInputs extends Array<Array<QueryInput<any, any, any, any>>>
 > {
   constructor(
     private readonly baseInput: BaseInput,

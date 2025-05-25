@@ -73,6 +73,21 @@ const spaceshipExample1 = graph.query({
   alliesWith: ["shipFaction", AlliesWith, "planetFaction"],
 }).run();
 
+const spaceshipExample1000 = graph.query({
+  ship: Spaceship,
+  shipFaction: Faction,
+  // @ts-expect-error
+  owns: ["shipFactasdion", Owns, "asdasd"],
+
+  planet: Planet,
+  planetFaction: Faction,
+  // @ts-expect-error
+  rules: ["asdasd", Rules, "asdasd"],
+
+  // @ts-expect-error
+  alliesWith: ["asdasd", AlliesWith, "asdasd"],
+}).run();
+
 const spaceshipExample2 = graph.query({
   ship: {
     spaceship: Spaceship,
@@ -85,6 +100,23 @@ const spaceshipExample2 = graph.query({
     rules: ["planet.faction", Rules, "planet.planet"],
   },
   alliance: ["ship.faction", AlliesWith, "planet.faction"],
+});
+
+const spaceshipExample2000 = graph.query({
+  // @ts-expect-error
+  ship: {
+    spaceship: Spaceship,
+    faction: Faction,
+    owns: ["ship.factasdion", Owns, "ship.spaceship"],
+  },
+  // @ts-expect-error
+  planet: {
+    planet: Planet,
+    faction: Faction,
+    rules: ["planet.faction", Rules, "planet.pasdlanet"],
+  },
+  // @ts-expect-error
+  alliance: ["shsdaip.faction", AlliesWith, "planet.faction"],
 });
 
 const spaceshipExampleWithAnyOf = graph
@@ -127,18 +159,49 @@ const spaceshipExampleWithAnyOf2 = graph
   })
   .anyOf(
     {
-      alliance: ["ship.faction", AlliesWith, "planet.faction"],
-      foo: GraphNode,
-      bar: ["foo", GraphEdge, "ship.spaceship"]
+      one: {
+        foo: GraphNode,
+        alliance: [ "ship.faction", AlliesWith, "planet.faction" ],
+        bar: [ "one.foo", GraphEdge, "ship.spaceship" ]
+      }
     },
     {
-      rules: ["planet.faction", Rules, "planet.planet"]
+      two: {
+        rules: ["planet.faction", Rules, "planet.planet"]
+      }
     },
   )
-  .optional({
-    optionalNode: GraphNode,
-    optionalEdge: ["optionalNode", GraphEdge, "foo"],
+  .run();
+
+const simple = graph
+  .query({
+    boop: GraphNode,
+    beep: GraphNode,
+    ship: {
+      boop: GraphNode,
+      beep: GraphNode,
+    },
+    planet: {
+      boop: GraphNode,
+      beep: GraphNode,
+    },
   })
+  .anyOf(
+    {
+      one: {
+        foo: GraphNode,
+        alliance: [ "boop", AlliesWith, "boop" ],
+        bar: [ "boop", GraphEdge, "boop" ]
+      }
+    },
+    {
+      two: {
+        foo: GraphNode,
+        alliance: [ "boop", AlliesWith, "boop" ],
+        bar: [ "boop", GraphEdge, "boop" ]
+      }
+    },
+  )
   .run();
 
 ////////////////////////////////////////////////////////////////////////////////
