@@ -5,7 +5,7 @@ import type { GraphNode } from "./node.ts";
 
 export type QueryOutput<
   Input extends QueryInput<any>
-> = Prettify<Writable<{
+> = Prettify<{
   [Key in keyof Input]: (
     Input[Key] extends EdgeItem<infer _, infer EdgeType, infer _>
       ? EdgeType extends typeof GraphEdge
@@ -16,7 +16,7 @@ export type QueryOutput<
           ? InstanceType<Input[Key]>
           : Input[Key]
         : Input[Key] extends SubQueryInput<any>
-          ? Prettify<QueryOutput<Input[Key]>>
+          ? QueryOutput<Input[Key]>
           : never
     );
-}>>
+}>

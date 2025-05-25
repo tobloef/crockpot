@@ -17,7 +17,8 @@ class OtherEdge extends GraphEdge {
   #brand = "OtherEdge" as const;
 }
 
-const result = new Graph().query({
+const graph = new Graph();
+const result = graph.query({
   a: GraphNode,
   b: ["a", GraphEdge, "c.a"],
   c: {
