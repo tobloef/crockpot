@@ -3,3 +3,4 @@
   - AnyOf
   - Optional
   - Without
+* Bidirectionality
