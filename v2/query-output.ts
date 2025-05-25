@@ -36,15 +36,15 @@ type DistributeInputs<
   Inputs extends [infer Input, ...infer Rest]
     ? Input extends QI<any>
       ? Rest extends QI<any>[]
-        ? (Prettify<ParseInput<Input>> & DistributeInputs<Rest>)
-        : Prettify<ParseInput<Input>>
+        ? (ParseInput<Input> & DistributeInputs<Rest>)
+        : ParseInput<Input>
       : {}
     : {}
   );
 
 type ParseInput<
   Input extends QI<any>
-> = {
+> = Prettify<{
   [Key in keyof Input]: (
     Input[Key] extends EdgeItem<infer _, infer EdgeType, infer _>
       ? EdgeType extends typeof GraphEdge
@@ -55,10 +55,10 @@ type ParseInput<
           ? InstanceType<Input[Key]>
           : Input[Key]
         : Input[Key] extends QI<any>
-          ? Prettify<ParseInput<Input[Key]>>
+          ? ParseInput<Input[Key]>
           : never
     );
-}
+}>
 
 type Optional<T extends Record<string, any>> = {
   [Key in keyof T]: T[Key] | undefined;
