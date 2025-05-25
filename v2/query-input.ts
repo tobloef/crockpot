@@ -9,25 +9,14 @@ export type QueryInput<
 > = {
   [Key: string]: (
     | InputItem<(
-      | NodeKeys<BaseInput>
-      | ArrayOfNodeKeys<OptionalInputs>
-      | ArrayOfNodeKeys<WithoutInputs>
-      | ArrayOfArrayOfNodeKeys<AnyOfInputs>
+      | DistributeNodeKeysRecursively<BaseInput>
+      | DistributeNodeKeysRecursively<OptionalInputs>
+      | DistributeNodeKeysRecursively<WithoutInputs>
+      | DistributeNodeKeysRecursively<AnyOfInputs>
     )>
     | QueryInput<BaseInput, OptionalInputs, WithoutInputs, AnyOfInputs>
   );
 };
-
-type Test = ArrayOfArrayOfNodeKeys<[
-  [
-    { a: GraphNode },
-    { b: { a: GraphNode } },
-  ],
-  [
-    { c: GraphNode },
-    { d: { e: GraphNode } },
-  ]
-]>
 
 export type QI<
   T extends QI<any>
@@ -58,53 +47,32 @@ export type InputItem<
 > = (
   | NodeItem
   | EdgeItem<NodeKey, typeof GraphEdge | GraphEdge, NodeKey>
-  )
+);
 
-type NodeKeys<BaseInput extends QI<any>> = KeysAsDotNotation<NodesOnly<BaseInput>>;
-
-export type ArrayOfNodeKeys<
-  Inputs extends Array<QI<any>>
-> = (
-  Inputs extends Array<infer Input>
-    ? Input extends QueryInput<any, any, any, any>
-      ? NodeKeys<Input>
+type DistributeNodeKeysRecursively<Input> = (
+  Input extends QI<any>
+    ? NodeKeys<Input>
+    : Input extends [infer First, ...infer Rest]
+      ? DistributeNodeKeysRecursively<First> | DistributeNodeKeysRecursively<Rest>
       : never
-    : never
-  );
+)
 
-export type ArrayOfArrayOfNodeKeys<
-  Inputs extends Array<Array<QI<any>>>
-> = (
-  Inputs extends Array<infer Input>
-    ? Input extends Array<QI<any>>
-      ? ArrayOfNodeKeys<Input>
-      : never
-    : never
-  );
-
-type NodesOnly<T extends QI<any>> = OmitNever<{
+export type NodeKeys<T extends QI<any>> = Values<OmitNever<{
   [Key in keyof T]: (
-    T[Key] extends NodeItem
-      ? Key
-      : T[Key] extends QI<any>
-        ? {} extends NodesOnly<T[Key]>
-          ? never
-          : NodesOnly<T[Key]>
-        : never
-    );
-}>
+    Key extends string
+      ? T[Key] extends EdgeItem<any, any, any>
+        ? never
+        : T[Key] extends NodeItem
+          ? Key
+          : T[Key] extends QI<any>
+              ? `${Key}.${NodeKeys<T[Key]>}`
+              : never
+      : never
+    )
+}>>
 
-type KeysAsDotNotation<
-  T,
-  Key extends keyof T = keyof T
-> = (
-  Key extends string
-    ? T extends string
-      ? never
-      : (
-        Key |
-        `${Key}.${KeysAsDotNotation<Exclude<T[Key], undefined>>}`
-        )
+type Values<Obj> = (
+  Obj extends Record<string, any>
+    ? Obj[keyof Obj]
     : never
-  );
-
+);

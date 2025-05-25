@@ -1,13 +1,7 @@
 import {
   Graph,
-  Query,
 } from "./graph.ts";
 import { GraphNode } from "./node.ts";
-import { optional } from "./optional.js";
-import type {
-  ArrayOfArrayOfNodeKeys,
-  QueryInput,
-} from "./query-input.js";
 
 class SomeNode extends GraphNode {
   #brand = "SomeNode" as const;
@@ -41,13 +35,16 @@ const result = graph.query({
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class Spaceship extends GraphNode {}
-class Planet extends GraphNode {}
-class Faction extends GraphNode {}
+class Spaceship extends GraphNode { }
+class Planet extends GraphNode {
+  planetName: string = "Earth";
+  static planetType: string = "Terrestrial";
+}
+class Faction extends GraphNode { }
 
-class Owns extends GraphEdge {}
-class Rules extends GraphEdge {}
-class AlliesWith extends GraphEdge {}
+class Owns extends GraphEdge { }
+class Rules extends GraphEdge { }
+class AlliesWith extends GraphEdge { }
 
 const spaceshipExample0 = graph.query({
   ship: {
@@ -60,7 +57,8 @@ const spaceshipExample0 = graph.query({
     faction: Faction,
     rules: ["planet.faction", Rules, "planet.planet"],
   },
-  alliance: ["ship", AlliesWith, "planet"], // TODO: Should not be allowed
+  // @ts-expect-error
+  alliance: ["ship", AlliesWith, "planet"],
 }).run();
 
 const spaceshipExample1 = graph.query({
@@ -114,30 +112,7 @@ const spaceshipExampleWithAnyOf = graph
   )
   .run();
 
-const simple = graph
-  .query({
-    foo: GraphNode,
-  })
-  .anyOf(
-    {
-      bar: GraphNode,
-      baz: ["foo", GraphEdge, "plonk"],
-    },
-    {
-      plonk: GraphNode,
-      baz: ["foo", GraphEdge, "bar"],
-    },
-  );
-
-type Keys<Q extends Query<any, any, any, any>> = (
-  Q extends Query<infer Base, infer Optional, infer Without, infer AnyOf>
-    ? ArrayOfArrayOfNodeKeys<AnyOf>
-    : "oof"
-)
-
-type Test = Keys<typeof simple>;
-
-const spaceshipExampleWithAnyOf = graph
+const spaceshipExampleWithAnyOf2 = graph
   .query({
     ship: {
       spaceship: Spaceship,
@@ -162,16 +137,16 @@ const spaceshipExampleWithAnyOf = graph
   )
   .optional({
     optionalNode: GraphNode,
-    optionalEdge: ["optionalNode", GraphEdge, "foo"], // TODO: Should not be allowed
+    optionalEdge: ["optionalNode", GraphEdge, "foo"],
   })
   .run();
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class LocalTransform extends GraphNode {}
-class GlobalTransform extends GraphNode {}
-class IsGlobalOf extends GraphEdge {}
-class IsParentOf extends GraphEdge {}
+class LocalTransform extends GraphNode { }
+class GlobalTransform extends GraphNode { }
+class IsGlobalOf extends GraphEdge { }
+class IsParentOf extends GraphEdge { }
 
 const transformExample = graph
   .query({
@@ -183,8 +158,8 @@ const transformExample = graph
     parent: {
       local: LocalTransform,
       global: GlobalTransform,
-      isGlobalOf: [ "parent.local", IsGlobalOf, "parent.global" ],
-      isParentOf: [ "parent.local", IsParentOf, "local" ],
+      isGlobalOf: ["parent.local", IsGlobalOf, "parent.global"],
+      isParentOf: ["parent.local", IsParentOf, "local"],
     },
   })
   .optional({
@@ -204,10 +179,10 @@ const rootTransformsExample = graph
   .without({
     parent: {
       local: LocalTransform,
-      isParentOf: [ "parent.local", IsParentOf, "local" ],
+      isParentOf: ["parent.local", IsParentOf, "local"],
     }
   })
   .optional({
-    lolol: [ "parent.local", IsParentOf, "local" ] // TODO: Should not be allowed
+    lolol: ["parent.local", IsParentOf, "local"]
   })
   .run()
