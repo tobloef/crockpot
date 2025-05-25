@@ -2,6 +2,7 @@ import {
   Graph,
 } from "./graph.ts";
 import { GraphNode } from "./node.ts";
+import { GraphEdge } from "./edge.js";
 
 class SomeNode extends GraphNode {
   #brand = "SomeNode" as const;

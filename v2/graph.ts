@@ -20,12 +20,22 @@ export class Query<
   WithoutInputs extends Array<QueryInput<any, any, any, any>>,
   AnyOfInputs extends Array<Array<QueryInput<any, any, any, any>>>
 > {
+  private readonly baseInput: BaseInput;
+  private readonly optionalInputs: OptionalInputs;
+  private readonly withoutInputs: WithoutInputs;
+  private readonly anyOfInputs: AnyOfInputs;
+
   constructor(
-    private readonly baseInput: BaseInput,
-    private readonly optionalInputs: OptionalInputs,
-    private readonly withoutInputs: WithoutInputs,
-    private readonly anyOfInputs: AnyOfInputs,
-  ) {}
+    baseInput: BaseInput,
+    optionalInputs: OptionalInputs,
+    withoutInputs: WithoutInputs,
+    anyOfInputs: AnyOfInputs,
+  ) {
+    this.baseInput = baseInput;
+    this.optionalInputs = optionalInputs;
+    this.withoutInputs = withoutInputs;
+    this.anyOfInputs = anyOfInputs;
+  }
 
   optional<
     OptionalInput extends QueryInput<

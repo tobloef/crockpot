@@ -1,4 +1,4 @@
-class GraphEdge {
+export class GraphEdge {
   #brand = "GraphEdge" as const;
 
   edgeMethod(): string {

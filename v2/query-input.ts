@@ -1,5 +1,6 @@
 import type { GraphNode } from "./node.ts";
 import type { OmitNever } from "./omit-never.ts";
+import type { GraphEdge } from "./edge.js";
 
 export type QueryInput<
   BaseInput extends QueryInput<BaseInput, OptionalInputs, WithoutInputs, AnyOfInputs>,

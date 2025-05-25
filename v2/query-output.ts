@@ -6,6 +6,7 @@ import type {
   QueryInput,
 } from "./query-input.ts";
 import type { GraphNode } from "./node.ts";
+import type { GraphEdge } from "./edge.js";
 
 export type QueryOutput<
   BaseInput extends QueryInput<any, any, any, any>,
