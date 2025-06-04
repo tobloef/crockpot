@@ -2,7 +2,7 @@
 
 ### An experimental Graph Component System (GCS) library for TypeScript game development 🥘
 
-Crockpot is a essentially an in-memory graph database for real-time applications. By structuring game logic as systems that act on a world of nodes and edges, you can achieve a high level of composability.
+Crockpot is essentially an in-memory graph database for real-time applications. By structuring game logic as systems that act on a world of nodes and edges, you can achieve a high level of composability.
 
 In this regard, it fills much of the same niche as an [Entity Component System (ECS)](https://en.wikipedia.org/wiki/Entity_component_system), though admittedly without the same cache-friendly data layouts  that many ECS libraries have (yet!). In comparison to ECS though, Crockpot dispenses with the concept of an "entity" and takes an entirely graph-first approach to the same problem, making both querying and reasoning about the data much more intuitive.
 
