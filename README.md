@@ -50,7 +50,7 @@ for (const { pos, vel } of results) {
 ```typescript
 // Finds spaceships docked to planets that are ruled by factions
 // that are allied with the faction of the spaceship.
-graph.query(
+const results = graph.query([
   Spaceship.with(
     IsIn.to(
       Faction.as("faction")
@@ -67,7 +67,12 @@ graph.query(
       )
     )
   ),
-);
+  "faction",
+]);
+
+for (const [ship, faction] of result) {
+  // Both items are correctly typed, even "faction"!
+}
 ```
 
 ## Acknowledgements
